@@ -1,8 +1,20 @@
 import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
-import * as kv from "./kv_store.tsx";
+import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
+
 const app = new Hono();
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_STORAGE_BUCKET = Deno.env.get("SUPABASE_STORAGE_BUCKET") ?? "cms-assets";
+
+// Service-role client used for all Postgres reads/writes and for verifying
+// user access tokens. Bypasses RLS -- ownership checks below are enforced
+// in application code instead.
+const supabase = createClient(
+  SUPABASE_URL,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
 
 // Enable logger
 app.use('*', logger(console.log));
@@ -19,21 +31,60 @@ app.use(
   }),
 );
 
-// Health check endpoint
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+async function getUserFromRequest(c: any) {
+  const accessToken = c.req.header('Authorization')?.split(' ')[1];
+  if (!accessToken) return null;
+  const { data: { user } } = await supabase.auth.getUser(accessToken);
+  return user ?? null;
+}
+
+// Directus-uploaded images are stored in the Supabase Storage bucket
+// configured in docker-compose.yml (STORAGE_SUPABASE_ROOT is empty, so
+// objects sit at the bucket root under directus_files.filename_disk).
+// Looking filename_disk up directly (rather than assuming it matches the
+// image UUID) keeps this correct regardless of Directus's internal naming.
+async function resolveImageUrls(imageIds: (string | null)[]): Promise<Map<string, string>> {
+  const ids = [...new Set(imageIds.filter((id): id is string => !!id))];
+  const urlById = new Map<string, string>();
+  if (ids.length === 0) return urlById;
+
+  const { data: files, error } = await supabase
+    .from('directus_files')
+    .select('id, filename_disk')
+    .in('id', ids);
+
+  if (error) {
+    // directus_files won't exist until Directus has booted at least once --
+    // treat that as "no images yet" rather than failing the whole request.
+    console.log(`Could not resolve image URLs (has Directus booted yet?): ${error.message}`);
+    return urlById;
+  }
+
+  for (const file of files ?? []) {
+    urlById.set(file.id, `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/${file.filename_disk}`);
+  }
+  return urlById;
+}
+
+// ---------------------------------------------------------------------------
+// Health
+// ---------------------------------------------------------------------------
+
 app.get("/make-server-6db475c7/health", (c) => {
   return c.json({ status: "ok" });
 });
 
-// Sign up
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+
 app.post("/make-server-6db475c7/auth/signup", async (c) => {
   try {
     const body = await c.req.json();
-    const { createClient } = await import("jsr:@supabase/supabase-js@2.49.8");
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL'),
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
-    );
-
     const { data, error } = await supabase.auth.admin.createUser({
       email: body.email,
       password: body.password,
@@ -54,130 +105,261 @@ app.post("/make-server-6db475c7/auth/signup", async (c) => {
   }
 });
 
-// Like a loadout
-app.post("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId/like", async (c) => {
-  try {
-    const gameId = c.req.param("gameId");
-    const loadoutId = c.req.param("loadoutId");
-    const loadout = await kv.get(`loadout:${gameId}:${loadoutId}`);
+// ---------------------------------------------------------------------------
+// Catalog: games / weapons / attachments / perks / equipment
+// ---------------------------------------------------------------------------
 
-    if (!loadout) {
-      return c.json({ error: "Loadout not found" }, 404);
-    }
-
-    loadout.likes = (loadout.likes || 0) + 1;
-    await kv.set(`loadout:${gameId}:${loadoutId}`, loadout);
-    return c.json({ loadout });
-  } catch (error) {
-    console.log(`Error liking loadout: ${error}`);
-    return c.json({ error: "Failed to like loadout", details: error.message }, 500);
-  }
-});
-
-// View a loadout (increment view count)
-app.post("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId/view", async (c) => {
-  try {
-    const gameId = c.req.param("gameId");
-    const loadoutId = c.req.param("loadoutId");
-    const loadout = await kv.get(`loadout:${gameId}:${loadoutId}`);
-
-    if (!loadout) {
-      return c.json({ error: "Loadout not found" }, 404);
-    }
-
-    loadout.views = (loadout.views || 0) + 1;
-    await kv.set(`loadout:${gameId}:${loadoutId}`, loadout);
-    return c.json({ loadout });
-  } catch (error) {
-    console.log(`Error incrementing views: ${error}`);
-    return c.json({ error: "Failed to increment views", details: error.message }, 500);
-  }
-});
-
-// Get all games
 app.get("/make-server-6db475c7/games", async (c) => {
   try {
-    const games = await kv.getByPrefix("game:");
-    return c.json({ games: games || [] });
+    const { data, error } = await supabase.from('games').select('*');
+    if (error) throw error;
+
+    const games = (data ?? []).map((g) => ({
+      id: g.id,
+      name: g.name,
+      slug: g.slug,
+      hasWeaponCategories: g.has_weapon_categories,
+      hasAttachments: g.has_attachments,
+      hasPerks: g.has_perks,
+      hasClasses: g.has_classes,
+    }));
+    return c.json({ games });
   } catch (error) {
     console.log(`Error fetching games: ${error}`);
     return c.json({ error: "Failed to fetch games", details: error.message }, 500);
   }
 });
 
-// Get weapons for a specific game
 app.get("/make-server-6db475c7/games/:gameId/weapons", async (c) => {
   try {
     const gameId = c.req.param("gameId");
-    const weapons = await kv.get(`weapons:${gameId}`);
-    return c.json({ weapons: weapons || [] });
+    const { data, error } = await supabase
+      .from('weapons')
+      .select('id, name, image, damage, fire_rate, range, accuracy, description, weapon_categories(name)')
+      .eq('game_id', gameId);
+    if (error) throw error;
+
+    const urlById = await resolveImageUrls((data ?? []).map((w: any) => w.image));
+    const weapons = (data ?? []).map((w: any) => ({
+      id: w.id,
+      name: w.name,
+      type: w.weapon_categories?.name ?? null,
+      damage: w.damage,
+      fireRate: w.fire_rate,
+      range: w.range,
+      accuracy: w.accuracy,
+      description: w.description,
+      imageUrl: w.image ? urlById.get(w.image) ?? null : null,
+    }));
+    return c.json({ weapons });
   } catch (error) {
     console.log(`Error fetching weapons for game: ${error}`);
     return c.json({ error: "Failed to fetch weapons", details: error.message }, 500);
   }
 });
 
-// Get attachments for a specific weapon category
-app.get("/make-server-6db475c7/games/:gameId/attachments/:category", async (c) => {
+app.get("/make-server-6db475c7/games/:gameId/attachments", async (c) => {
   try {
     const gameId = c.req.param("gameId");
-    const category = c.req.param("category");
-    const attachments = await kv.get(`attachments:${gameId}:${category}`);
-    return c.json({ attachments: attachments || [] });
+    const { data, error } = await supabase
+      .from('attachments_with_images')
+      .select('id, name, description, stats, image, type_name, type_slug')
+      .eq('game_id', gameId);
+    if (error) throw error;
+
+    const urlById = await resolveImageUrls((data ?? []).map((a: any) => a.image));
+    const attachments = (data ?? []).map((a: any) => ({
+      id: a.id,
+      name: a.name,
+      description: a.description,
+      stats: a.stats,
+      type: a.type_name,
+      typeSlug: a.type_slug,
+      imageUrl: a.image ? urlById.get(a.image) ?? null : null,
+    }));
+    return c.json({ attachments });
   } catch (error) {
     console.log(`Error fetching attachments: ${error}`);
     return c.json({ error: "Failed to fetch attachments", details: error.message }, 500);
   }
 });
 
-// Get all loadouts for a game (public feed)
+app.get("/make-server-6db475c7/games/:gameId/perks", async (c) => {
+  try {
+    const gameId = c.req.param("gameId");
+    const { data, error } = await supabase
+      .from('perks')
+      .select('id, name, description, image, display_order')
+      .eq('game_id', gameId)
+      .order('display_order', { ascending: true });
+    if (error) throw error;
+
+    const urlById = await resolveImageUrls((data ?? []).map((p: any) => p.image));
+    const perks = (data ?? []).map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      imageUrl: p.image ? urlById.get(p.image) ?? null : null,
+    }));
+    return c.json({ perks });
+  } catch (error) {
+    console.log(`Error fetching perks: ${error}`);
+    return c.json({ error: "Failed to fetch perks", details: error.message }, 500);
+  }
+});
+
+app.get("/make-server-6db475c7/games/:gameId/equipment", async (c) => {
+  try {
+    const gameId = c.req.param("gameId");
+    const { data, error } = await supabase
+      .from('equipment')
+      .select('id, name, description, image, display_order')
+      .eq('game_id', gameId)
+      .order('display_order', { ascending: true });
+    if (error) throw error;
+
+    const urlById = await resolveImageUrls((data ?? []).map((e: any) => e.image));
+    const equipment = (data ?? []).map((e: any) => ({
+      id: e.id,
+      name: e.name,
+      description: e.description,
+      imageUrl: e.image ? urlById.get(e.image) ?? null : null,
+    }));
+    return c.json({ equipment });
+  } catch (error) {
+    console.log(`Error fetching equipment: ${error}`);
+    return c.json({ error: "Failed to fetch equipment", details: error.message }, 500);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Loadouts
+// ---------------------------------------------------------------------------
+
+function mapLoadout(l: any) {
+  return {
+    id: l.id,
+    gameId: l.game_id,
+    userId: l.user_id,
+    userName: l.user_name,
+    name: l.name,
+    description: l.description,
+    weapons: l.weapons ?? [],
+    perks: l.perks ?? [],
+    equipment: l.equipment ?? [],
+    likes: l.likes,
+    views: l.views,
+    createdAt: l.created_at,
+    updatedAt: l.updated_at,
+  };
+}
+
+app.post("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId/like", async (c) => {
+  try {
+    const gameId = c.req.param("gameId");
+    const loadoutId = c.req.param("loadoutId");
+
+    const { data: existing, error: fetchError } = await supabase
+      .from('loadouts')
+      .select('likes')
+      .eq('id', loadoutId)
+      .eq('game_id', gameId)
+      .single();
+    if (fetchError || !existing) {
+      return c.json({ error: "Loadout not found" }, 404);
+    }
+
+    const { data: updated, error } = await supabase
+      .from('loadouts')
+      .update({ likes: (existing.likes ?? 0) + 1 })
+      .eq('id', loadoutId)
+      .eq('game_id', gameId)
+      .select()
+      .single();
+    if (error) throw error;
+
+    return c.json({ loadout: mapLoadout(updated) });
+  } catch (error) {
+    console.log(`Error liking loadout: ${error}`);
+    return c.json({ error: "Failed to like loadout", details: error.message }, 500);
+  }
+});
+
+app.post("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId/view", async (c) => {
+  try {
+    const gameId = c.req.param("gameId");
+    const loadoutId = c.req.param("loadoutId");
+
+    const { data: existing, error: fetchError } = await supabase
+      .from('loadouts')
+      .select('views')
+      .eq('id', loadoutId)
+      .eq('game_id', gameId)
+      .single();
+    if (fetchError || !existing) {
+      return c.json({ error: "Loadout not found" }, 404);
+    }
+
+    const { data: updated, error } = await supabase
+      .from('loadouts')
+      .update({ views: (existing.views ?? 0) + 1 })
+      .eq('id', loadoutId)
+      .eq('game_id', gameId)
+      .select()
+      .single();
+    if (error) throw error;
+
+    return c.json({ loadout: mapLoadout(updated) });
+  } catch (error) {
+    console.log(`Error incrementing views: ${error}`);
+    return c.json({ error: "Failed to increment views", details: error.message }, 500);
+  }
+});
+
 app.get("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
   try {
     const gameId = c.req.param("gameId");
-    const loadouts = await kv.getByPrefix(`loadout:${gameId}:`);
-    return c.json({ loadouts: loadouts || [] });
+    const { data, error } = await supabase
+      .from('loadouts')
+      .select('*')
+      .eq('game_id', gameId)
+      .eq('is_public', true)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    return c.json({ loadouts: (data ?? []).map(mapLoadout) });
   } catch (error) {
     console.log(`Error fetching loadouts: ${error}`);
     return c.json({ error: "Failed to fetch loadouts", details: error.message }, 500);
   }
 });
 
-// Get user's own loadouts
 app.get("/make-server-6db475c7/games/:gameId/my-loadouts", async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { createClient } = await import("jsr:@supabase/supabase-js@2.49.8");
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL'),
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
-    );
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
-
+    const user = await getUserFromRequest(c);
     if (!user?.id) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
     const gameId = c.req.param("gameId");
-    const allLoadouts = await kv.getByPrefix(`loadout:${gameId}:`);
-    const userLoadouts = (allLoadouts || []).filter((l: any) => l.userId === user.id);
-    return c.json({ loadouts: userLoadouts });
+    const { data, error } = await supabase
+      .from('loadouts')
+      .select('*')
+      .eq('game_id', gameId)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    return c.json({ loadouts: (data ?? []).map(mapLoadout) });
   } catch (error) {
     console.log(`Error fetching user loadouts: ${error}`);
     return c.json({ error: "Failed to fetch loadouts", details: error.message }, 500);
   }
 });
 
-// Create a new loadout (requires auth)
 app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { createClient } = await import("jsr:@supabase/supabase-js@2.49.8");
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL'),
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
-    );
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
-
+    const user = await getUserFromRequest(c);
     if (!user?.id) {
       return c.json({ error: 'Unauthorized - please log in to create loadouts' }, 401);
     }
@@ -185,39 +367,34 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
     const gameId = c.req.param("gameId");
     const body = await c.req.json();
     const loadoutId = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
-    const loadout = {
-      id: loadoutId,
-      gameId,
-      userId: user.id,
-      userName: user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous',
-      name: body.name,
-      description: body.description || '',
-      weapons: body.weapons,
-      perks: body.perks,
-      equipment: body.equipment,
-      likes: 0,
-      views: 0,
-      createdAt: new Date().toISOString(),
-    };
-    await kv.set(`loadout:${gameId}:${loadoutId}`, loadout);
-    return c.json({ loadout });
+
+    const { data: inserted, error } = await supabase
+      .from('loadouts')
+      .insert({
+        id: loadoutId,
+        game_id: gameId,
+        user_id: user.id,
+        user_name: user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous',
+        name: body.name,
+        description: body.description || '',
+        weapons: body.weapons ?? [],
+        perks: body.perks ?? [],
+        equipment: body.equipment ?? [],
+      })
+      .select()
+      .single();
+    if (error) throw error;
+
+    return c.json({ loadout: mapLoadout(inserted) });
   } catch (error) {
     console.log(`Error creating loadout: ${error}`);
     return c.json({ error: "Failed to create loadout", details: error.message }, 500);
   }
 });
 
-// Update a loadout (requires auth and ownership)
 app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { createClient } = await import("jsr:@supabase/supabase-js@2.49.8");
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL'),
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
-    );
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
-
+    const user = await getUserFromRequest(c);
     if (!user?.id) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -225,160 +402,77 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
     const gameId = c.req.param("gameId");
     const loadoutId = c.req.param("loadoutId");
     const body = await c.req.json();
-    const existing = await kv.get(`loadout:${gameId}:${loadoutId}`);
 
-    if (!existing) {
+    const { data: existing, error: fetchError } = await supabase
+      .from('loadouts')
+      .select('user_id')
+      .eq('id', loadoutId)
+      .eq('game_id', gameId)
+      .single();
+    if (fetchError || !existing) {
       return c.json({ error: "Loadout not found" }, 404);
     }
-
-    if (existing.userId !== user.id) {
+    if (existing.user_id !== user.id) {
       return c.json({ error: "You can only edit your own loadouts" }, 403);
     }
 
-    const updated = {
-      ...existing,
-      ...body,
-      userId: existing.userId,
-      userName: existing.userName,
-      updatedAt: new Date().toISOString(),
-    };
-    await kv.set(`loadout:${gameId}:${loadoutId}`, updated);
-    return c.json({ loadout: updated });
+    const { data: updated, error } = await supabase
+      .from('loadouts')
+      .update({
+        name: body.name,
+        description: body.description ?? '',
+        weapons: body.weapons ?? [],
+        perks: body.perks ?? [],
+        equipment: body.equipment ?? [],
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', loadoutId)
+      .eq('game_id', gameId)
+      .select()
+      .single();
+    if (error) throw error;
+
+    return c.json({ loadout: mapLoadout(updated) });
   } catch (error) {
     console.log(`Error updating loadout: ${error}`);
     return c.json({ error: "Failed to update loadout", details: error.message }, 500);
   }
 });
 
-// Delete a loadout (requires auth and ownership)
 app.delete("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { createClient } = await import("jsr:@supabase/supabase-js@2.49.8");
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL'),
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
-    );
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
-
+    const user = await getUserFromRequest(c);
     if (!user?.id) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
     const gameId = c.req.param("gameId");
     const loadoutId = c.req.param("loadoutId");
-    const existing = await kv.get(`loadout:${gameId}:${loadoutId}`);
 
-    if (!existing) {
+    const { data: existing, error: fetchError } = await supabase
+      .from('loadouts')
+      .select('user_id')
+      .eq('id', loadoutId)
+      .eq('game_id', gameId)
+      .single();
+    if (fetchError || !existing) {
       return c.json({ error: "Loadout not found" }, 404);
     }
-
-    if (existing.userId !== user.id) {
+    if (existing.user_id !== user.id) {
       return c.json({ error: "You can only delete your own loadouts" }, 403);
     }
 
-    await kv.del(`loadout:${gameId}:${loadoutId}`);
+    const { error } = await supabase
+      .from('loadouts')
+      .delete()
+      .eq('id', loadoutId)
+      .eq('game_id', gameId);
+    if (error) throw error;
+
     return c.json({ success: true });
   } catch (error) {
     console.log(`Error deleting loadout: ${error}`);
     return c.json({ error: "Failed to delete loadout", details: error.message }, 500);
-  }
-});
-
-// Initialize sample data (CMS endpoint - you can call this to seed data)
-app.post("/make-server-6db475c7/admin/seed", async (c) => {
-  try {
-    const games = [
-      { id: "blackops7", name: "Black Ops 7", slug: "blackops7" },
-      { id: "warzone", name: "Warzone", slug: "warzone" },
-      { id: "bf6", name: "Battlefield 6", slug: "bf6" },
-      { id: "thefinals", name: "The Finals", slug: "thefinals" },
-    ];
-
-    for (const game of games) {
-      await kv.set(`game:${game.id}`, game);
-    }
-
-    // Sample weapons for Black Ops 7
-    const blackOpsWeapons = [
-      { id: "xm4", name: "XM4", type: "Assault Rifle", damage: 42, fireRate: 750 },
-      { id: "ak47", name: "AK-47", type: "Assault Rifle", damage: 48, fireRate: 600 },
-      { id: "mp5", name: "MP5", type: "SMG", damage: 35, fireRate: 900 },
-      { id: "mac10", name: "MAC-10", type: "SMG", damage: 32, fireRate: 1100 },
-      { id: "pelington", name: "Pelington 703", type: "Sniper", damage: 100, fireRate: 50 },
-    ];
-    await kv.set("weapons:blackops7", blackOpsWeapons);
-
-    // Sample attachments for assault rifles
-    await kv.set("attachments:blackops7:Assault Rifle", {
-      optics: ["Reflex", "Holographic", "ACOG 3x", "Thermal 4x"],
-      muzzle: ["Suppressor", "Compensator", "Muzzle Brake", "Flash Guard"],
-      barrel: ["Extended", "Reinforced Heavy", "Ranger", "Task Force"],
-      underbarrel: ["Foregrip", "Bipod", "Field Agent Grip", "Bruiser Grip"],
-      magazine: ["Fast Mag", "Extended Mag", "STANAG 60 Rnd", "Salvo 50 Rnd"],
-    });
-
-    // Sample weapons for Warzone
-    await kv.set("weapons:warzone", [
-      { id: "grau", name: "Grau 5.56", type: "Assault Rifle", damage: 40, fireRate: 750 },
-      { id: "kar98", name: "Kar98k", type: "Marksman Rifle", damage: 95, fireRate: 45 },
-      { id: "fennec", name: "Fennec", type: "SMG", damage: 30, fireRate: 1100 },
-    ]);
-
-    // Create sample loadouts for browsing
-    const sampleLoadouts = [
-      {
-        id: "sample1",
-        gameId: "blackops7",
-        userId: "demo-user-1",
-        userName: "ProGamer",
-        name: "Aggressive Rush Build",
-        description: "Perfect for close-quarters combat and fast-paced gameplay",
-        weapons: [blackOpsWeapons[2], blackOpsWeapons[3]],
-        perks: ["Ninja", "Gung-Ho", "Ghost"],
-        equipment: ["Flashbang", "Semtex"],
-        likes: 47,
-        views: 234,
-        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-      },
-      {
-        id: "sample2",
-        gameId: "blackops7",
-        userId: "demo-user-2",
-        userName: "TacticalMind",
-        name: "Long-Range Domination",
-        description: "Control the battlefield from a distance with precision",
-        weapons: [blackOpsWeapons[0], blackOpsWeapons[4]],
-        perks: ["Cold Blooded", "Engineer", "Tracker"],
-        equipment: ["Smoke Grenade", "Frag Grenade"],
-        likes: 92,
-        views: 512,
-        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-      },
-      {
-        id: "sample3",
-        gameId: "blackops7",
-        userId: "demo-user-3",
-        userName: "RunAndGun",
-        name: "SMG Speed Demon",
-        description: "Maximum mobility for run-and-gun playstyle",
-        weapons: [blackOpsWeapons[2], blackOpsWeapons[3]],
-        perks: ["Quick Fix", "Scavenger", "Ninja"],
-        equipment: ["Stun Grenade", "Molotov"],
-        likes: 63,
-        views: 387,
-        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-      },
-    ];
-
-    for (const loadout of sampleLoadouts) {
-      await kv.set(`loadout:${loadout.gameId}:${loadout.id}`, loadout);
-    }
-
-    return c.json({ success: true, message: "Sample data seeded successfully!" });
-  } catch (error) {
-    console.log(`Error seeding data: ${error}`);
-    return c.json({ error: "Failed to seed data", details: error.message }, 500);
   }
 });
 

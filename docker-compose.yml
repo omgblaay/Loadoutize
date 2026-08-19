@@ -1,0 +1,33 @@
+services:
+  directus:
+    image: directus/directus:11
+    ports:
+      - "8055:8055"
+    environment:
+      KEY: ${DIRECTUS_KEY}
+      SECRET: ${DIRECTUS_SECRET}
+
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
+
+      DB_CLIENT: pg
+      DB_CONNECTION_STRING: ${SUPABASE_DB_CONNECTION_STRING}
+
+      # Supabase Storage is S3-compatible -- Directus uploads/serves files
+      # through it directly, no separate storage vendor needed.
+      STORAGE_LOCATIONS: supabase
+      STORAGE_SUPABASE_DRIVER: s3
+      STORAGE_SUPABASE_KEY: ${SUPABASE_S3_ACCESS_KEY_ID}
+      STORAGE_SUPABASE_SECRET: ${SUPABASE_S3_SECRET_ACCESS_KEY}
+      STORAGE_SUPABASE_BUCKET: ${SUPABASE_STORAGE_BUCKET}
+      STORAGE_SUPABASE_REGION: ${SUPABASE_STORAGE_REGION}
+      STORAGE_SUPABASE_ENDPOINT: https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/s3
+      # Supabase's S3-compatible endpoint only supports path-style requests
+      # (endpoint/bucket-name), not virtual-hosted-style (bucket-name.endpoint).
+      STORAGE_SUPABASE_FORCE_PATH_STYLE: "true"
+      # Left empty on purpose: objects are stored at the bucket root, so the
+      # backend can build public URLs as
+      # storage/v1/object/public/{bucket}/{filename_disk} with no extra
+      # prefix. If you ever set this to a subfolder, the URL-building code
+      # in supabase/functions/server/index.tsx must be updated to match.
+      STORAGE_SUPABASE_ROOT: ""

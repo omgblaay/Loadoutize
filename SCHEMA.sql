@@ -1,17 +1,21 @@
 -- LOADOUTIZE Database Schema
--- Run this file in your Supabase SQL Editor
+-- Run this file in your Supabase SQL Editor.
+--
+-- IMPORTANT ORDERING: this schema references directus_files(id) via plain
+-- UUID columns (no FK constraint yet, so this file is safe to run before or
+-- after Directus's first boot). Once Directus has booted at least once
+-- against this database (creating its own directus_* system tables), run
+-- 09-schema-fk.sql (or the ALTER TABLE block at the bottom of this file) to
+-- attach the real foreign keys. Re-running this file is safe at any point
+-- during setup/iteration.
 
 -- Drop existing tables if they exist (in reverse order of dependencies)
-DROP TABLE IF EXISTS loadout_equipment CASCADE;
-DROP TABLE IF EXISTS equipment CASCADE;
-DROP TABLE IF EXISTS loadout_specializations CASCADE;
-DROP TABLE IF EXISTS loadout_perks CASCADE;
-DROP TABLE IF EXISTS loadout_weapons CASCADE;
+DROP VIEW IF EXISTS attachments_with_images;
 DROP TABLE IF EXISTS loadouts CASCADE;
 DROP TABLE IF EXISTS specializations CASCADE;
 DROP TABLE IF EXISTS classes CASCADE;
+DROP TABLE IF EXISTS equipment CASCADE;
 DROP TABLE IF EXISTS perks CASCADE;
-DROP TABLE IF EXISTS perk_types CASCADE;
 DROP TABLE IF EXISTS attachments CASCADE;
 DROP TABLE IF EXISTS attachment_types CASCADE;
 DROP TABLE IF EXISTS weapons CASCADE;
@@ -30,7 +34,6 @@ CREATE TABLE games (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Insert games first
 INSERT INTO games (id, name, slug, has_weapon_categories, has_attachments, has_perks, has_classes) VALUES
   ('blackops7', 'Black Ops 7', 'blackops7', true, true, true, false),
   ('warzone', 'Warzone', 'warzone', true, true, true, false),
@@ -55,9 +58,7 @@ INSERT INTO weapon_categories (game_id, name, slug, display_order) VALUES
   ('blackops7', 'Marksman Rifle', 'marksman', 5),
   ('warzone', 'Assault Rifle', 'ar', 1),
   ('warzone', 'SMG', 'smg', 2),
-  ('warzone', 'Sniper', 'sniper', 3),
-  ('warzone', 'LMG', 'lmg', 4),
-  ('warzone', 'Marksman Rifle', 'marksman', 5),
+  ('warzone', 'Marksman Rifle', 'marksman', 3),
   ('bf6', 'Assault Rifle', 'ar', 1),
   ('bf6', 'Carbine', 'carbine', 2),
   ('bf6', 'DMR', 'dmr', 3),
@@ -66,12 +67,14 @@ INSERT INTO weapon_categories (game_id, name, slug, display_order) VALUES
   ('bf6', 'SMG', 'smg', 6);
 
 -- 3. Weapons Table
+-- `image` is a plain UUID (no FK yet, see note at top of file) pointing at a
+-- directus_files.id once Directus manages uploads for this row.
 CREATE TABLE weapons (
   id TEXT PRIMARY KEY,
   game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
   category_id INTEGER REFERENCES weapon_categories(id) ON DELETE SET NULL,
   name TEXT NOT NULL,
-  image_url TEXT,
+  image UUID,
   damage INTEGER,
   fire_rate INTEGER,
   range INTEGER,
@@ -83,13 +86,23 @@ CREATE TABLE weapons (
 CREATE INDEX idx_weapons_game ON weapons(game_id);
 CREATE INDEX idx_weapons_category ON weapons(category_id);
 
+INSERT INTO weapons (id, game_id, category_id, name, damage, fire_rate) VALUES
+  ('xm4', 'blackops7', (SELECT id FROM weapon_categories WHERE game_id = 'blackops7' AND slug = 'ar'), 'XM4', 42, 750),
+  ('ak47', 'blackops7', (SELECT id FROM weapon_categories WHERE game_id = 'blackops7' AND slug = 'ar'), 'AK-47', 48, 600),
+  ('mp5', 'blackops7', (SELECT id FROM weapon_categories WHERE game_id = 'blackops7' AND slug = 'smg'), 'MP5', 35, 900),
+  ('mac10', 'blackops7', (SELECT id FROM weapon_categories WHERE game_id = 'blackops7' AND slug = 'smg'), 'MAC-10', 32, 1100),
+  ('pelington', 'blackops7', (SELECT id FROM weapon_categories WHERE game_id = 'blackops7' AND slug = 'sniper'), 'Pelington 703', 100, 50),
+  ('grau', 'warzone', (SELECT id FROM weapon_categories WHERE game_id = 'warzone' AND slug = 'ar'), 'Grau 5.56', 40, 750),
+  ('kar98', 'warzone', (SELECT id FROM weapon_categories WHERE game_id = 'warzone' AND slug = 'marksman'), 'Kar98k', 95, 45),
+  ('fennec', 'warzone', (SELECT id FROM weapon_categories WHERE game_id = 'warzone' AND slug = 'smg'), 'Fennec', 30, 1100);
+
 -- 4. Attachment Types Table
 CREATE TABLE attachment_types (
   id SERIAL PRIMARY KEY,
   game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   slug TEXT NOT NULL,
-  image_url TEXT,
+  image UUID,
   display_order INTEGER DEFAULT 0,
   UNIQUE(game_id, slug)
 );
@@ -114,13 +127,13 @@ INSERT INTO attachment_types (game_id, name, slug, display_order) VALUES
   ('bf6', 'Magazine', 'magazine', 5);
 
 -- 5. Attachments Table
--- Note: image_url is optional - if null, will fall back to attachment_type.image_url
+-- image is optional: falls back to attachment_type.image if null (see view below)
 CREATE TABLE attachments (
   id SERIAL PRIMARY KEY,
   game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
   attachment_type_id INTEGER REFERENCES attachment_types(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
-  image_url TEXT, -- Optional: falls back to attachment_type.image_url if null
+  image UUID,
   description TEXT,
   stats JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -129,14 +142,13 @@ CREATE TABLE attachments (
 CREATE INDEX idx_attachments_game ON attachments(game_id);
 CREATE INDEX idx_attachments_type ON attachments(attachment_type_id);
 
--- Helper view to get attachment with fallback image
 CREATE VIEW attachments_with_images AS
 SELECT
   a.id,
   a.game_id,
   a.attachment_type_id,
   a.name,
-  COALESCE(a.image_url, at.image_url) as image_url, -- Use attachment image or fall back to type image
+  COALESCE(a.image, at.image) as image,
   a.description,
   a.stats,
   a.created_at,
@@ -145,46 +157,78 @@ SELECT
 FROM attachments a
 LEFT JOIN attachment_types at ON a.attachment_type_id = at.id;
 
--- 6. Perk Types Table
-CREATE TABLE perk_types (
-  id SERIAL PRIMARY KEY,
-  game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  slug TEXT NOT NULL,
-  display_order INTEGER DEFAULT 0,
-  UNIQUE(game_id, slug)
-);
+INSERT INTO attachments (game_id, attachment_type_id, name) VALUES
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'optic'), 'Reflex'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'optic'), 'Holographic'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'optic'), 'ACOG 3x'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'optic'), 'Thermal 4x'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'muzzle'), 'Suppressor'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'muzzle'), 'Compensator'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'muzzle'), 'Muzzle Brake'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'muzzle'), 'Flash Guard'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'barrel'), 'Extended'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'barrel'), 'Reinforced Heavy'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'barrel'), 'Ranger'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'barrel'), 'Task Force'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'underbarrel'), 'Foregrip'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'underbarrel'), 'Bipod'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'underbarrel'), 'Field Agent Grip'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'underbarrel'), 'Bruiser Grip'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'magazine'), 'Fast Mag'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'magazine'), 'Extended Mag'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'magazine'), 'STANAG 60 Rnd'),
+  ('blackops7', (SELECT id FROM attachment_types WHERE game_id = 'blackops7' AND slug = 'magazine'), 'Salvo 50 Rnd');
 
-INSERT INTO perk_types (game_id, name, slug, display_order) VALUES
-  ('blackops7', 'Perk 1', 'perk_1', 1),
-  ('blackops7', 'Perk 2', 'perk_2', 2),
-  ('blackops7', 'Perk 3', 'perk_3', 3),
-  ('warzone', 'Base Perk', 'base', 1),
-  ('warzone', 'Bonus Perk', 'bonus', 2),
-  ('warzone', 'Ultimate Perk', 'ultimate', 3);
-
--- 7. Perks Table
+-- 6. Perks Table
+-- Flat pool per game (no perk-slot concept in the current UI, unlike the
+-- fully-slotted design in earlier drafts of this schema).
 CREATE TABLE perks (
   id SERIAL PRIMARY KEY,
   game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
-  perk_type_id INTEGER REFERENCES perk_types(id) ON DELETE SET NULL,
   name TEXT NOT NULL,
   description TEXT,
-  icon_url TEXT,
+  image UUID,
+  display_order INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX idx_perks_game ON perks(game_id);
-CREATE INDEX idx_perks_type ON perks(perk_type_id);
 
--- 8. Classes Table
+INSERT INTO perks (game_id, name, display_order) VALUES
+  ('blackops7', 'Ghost', 1), ('blackops7', 'Quick Fix', 2), ('blackops7', 'Scavenger', 3),
+  ('blackops7', 'Cold Blooded', 4), ('blackops7', 'Ninja', 5), ('blackops7', 'Gung-Ho', 6),
+  ('blackops7', 'Tracker', 7), ('blackops7', 'Engineer', 8),
+  ('warzone', 'Ghost', 1), ('warzone', 'Quick Fix', 2), ('warzone', 'Scavenger', 3),
+  ('warzone', 'Cold Blooded', 4), ('warzone', 'Ninja', 5), ('warzone', 'Gung-Ho', 6),
+  ('warzone', 'Tracker', 7), ('warzone', 'Engineer', 8);
+
+-- 7. Equipment Table (lethals/tacticals)
+CREATE TABLE equipment (
+  id SERIAL PRIMARY KEY,
+  game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT,
+  image UUID,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_equipment_game ON equipment(game_id);
+
+INSERT INTO equipment (game_id, name, display_order) VALUES
+  ('blackops7', 'Frag Grenade', 1), ('blackops7', 'Semtex', 2), ('blackops7', 'Flashbang', 3),
+  ('blackops7', 'Smoke Grenade', 4), ('blackops7', 'Stun Grenade', 5), ('blackops7', 'Molotov', 6),
+  ('warzone', 'Frag Grenade', 1), ('warzone', 'Semtex', 2), ('warzone', 'Flashbang', 3),
+  ('warzone', 'Smoke Grenade', 4), ('warzone', 'Stun Grenade', 5), ('warzone', 'Molotov', 6);
+
+-- 8. Classes Table (for The Finals and BF6 -- not yet wired into the frontend)
 CREATE TABLE classes (
   id SERIAL PRIMARY KEY,
   game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   slug TEXT NOT NULL,
   description TEXT,
-  icon_url TEXT,
+  image UUID,
   UNIQUE(game_id, slug)
 );
 
@@ -197,21 +241,27 @@ INSERT INTO classes (game_id, name, slug, description) VALUES
   ('bf6', 'Engineer', 'engineer', 'Vehicle and gadget specialist'),
   ('bf6', 'Recon', 'recon', 'Long-range reconnaissance');
 
--- 9. Specializations Table
+-- 9. Specializations Table (for The Finals special abilities -- not yet wired into the frontend)
 CREATE TABLE specializations (
   id SERIAL PRIMARY KEY,
   game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
   class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
-  type TEXT NOT NULL,
+  type TEXT NOT NULL, -- 'ability', 'gadget', 'weapon_special'
   description TEXT,
-  icon_url TEXT,
+  image UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX idx_specializations_class ON specializations(class_id);
 
 -- 10. Loadouts Table
+-- Pragmatic (non-normalized) shape that mirrors what LoadoutBuilder.tsx
+-- already sends/expects: weapons is a JSONB array of embedded weapon
+-- objects (not weapon_id references), perks/equipment are plain name
+-- arrays. This avoids a larger loadout-builder rewrite; normalizing into
+-- proper junction tables (loadout_weapons/loadout_perks/loadout_equipment)
+-- is future work if/when the builder is changed to pick catalog items by ID.
 CREATE TABLE loadouts (
   id TEXT PRIMARY KEY,
   game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
@@ -219,7 +269,9 @@ CREATE TABLE loadouts (
   user_name TEXT NOT NULL,
   name TEXT NOT NULL,
   description TEXT,
-  class_id INTEGER REFERENCES classes(id) ON DELETE SET NULL,
+  weapons JSONB DEFAULT '[]'::jsonb,
+  perks TEXT[] DEFAULT '{}',
+  equipment TEXT[] DEFAULT '{}',
   likes INTEGER DEFAULT 0,
   views INTEGER DEFAULT 0,
   is_public BOOLEAN DEFAULT true,
@@ -232,83 +284,6 @@ CREATE INDEX idx_loadouts_user ON loadouts(user_id);
 CREATE INDEX idx_loadouts_likes ON loadouts(likes DESC);
 CREATE INDEX idx_loadouts_created ON loadouts(created_at DESC);
 
--- 10b. Weapon Configs Table (standalone weapon builds for BO7, Warzone, BF6)
-CREATE TABLE weapon_configs (
-  id TEXT PRIMARY KEY,
-  game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
-  weapon_id TEXT REFERENCES weapons(id) ON DELETE CASCADE,
-  user_id TEXT NOT NULL,
-  user_name TEXT NOT NULL,
-  name TEXT NOT NULL,
-  description TEXT,
-  attachments INTEGER[], -- Array of attachment IDs
-  likes INTEGER DEFAULT 0,
-  views INTEGER DEFAULT 0,
-  is_public BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_weapon_configs_game ON weapon_configs(game_id);
-CREATE INDEX idx_weapon_configs_weapon ON weapon_configs(weapon_id);
-CREATE INDEX idx_weapon_configs_user ON weapon_configs(user_id);
-CREATE INDEX idx_weapon_configs_likes ON weapon_configs(likes DESC);
-CREATE INDEX idx_weapon_configs_created ON weapon_configs(created_at DESC);
-
--- 11. Loadout Weapons Table
-CREATE TABLE loadout_weapons (
-  id SERIAL PRIMARY KEY,
-  loadout_id TEXT REFERENCES loadouts(id) ON DELETE CASCADE,
-  weapon_id TEXT REFERENCES weapons(id) ON DELETE CASCADE,
-  slot INTEGER NOT NULL,
-  attachments INTEGER[]
-);
-
-CREATE INDEX idx_loadout_weapons_loadout ON loadout_weapons(loadout_id);
-
--- 12. Loadout Perks Table
-CREATE TABLE loadout_perks (
-  id SERIAL PRIMARY KEY,
-  loadout_id TEXT REFERENCES loadouts(id) ON DELETE CASCADE,
-  perk_id INTEGER REFERENCES perks(id) ON DELETE CASCADE,
-  slot INTEGER
-);
-
-CREATE INDEX idx_loadout_perks_loadout ON loadout_perks(loadout_id);
-
--- 13. Loadout Specializations Table
-CREATE TABLE loadout_specializations (
-  id SERIAL PRIMARY KEY,
-  loadout_id TEXT REFERENCES loadouts(id) ON DELETE CASCADE,
-  specialization_id INTEGER REFERENCES specializations(id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_loadout_specializations_loadout ON loadout_specializations(loadout_id);
-
--- 14. Equipment Table
-CREATE TABLE equipment (
-  id SERIAL PRIMARY KEY,
-  game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
-  type TEXT NOT NULL,
-  name TEXT NOT NULL,
-  description TEXT,
-  icon_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_equipment_game ON equipment(game_id);
-
--- 15. Loadout Equipment Table
-CREATE TABLE loadout_equipment (
-  id SERIAL PRIMARY KEY,
-  loadout_id TEXT REFERENCES loadouts(id) ON DELETE CASCADE,
-  equipment_id INTEGER REFERENCES equipment(id) ON DELETE CASCADE,
-  slot INTEGER
-);
-
-CREATE INDEX idx_loadout_equipment_loadout ON loadout_equipment(loadout_id);
-
--- Row Level Security for Loadouts
 ALTER TABLE loadouts ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Public loadouts are viewable by everyone"
@@ -331,25 +306,19 @@ CREATE POLICY "Users can delete own loadouts"
   ON loadouts FOR DELETE
   USING (auth.uid()::text = user_id);
 
--- Row Level Security for Weapon Configs
-ALTER TABLE weapon_configs ENABLE ROW LEVEL SECURITY;
+-- NOTE: the edge function backend (supabase/functions/server/index.tsx) uses
+-- the Supabase service role key, which bypasses RLS -- these policies exist
+-- so Directus (or any other client using anon/authenticated Supabase keys)
+-- still gets sane defaults if it ever queries loadouts directly.
 
-CREATE POLICY "Public weapon configs are viewable by everyone"
-  ON weapon_configs FOR SELECT
-  USING (is_public = true);
-
-CREATE POLICY "Users can view own weapon configs"
-  ON weapon_configs FOR SELECT
-  USING (auth.uid()::text = user_id);
-
-CREATE POLICY "Users can create weapon configs"
-  ON weapon_configs FOR INSERT
-  WITH CHECK (auth.uid()::text = user_id);
-
-CREATE POLICY "Users can update own weapon configs"
-  ON weapon_configs FOR UPDATE
-  USING (auth.uid()::text = user_id);
-
-CREATE POLICY "Users can delete own weapon configs"
-  ON weapon_configs FOR DELETE
-  USING (auth.uid()::text = user_id);
+-- ============================================================================
+-- Run this block ONLY after Directus has booted at least once against this
+-- database (so directus_files exists). Safe to run standalone/repeatedly.
+-- ============================================================================
+-- ALTER TABLE weapons            ADD CONSTRAINT weapons_image_fkey            FOREIGN KEY (image) REFERENCES directus_files(id) ON DELETE SET NULL;
+-- ALTER TABLE attachment_types   ADD CONSTRAINT attachment_types_image_fkey   FOREIGN KEY (image) REFERENCES directus_files(id) ON DELETE SET NULL;
+-- ALTER TABLE attachments        ADD CONSTRAINT attachments_image_fkey        FOREIGN KEY (image) REFERENCES directus_files(id) ON DELETE SET NULL;
+-- ALTER TABLE perks              ADD CONSTRAINT perks_image_fkey              FOREIGN KEY (image) REFERENCES directus_files(id) ON DELETE SET NULL;
+-- ALTER TABLE equipment          ADD CONSTRAINT equipment_image_fkey          FOREIGN KEY (image) REFERENCES directus_files(id) ON DELETE SET NULL;
+-- ALTER TABLE classes            ADD CONSTRAINT classes_image_fkey            FOREIGN KEY (image) REFERENCES directus_files(id) ON DELETE SET NULL;
+-- ALTER TABLE specializations    ADD CONSTRAINT specializations_image_fkey    FOREIGN KEY (image) REFERENCES directus_files(id) ON DELETE SET NULL;

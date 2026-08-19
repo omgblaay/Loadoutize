@@ -99,7 +99,7 @@ export function WeaponConfigPreview() {
         <div className="text-center">
           <h1 className="text-2xl font-black text-white mb-4">Weapon Config Not Found</h1>
           <button
-            onClick={() => navigate(`/game/${gameId}`)}
+            onClick={() => navigate(`/${gameId}/explore`)}
             className="bg-white text-neutral-900 font-bold py-3 px-6"
           >
             Back to Game
@@ -118,7 +118,7 @@ export function WeaponConfigPreview() {
         <div className="max-w-5xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => navigate(`/game/${gameId}`)}
+              onClick={() => navigate(`/${gameId}/explore`)}
               className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors font-medium"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -134,7 +134,7 @@ export function WeaponConfigPreview() {
               </button>
               {canEdit && (
                 <button
-                  onClick={() => navigate(`/game/${gameId}/weapon-builder?edit=${configId}`)}
+                  onClick={() => navigate(`/${gameId}/explore/weapon-builder?edit=${configId}`)}
                   className="flex items-center gap-2 px-4 py-2 text-neutral-900 font-bold transition-opacity hover:opacity-90"
                   style={{ backgroundColor: accentColor.primary }}
                 >
