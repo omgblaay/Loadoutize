@@ -114,6 +114,7 @@ app.get("/make-server-6db475c7/games", async (c) => {
     const { data, error } = await supabase.from('games').select('*');
     if (error) throw error;
 
+    const urlById = await resolveImageUrls((data ?? []).map((g: any) => g.Logo));
     const games = (data ?? []).map((g) => ({
       id: g.id,
       name: g.name,
@@ -122,6 +123,7 @@ app.get("/make-server-6db475c7/games", async (c) => {
       hasAttachments: g.has_attachments,
       hasPerks: g.has_perks,
       hasClasses: g.has_classes,
+      logoUrl: g.Logo ? urlById.get(g.Logo) ?? null : null,
     }));
     return c.json({ games });
   } catch (error) {

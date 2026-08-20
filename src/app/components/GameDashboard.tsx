@@ -6,6 +6,8 @@ import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "./AppLayout";
 import { LoadoutCard, type CardLoadout, type CardWeapon } from "./LoadoutCard";
 import { Search, SlidersHorizontal, ArrowUpDown, ChevronDown, X } from "lucide-react";
+import { SideNav } from "./ui/sidenav";
+import { SearchBar } from "./ui/searchbar";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -105,15 +107,7 @@ export function GameDashboard() {
         >
           Explore
         </h1>
-        <div className="flex-1 min-w-[240px] h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center gap-3 px-4">
-          <Search className="w-4 h-4 text-[#8d898a] shrink-0" />
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search name, author, weapon, tag..."
-            className="bg-transparent outline-none border-0 flex-1 text-[14px] text-[#fafafa] placeholder:text-[#8d898a]"
-          />
-        </div>
+        <SearchBar isExplore={false} value={searchQuery} onChange={setSearchQuery} />
       </div>
 
       {/* Filter / sort row */}

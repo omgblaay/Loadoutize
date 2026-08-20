@@ -31,7 +31,8 @@ CREATE TABLE games (
   has_attachments BOOLEAN DEFAULT true,
   has_perks BOOLEAN DEFAULT true,
   has_classes BOOLEAN DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  "Logo" UUID
 );
 
 INSERT INTO games (id, name, slug, has_weapon_categories, has_attachments, has_perks, has_classes) VALUES

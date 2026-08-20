@@ -19,6 +19,9 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        sidenav: "min-h-[52px] text-[#fafafa] hover:bg-white/[0.05] rounded-xl px-4 flex gap-2 text-[#fafafa] uppercase text-[14px] font-medium hover:bg-white/[0.05]",
+        sidenavActive: "min-h-[52px] text-[#fafafa] hover:bg-white/[0.05] bg-white/[0.08] text-[#fafafa] rounded-xl px-4 flex gap-2 text-[#fafafa] uppercase text-[14px] font-medium hover:bg-white/[0.05]",
+
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

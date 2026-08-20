@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { getGameColor } from "../utils/gameColors";
-import { gameMeta, GAME_ORDER } from "../utils/games";
+import { gameMeta } from "../utils/games";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "./AppLayout";
 import { LoadoutCard, type CardLoadout, type CardWeapon } from "./LoadoutCard";
@@ -12,7 +12,15 @@ interface Loadout extends CardLoadout {
   createdAt: string;
 }
 
+interface Game {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl: string | null;
+}
+
 export function GameSelector() {
+  const [games, setGames] = useState<Game[]>([]);
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
   const [weapons, setWeapons] = useState<CardWeapon[]>([]);
   const [selectedGame, setSelectedGame] = useState<string>("blackops7");
@@ -21,19 +29,32 @@ export function GameSelector() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games`, {
+      headers: { Authorization: `Bearer ${publicAnonKey}` },
+    })
+      .then((r) => r.json())
+      .then((data) => data.games && setGames(data.games))
+      .catch((error) => console.error("Error fetching games:", error));
+  }, []);
+
+  useEffect(() => {
     const gameParam = searchParams.get("game");
     if (gameParam) setSelectedGame(gameParam);
-    fetchLoadouts();
   }, [searchParams]);
+
+  useEffect(() => {
+    if (games.length === 0) return;
+    fetchLoadouts(games.map((g) => g.id));
+  }, [games]);
 
   useEffect(() => {
     fetchWeapons(selectedGame);
   }, [selectedGame]);
 
-  const fetchLoadouts = async () => {
+  const fetchLoadouts = async (gameIds: string[]) => {
     try {
       const results = await Promise.all(
-        GAME_ORDER.map((gameId) =>
+        gameIds.map((gameId) =>
           fetch(
             `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts`,
             { headers: { Authorization: `Bearer ${publicAnonKey}` } }
@@ -61,8 +82,12 @@ export function GameSelector() {
     }
   };
 
-  const activeMeta = gameMeta[selectedGame] ?? gameMeta.blackops7;
-  const ActiveIcon = activeMeta.icon;
+  const activeGame = games.find((g) => g.id === selectedGame);
+  const activeMeta = gameMeta[selectedGame];
+  const activeName = activeGame?.name ?? activeMeta?.name ?? selectedGame;
+  const activeShort = activeMeta?.short ?? activeName.slice(0, 3).toUpperCase();
+  const ActiveIcon = activeMeta?.icon ?? Crosshair;
+  const activeLogoUrl = activeGame?.logoUrl;
   const accent = getGameColor(selectedGame).primary;
 
   const metaLoadouts = loadouts
@@ -103,14 +128,15 @@ export function GameSelector() {
       {/* Header */}
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center border border-white/10 shrink-0"
-            style={{ background: "#1b1819" }}
-          >
-            <ActiveIcon className="w-5 h-5 text-[#efedf1]" />
+          <div className="w-12 h-12 flex items-center justify-center">
+            {activeLogoUrl ? (
+              <img src={activeLogoUrl} alt="" className="w-full h-full object-contain" />
+            ) : (
+              <ActiveIcon className="w-12 h-12 text-[#efedf1]" />
+            )}
           </div>
           <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">
-            {activeMeta.name} Meta Vault
+            {activeName} Meta Vault
           </h1>
         </div>
         <p className="text-[16px] leading-[24px] text-[#bebcbc]">
@@ -192,7 +218,7 @@ export function GameSelector() {
                 loadout={l}
                 weapons={weapons}
                 accent={accent}
-                gameShort={activeMeta.short}
+                gameShort={activeShort}
                 index={i}
                 onClick={() => navigate(`/${l.gameId}/loadout/${l.id}`)}
               />
