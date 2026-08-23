@@ -137,22 +137,34 @@ app.get("/make-server-6db475c7/games/:gameId/weapons", async (c) => {
     const gameId = c.req.param("gameId");
     const { data, error } = await supabase
       .from('weapons')
-      .select('id, name, image, damage, fire_rate, range, accuracy, description, weapon_categories(name)')
+      .select('id, name, image, weapon_category')
       .eq('game_id', gameId);
     if (error) throw error;
 
+    // weapon_category is a Directus many-to-any pointer (`{ key, collection }`)
+    // rather than a plain FK column, so PostgREST can't auto-embed it the way
+    // resolveImageUrls embeds directus_files -- resolve weapon_categories rows
+    // for the referenced keys separately instead.
+    const categoryIds = [...new Set(
+      (data ?? []).map((w: any) => w.weapon_category?.key).filter((id: any) => id != null)
+    )];
+    const { data: categoryRows, error: catError } = categoryIds.length
+      ? await supabase.from('weapon_categories').select('id, name, short_version').in('id', categoryIds)
+      : { data: [], error: null };
+    if (catError) throw catError;
+    const categoryById = new Map((categoryRows ?? []).map((cat: any) => [cat.id, cat]));
+
     const urlById = await resolveImageUrls((data ?? []).map((w: any) => w.image));
-    const weapons = (data ?? []).map((w: any) => ({
-      id: w.id,
-      name: w.name,
-      type: w.weapon_categories?.name ?? null,
-      damage: w.damage,
-      fireRate: w.fire_rate,
-      range: w.range,
-      accuracy: w.accuracy,
-      description: w.description,
-      imageUrl: w.image ? urlById.get(w.image) ?? null : null,
-    }));
+    const weapons = (data ?? []).map((w: any) => {
+      const category = categoryById.get(w.weapon_category?.key);
+      return {
+        id: w.id,
+        name: w.name,
+        type: category?.name ?? null,
+        typeShort: category?.short_version ?? null,
+        imageUrl: w.image ? urlById.get(w.image) ?? null : null,
+      };
+    });
     return c.json({ weapons });
   } catch (error) {
     console.log(`Error fetching weapons for game: ${error}`);

@@ -15,7 +15,7 @@ interface Loadout {
   createdAt: string;
 }
 
-const GAME_ORDER = ["blackops7", "warzone", "bf6", "thefinals"];
+const GAME_ORDER = ["mw4", "warzone", "df", "thefinals", "bf6"];
 
 export function UserPage() {
   const { nickname } = useParams<{ nickname: string }>();

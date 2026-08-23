@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { getGameColor } from "../utils/gameColors";
-import { gameMeta } from "../utils/games";
+import { gameMeta, GAME_ORDER, LAST_SELECTED_GAME_KEY, GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "../utils/games";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "./AppLayout";
-import { LoadoutCard, type CardLoadout, type CardWeapon } from "./LoadoutCard";
+import { LoadoutCard, type CardLoadout, type CardWeapon } from "./ui/LoadoutCard";
 import { ChevronRight, Crosshair, Flame, Sparkles, Youtube, Twitch, Video, Music2 } from "lucide-react";
+import { WeaponImage } from "./ui/WeaponImage";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -23,7 +24,7 @@ export function GameSelector() {
   const [games, setGames] = useState<Game[]>([]);
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
   const [weapons, setWeapons] = useState<CardWeapon[]>([]);
-  const [selectedGame, setSelectedGame] = useState<string>("blackops7");
+  const [selectedGame, setSelectedGame] = useState<string>(GAME_SELECTOR_ENABLED ? "" : LOCKED_GAME_ID);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -38,16 +39,47 @@ export function GameSelector() {
   }, []);
 
   useEffect(() => {
+    if (!GAME_SELECTOR_ENABLED) return;
     const gameParam = searchParams.get("game");
     if (gameParam) setSelectedGame(gameParam);
   }, [searchParams]);
 
+  // Falls back to the last game the user picked elsewhere (e.g. on Explore),
+  // then the first game in GAME_ORDER actually returned by the API, instead
+  // of a hardcoded id that may no longer exist in the database (e.g. a
+  // retired game).
   useEffect(() => {
+    if (!GAME_SELECTOR_ENABLED) return;
+    if (games.length === 0) return;
+    setSelectedGame((current) => {
+      if (current && games.some((g) => g.id === current)) return current;
+      let stored: string | null = null;
+      try {
+        stored = localStorage.getItem(LAST_SELECTED_GAME_KEY);
+      } catch {
+        // localStorage may be unavailable (e.g. private browsing).
+      }
+      if (stored && games.some((g) => g.id === stored)) return stored;
+      const preferred = GAME_ORDER.find((id) => games.some((g) => g.id === id));
+      return preferred ?? games[0].id;
+    });
+  }, [games]);
+
+  // While the selector is disabled, only the locked game's loadouts are
+  // needed — no reason to wait on or fetch the full games list.
+  useEffect(() => {
+    if (GAME_SELECTOR_ENABLED) return;
+    fetchLoadouts([LOCKED_GAME_ID]);
+  }, []);
+
+  useEffect(() => {
+    if (!GAME_SELECTOR_ENABLED) return;
     if (games.length === 0) return;
     fetchLoadouts(games.map((g) => g.id));
   }, [games]);
 
   useEffect(() => {
+    if (!selectedGame) return;
     fetchWeapons(selectedGame);
   }, [selectedGame]);
 
@@ -93,25 +125,7 @@ export function GameSelector() {
   const metaLoadouts = loadouts
     .filter((l) => l.gameId === selectedGame)
     .sort((a, b) => b.likes - a.likes)
-    .slice(0, 4);
-
-  const displayLoadouts: Loadout[] =
-    metaLoadouts.length > 0
-      ? metaLoadouts
-      : Array.from({ length: 4 }).map(
-          (_, i) =>
-            ({
-              id: `placeholder-${i}`,
-              name: "Fire Support Anchor",
-              description: "Revive-train support kit that holds any objective.",
-              weapons: [{ name: "SGX 124" }],
-              userName: "blaay",
-              likes: 95,
-              views: 310,
-              gameId: selectedGame,
-              createdAt: "",
-            } as Loadout)
-        );
+    .slice(0, 6);
 
   const topWeapons = weapons.slice(0, 5);
 
@@ -202,8 +216,39 @@ export function GameSelector() {
         </div>
       </div>
 
-      {/* Popular loadouts + top weapons */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_240px] gap-6">
+      {/* Top weapons + popular loadouts */}
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
+          <p className="text-[16px] text-[#fafafa] font-semibold flex items-center gap-2">
+            <Flame className="w-4 h-4" style={{ color: accent }} />
+            Top 5 weapons
+          </p>
+          {topWeapons.length > 0 ? (
+            <div className="flex flex-row flex-wrap gap-4">
+              {topWeapons.map((w) => (
+                <button
+                  key={w.id}
+                  onClick={() => navigate(`/${selectedGame}/explore?weapon=${encodeURIComponent(w.name)}`)}
+                  className="flex-1 max-w-sm min-w-xs rounded-xl border border-white/[0.18] p-4 flex flex-col items-center gap-3 text-left hover:border-white/[0.32]"
+                  style={{ backgroundImage: "linear-gradient(180deg, rgb(64,49,57) 0%, rgba(64,49,57,0) 20%), #201e1f" }}
+                >
+                  <div className="w-full h-16 rounded-lg flex items-center justify-center overflow-hidden">
+                  <WeaponImage variant="small" imageUrl={w.imageUrl} />
+                  </div>
+                  <div className="flex items-center gap-2 w-full">
+
+                    <span className="text-[14px] text-[#fafafa] font-semibold flex-1">{w.name}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-8 text-center">
+              <p className="text-[#8d898a]">No weapon data for {activeName} yet.</p>
+            </div>
+          )}
+        </div>
+
         <div className="flex flex-col gap-4">
           <div>
             <p className="text-[16px] text-[#fafafa] font-semibold">Most popular loadouts</p>
@@ -211,45 +256,27 @@ export function GameSelector() {
               Class setups from the latest patch that are currently dominating the game.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {displayLoadouts.map((l, i) => (
-              <LoadoutCard
-                key={l.id}
-                loadout={l}
-                weapons={weapons}
-                accent={accent}
-                gameShort={activeShort}
-                index={i}
-                onClick={() => navigate(`/${l.gameId}/loadout/${l.id}`)}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <p className="text-[16px] text-[#fafafa] font-semibold flex items-center gap-2">
-            <Flame className="w-4 h-4" style={{ color: accent }} />
-            Top 5 weapons
-          </p>
-          <div className="flex flex-col gap-4">
-            {(topWeapons.length > 0 ? topWeapons : [{ id: "ph1", name: "SGX", type: "SMG" }]).map((w) => (
-              <div
-                key={w.id}
-                className="rounded-xl border border-white/[0.18] p-4 flex flex-col items-center gap-3"
-                style={{ backgroundImage: "linear-gradient(180deg, rgb(64,49,57) 0%, rgba(64,49,57,0) 20%), #201e1f" }}
-              >
-                <div className="w-full h-16 rounded-lg bg-white/5 flex items-center justify-center">
-                  <Crosshair className="w-6 h-6" style={{ color: `${accent}80` }} />
-                </div>
-                <div className="flex items-center gap-2 w-full">
-                  <span className="h-6 px-2.5 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] uppercase text-[#fafafa]">
-                    {(w.type || "SMG").slice(0, 3)}
-                  </span>
-                  <span className="text-[14px] text-[#fafafa] font-semibold flex-1">{w.name}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          {metaLoadouts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              {metaLoadouts.map((l, i) => (
+                <LoadoutCard
+                  key={l.id}
+                  loadout={l}
+                  weapons={weapons}
+                  accent={accent}
+                  gameShort={activeShort}
+                  index={i}
+                  onClick={() => navigate(`/${l.gameId}/loadout/${l.id}`)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
+              <p className="text-[#8d898a]">
+                No loadouts published for {activeName} yet. Be the first to create one!
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>

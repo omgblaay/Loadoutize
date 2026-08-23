@@ -6,6 +6,7 @@ import { getGameColor } from "../utils/gameColors";
 import { gameMeta } from "../utils/games";
 import { useAuth } from "./AuthContext";
 import { AppLayout } from "./AppLayout";
+import type { CardWeapon } from "./ui/LoadoutCard";
 import {
   Edit,
   Trash2,
@@ -39,35 +40,12 @@ interface Loadout {
   createdAt: string;
 }
 
-function shortType(type?: string | null) {
-  if (!type) return "WPN";
-  const map: Record<string, string> = {
-    "Assault Rifle": "AR",
-    SMG: "SMG",
-    Carbine: "CAR",
-    LMG: "LMG",
-    "Marksman Rifle": "MAR",
-    "Sniper Rifle": "SNP",
-    Sniper: "SNP",
-    Shotgun: "SHG",
-    Handgun: "PST",
-    Sidearm: "PST",
-    DMR: "DMR",
-    Launcher: "LNC",
-    Melee: "MLE",
-    Special: "SPC",
-    Light: "LGT",
-    Medium: "MED",
-    Heavy: "HVY",
-  };
-  return map[type] ?? type.slice(0, 3).toUpperCase();
-}
-
 export function LoadoutPreview() {
-  const { gameId = "blackops7", loadoutId } = useParams<{ gameId: string; loadoutId: string }>();
+  const { gameId = "mw4", loadoutId } = useParams<{ gameId: string; loadoutId: string }>();
   const navigate = useNavigate();
   const { user, accessToken } = useAuth();
   const [loadout, setLoadout] = useState<Loadout | null>(null);
+  const [catalogWeapons, setCatalogWeapons] = useState<CardWeapon[]>([]);
   const [loading, setLoading] = useState(true);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
@@ -77,6 +55,15 @@ export function LoadoutPreview() {
       incrementViews();
     }
   }, [gameId, loadoutId]);
+
+  useEffect(() => {
+    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/weapons`, {
+      headers: { Authorization: `Bearer ${publicAnonKey}` },
+    })
+      .then((r) => r.json())
+      .then((data) => setCatalogWeapons(data.weapons ?? []))
+      .catch((error) => console.error("Error fetching weapons:", error));
+  }, [gameId]);
 
   useEffect(() => {
     QRCode.toDataURL(window.location.href, { margin: 1, width: 208, color: { dark: "#fafafa", light: "#00000000" } })
@@ -154,7 +141,7 @@ export function LoadoutPreview() {
     a.click();
   };
 
-  const meta = gameMeta[gameId] ?? gameMeta.blackops7;
+  const meta = gameMeta[gameId] ?? gameMeta.mw4;
   const accent = getGameColor(gameId).primary;
 
   if (loading) {
@@ -181,6 +168,8 @@ export function LoadoutPreview() {
 
   const canEdit = user?.id === loadout.userId;
   const primaryWeapon = loadout.weapons?.[0];
+  const primaryWeaponCatalog = catalogWeapons.find((w) => w.name === primaryWeapon?.name);
+  const primaryWeaponImage = primaryWeaponCatalog?.imageUrl ?? null;
   const shareUrl = window.location.href;
 
   return (
@@ -224,7 +213,7 @@ export function LoadoutPreview() {
         <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-4">
           <div className="flex items-center gap-4">
             <span className="h-7 px-2.5 rounded-[10px] border border-white/[0.18] bg-white/[0.02] flex items-center text-[12px] uppercase text-[#fafafa] tracking-[0.5px] font-medium">
-              {shortType(primaryWeapon?.type)}
+              {primaryWeaponCatalog?.typeShort || "—"}
             </span>
             <p className="text-[22px] leading-[28px] font-semibold text-[#fafafa]">
               {primaryWeapon?.name ?? loadout.name}
@@ -233,10 +222,14 @@ export function LoadoutPreview() {
 
           <div className="flex flex-col items-center gap-2 py-4">
             <div
-              className="w-full max-w-[400px] h-[150px] rounded-xl flex items-center justify-center"
+              className="w-full max-w-[400px] h-[150px] rounded-xl flex items-center justify-center overflow-hidden"
               style={{ background: `radial-gradient(ellipse at center, ${accent}14, transparent 70%)` }}
             >
-              <Crosshair className="w-10 h-10" style={{ color: `${accent}80` }} />
+              {primaryWeaponImage ? (
+                <img src={primaryWeaponImage} alt="" className="w-full h-full object-contain p-4" />
+              ) : (
+                <Crosshair className="w-10 h-10" style={{ color: `${accent}80` }} />
+              )}
             </div>
           </div>
 

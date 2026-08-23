@@ -3,10 +3,9 @@ import { useParams, useNavigate, useSearchParams } from "react-router";
 import { getGameColor } from "../utils/gameColors";
 import { gameMeta } from "../utils/games";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
-import { AppLayout } from "./AppLayout";
-import { LoadoutCard, type CardLoadout, type CardWeapon } from "./LoadoutCard";
-import { Search, SlidersHorizontal, ArrowUpDown, ChevronDown, X } from "lucide-react";
-import { SideNav } from "./ui/sidenav";
+import { AppLayout, useGameName } from "./AppLayout";
+import { LoadoutCard, type CardLoadout, type CardWeapon } from "./ui/LoadoutCard";
+import { SlidersHorizontal, ArrowUpDown, ChevronDown, X } from "lucide-react";
 import { SearchBar } from "./ui/searchbar";
 
 interface Loadout extends CardLoadout {
@@ -17,7 +16,7 @@ interface Loadout extends CardLoadout {
 type SortMode = "likes" | "newest";
 
 export function GameDashboard() {
-  const { gameId = "blackops7" } = useParams<{ gameId: string }>();
+  const { gameId: selectedGame = "blackops7" } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -36,7 +35,7 @@ export function GameDashboard() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts`, {
+    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/loadouts`, {
       headers: { Authorization: `Bearer ${publicAnonKey}` },
     })
       .then((r) => r.json())
@@ -44,16 +43,17 @@ export function GameDashboard() {
       .catch((error) => console.error("Error fetching loadouts:", error))
       .finally(() => setLoading(false));
 
-    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/weapons`, {
+    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/weapons`, {
       headers: { Authorization: `Bearer ${publicAnonKey}` },
     })
       .then((r) => r.json())
       .then((data) => setWeapons(data.weapons ?? []))
       .catch((error) => console.error("Error fetching weapons:", error));
-  }, [gameId]);
+  }, [selectedGame]);
 
-  const accent = getGameColor(gameId).primary;
-  const meta = gameMeta[gameId] ?? gameMeta.blackops7;
+  const accent = getGameColor(selectedGame).primary;
+  const meta = gameMeta[selectedGame] ?? gameMeta.blackops7;
+  const { name: gameName } = useGameName(selectedGame);
   const categories = Array.from(
     new Set(weapons.map((w) => w.type).filter((t): t is string => Boolean(t)))
   ).slice(0, 6);
@@ -99,7 +99,7 @@ export function GameDashboard() {
   }
 
   return (
-    <AppLayout selectedGame={gameId} onGameSelect={(id) => navigate(`/${id}/explore`)}>
+    <AppLayout selectedGame={selectedGame} onGameSelect={(id) => navigate(`/${id}/explore`)}>
       {/* Header: title + search */}
       <div className="flex items-center gap-5 w-full flex-wrap">
         <h1
@@ -183,7 +183,7 @@ export function GameDashboard() {
         <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
           <p className="text-[#8d898a]">
             {loadouts.length === 0
-              ? `No loadouts published for ${meta.name} yet. Be the first to create one!`
+              ? `No loadouts published for ${gameName} yet. Be the first to create one!`
               : "No loadouts match your filters."}
           </p>
           {hasActiveFilters && (
@@ -202,7 +202,7 @@ export function GameDashboard() {
               accent={accent}
               gameShort={meta.short}
               index={i}
-              onClick={() => navigate(`/${gameId}/loadout/${l.id}`)}
+              onClick={() => navigate(`/${selectedGame}/loadout/${l.id}`)}
             />
           ))}
         </div>

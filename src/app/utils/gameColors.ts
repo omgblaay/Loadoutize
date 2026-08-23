@@ -1,5 +1,5 @@
 export const gameColors = {
-  blackops7: {
+  mw4: {
     primary: "#FF6B35",
     light: "#FF8C61",
     dark: "#E5572D",
@@ -23,12 +23,18 @@ export const gameColors = {
     dark: "#E600E6",
     bg: "#FF00FF",
   },
+  df: {
+    primary: "#FFC400",
+    light: "#FFD84D",
+    dark: "#E6B000",
+    bg: "#FFC400",
+  },
 } as const;
 
 export type GameId = keyof typeof gameColors;
 
-export function getGameColor(gameId: string | undefined): typeof gameColors.blackops7 {
-  if (!gameId) return gameColors.blackops7;
+export function getGameColor(gameId: string | undefined): typeof gameColors.mw4 {
+  if (!gameId) return gameColors.mw4;
   const normalizedId = gameId.toLowerCase();
-  return gameColors[normalizedId as GameId] || gameColors.blackops7;
+  return gameColors[normalizedId as GameId] || gameColors.mw4;
 }

@@ -1,4 +1,4 @@
-import { Crosshair, Rocket } from "lucide-react";
+import { WeaponImage } from "./WeaponImage";
 
 export interface CardLoadout {
   id: string;
@@ -15,6 +15,8 @@ export interface CardWeapon {
   id: string;
   name: string;
   type: string | null;
+  typeShort?: string | null;
+  imageUrl?: string | null;
 }
 
 const TAG_CYCLE: { label: string; tone: "amber" | "teal" | "violet" | "blue" }[] = [
@@ -60,16 +62,6 @@ function RatingRing({ percent, accent }: { percent: number; accent: string }) {
   );
 }
 
-function WeaponArt({ accent }: { accent: string }) {
-  return (
-    <div
-      className="w-full aspect-[407/120] rounded-xl flex items-center justify-center shrink-0"
-      style={{ background: `radial-gradient(ellipse at center, ${accent}14, transparent 70%), #141213` }}
-    >
-      <Crosshair className="w-8 h-8" style={{ color: `${accent}80` }} />
-    </div>
-  );
-}
 
 export function LoadoutCard({
   loadout,
@@ -87,6 +79,9 @@ export function LoadoutCard({
   onClick: () => void;
 }) {
   const primaryWeapon = loadout.weapons?.[0]?.name || "SGX 124";
+  const primaryWeaponData = weapons.find((w) => w.name === primaryWeapon);
+  const secondaryWeapon = loadout.weapons?.[1]?.name;
+  const secondaryWeaponData = weapons.find((w) => w.name === secondaryWeapon);
   const rating = 95 + (index % 2) * 3;
   const tagA = TAG_CYCLE[index % TAG_CYCLE.length];
   const tagB = TAG_CYCLE[(index + 1) % TAG_CYCLE.length];
@@ -104,8 +99,7 @@ export function LoadoutCard({
         <RatingRing percent={rating} accent={accent} />
         <div className="flex-1 flex flex-col gap-2 justify-center">
           <div className="flex items-center gap-1 text-[10px] tracking-[0.5px] uppercase">
-            <span className="text-white">Elite</span>
-            <span className="text-white/55">•{loadout.views || 310} ratings</span>
+            <span className="text-white/55">{loadout.views} ratings</span>
           </div>
           <div className="inline-flex backdrop-blur-[2px] bg-black/[0.28] border border-white/[0.24] rounded-[7px] px-2.5 py-1 w-fit">
             <span className="text-[10px] tracking-[0.5px] uppercase text-white/66">Season 4</span>
@@ -116,27 +110,23 @@ export function LoadoutCard({
         </div>
       </div>
 
-      <WeaponArt accent={accent} />
+      <WeaponImage variant="large" imageUrl={primaryWeaponData?.imageUrl} />
 
       <div className="flex flex-col gap-2 w-full">
         <div className="flex flex-wrap gap-2 w-full">
           <div className="flex-1 min-w-[160px] h-10 rounded-xl bg-white/5 border border-white/[0.07] flex items-center gap-2 px-2">
-            <span className="h-6 px-2.5 rounded-[10px] border border-white/[0.18] flex items-center text-[10px] tracking-[0.5px] uppercase text-[#fafafa]">
-              {weapons.find((w) => w.name === primaryWeapon)?.type?.slice(0, 3).toUpperCase() || "PRI"}
+            <span className="h-6 px-2.5 rounded-[10px] border border-white/[0.15] flex items-center text-[10px] tracking-[0.5px] uppercase text-[#fafafa]">
+              {primaryWeaponData?.typeShort || "—"}
             </span>
-            <span className="text-[14px] text-[#fafafa]">{primaryWeapon}</span>
-          </div>
-          <div className="flex-1 min-w-[120px] h-10 rounded-xl bg-white/5 border border-white/[0.07] flex items-center gap-2 px-2">
-            <Rocket className="w-[19px] h-[19px]" style={{ color: accent }} />
-            <span className="text-[10px] tracking-[0.5px] uppercase text-white">{gameShort}</span>
+            {primaryWeapon}
           </div>
         </div>
         <div className="flex flex-wrap gap-2 w-full">
           <div className="flex-1 min-w-[160px] h-8 rounded-xl bg-white/5 border border-white/[0.07] flex items-center gap-1.5 px-2">
-            <span className="h-6 px-2.5 rounded-[10px] border border-white/[0.18] flex items-center text-[10px] tracking-[0.5px] uppercase text-[#fafafa]">
-              PST
+            <span className="h-6 px-2.5 rounded-[10px] border border-white/[0.15] flex items-center text-[10px] tracking-[0.5px] uppercase text-[#fafafa]">
+              {secondaryWeaponData?.typeShort || "—"}
             </span>
-            <span className="text-[14px] text-[#fafafa]">Sidearm</span>
+            {secondaryWeapon || "No secondary"}
           </div>
           <div className="flex-1 min-w-[120px] flex gap-2">
             <div className="flex-1 h-8 rounded-xl bg-white/5 border border-white/[0.07]" />
@@ -149,7 +139,7 @@ export function LoadoutCard({
       <div className="flex flex-col gap-1.5 w-full">
         <p className="text-[16px] text-white font-semibold">{loadout.name}</p>
         <p className="text-[12px] text-white/72">
-          {loadout.description || "Community build tuned for consistent objective play."}
+          {loadout.description || "No description provided."}
         </p>
       </div>
 

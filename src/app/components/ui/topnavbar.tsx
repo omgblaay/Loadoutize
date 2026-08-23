@@ -5,21 +5,19 @@ import { useAuth } from "../AuthContext";
 import { gameMeta } from "@/app/utils/games";
 import { Logo } from "./logo";
 
-
-
 export function TopNavBar({
   activeLogoUrl,
   user,
-  onGameSelect,
   selectedGame,
   orderedGames,
+  handleGameSelect,
   setShowAuthModal,
 }: {
   activeLogoUrl: string | null;
   user: any;
-  onGameSelect: (id: string) => void;
   selectedGame: string;
   orderedGames: { id: string; name: string; slug: string; logoUrl: string | null }[];
+  handleGameSelect: (id: string) => void;
   setShowAuthModal: (show: boolean) => void;
 }) {
   const navigate = useNavigate();
@@ -27,21 +25,14 @@ export function TopNavBar({
 
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
 
-  const handleGameSelect = (id: string) => {
-    onGameSelect(id);
-    setGameMenuOpen(false);
-  };
-
-  const activeGame = orderedGames.find((g) => g.id === selectedGame);
   const activeMeta = gameMeta[selectedGame];
-  const activeName = activeGame?.name ?? activeMeta?.name ?? selectedGame;
+  const activeName = orderedGames.find((g) => g.id === selectedGame)?.name ?? activeMeta?.name ?? selectedGame;
   const ActiveIcon = activeMeta?.icon ?? Globe;
     return (<div className="w-full backdrop-blur-md bg-[rgba(6,5,9,0.6)] border-b border-white/[0.16] sticky top-0 z-40">
         <div className="max-w-[1440px] mx-auto px-6 h-[72px] flex items-center gap-5">
           <div className="flex items-center gap-3 shrink-0">
             <a href="/" className="flex items-center gap-1.5">
               <Logo />
-
             </a>
             <span className="text-[#5D5658] px-1">/</span>
             <div className="relative">
@@ -65,7 +56,10 @@ export function TopNavBar({
                     return (
                       <button
                         key={game.id}
-                        onClick={() => handleGameSelect(game.id)}
+                        onClick={() => {
+                          handleGameSelect(game.id);
+                          setGameMenuOpen(false);
+                        }}
                         className={`w-full px-3.5 py-2.5 flex items-center gap-2 text-left hover:bg-white/5 ${
                           selectedGame === game.id ? "text-[#f8f7f9]" : "text-[#aea6a8]"
                         }`}
@@ -75,7 +69,7 @@ export function TopNavBar({
                         ) : (
                           <Icon className="w-4 h-4" />
                         )}
-                        <span>{meta?.name ?? game.name}</span>
+                        <span>{game.name ?? meta?.name}</span>
                       </button>
                     );
                   })}
@@ -95,8 +89,7 @@ export function TopNavBar({
               onClick={() => (user ? navigate(`/${selectedGame}/create`) : setShowAuthModal(true))}
               className="h-[52px] px-4 rounded-xl border border-white/[0.08] bg-[#2a2829] flex items-center gap-2 text-[#efedf1]"
             >
-              <Star className="w-4 h-4" />
-              <span>Create new</span>
+              <span>Create</span>
             </button>
             {user ? (
               <div className="flex items-center gap-2">

@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "./AuthContext";
-import { projectId, publicAnonKey } from "/utils/supabase/info";
+import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { getGameColor } from "../utils/gameColors";
 import { gameMeta } from "../utils/games";
 import { AppLayout } from "./AppLayout";
 import { ArrowLeft, Save, Check, Puzzle } from "lucide-react";
+import { WeaponTile } from "./ui/WeaponTile";
 
 interface Weapon {
+  imageUrl: string | null | undefined;
   id: string;
   name: string;
   type: string | null;
+  typeShort: string | null;
   damage: number;
   fireRate: number;
 }
@@ -36,52 +39,8 @@ interface Equipment {
   name: string;
 }
 
-function shortType(type?: string | null) {
-  return (type || "WPN").slice(0, 3).toUpperCase();
-}
 
-function WeaponTile({
-  weapon,
-  isSelected,
-  disabled,
-  accent,
-  onToggle,
-}: {
-  weapon: Weapon;
-  isSelected: boolean;
-  disabled: boolean;
-  accent: string;
-  onToggle: () => void;
-}) {
-  return (
-    <button
-      onClick={onToggle}
-      disabled={disabled}
-      className={`text-left rounded-xl border p-4 flex flex-col gap-3 transition-colors ${
-        isSelected ? "" : "border-white/[0.18] hover:border-white/30"
-      } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
-      style={
-        isSelected
-          ? { background: `${accent}1a`, borderColor: accent }
-          : { backgroundImage: "linear-gradient(180deg, rgb(64,49,57) 0%, rgba(64,49,57,0) 20%), #201e1f" }
-      }
-    >
-      <div className="flex items-center justify-between">
-        <span className="h-6 px-2.5 rounded-[10px] border border-white/[0.18] flex items-center text-[10px] tracking-[0.5px] uppercase text-[#fafafa]">
-          {shortType(weapon.type)}
-        </span>
-        {isSelected && <Check className="w-4 h-4 shrink-0" style={{ color: accent }} />}
-      </div>
-      <p className="text-[16px] text-[#fafafa] font-semibold">{weapon.name}</p>
-      <div className="flex gap-4 text-[12px] text-[#8d898a]">
-        <span><span className="text-[#fafafa] font-medium">{weapon.damage}</span> DMG</span>
-        <span><span className="text-[#fafafa] font-medium">{weapon.fireRate}</span> RPM</span>
-      </div>
-    </button>
-  );
-}
-
-function Pill({
+export function Pill({
   label,
   isSelected,
   accent,
@@ -108,7 +67,7 @@ function Pill({
 }
 
 export function LoadoutBuilder() {
-  const { gameId = "blackops7" } = useParams<{ gameId: string }>();
+  const { gameId = "mw4" } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get("edit");
@@ -322,7 +281,7 @@ export function LoadoutBuilder() {
   }
 
   const accent = getGameColor(gameId).primary;
-  const meta = gameMeta[gameId] ?? gameMeta.blackops7;
+  const meta = gameMeta[gameId] ?? gameMeta.mw4;
 
   const attachmentsByType = attachments.reduce<Record<string, Attachment[]>>((acc, a) => {
     (acc[a.type] ??= []).push(a);
@@ -422,10 +381,13 @@ export function LoadoutBuilder() {
               return (
                 <WeaponTile
                   key={weapon.id}
-                  weapon={weapon}
+                  weapon={{
+                    ...weapon,
+                    typeShort: weapon.typeShort ?? undefined,
+                    imageUrl: weapon.imageUrl ?? undefined,
+                  }}
                   isSelected={isSelected}
                   disabled={!isSelected && selectedWeapons.length >= 2}
-                  accent={accent}
                   onToggle={() => toggleWeapon(weapon)}
                 />
               );
@@ -438,7 +400,7 @@ export function LoadoutBuilder() {
         <div key={weapon.id} className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
           <div className="flex items-center gap-3">
             <span className="h-7 px-2.5 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] uppercase text-[#fafafa] tracking-[0.5px]">
-              {shortType(weapon.type)}
+              {weapon.typeShort || "—"}
             </span>
             <p className="text-[16px] text-[#fafafa] font-semibold flex-1">{weapon.name} build</p>
           </div>
