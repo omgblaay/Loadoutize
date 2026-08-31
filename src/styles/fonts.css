@@ -1,4 +1,14 @@
 /* Aspekta | OFL v1.1 License | Ivo Dolenc (c) 2025 | https://github.com/ivodolenc/aspekta */
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+@font-face {
+  font-family: 'BBH Bartle';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/BBHBartle-Regular.woff2') format('woff2');
+}
 
 @font-face {
   font-family: 'Aspekta';

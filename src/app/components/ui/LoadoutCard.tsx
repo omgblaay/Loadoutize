@@ -1,4 +1,6 @@
+import * as React from "react";
 import { WeaponImage } from "./WeaponImage";
+import { Tag } from "./tag";
 
 export interface CardLoadout {
   id: string;
@@ -8,7 +10,10 @@ export interface CardLoadout {
   weapons: any[];
   userName: string;
   likes: number;
+  score: number;
+  ratingPercent: number | null;
   views: number;
+  tagId?: number | null;
 }
 
 export interface CardWeapon {
@@ -19,36 +24,35 @@ export interface CardWeapon {
   imageUrl?: string | null;
 }
 
-const TAG_CYCLE: { label: string; tone: "amber" | "teal" | "violet" | "blue" }[] = [
-  { label: "Objective", tone: "amber" },
-  { label: "Off meta", tone: "teal" },
-  { label: "Rush", tone: "violet" },
-  { label: "No recoil", tone: "blue" },
-];
-
-const tagToneStyles: Record<string, { bg: string; border: string; dot: string; text: string }> = {
-  amber: { bg: "rgba(255,162,61,0.2)", border: "rgba(255,162,61,0.5)", dot: "#ffa23d", text: "#ffc07b" },
-  teal: { bg: "rgba(47,214,195,0.2)", border: "rgba(47,214,195,0.5)", dot: "#2fd6c3", text: "#97ebe1" },
-  violet: { bg: "rgba(168,110,255,0.2)", border: "rgba(168,110,255,0.5)", dot: "#a86eff", text: "#d6bfff" },
-  blue: { bg: "rgba(90,169,255,0.2)", border: "rgba(90,169,255,0.5)", dot: "#5aa9ff", text: "#aed4ff" },
-};
-
-function LoadoutTag({ label, tone }: { label: string; tone: keyof typeof tagToneStyles }) {
-  const s = tagToneStyles[tone];
-  return (
-    <div
-      className="h-7 pl-2 pr-[11px] rounded-[9px] border flex items-center gap-[7px] shrink-0"
-      style={{ background: s.bg, borderColor: s.border }}
-    >
-      <span className="w-[7px] h-[7px] rounded-full" style={{ background: s.dot, boxShadow: `0 0 8px ${s.dot}` }} />
-      <span className="text-[10px] tracking-[0.5px] uppercase font-semibold" style={{ color: s.text }}>
-        {label}
-      </span>
-    </div>
-  );
+export interface CardAttachment {
+  id: string;
+  name: string;
+  type: string | null;
+  imageUrl?: string | null;
 }
 
-function RatingRing({ percent, accent }: { percent: number; accent: string }) {
+export interface CardTag {
+  id: number;
+  name: string;
+  color: string;
+}
+
+const MAX_ATTACHMENT_ICONS = 6;
+
+
+function RatingRing({ percent, accent }: { percent: number | null; accent: string }) {
+  if (percent == null) {
+    return (
+      <div
+        className="relative shrink-0 size-14 rounded-full flex items-center justify-center"
+        style={{ background: "rgba(255,255,255,0.1)" }}
+      >
+        <div className="absolute inset-[3px] rounded-full bg-[#201e1f] border border-white/5 flex items-center justify-center">
+          <span className="text-[10px] font-semibold text-teritary tracking-[-0.3px]">New</span>
+        </div>
+      </div>
+    );
+  }
   const color = percent >= 90 ? "#36D27A" : percent >= 70 ? accent : "#FF4D63";
   return (
     <div
@@ -62,10 +66,11 @@ function RatingRing({ percent, accent }: { percent: number; accent: string }) {
   );
 }
 
-
 export function LoadoutCard({
   loadout,
   weapons,
+  attachments,
+  tags,
   accent,
   gameShort,
   index,
@@ -73,89 +78,73 @@ export function LoadoutCard({
 }: {
   loadout: CardLoadout;
   weapons: CardWeapon[];
+  attachments: CardAttachment[];
+  tags: CardTag[];
   accent: string;
   gameShort: string;
   index: number;
   onClick: () => void;
 }) {
-  const primaryWeapon = loadout.weapons?.[0]?.name || "SGX 124";
-  const primaryWeaponData = weapons.find((w) => w.name === primaryWeapon);
-  const secondaryWeapon = loadout.weapons?.[1]?.name;
-  const secondaryWeaponData = weapons.find((w) => w.name === secondaryWeapon);
-  const rating = 95 + (index % 2) * 3;
-  const tagA = TAG_CYCLE[index % TAG_CYCLE.length];
-  const tagB = TAG_CYCLE[(index + 1) % TAG_CYCLE.length];
+  const primaryWeaponId = loadout.weapons?.[0]?.id;
+  const primaryWeaponData = weapons.find((w) => w.id === primaryWeaponId);
+  const primaryWeapon = primaryWeaponData?.name || "SGX 124";
+  const primaryAttachments: Record<string, string> = loadout.weapons?.[0]?.attachments || {};
+  const attachmentIcons = Object.entries(primaryAttachments)
+    .map(([type, name]) => attachments.find((a) => a.type === type && a.name === name))
+    .filter((a): a is CardAttachment => Boolean(a))
+    .slice(0, MAX_ATTACHMENT_ICONS);
+  const tag = loadout.tagId != null ? tags.find((t) => t.id === loadout.tagId) : undefined;
+  const glowColor = tag?.color ?? accent;
 
   return (
     <button
       onClick={onClick}
-      className="relative rounded-[26px] border border-white/10 p-5 flex flex-col gap-4 text-left overflow-hidden w-full"
+      className="relative bg-[#100D10] rounded-xl border border-white/[0.08] hover:bg-[#1a161a] hover:border-white/20 transition-all flex flex-col text-left overflow-hidden w-full"
       style={{
-        backgroundImage: "linear-gradient(179deg, rgb(34,28,38) 0%, rgb(17,15,18) 20%, rgb(10,9,9) 100%)",
         boxShadow: "0px 30px 70px -36px rgba(0,0,0,0.85)",
       }}
     >
-      <div className="flex items-start gap-2 w-full">
-        <RatingRing percent={rating} accent={accent} />
-        <div className="flex-1 flex flex-col gap-2 justify-center">
-          <div className="flex items-center gap-1 text-[10px] tracking-[0.5px] uppercase">
-            <span className="text-white/55">{loadout.views} ratings</span>
-          </div>
-          <div className="inline-flex backdrop-blur-[2px] bg-black/[0.28] border border-white/[0.24] rounded-[7px] px-2.5 py-1 w-fit">
-            <span className="text-[10px] tracking-[0.5px] uppercase text-white/66">Season 4</span>
-          </div>
-        </div>
-        <div className="backdrop-blur-[2px] bg-black/[0.28] border border-white/[0.24] rounded-[7px] px-2.5 py-1 h-fit">
-          <span className="text-[10px] tracking-[0.5px] uppercase text-white/66">Loadout</span>
+      <div
+        className="absolute bottom-[-50%] right-[-50%] top-0 left-0 pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 50%)`, opacity: 0.16 }}
+      />
+
+      <div className="relative flex p-4 items-start gap-[9px] w-full">
+        <RatingRing percent={loadout.ratingPercent} accent={accent} />
+        <div className="flex-1 min-w-0 flex flex-col gap-0 justify-center">
+          <p className="text-lg font-semibold">{loadout.name}</p>
+          <p className="text-sm text-teritary truncate">{loadout.description}</p>
         </div>
       </div>
 
-      <WeaponImage variant="large" imageUrl={primaryWeaponData?.imageUrl} />
+      <div className="px-4 pb-4 flex flex-col items-center w-full">
 
-      <div className="flex flex-col gap-2 w-full">
-        <div className="flex flex-wrap gap-2 w-full">
-          <div className="flex-1 min-w-[160px] h-10 rounded-xl bg-white/5 border border-white/[0.07] flex items-center gap-2 px-2">
-            <span className="h-6 px-2.5 rounded-[10px] border border-white/[0.15] flex items-center text-[10px] tracking-[0.5px] uppercase text-[#fafafa]">
-              {primaryWeaponData?.typeShort || "—"}
-            </span>
-            {primaryWeapon}
-          </div>
+          <WeaponImage imageUrl={primaryWeaponData?.imageUrl} variant="small" />
+        <div className="flex items-center justify-center gap-2 w-full">
+
+          <Tag color={""}>{primaryWeaponData?.typeShort || gameShort}</Tag>
+          <p className="w-full font-mono text-secondary text-sm">{primaryWeapon}</p>
+          <Tag color={loadout.tagId ? tags.find((t) => t.id === loadout.tagId)?.color : undefined}>
+          {tag?.name}
+          </Tag>
         </div>
-        <div className="flex flex-wrap gap-2 w-full">
-          <div className="flex-1 min-w-[160px] h-8 rounded-xl bg-white/5 border border-white/[0.07] flex items-center gap-1.5 px-2">
-            <span className="h-6 px-2.5 rounded-[10px] border border-white/[0.15] flex items-center text-[10px] tracking-[0.5px] uppercase text-[#fafafa]">
-              {secondaryWeaponData?.typeShort || "—"}
-            </span>
-            {secondaryWeapon || "No secondary"}
-          </div>
-          <div className="flex-1 min-w-[120px] flex gap-2">
-            <div className="flex-1 h-8 rounded-xl bg-white/5 border border-white/[0.07]" />
-            <div className="flex-1 h-8 rounded-xl bg-white/5 border border-white/[0.07]" />
-            <div className="flex-1 h-8 rounded-xl bg-white/5 border border-white/[0.07]" />
-          </div>
-        </div>
+
       </div>
 
-      <div className="flex flex-col gap-1.5 w-full">
-        <p className="text-[16px] text-white font-semibold">{loadout.name}</p>
-        <p className="text-[12px] text-white/72">
-          {loadout.description || "No description provided."}
-        </p>
-      </div>
+      {attachmentIcons.length > 0 && (
+        <div className="relative flex items-center w-full">
+          {attachmentIcons.map((a) => (
+            <div
+              key={a.id}
+              className="bg-gradient-to-b from-white/0 from-[60%] to-white/[0.08] border w-full border-white/[0.07] h-14 flex items-center justify-center"
+            >
+              <img src={a.imageUrl ?? undefined} alt={a.name} className="size-6 object-contain" />
+            </div>
+          ))}
+        </div>
+      )}
 
-      <div className="flex items-center justify-between w-full">
-        <div className="flex gap-3 items-center">
-          <LoadoutTag label={tagA.label} tone={tagA.tone} />
-          <LoadoutTag label={tagB.label} tone={tagB.tone} />
-        </div>
-        <div className="flex items-center gap-2">
-          <div
-            className="w-5 h-5 rounded-full border border-[#3f3c3d]"
-            style={{ backgroundImage: "linear-gradient(135deg, rgb(207,206,212), rgb(64,62,67))" }}
-          />
-          <span className="text-[12px] text-[#fafafa]">{loadout.userName}</span>
-        </div>
-      </div>
+      <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[inset_0px_0px_0px_1px_rgba(255,255,255,0.07)]" />
     </button>
   );
 }

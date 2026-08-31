@@ -11,7 +11,14 @@
 
 -- Drop existing tables if they exist (in reverse order of dependencies)
 DROP VIEW IF EXISTS attachments_with_images;
+DROP TABLE IF EXISTS loadout_reactions CASCADE;
+DROP TABLE IF EXISTS loadout_equipment CASCADE;
+DROP TABLE IF EXISTS loadout_perks CASCADE;
+DROP TABLE IF EXISTS loadout_weapon_attachments CASCADE;
+DROP TABLE IF EXISTS loadout_weapons CASCADE;
 DROP TABLE IF EXISTS loadouts CASCADE;
+DROP TABLE IF EXISTS tag_weapon_categories CASCADE;
+DROP TABLE IF EXISTS tags CASCADE;
 DROP TABLE IF EXISTS specializations CASCADE;
 DROP TABLE IF EXISTS classes CASCADE;
 DROP TABLE IF EXISTS equipment CASCADE;
@@ -256,13 +263,54 @@ CREATE TABLE specializations (
 
 CREATE INDEX idx_specializations_class ON specializations(class_id);
 
--- 10. Loadouts Table
--- Pragmatic (non-normalized) shape that mirrors what LoadoutBuilder.tsx
--- already sends/expects: weapons is a JSONB array of embedded weapon
--- objects (not weapon_id references), perks/equipment are plain name
--- arrays. This avoids a larger loadout-builder rewrite; normalizing into
--- proper junction tables (loadout_weapons/loadout_perks/loadout_equipment)
--- is future work if/when the builder is changed to pick catalog items by ID.
+-- 10. Tags Table
+-- A single, optional playstyle tag per loadout (e.g. "Quick Scope"),
+-- colored, per-game. `color` feeds directly into the frontend's <Tag
+-- color={...}> pill component as a hex string.
+CREATE TABLE tags (
+  id SERIAL PRIMARY KEY,
+  game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  color TEXT NOT NULL,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(game_id, name)
+);
+
+CREATE INDEX idx_tags_game ON tags(game_id);
+
+ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read access" ON tags FOR SELECT USING (true);
+
+-- 11. Tag-Weapon-Category Restrictions (junction table)
+-- Which weapon categories a tag is allowed on. No rows for a tag means
+-- unrestricted (selectable regardless of weapon category) -- e.g. "Quick
+-- Scope" would have rows for Sniper/Marksman Rifle only, so it can't be
+-- picked on a loadout that includes an SMG.
+-- Uses a surrogate `id` primary key (rather than a composite PK on the two
+-- FK columns) because Directus's Data Studio requires every collection --
+-- including M2M junction tables -- to have a single-column primary key to
+-- introspect and render it; a composite PK makes the collection (and any
+-- M2M field built on it) silently fail to show up in the admin UI.
+CREATE TABLE tag_weapon_categories (
+  id SERIAL PRIMARY KEY,
+  tag_id INTEGER REFERENCES tags(id) ON DELETE CASCADE,
+  weapon_category_id INTEGER REFERENCES weapon_categories(id) ON DELETE CASCADE,
+  UNIQUE (tag_id, weapon_category_id)
+);
+
+ALTER TABLE tag_weapon_categories ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read access" ON tag_weapon_categories FOR SELECT USING (true);
+
+-- 12. Loadouts Table
+-- weapons/perks/equipment are all normalized as real FK relations (see
+-- loadout_weapons / loadout_weapon_attachments / loadout_perks /
+-- loadout_equipment below) rather than embedded JSON or plain TEXT[] name
+-- arrays, so the catalog can be browsed/edited as real relations in Directus
+-- and a loadout's selections stay valid FK references instead of copied text.
+-- Likes/dislikes/favorites similarly aren't stored here -- see
+-- loadout_reactions below; `likes`/`score`/`ratingPercent` in API responses
+-- are computed from that table, not columns on this one.
 CREATE TABLE loadouts (
   id TEXT PRIMARY KEY,
   game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
@@ -270,10 +318,7 @@ CREATE TABLE loadouts (
   user_name TEXT NOT NULL,
   name TEXT NOT NULL,
   description TEXT,
-  weapons JSONB DEFAULT '[]'::jsonb,
-  perks TEXT[] DEFAULT '{}',
-  equipment TEXT[] DEFAULT '{}',
-  likes INTEGER DEFAULT 0,
+  tag_id INTEGER REFERENCES tags(id) ON DELETE SET NULL,
   views INTEGER DEFAULT 0,
   is_public BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -282,7 +327,6 @@ CREATE TABLE loadouts (
 
 CREATE INDEX idx_loadouts_game ON loadouts(game_id);
 CREATE INDEX idx_loadouts_user ON loadouts(user_id);
-CREATE INDEX idx_loadouts_likes ON loadouts(likes DESC);
 CREATE INDEX idx_loadouts_created ON loadouts(created_at DESC);
 
 ALTER TABLE loadouts ENABLE ROW LEVEL SECURITY;
@@ -306,6 +350,175 @@ CREATE POLICY "Users can update own loadouts"
 CREATE POLICY "Users can delete own loadouts"
   ON loadouts FOR DELETE
   USING (auth.uid()::text = user_id);
+
+-- 13. Loadout Weapons (one loadout -> many weapon slots, each a real FK to
+-- the weapons catalog rather than an embedded copy).
+CREATE TABLE loadout_weapons (
+  id SERIAL PRIMARY KEY,
+  loadout_id TEXT REFERENCES loadouts(id) ON DELETE CASCADE,
+  weapon_id TEXT REFERENCES weapons(id) ON DELETE CASCADE,
+  slot_order INTEGER DEFAULT 0
+);
+
+CREATE INDEX idx_loadout_weapons_loadout ON loadout_weapons(loadout_id);
+CREATE INDEX idx_loadout_weapons_weapon ON loadout_weapons(weapon_id);
+
+ALTER TABLE loadout_weapons ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public loadout weapons are viewable by everyone"
+  ON loadout_weapons FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM loadouts l WHERE l.id = loadout_weapons.loadout_id AND l.is_public = true
+  ));
+
+CREATE POLICY "Users can view own loadout weapons"
+  ON loadout_weapons FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM loadouts l WHERE l.id = loadout_weapons.loadout_id AND auth.uid()::text = l.user_id
+  ));
+
+CREATE POLICY "Users can manage own loadout weapons"
+  ON loadout_weapons FOR ALL
+  USING (EXISTS (
+    SELECT 1 FROM loadouts l WHERE l.id = loadout_weapons.loadout_id AND auth.uid()::text = l.user_id
+  ))
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM loadouts l WHERE l.id = loadout_weapons.loadout_id AND auth.uid()::text = l.user_id
+  ));
+
+-- 14. Loadout Weapon Attachments (many attachments -> one loadout weapon slot).
+CREATE TABLE loadout_weapon_attachments (
+  id SERIAL PRIMARY KEY,
+  loadout_weapon_id INTEGER REFERENCES loadout_weapons(id) ON DELETE CASCADE,
+  attachment_id INTEGER REFERENCES attachments(id) ON DELETE CASCADE,
+  UNIQUE (loadout_weapon_id, attachment_id)
+);
+
+CREATE INDEX idx_lwa_loadout_weapon ON loadout_weapon_attachments(loadout_weapon_id);
+
+ALTER TABLE loadout_weapon_attachments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public loadout weapon attachments are viewable by everyone"
+  ON loadout_weapon_attachments FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM loadout_weapons lw
+    JOIN loadouts l ON l.id = lw.loadout_id
+    WHERE lw.id = loadout_weapon_attachments.loadout_weapon_id AND l.is_public = true
+  ));
+
+CREATE POLICY "Users can view own loadout weapon attachments"
+  ON loadout_weapon_attachments FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM loadout_weapons lw
+    JOIN loadouts l ON l.id = lw.loadout_id
+    WHERE lw.id = loadout_weapon_attachments.loadout_weapon_id AND auth.uid()::text = l.user_id
+  ));
+
+CREATE POLICY "Users can manage own loadout weapon attachments"
+  ON loadout_weapon_attachments FOR ALL
+  USING (EXISTS (
+    SELECT 1 FROM loadout_weapons lw
+    JOIN loadouts l ON l.id = lw.loadout_id
+    WHERE lw.id = loadout_weapon_attachments.loadout_weapon_id AND auth.uid()::text = l.user_id
+  ))
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM loadout_weapons lw
+    JOIN loadouts l ON l.id = lw.loadout_id
+    WHERE lw.id = loadout_weapon_attachments.loadout_weapon_id AND auth.uid()::text = l.user_id
+  ));
+
+-- 15. Loadout Perks (many loadout_perks rows -> one loadout, each a real FK
+-- to the perks catalog rather than a plain-text name copy).
+CREATE TABLE loadout_perks (
+  id SERIAL PRIMARY KEY,
+  loadout_id TEXT REFERENCES loadouts(id) ON DELETE CASCADE,
+  perk_id INTEGER REFERENCES perks(id) ON DELETE CASCADE,
+  UNIQUE (loadout_id, perk_id)
+);
+
+CREATE INDEX idx_loadout_perks_loadout ON loadout_perks(loadout_id);
+CREATE INDEX idx_loadout_perks_perk ON loadout_perks(perk_id);
+
+ALTER TABLE loadout_perks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public loadout perks are viewable by everyone"
+  ON loadout_perks FOR SELECT
+  USING (EXISTS (SELECT 1 FROM loadouts l WHERE l.id = loadout_perks.loadout_id AND l.is_public = true));
+
+CREATE POLICY "Users can view own loadout perks"
+  ON loadout_perks FOR SELECT
+  USING (EXISTS (SELECT 1 FROM loadouts l WHERE l.id = loadout_perks.loadout_id AND auth.uid()::text = l.user_id));
+
+CREATE POLICY "Users can manage own loadout perks"
+  ON loadout_perks FOR ALL
+  USING (EXISTS (SELECT 1 FROM loadouts l WHERE l.id = loadout_perks.loadout_id AND auth.uid()::text = l.user_id))
+  WITH CHECK (EXISTS (SELECT 1 FROM loadouts l WHERE l.id = loadout_perks.loadout_id AND auth.uid()::text = l.user_id));
+
+-- 16. Loadout Equipment (many loadout_equipment rows -> one loadout, each a
+-- real FK to the equipment catalog rather than a plain-text name copy).
+CREATE TABLE loadout_equipment (
+  id SERIAL PRIMARY KEY,
+  loadout_id TEXT REFERENCES loadouts(id) ON DELETE CASCADE,
+  equipment_id INTEGER REFERENCES equipment(id) ON DELETE CASCADE,
+  UNIQUE (loadout_id, equipment_id)
+);
+
+CREATE INDEX idx_loadout_equipment_loadout ON loadout_equipment(loadout_id);
+CREATE INDEX idx_loadout_equipment_equipment ON loadout_equipment(equipment_id);
+
+ALTER TABLE loadout_equipment ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public loadout equipment are viewable by everyone"
+  ON loadout_equipment FOR SELECT
+  USING (EXISTS (SELECT 1 FROM loadouts l WHERE l.id = loadout_equipment.loadout_id AND l.is_public = true));
+
+CREATE POLICY "Users can view own loadout equipment"
+  ON loadout_equipment FOR SELECT
+  USING (EXISTS (SELECT 1 FROM loadouts l WHERE l.id = loadout_equipment.loadout_id AND auth.uid()::text = l.user_id));
+
+CREATE POLICY "Users can manage own loadout equipment"
+  ON loadout_equipment FOR ALL
+  USING (EXISTS (SELECT 1 FROM loadouts l WHERE l.id = loadout_equipment.loadout_id AND auth.uid()::text = l.user_id))
+  WITH CHECK (EXISTS (SELECT 1 FROM loadouts l WHERE l.id = loadout_equipment.loadout_id AND auth.uid()::text = l.user_id));
+
+-- 17. Loadout Reactions (per-user like/dislike/favorite rows -- replaces the
+-- old blind `loadouts.likes` counter, which had no per-user identity and let
+-- anyone click Like indefinitely). like/dislike are mutually exclusive per
+-- user (enforced in the edge function, not here); favorite is independent
+-- of both. The API's `likes`/`dislikes`/`favorites`/`score`/`ratingPercent`
+-- fields are computed from this table on every read, not stored columns --
+-- see mapLoadout() in supabase/functions/server/index.tsx.
+--
+-- Unlike every other loadout child table, a reaction row is owned by the
+-- *reacting* user, not the loadout's owner -- hence the RLS policies below
+-- check auth.uid() against loadout_reactions.user_id directly, rather than
+-- joining back to loadouts.user_id the way loadout_weapons etc. do.
+CREATE TABLE loadout_reactions (
+  id SERIAL PRIMARY KEY,
+  loadout_id TEXT REFERENCES loadouts(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('like', 'dislike', 'favorite')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE (loadout_id, user_id, type)
+);
+
+CREATE INDEX idx_loadout_reactions_loadout ON loadout_reactions(loadout_id);
+CREATE INDEX idx_loadout_reactions_user ON loadout_reactions(user_id);
+
+ALTER TABLE loadout_reactions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Reactions on visible loadouts are publicly readable"
+  ON loadout_reactions FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM loadouts l
+    WHERE l.id = loadout_reactions.loadout_id
+      AND (l.is_public = true OR auth.uid()::text = l.user_id)
+  ));
+
+CREATE POLICY "Users manage their own reactions"
+  ON loadout_reactions FOR ALL
+  USING (auth.uid()::text = user_id)
+  WITH CHECK (auth.uid()::text = user_id);
 
 -- NOTE: the edge function backend (supabase/functions/server/index.tsx) uses
 -- the Supabase service role key, which bypasses RLS -- these policies exist

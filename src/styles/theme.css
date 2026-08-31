@@ -8,10 +8,11 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #030213;
+  --primary: #fafafa;
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.0058 264.53);
+  --secondary: #bebcbc;
   --secondary-foreground: #030213;
+  --teritary: #8d898a;
   --muted: #ececf0;
   --muted-foreground: #717182;
   --accent: #e9ebef;
@@ -89,6 +90,7 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-teritary: var(--teritary);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
@@ -118,6 +120,8 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: 'Aspekta', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'BBH Bartle', 'Aspekta', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 @layer base {
@@ -137,6 +141,15 @@
 
   html {
     font-size: var(--font-size);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
   }
 
   h1 {

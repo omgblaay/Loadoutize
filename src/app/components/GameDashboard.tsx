@@ -4,7 +4,7 @@ import { getGameColor } from "../utils/gameColors";
 import { gameMeta } from "../utils/games";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout, useGameName } from "./AppLayout";
-import { LoadoutCard, type CardLoadout, type CardWeapon } from "./ui/LoadoutCard";
+import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, type CardTag } from "./ui/LoadoutCard";
 import { SlidersHorizontal, ArrowUpDown, ChevronDown, X } from "lucide-react";
 import { SearchBar } from "./ui/searchbar";
 
@@ -22,6 +22,8 @@ export function GameDashboard() {
 
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
   const [weapons, setWeapons] = useState<CardWeapon[]>([]);
+  const [attachments, setAttachments] = useState<CardAttachment[]>([]);
+  const [tags, setTags] = useState<CardTag[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -49,6 +51,20 @@ export function GameDashboard() {
       .then((r) => r.json())
       .then((data) => setWeapons(data.weapons ?? []))
       .catch((error) => console.error("Error fetching weapons:", error));
+
+    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/attachments`, {
+      headers: { Authorization: `Bearer ${publicAnonKey}` },
+    })
+      .then((r) => r.json())
+      .then((data) => setAttachments(data.attachments ?? []))
+      .catch((error) => console.error("Error fetching attachments:", error));
+
+    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/tags`, {
+      headers: { Authorization: `Bearer ${publicAnonKey}` },
+    })
+      .then((r) => r.json())
+      .then((data) => setTags(data.tags ?? []))
+      .catch((error) => console.error("Error fetching tags:", error));
   }, [selectedGame]);
 
   const accent = getGameColor(selectedGame).primary;
@@ -58,18 +74,23 @@ export function GameDashboard() {
     new Set(weapons.map((w) => w.type).filter((t): t is string => Boolean(t)))
   ).slice(0, 6);
 
-  const weaponTypeByName = new Map(weapons.map((w) => [w.name, w.type]));
+  const weaponById = new Map(weapons.map((w) => [w.id, w]));
 
   const filtered = loadouts.filter((l) => {
     if (activeCategory) {
       const matchesCategory = (l.weapons ?? []).some(
-        (w: any) => weaponTypeByName.get(w?.name) === activeCategory
+        (w: any) => weaponById.get(w?.id)?.type === activeCategory
       );
       if (!matchesCategory) return false;
     }
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
-      const haystack = [l.name, l.userName, l.description, ...(l.weapons ?? []).map((w: any) => w?.name)]
+      const haystack = [
+        l.name,
+        l.userName,
+        l.description,
+        ...(l.weapons ?? []).map((w: any) => weaponById.get(w?.id)?.name),
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -80,7 +101,7 @@ export function GameDashboard() {
 
   const sorted = [...filtered].sort((a, b) =>
     sortMode === "likes"
-      ? b.likes - a.likes
+      ? b.score - a.score
       : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
@@ -136,7 +157,7 @@ export function GameDashboard() {
             <div className="absolute top-[calc(100%+8px)] right-0 w-44 rounded-xl border border-white/10 bg-[#161415] shadow-2xl overflow-hidden z-50">
               {(
                 [
-                  { id: "likes", label: "Most liked" },
+                  { id: "likes", label: "Top" },
                   { id: "newest", label: "Newest" },
                 ] as const
               ).map((opt) => (
@@ -199,6 +220,8 @@ export function GameDashboard() {
               key={l.id}
               loadout={l}
               weapons={weapons}
+              attachments={attachments}
+              tags={tags}
               accent={accent}
               gameShort={meta.short}
               index={i}

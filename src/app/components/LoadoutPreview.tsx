@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import QRCode from "qrcode";
-import { projectId, publicAnonKey } from "/utils/supabase/info";
+import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { getGameColor } from "../utils/gameColors";
 import { gameMeta } from "../utils/games";
 import { useAuth } from "./AuthContext";
-import { AppLayout } from "./AppLayout";
-import type { CardWeapon } from "./ui/LoadoutCard";
+import { AppLayout, useGameName } from "./AppLayout";
+import { Button } from "./ui/button";
+import { WeaponImage } from "./ui/WeaponImage";
+import type { CardWeapon, CardTag, CardAttachment } from "./ui/LoadoutCard";
+import { Tag } from "./ui/tag";
+import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
 import {
   Edit,
   Trash2,
@@ -16,12 +20,11 @@ import {
   Download,
   Puzzle,
   Crosshair,
+  Icon,
 } from "lucide-react";
 
 interface Weapon {
   id: string;
-  name: string;
-  type: string;
   attachments?: Record<string, string>;
 }
 
@@ -36,9 +39,19 @@ interface Loadout {
   perks?: string[];
   equipment?: string[];
   likes: number;
+  dislikes: number;
+  favorites: number;
+  score: number;
+  ratingPercent: number | null;
+  liked: boolean;
+  disliked: boolean;
+  favorited: boolean;
   views: number;
   createdAt: string;
+  tagId?: number | null;
 }
+
+type ReactionType = "like" | "dislike" | "favorite";
 
 export function LoadoutPreview() {
   const { gameId = "mw4", loadoutId } = useParams<{ gameId: string; loadoutId: string }>();
@@ -46,12 +59,21 @@ export function LoadoutPreview() {
   const { user, accessToken } = useAuth();
   const [loadout, setLoadout] = useState<Loadout | null>(null);
   const [catalogWeapons, setCatalogWeapons] = useState<CardWeapon[]>([]);
+  const [catalogAttachments, setCatalogAttachments] = useState<CardAttachment[]>([]);
+  const [catalogTags, setCatalogTags] = useState<CardTag[]>([]);
   const [loading, setLoading] = useState(true);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (gameId && loadoutId) {
       fetchLoadout();
+    }
+    // accessToken starts undefined and resolves after AuthContext loads --
+    // refetch once it settles so liked/disliked/favorited reflect this viewer.
+  }, [gameId, loadoutId, accessToken]);
+
+  useEffect(() => {
+    if (gameId && loadoutId) {
       incrementViews();
     }
   }, [gameId, loadoutId]);
@@ -63,19 +85,33 @@ export function LoadoutPreview() {
       .then((r) => r.json())
       .then((data) => setCatalogWeapons(data.weapons ?? []))
       .catch((error) => console.error("Error fetching weapons:", error));
+
+    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/attachments`, {
+      headers: { Authorization: `Bearer ${publicAnonKey}` },
+    })
+      .then((r) => r.json())
+      .then((data) => setCatalogAttachments(data.attachments ?? []))
+      .catch((error) => console.error("Error fetching attachments:", error));
+
+    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/tags`, {
+      headers: { Authorization: `Bearer ${publicAnonKey}` },
+    })
+      .then((r) => r.json())
+      .then((data) => setCatalogTags(data.tags ?? []))
+      .catch((error) => console.error("Error fetching tags:", error));
   }, [gameId]);
 
   useEffect(() => {
     QRCode.toDataURL(window.location.href, { margin: 1, width: 208, color: { dark: "#fafafa", light: "#00000000" } })
       .then(setQrDataUrl)
-      .catch((error) => console.error("Error generating QR code:", error));
+      .catch((error: unknown) => console.error("Error generating QR code:", error));
   }, [gameId, loadoutId]);
 
   const fetchLoadout = async () => {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        { headers: { Authorization: `Bearer ${accessToken ?? publicAnonKey}` } }
       );
       const data = await response.json();
       const found = data.loadouts?.find((l: any) => l.id === loadoutId);
@@ -98,18 +134,26 @@ export function LoadoutPreview() {
     }
   };
 
-  const likeLoadout = async () => {
+  const react = async (type: ReactionType) => {
+    if (!accessToken) {
+      alert("You must be logged in to react to loadouts");
+      return;
+    }
     try {
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts/${loadoutId}/like`,
-        { method: "POST", headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts/${loadoutId}/react`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+          body: JSON.stringify({ type }),
+        }
       );
       if (response.ok) {
         const { loadout: updated } = await response.json();
         setLoadout(updated);
       }
     } catch (error) {
-      console.error("Error liking loadout:", error);
+      console.error("Error reacting to loadout:", error);
     }
   };
 
@@ -142,6 +186,7 @@ export function LoadoutPreview() {
   };
 
   const meta = gameMeta[gameId] ?? gameMeta.mw4;
+  const { game: activeGame } = useGameName(gameId);
   const accent = getGameColor(gameId).primary;
 
   if (loading) {
@@ -156,19 +201,19 @@ export function LoadoutPreview() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0a0909] flex-col gap-4">
         <p className="text-[#efedf1] text-xl">Loadout not found.</p>
-        <button
+        <Button
           onClick={() => navigate(`/${gameId}/explore`)}
           className="h-11 px-5 rounded-xl bg-[#fafafa] text-[#161414] font-medium"
         >
           Back to Explore
-        </button>
+        </Button>
       </div>
     );
   }
 
   const canEdit = user?.id === loadout.userId;
   const primaryWeapon = loadout.weapons?.[0];
-  const primaryWeaponCatalog = catalogWeapons.find((w) => w.name === primaryWeapon?.name);
+  const primaryWeaponCatalog = catalogWeapons.find((w) => w.id === primaryWeapon?.id);
   const primaryWeaponImage = primaryWeaponCatalog?.imageUrl ?? null;
   const shareUrl = window.location.href;
 
@@ -178,33 +223,33 @@ export function LoadoutPreview() {
       onGameSelect={(id) => navigate(`/${id}/explore`)}
       breadcrumb={
         <>
-          <button
-            onClick={() => navigate(`/${gameId}/explore`)}
-            className="text-[#fafafa] hover:text-white transition-colors"
-          >
-            {meta.short}
-          </button>
-          {primaryWeapon && (
+          <BreadcrumbLink to={`/${gameId}/explore`}>
+            {activeGame?.logoUrl ? (
+              <img src={activeGame.logoUrl} alt="" className="w-10 h-10 object-contain shrink-0" />
+            ) : (
+              <meta.icon className="w-4 h-4" />
+            )}
+          </BreadcrumbLink>
+          {primaryWeaponCatalog && (
             <>
-              <span className="text-[#5D5658]">/</span>
-              {primaryWeapon.type ? (
-                <button
-                  onClick={() =>
-                    navigate(`/${gameId}/explore?category=${encodeURIComponent(primaryWeapon.type)}`)
-                  }
-                  className="hover:text-[#fafafa] transition-colors"
+              <BreadcrumbSpacer />
+              {primaryWeaponCatalog.type ? (
+                <BreadcrumbLink
+                  to={`/${gameId}/explore?category=${encodeURIComponent(primaryWeaponCatalog.type)}`}
                 >
-                  {primaryWeapon.type}
-                </button>
+                  {primaryWeaponCatalog.typeShort || meta.short}
+                </BreadcrumbLink>
               ) : (
-                <span>{primaryWeapon.type}</span>
+                null
               )}
-              <span className="text-[#5D5658]">/</span>
-              <span>{primaryWeapon.name}</span>
+              <BreadcrumbSpacer />
+              <BreadcrumbLink to={`/${gameId}/explore?category=${encodeURIComponent(primaryWeaponCatalog.name)}`}>
+                {primaryWeaponCatalog.name}
+              </BreadcrumbLink>
             </>
           )}
-          <span className="text-[#5D5658]">/</span>
-          <span className="text-[#fafafa]">{loadout.name}</span>
+          <BreadcrumbSpacer />
+          <span className="text-base">{loadout.name}</span>
         </>
       }
     >
@@ -212,11 +257,18 @@ export function LoadoutPreview() {
         {/* Weapon build */}
         <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-4">
           <div className="flex items-center gap-4">
-            <span className="h-7 px-2.5 rounded-[10px] border border-white/[0.18] bg-white/[0.02] flex items-center text-[12px] uppercase text-[#fafafa] tracking-[0.5px] font-medium">
-              {primaryWeaponCatalog?.typeShort || "—"}
-            </span>
-            <p className="text-[22px] leading-[28px] font-semibold text-[#fafafa]">
-              {primaryWeapon?.name ?? loadout.name}
+            <Tag
+              color={""}
+              link={
+                primaryWeaponCatalog?.type
+                  ? `/${gameId}/explore?category=${encodeURIComponent(primaryWeaponCatalog.type)}`
+                  : undefined
+              }
+            >
+              {primaryWeaponCatalog?.typeShort || meta.short}
+            </Tag>
+            <p className="text-md font-semibold">
+              {primaryWeaponCatalog?.name ?? loadout.name}
             </p>
           </div>
 
@@ -225,25 +277,28 @@ export function LoadoutPreview() {
               className="w-full max-w-[400px] h-[150px] rounded-xl flex items-center justify-center overflow-hidden"
               style={{ background: `radial-gradient(ellipse at center, ${accent}14, transparent 70%)` }}
             >
-              {primaryWeaponImage ? (
-                <img src={primaryWeaponImage} alt="" className="w-full h-full object-contain p-4" />
-              ) : (
-                <Crosshair className="w-10 h-10" style={{ color: `${accent}80` }} />
-              )}
+              <WeaponImage imageUrl={primaryWeaponImage} />
             </div>
           </div>
 
           <div className="flex flex-col w-full">
             {primaryWeapon?.attachments &&
-              Object.entries(primaryWeapon.attachments).map(([slot, value]) => (
-                <div key={slot} className="flex items-center gap-4 py-3 border-b border-white/5 w-full">
-                  <div className="w-6 h-6 rounded-md bg-white/[0.02] border border-white/[0.18] flex items-center justify-center shrink-0">
-                    <Puzzle className="w-3.5 h-3.5 text-[#8d898a]" />
+              Object.entries(primaryWeapon.attachments).map(([slot, value]) => {
+                const attachment = catalogAttachments.find((a) => a.type === slot && a.name === value);
+                return (
+                  <div key={slot} className="flex items-center gap-4 py-3 border-b border-white/5 w-full">
+                    <div className="w-6 h-6 flex items-center justify-center shrink-0 overflow-hidden">
+                      {attachment?.imageUrl ? (
+                        <img src={attachment.imageUrl} alt={value} className="w-full opacity-50 h-full object-contain" />
+                      ) : (
+                        <Puzzle className="w-3.5 h-3.5 text-[#8d898a]" />
+                      )}
+                    </div>
+                    <span className="text-[14px] text-[#8d898a] flex-1">{slot}</span>
+                    <span className="text-[14px] text-[#fafafa] font-medium">{value}</span>
                   </div>
-                  <span className="text-[14px] text-[#8d898a] flex-1">{slot}</span>
-                  <span className="text-[14px] text-[#fafafa] font-medium">{value}</span>
-                </div>
-              ))}
+                );
+              })}
 
             {!primaryWeapon?.attachments &&
               (loadout.equipment ?? []).map((item, i) => (
@@ -269,17 +324,21 @@ export function LoadoutPreview() {
               <div
                 className="relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center border border-[#2a2829]"
                 style={{
-                  background: `conic-gradient(#01a059 ${Math.min(loadout.likes, 100) * 3.6}deg, rgba(255,255,255,0.1) 0deg)`,
+                  background:
+                    loadout.ratingPercent != null
+                      ? `conic-gradient(#01a059 ${loadout.ratingPercent * 3.6}deg, rgba(255,255,255,0.1) 0deg)`
+                      : "rgba(255,255,255,0.1)",
                 }}
               >
                 <div className="absolute inset-[3px] rounded-full bg-[#201e1f] flex items-center justify-center">
-                  <span className="text-[14px] text-white font-medium">{loadout.likes}</span>
+                  <span className="text-[14px] text-white font-medium">
+                    {loadout.ratingPercent != null ? `${loadout.ratingPercent}%` : "—"}
+                  </span>
                 </div>
               </div>
               <div className="flex-1 flex flex-col gap-2">
-                <p className="text-[28px] leading-[36px] font-semibold text-[#fafafa]">
-                  Does this setup still hold up?
-                </p>
+
+            <h1 className="text-lg">{loadout.name}</h1>
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center gap-2">
                     <div
@@ -288,39 +347,56 @@ export function LoadoutPreview() {
                     />
                     <span className="text-[12px] text-[#fafafa]">{loadout.userName}</span>
                   </div>
+
                 </div>
               </div>
             </div>
-
             {loadout.description && (
-              <p className="text-[14px] leading-[20px] text-[#bebcbc]">{loadout.description}</p>
+              <p className="text-secondary">{loadout.description}</p>
             )}
 
             <div className="h-px w-full bg-white/[0.07]" />
-
+                <p className="text-teritary text-xs">
+                  How would you rate this loadout? Your rating will be reflected in the overall score and rating percentage.
+                </p>
             <div className="flex items-center gap-3 flex-wrap">
-              <button
-                onClick={likeLoadout}
+              <Button
+                onClick={() => react("like")}
                 className="h-[52px] px-3 rounded-xl border flex items-center gap-2"
-                style={{ background: "rgba(1,160,89,0.12)", borderColor: "#01a059" }}
+                style={{
+                  background: loadout.liked ? "rgba(1,160,89,0.24)" : "rgba(1,160,89,0.12)",
+                  borderColor: "#01a059",
+                }}
               >
-                <ThumbsUp className="w-4 h-4 text-[#fafafa]" />
+                <ThumbsUp className="w-4 h-4 text-[#fafafa]" fill={loadout.liked ? "#fafafa" : "none"} />
                 <span className="text-[14px] text-[#fafafa]">Upvote</span>
                 <span className="text-[14px] text-[#00e37e]">{loadout.likes}</span>
-              </button>
-              <button
-                disabled
-                className="h-[52px] px-4 rounded-xl border border-white/[0.18] flex items-center gap-2 opacity-50 cursor-not-allowed"
-                title="Downvotes aren't tracked yet"
+              </Button>
+              <Button
+                onClick={() => react("dislike")}
+                className="h-[52px] px-4 rounded-xl border flex items-center gap-2"
+                style={{
+                  background: loadout.disliked ? "rgba(208,0,80,0.18)" : "transparent",
+                  borderColor: loadout.disliked ? "#d00050" : "rgba(255,255,255,0.18)",
+                }}
               >
-                <ThumbsDown className="w-4 h-4 text-[#d00050]" />
-                <span className="text-[14px] text-[#d00050]">0</span>
-              </button>
-              <p className="text-[12px] text-[#8d898a]">Total: {loadout.likes}</p>
-              <button className="h-[52px] px-4 rounded-xl border border-white/[0.18] flex items-center gap-2 ml-auto">
-                <Heart className="w-4 h-4 text-[#bebcbc]" />
-                <span className="text-[14px] text-[#bebcbc]">Add to favorites</span>
-              </button>
+                <ThumbsDown className="w-4 h-4 text-[#d00050]" fill={loadout.disliked ? "#d00050" : "none"} />
+                <span className="text-[14px] text-[#d00050]">{loadout.dislikes}</span>
+              </Button>
+              <p className="text-[12px] text-[#8d898a]">Score: {loadout.score}</p>
+              <Button
+                onClick={() => react("favorite")}
+                className="h-[52px] px-4 rounded-xl border flex items-center gap-2 ml-auto"
+                style={{
+                  background: loadout.favorited ? "rgba(190,188,188,0.18)" : "transparent",
+                  borderColor: loadout.favorited ? "#bebcbc" : "rgba(255,255,255,0.18)",
+                }}
+              >
+                <Heart className="w-4 h-4 text-[#bebcbc]" fill={loadout.favorited ? "#bebcbc" : "none"} />
+                <span className="text-[14px] text-[#bebcbc]">
+                  {loadout.favorited ? "Favorited" : "Add to favorites"} ({loadout.favorites})
+                </span>
+              </Button>
             </div>
           </div>
 

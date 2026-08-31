@@ -4,7 +4,7 @@ import { getGameColor } from "../utils/gameColors";
 import { gameMeta, GAME_ORDER, LAST_SELECTED_GAME_KEY, GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "../utils/games";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "./AppLayout";
-import { LoadoutCard, type CardLoadout, type CardWeapon } from "./ui/LoadoutCard";
+import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, type CardTag } from "./ui/LoadoutCard";
 import { ChevronRight, Crosshair, Flame, Sparkles, Youtube, Twitch, Video, Music2 } from "lucide-react";
 import { WeaponImage } from "./ui/WeaponImage";
 
@@ -24,6 +24,8 @@ export function GameSelector() {
   const [games, setGames] = useState<Game[]>([]);
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
   const [weapons, setWeapons] = useState<CardWeapon[]>([]);
+  const [attachments, setAttachments] = useState<CardAttachment[]>([]);
+  const [tags, setTags] = useState<CardTag[]>([]);
   const [selectedGame, setSelectedGame] = useState<string>(GAME_SELECTOR_ENABLED ? "" : LOCKED_GAME_ID);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -81,6 +83,8 @@ export function GameSelector() {
   useEffect(() => {
     if (!selectedGame) return;
     fetchWeapons(selectedGame);
+    fetchAttachments(selectedGame);
+    fetchTags(selectedGame);
   }, [selectedGame]);
 
   const fetchLoadouts = async (gameIds: string[]) => {
@@ -114,6 +118,32 @@ export function GameSelector() {
     }
   };
 
+  const fetchAttachments = async (gameId: string) => {
+    try {
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/attachments`,
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+      );
+      const data = await response.json();
+      if (data.attachments) setAttachments(data.attachments);
+    } catch (error) {
+      console.error("Error fetching attachments:", error);
+    }
+  };
+
+  const fetchTags = async (gameId: string) => {
+    try {
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/tags`,
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+      );
+      const data = await response.json();
+      if (data.tags) setTags(data.tags);
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+    }
+  };
+
   const activeGame = games.find((g) => g.id === selectedGame);
   const activeMeta = gameMeta[selectedGame];
   const activeName = activeGame?.name ?? activeMeta?.name ?? selectedGame;
@@ -124,7 +154,7 @@ export function GameSelector() {
 
   const metaLoadouts = loadouts
     .filter((l) => l.gameId === selectedGame)
-    .sort((a, b) => b.likes - a.likes)
+    .sort((a, b) => b.score - a.score)
     .slice(0, 6);
 
   const topWeapons = weapons.slice(0, 5);
@@ -263,6 +293,8 @@ export function GameSelector() {
                   key={l.id}
                   loadout={l}
                   weapons={weapons}
+                  attachments={attachments}
+                  tags={tags}
                   accent={accent}
                   gameShort={activeShort}
                   index={i}

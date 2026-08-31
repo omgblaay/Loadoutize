@@ -12,8 +12,7 @@ export function WeaponImage({ imageUrl, variant }: {  imageUrl?: string | null; 
 
   return (
     <div
-      className={getVariantClasses()}
-    >
+      className={getVariantClasses()}>
         <img src={imageUrl ?? undefined} alt="" className="w-full h-full object-contain p-2" />
     </div>
   );    

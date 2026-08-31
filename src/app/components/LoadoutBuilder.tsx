@@ -7,6 +7,8 @@ import { gameMeta } from "../utils/games";
 import { AppLayout } from "./AppLayout";
 import { ArrowLeft, Save, Check, Puzzle } from "lucide-react";
 import { WeaponTile } from "./ui/WeaponTile";
+import { Tag } from "./ui/tag";
+import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
 
 interface Weapon {
   imageUrl: string | null | undefined;
@@ -14,6 +16,7 @@ interface Weapon {
   name: string;
   type: string | null;
   typeShort: string | null;
+  categoryId: number | null;
   damage: number;
   fireRate: number;
 }
@@ -37,6 +40,21 @@ interface Perk {
 interface Equipment {
   id: number;
   name: string;
+}
+
+interface LoadoutTag {
+  id: number;
+  name: string;
+  color: string;
+  allowedWeaponCategoryIds: number[];
+}
+
+// What the API now returns per weapon slot on a loadout -- just the catalog
+// weapon id + chosen attachments. Full weapon details (name/type/image/etc.)
+// are resolved against the already-fetched catalog `weapons` list by id.
+interface LoadoutWeaponRef {
+  id: string;
+  attachments: Record<string, string>;
 }
 
 
@@ -66,6 +84,31 @@ export function Pill({
   );
 }
 
+function TagOption({
+  tag,
+  isSelected,
+  disabled,
+  onClick,
+}: {
+  tag: LoadoutTag;
+  isSelected: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={disabled ? "Not available for the weapon category(ies) in this loadout" : undefined}
+      className="transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+      style={isSelected ? { outline: `2px solid ${tag.color}`, outlineOffset: 2, borderRadius: 6 } : undefined}
+    >
+      <Tag color={tag.color}>{tag.name}</Tag>
+    </button>
+  );
+}
+
 export function LoadoutBuilder() {
   const { gameId = "mw4" } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
@@ -82,6 +125,9 @@ export function LoadoutBuilder() {
   const [selectedPerks, setSelectedPerks] = useState<string[]>([]);
   const [availableEquipment, setAvailableEquipment] = useState<Equipment[]>([]);
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
+  const [tags, setTags] = useState<LoadoutTag[]>([]);
+  const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
+  const [pendingWeaponRefs, setPendingWeaponRefs] = useState<LoadoutWeaponRef[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -97,6 +143,7 @@ export function LoadoutBuilder() {
       fetchAttachments();
       fetchPerks();
       fetchEquipment();
+      fetchTags();
       if (editId) {
         loadExistingLoadout();
       }
@@ -157,6 +204,19 @@ export function LoadoutBuilder() {
     }
   };
 
+  const fetchTags = async () => {
+    try {
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/tags`,
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+      );
+      const data = await response.json();
+      if (data.tags) setTags(data.tags);
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+    }
+  };
+
   const loadExistingLoadout = async () => {
     if (!accessToken) return;
 
@@ -170,11 +230,12 @@ export function LoadoutBuilder() {
       if (loadout) {
         setLoadoutName(loadout.name);
         setLoadoutDescription(loadout.description || "");
-        setSelectedWeapons(
-          (loadout.weapons || []).map((w: any) => ({ ...w, attachments: w.attachments ?? {} }))
+        setPendingWeaponRefs(
+          (loadout.weapons || []).map((w: any) => ({ id: w.id, attachments: w.attachments ?? {} }))
         );
         setSelectedPerks(loadout.perks || []);
         setSelectedEquipment(loadout.equipment || []);
+        setSelectedTagId(loadout.tagId ?? null);
       }
     } catch (error) {
       console.error("Error loading loadout:", error);
@@ -198,6 +259,7 @@ export function LoadoutBuilder() {
       weapons: selectedWeapons,
       perks: selectedPerks,
       equipment: selectedEquipment,
+      tagId: selectedTagId,
     };
 
     setSaving(true);
@@ -272,6 +334,43 @@ export function LoadoutBuilder() {
     }
   };
 
+  const isTagAllowed = (tag: LoadoutTag) => {
+    if (tag.allowedWeaponCategoryIds.length === 0) return true;
+    return selectedWeapons.every(
+      (w) => w.categoryId != null && tag.allowedWeaponCategoryIds.includes(w.categoryId)
+    );
+  };
+
+  const toggleTag = (tag: LoadoutTag) => {
+    setSelectedTagId((prev) => (prev === tag.id ? null : tag.id));
+  };
+
+  useEffect(() => {
+    if (selectedTagId == null) return;
+    const current = tags.find((t) => t.id === selectedTagId);
+    if (current && !isTagAllowed(current)) {
+      setSelectedTagId(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedWeapons, tags]);
+
+  // Resolves an in-edit loadout's weapon refs ({id, attachments}) into full
+  // SelectedWeapon objects once the catalog `weapons` list has loaded --
+  // fetchWeapons() and loadExistingLoadout() run in parallel, so this can't
+  // be done inline in loadExistingLoadout.
+  useEffect(() => {
+    if (pendingWeaponRefs == null || weapons.length === 0) return;
+    setSelectedWeapons(
+      pendingWeaponRefs
+        .map((ref) => {
+          const catalogWeapon = weapons.find((w) => w.id === ref.id);
+          return catalogWeapon ? { ...catalogWeapon, attachments: ref.attachments } : null;
+        })
+        .filter((w): w is SelectedWeapon => w !== null)
+    );
+    setPendingWeaponRefs(null);
+  }, [weapons, pendingWeaponRefs]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0a0909]">
@@ -295,13 +394,8 @@ export function LoadoutBuilder() {
       onGameSelect={(id) => navigate(`/${id}/create`)}
       breadcrumb={
         <>
-          <button
-            onClick={() => navigate(`/${gameId}/explore`)}
-            className="text-[#fafafa] hover:text-white transition-colors"
-          >
-            {meta.short}
-          </button>
-          <span className="text-[#5D5658]">/</span>
+          <BreadcrumbLink to={`/${gameId}/explore`}>{meta.short}</BreadcrumbLink>
+          <BreadcrumbSpacer />
           <span className="text-[#fafafa]">{editId ? "Edit Loadout" : "New Loadout"}</span>
         </>
       }
@@ -436,6 +530,28 @@ export function LoadoutBuilder() {
           )}
         </div>
       ))}
+
+      {tags.length > 0 && (
+        <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
+          <div className="flex items-center justify-between">
+            <p className="text-[16px] text-[#fafafa] font-semibold">Tag</p>
+            <span className="h-7 px-3 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] text-[#fafafa]">
+              {selectedTagId != null ? "1/1 selected" : "0/1 selected"}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <TagOption
+                key={tag.id}
+                tag={tag}
+                isSelected={selectedTagId === tag.id}
+                disabled={selectedTagId !== tag.id && !isTagAllowed(tag)}
+                onClick={() => toggleTag(tag)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
         <div className="flex items-center justify-between">

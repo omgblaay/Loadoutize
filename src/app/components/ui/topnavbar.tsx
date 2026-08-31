@@ -81,10 +81,12 @@ export function TopNavBar({
           <div className="flex-1" />
 
           <div className="flex items-center gap-4 shrink-0">
-            <button className="h-[52px] px-4 rounded-xl border border-white/[0.18] flex items-center gap-2 text-[#efedf1]">
-              <Heart className="w-4 h-4" />
-              <span>Favourites</span>
-            </button>
+            {user && (
+              <button className="h-[52px] px-4 rounded-xl border border-white/[0.18] flex items-center gap-2 text-[#efedf1]">
+                <Heart className="w-4 h-4" />
+                <span>Favourites</span>
+              </button>
+            )}
             <button
               onClick={() => (user ? navigate(`/${selectedGame}/create`) : setShowAuthModal(true))}
               className="h-[52px] px-4 rounded-xl border border-white/[0.08] bg-[#2a2829] flex items-center gap-2 text-[#efedf1]"
@@ -107,10 +109,9 @@ export function TopNavBar({
             ) : (
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center text-white"
-                style={{ backgroundImage: "linear-gradient(135deg, rgb(207,206,212) 0%, rgb(64,62,67) 100%)" }}
+                className="h-[52px] px-5 rounded-xl bg-[#efedf1] text-[#161414] font-medium flex items-center gap-2"
               >
-                HK
+                <span>Join</span>
               </button>
             )}
           </div>
