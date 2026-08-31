@@ -37,7 +37,7 @@ export interface CardTag {
   color: string;
 }
 
-const MAX_ATTACHMENT_ICONS = 6;
+const MAX_ATTACHMENT_ICONS = 10;
 
 
 function RatingRing({ percent, accent }: { percent: number | null; accent: string }) {
@@ -123,7 +123,7 @@ export function LoadoutCard({
         <div className="flex items-center justify-center gap-2 w-full">
 
           <Tag color={""}>{primaryWeaponData?.typeShort || gameShort}</Tag>
-          <p className="w-full font-mono text-secondary text-sm">{primaryWeapon}</p>
+          <p className="w-full font-mono text-body text-sm">{primaryWeapon}</p>
           <Tag color={loadout.tagId ? tags.find((t) => t.id === loadout.tagId)?.color : undefined}>
           {tag?.name}
           </Tag>
@@ -136,9 +136,9 @@ export function LoadoutCard({
           {attachmentIcons.map((a) => (
             <div
               key={a.id}
-              className="bg-gradient-to-b from-white/0 from-[60%] to-white/[0.08] border w-full border-white/[0.07] h-14 flex items-center justify-center"
+              className="bg-gradient-to-b from-white/0 from-[60%] to-white/[0.08] opacity-80 p-2 border w-full border-white/12 h-14 flex items-center justify-center"
             >
-              <img src={a.imageUrl ?? undefined} alt={a.name} className="size-6 object-contain" />
+              <img src={a.imageUrl ?? undefined} alt={a.name} className="max-size-6 object-contain" />
             </div>
           ))}
         </div>

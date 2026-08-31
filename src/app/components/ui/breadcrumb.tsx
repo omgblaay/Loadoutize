@@ -15,7 +15,7 @@ export function BreadcrumbLink({ to, className, children, ...props }: Breadcrumb
     <button
       type="button"
       onClick={() => navigate(to)}
-      className={cn("text-secondary hover:text-primary text-base transition-colors", className)}
+      className={cn("text-body hover:text-primary text-base transition-colors", className)}
       {...props}
     >
       {children}

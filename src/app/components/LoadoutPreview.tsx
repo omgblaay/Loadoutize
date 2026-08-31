@@ -11,6 +11,7 @@ import { WeaponImage } from "./ui/WeaponImage";
 import type { CardWeapon, CardTag, CardAttachment } from "./ui/LoadoutCard";
 import { Tag } from "./ui/tag";
 import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
+import { ReactionButton } from "./ui/reaction-button";
 import {
   Edit,
   Trash2,
@@ -22,6 +23,7 @@ import {
   Crosshair,
   Icon,
 } from "lucide-react";
+import * as React from "react";
 
 interface Weapon {
   id: string;
@@ -134,10 +136,11 @@ export function LoadoutPreview() {
     }
   };
 
-  const react = async (type: ReactionType) => {
+  /** Performs the reaction toggle and resolves to whether `type` is now active, for ReactionButton's success animation. */
+  const react = async (type: ReactionType): Promise<boolean> => {
     if (!accessToken) {
       alert("You must be logged in to react to loadouts");
-      return;
+      return false;
     }
     try {
       const response = await fetch(
@@ -148,12 +151,13 @@ export function LoadoutPreview() {
           body: JSON.stringify({ type }),
         }
       );
-      if (response.ok) {
-        const { loadout: updated } = await response.json();
-        setLoadout(updated);
-      }
+      if (!response.ok) return false;
+      const { loadout: updated } = await response.json();
+      setLoadout(updated);
+      return type === "like" ? updated.liked : type === "dislike" ? updated.disliked : updated.favorited;
     } catch (error) {
       console.error("Error reacting to loadout:", error);
+      return false;
     }
   };
 
@@ -267,7 +271,7 @@ export function LoadoutPreview() {
             >
               {primaryWeaponCatalog?.typeShort || meta.short}
             </Tag>
-            <p className="text-md font-semibold">
+            <p className="text-md text-body">
               {primaryWeaponCatalog?.name ?? loadout.name}
             </p>
           </div>
@@ -338,101 +342,76 @@ export function LoadoutPreview() {
               </div>
               <div className="flex-1 flex flex-col gap-2">
 
-            <h1 className="text-lg">{loadout.name}</h1>
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-5 h-5 rounded-full border border-[#3f3c3d]"
-                      style={{ backgroundImage: "linear-gradient(135deg, rgb(207,206,212), rgb(64,62,67))" }}
-                    />
-                    <span className="text-[12px] text-[#fafafa]">{loadout.userName}</span>
-                  </div>
-
+            <h1 className="text-lg wrap-anywhere">{loadout.name}</h1>
+                <div className="flex flex-wrap items-center text-sm gap-1.5">
+                   <span className="text-teritary">by</span> <span className=""> {loadout.userName}</span>
                 </div>
               </div>
             </div>
+          {loadout.tagId != null && (() => {
+            const tag = catalogTags.find((t) => t.id === loadout.tagId);
+            return tag ? <Tag color={tag.color}>{tag.name}</Tag> : null;
+          })()}
             {loadout.description && (
-              <p className="text-secondary">{loadout.description}</p>
+              <p className="text-body text-base">{loadout.description}</p>
             )}
 
             <div className="h-px w-full bg-white/[0.07]" />
-                <p className="text-teritary text-xs">
-                  How would you rate this loadout? Your rating will be reflected in the overall score and rating percentage.
+                <p className="text-teritary text-sm">
+                  How would you rate this loadout?
                 </p>
             <div className="flex items-center gap-3 flex-wrap">
-              <Button
+              <ReactionButton
+                icon={<ThumbsUp className="w-4 h-4" />}
+                label="Like"
+                count={loadout.likes}
+                active={loadout.liked}
+                accent="#01a059"
                 onClick={() => react("like")}
-                className="h-[52px] px-3 rounded-xl border flex items-center gap-2"
-                style={{
-                  background: loadout.liked ? "rgba(1,160,89,0.24)" : "rgba(1,160,89,0.12)",
-                  borderColor: "#01a059",
-                }}
-              >
-                <ThumbsUp className="w-4 h-4 text-[#fafafa]" fill={loadout.liked ? "#fafafa" : "none"} />
-                <span className="text-[14px] text-[#fafafa]">Upvote</span>
-                <span className="text-[14px] text-[#00e37e]">{loadout.likes}</span>
-              </Button>
-              <Button
+              />
+              <ReactionButton
+                icon={<ThumbsDown className="w-4 h-4" />}
+                label="Dislike"
+                count={loadout.dislikes}
+                active={loadout.disliked}
+                accent="#d00050"
                 onClick={() => react("dislike")}
-                className="h-[52px] px-4 rounded-xl border flex items-center gap-2"
-                style={{
-                  background: loadout.disliked ? "rgba(208,0,80,0.18)" : "transparent",
-                  borderColor: loadout.disliked ? "#d00050" : "rgba(255,255,255,0.18)",
-                }}
-              >
-                <ThumbsDown className="w-4 h-4 text-[#d00050]" fill={loadout.disliked ? "#d00050" : "none"} />
-                <span className="text-[14px] text-[#d00050]">{loadout.dislikes}</span>
-              </Button>
+              />
               <p className="text-[12px] text-[#8d898a]">Score: {loadout.score}</p>
-              <Button
-                onClick={() => react("favorite")}
-                className="h-[52px] px-4 rounded-xl border flex items-center gap-2 ml-auto"
-                style={{
-                  background: loadout.favorited ? "rgba(190,188,188,0.18)" : "transparent",
-                  borderColor: loadout.favorited ? "#bebcbc" : "rgba(255,255,255,0.18)",
-                }}
-              >
-                <Heart className="w-4 h-4 text-[#bebcbc]" fill={loadout.favorited ? "#bebcbc" : "none"} />
-                <span className="text-[14px] text-[#bebcbc]">
-                  {loadout.favorited ? "Favorited" : "Add to favorites"} ({loadout.favorites})
-                </span>
-              </Button>
+
             </div>
           </div>
 
           <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex items-center gap-5 flex-wrap">
             {qrDataUrl && <img src={qrDataUrl} alt="QR code linking to this loadout" className="w-[104px] h-[104px] shrink-0" />}
             <div className="flex-1 min-w-[200px] flex flex-col gap-3">
-              <p className="text-[12px] tracking-[0.5px] uppercase text-[#fafafa] font-medium">Share loadout</p>
+              <h3 className="text-[12px] tracking-[0.5px] uppercase text-[#fafafa] font-medium">Share loadout</h3>
               <p className="text-[12px] text-[#8d898a] break-all">{shareUrl}</p>
-              <button
+              <Button
                 onClick={downloadQr}
-                className="h-10 px-3.5 rounded-xl border border-white/[0.18] flex items-center gap-2 w-fit"
+                variant="outline"
               >
                 <Download className="w-4 h-4 text-[#fafafa]" />
                 <span className="text-[14px] text-[#fafafa]">Download QR</span>
                 <span className="text-[14px] text-[#bebcbc]">as PNG</span>
-              </button>
+              </Button>
             </div>
           </div>
 
           {canEdit && (
             <div className="flex items-center gap-3">
-              <button
+              <Button
                 onClick={() => navigate(`/${gameId}/create?edit=${loadoutId}`)}
-                className="h-11 px-4 rounded-xl flex items-center gap-2 text-[#161414] font-medium flex-1 justify-center"
-                style={{ background: accent }}
+                variant="secondary"
               >
                 <Edit className="w-4 h-4" />
                 Edit
-              </button>
-              <button
-                onClick={deleteLoadout}
-                className="h-11 px-4 rounded-xl border border-white/[0.18] hover:border-red-500 text-[#bebcbc] hover:text-red-500 flex items-center gap-2"
-              >
+              </Button>
+              <Button
+                onClick={deleteLoadout}>
                 <Trash2 className="w-4 h-4" />
                 Delete
-              </button>
+              </Button>
             </div>
           )}
         </div>

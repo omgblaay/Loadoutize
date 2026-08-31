@@ -24,6 +24,7 @@ interface Weapon {
   id: string;
   name: string;
   type: string | null;
+  typeShort: string | null;
 }
 
 // Shared with GameDashboard so the "no loadouts yet" empty state (and anywhere
@@ -91,7 +92,11 @@ export function AppLayout({
   const activeMeta = gameMeta[selectedGame];
   const ActiveIcon = activeMeta?.icon ?? Globe;
   const categories = Array.from(
-    new Set(weapons.map((w) => w.type).filter((t): t is string => Boolean(t)))
+    new Map(
+      weapons
+        .filter((w): w is Weapon & { type: string } => Boolean(w.type))
+        .map((w) => [w.type, { name: w.type, typeShort: w.typeShort }] as const)
+    ).values()
   ).slice(0, 6);
 
   const isHome = location.pathname === "/";

@@ -48,7 +48,7 @@ export function Tag({ color, icon, children, className, style, link, onClick, ..
   );
   const sharedStyle: React.CSSProperties = {
     fontFamily: "var(--font-mono)",
-    fontSize: "10px",
+    fontSize: "11px",
     lineHeight: 1,
     backgroundColor: color ? withAlpha(color, 0.2) : "rgba(255, 255, 255, 0.1)",
     borderColor: color ?? "rgba(255, 255, 255, 0.2)",
