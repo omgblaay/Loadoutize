@@ -101,6 +101,7 @@ export function AppLayout({
 
   const isHome = location.pathname === "/";
   const isExplore = location.pathname.endsWith("/explore");
+  const isMeta = location.pathname.endsWith("/meta");
 
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -130,27 +131,29 @@ export function AppLayout({
         setShowAuthModal={setShowAuthModal}
       />
 
-      {breadcrumb && (
-        <div className="w-full border-b border-white/[0.07]">
-          <div className="max-w-[1440px] mx-auto px-6 py-3 flex items-center gap-2 flex-wrap text-[14px] text-[#bebcbc]">
-            {breadcrumb}
-          </div>
-        </div>
-      )}
+
 
       {/* Body: Sidenav + content */}
-      <div className="max-w-[1440px] w-full mx-auto flex gap-6 px-6 py-6 flex-1">
+      <div className="max-w-[1440px] w-full mx-auto flex gap-6 px-6 pt-6 pb-20 sm:pb-6 flex-1">
         {/* Sidenav */}
-        <SideNav isHome={isHome} isExplore={isExplore} selectedGame={selectedGame} categories={categories} navigate={navigate} setShowAuthModal={setShowAuthModal} handleGameSelect={handleGameSelect} />
+        <SideNav isHome={isHome} isExplore={isExplore} isMeta={isMeta} selectedGame={selectedGame} categories={categories} navigate={navigate} setShowAuthModal={setShowAuthModal} handleGameSelect={handleGameSelect} />
 
         {/* Page content */}
-        <main className="flex-1 min-w-0 flex flex-col gap-6">{children}</main>
+        <main className="flex-1 min-w-0 flex flex-col gap-4">
+          {breadcrumb && (
+            <div className="w-full">
+              <div className="flex items-center gap-2 flex-wrap text-[14px] text-[#bebcbc]">
+                {breadcrumb}
+              </div>
+            </div>
+          )}
+          {children}</main>
       </div>
 
 
       {/* Footer */}
       <Footer handleGameSelect={handleGameSelect} navigate={navigate} selectedGame={selectedGame} orderedGames={orderedGames} gameMeta={gameMeta} />
-      
+
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} isOpen={showAuthModal} />}
     </div>
   );

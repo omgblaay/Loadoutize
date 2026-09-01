@@ -2,13 +2,20 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "./AuthContext";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
-import { getGameColor } from "../utils/gameColors";
 import { gameMeta } from "../utils/games";
 import { AppLayout } from "./AppLayout";
-import { ArrowLeft, Save, Check, Puzzle } from "lucide-react";
-import { WeaponTile } from "./ui/WeaponTile";
+import {
+  ArrowLeft,
+  Save,
+  Puzzle,
+  Search,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
+import { WeaponCard } from "./ui/WeaponCard";
 import { Tag } from "./ui/tag";
 import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
+import { FilterPill } from "./ui/filter-pill";
 
 interface Weapon {
   imageUrl: string | null | undefined;
@@ -30,6 +37,7 @@ interface Attachment {
   name: string;
   type: string;
   typeSlug: string;
+  typeImageUrl: string | null;
 }
 
 interface Perk {
@@ -57,16 +65,13 @@ interface LoadoutWeaponRef {
   attachments: Record<string, string>;
 }
 
-
 export function Pill({
   label,
   isSelected,
-  accent,
   onClick,
 }: {
   label: string;
   isSelected: boolean;
-  accent: string;
   onClick: () => void;
 }) {
   return (
@@ -75,7 +80,7 @@ export function Pill({
       className="h-11 px-4 rounded-xl border text-[14px] font-medium transition-colors text-left"
       style={
         isSelected
-          ? { background: accent, borderColor: accent, color: "#161414" }
+          ? { background: "#fafafa", borderColor: "#fafafa", color: "#161414" }
           : { borderColor: "rgba(255,255,255,0.18)", color: "#fafafa" }
       }
     >
@@ -118,6 +123,7 @@ export function LoadoutBuilder() {
 
   const [loadoutName, setLoadoutName] = useState("");
   const [loadoutDescription, setLoadoutDescription] = useState("");
+  const [gameLoadoutCode, setGameLoadoutCode] = useState("");
   const [weapons, setWeapons] = useState<Weapon[]>([]);
   const [selectedWeapons, setSelectedWeapons] = useState<SelectedWeapon[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -128,6 +134,9 @@ export function LoadoutBuilder() {
   const [tags, setTags] = useState<LoadoutTag[]>([]);
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
   const [pendingWeaponRefs, setPendingWeaponRefs] = useState<LoadoutWeaponRef[] | null>(null);
+  const [weaponTypeFilter, setWeaponTypeFilter] = useState<string | null>(null);
+  const [weaponSearchOpen, setWeaponSearchOpen] = useState(false);
+  const [weaponSearchQuery, setWeaponSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -230,6 +239,7 @@ export function LoadoutBuilder() {
       if (loadout) {
         setLoadoutName(loadout.name);
         setLoadoutDescription(loadout.description || "");
+        setGameLoadoutCode(loadout.gameLoadoutCode || "");
         setPendingWeaponRefs(
           (loadout.weapons || []).map((w: any) => ({ id: w.id, attachments: w.attachments ?? {} }))
         );
@@ -256,6 +266,7 @@ export function LoadoutBuilder() {
     const loadoutData = {
       name: loadoutName,
       description: loadoutDescription,
+      gameLoadoutCode: gameLoadoutCode.trim() || null,
       weapons: selectedWeapons,
       perks: selectedPerks,
       equipment: selectedEquipment,
@@ -298,8 +309,7 @@ export function LoadoutBuilder() {
       if (prev.some((w) => w.id === weapon.id)) {
         return prev.filter((w) => w.id !== weapon.id);
       }
-      if (prev.length >= 2) return prev;
-      return [...prev, { ...weapon, attachments: {} }];
+      return [{ ...weapon, attachments: {} }];
     });
   };
 
@@ -379,7 +389,6 @@ export function LoadoutBuilder() {
     );
   }
 
-  const accent = getGameColor(gameId).primary;
   const meta = gameMeta[gameId] ?? gameMeta.mw4;
 
   const attachmentsByType = attachments.reduce<Record<string, Attachment[]>>((acc, a) => {
@@ -387,6 +396,17 @@ export function LoadoutBuilder() {
     return acc;
   }, {});
   const attachmentTypes = Object.keys(attachmentsByType);
+
+  const weaponTypes = Array.from(new Set(weapons.map((w) => w.typeShort || w.type).filter((t): t is string => Boolean(t))));
+  const filteredWeapons = weapons.filter((weapon) => {
+    if (weaponTypeFilter && weapon.typeShort !== weaponTypeFilter && weapon.type !== weaponTypeFilter) {
+      return false;
+    }
+    if (weaponSearchQuery.trim() && !weapon.name.toLowerCase().includes(weaponSearchQuery.trim().toLowerCase())) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <AppLayout
@@ -420,8 +440,7 @@ export function LoadoutBuilder() {
           <button
             onClick={saveLoadout}
             disabled={saving}
-            className="h-[52px] px-5 rounded-xl flex items-center gap-2 text-[#161414] font-medium disabled:opacity-60"
-            style={{ background: accent }}
+            className="h-[52px] px-5 rounded-xl flex items-center gap-2 text-[#161414] font-medium disabled:opacity-60 bg-[#fafafa]"
           >
             <Save className="w-4 h-4" />
             {saving ? "Saving…" : editId ? "Update" : "Publish"}
@@ -430,7 +449,7 @@ export function LoadoutBuilder() {
       </div>
 
       <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
-        <p className="text-[16px] text-[#fafafa] font-semibold">Loadout details</p>
+        <h2 className="text-[16px] text-[#fafafa] font-semibold">Loadout details</h2>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
@@ -456,33 +475,102 @@ export function LoadoutBuilder() {
               className="rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 py-3 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors resize-none"
             />
           </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+              In-game loadout code (optional)
+            </label>
+            <input
+              type="text"
+              value={gameLoadoutCode}
+              onChange={(e) => setGameLoadoutCode(e.target.value)}
+              placeholder="Paste the loadout code from the game"
+              className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] font-mono text-[#fafafa] placeholder:text-[#8d898a] placeholder:font-sans outline-none focus:border-white/30 transition-colors"
+            />
+          </div>
+                  {tags.length > 0 && (
+          <div>
+            <label className="text-[12px] pb-2 tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+              Tag
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <TagOption
+                  key={tag.id}
+                  tag={tag}
+                  isSelected={selectedTagId === tag.id}
+                  disabled={selectedTagId !== tag.id && !isTagAllowed(tag)}
+                  onClick={() => toggleTag(tag)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
         </div>
       </div>
 
       <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
-        <div className="flex items-center justify-between">
-          <p className="text-[16px] text-[#fafafa] font-semibold">Weapons</p>
-          <span className="h-7 px-3 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] text-[#fafafa]">
-            {selectedWeapons.length}/2 selected
-          </span>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h2 className="text-[16px] text-[#fafafa] font-semibold">Select weapon</h2>
+
         </div>
+
+        {weaponSearchOpen && (
+          <input
+            type="text"
+            autoFocus
+            value={weaponSearchQuery}
+            onChange={(e) => setWeaponSearchQuery(e.target.value)}
+            placeholder="Search weapons by name..."
+            className="h-11 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
+          />
+        )}
+
+        {weaponTypes.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setWeaponSearchOpen((v) => !v);
+                if (weaponSearchOpen) setWeaponSearchQuery("");
+              }}
+              className="w-9 h-9 rounded-xl border border-white/[0.18] flex items-center justify-center text-[#fafafa] hover:bg-white/[0.05] transition-colors"
+              aria-label={weaponSearchOpen ? "Close search" : "Search weapons"}
+            >
+              {weaponSearchOpen ? <X className="w-4 h-4" /> : <Search className="size-4.5" />}
+            </button>
+
+          </div>
+            <FilterPill active={weaponTypeFilter === null} onClick={() => setWeaponTypeFilter(null)} size="sm">
+              All
+            </FilterPill>
+            {weaponTypes.map((type) => (
+              <FilterPill
+                key={type}
+                active={weaponTypeFilter === type}
+                onClick={() => setWeaponTypeFilter((prev) => (prev === type ? null : type))}
+                size="sm"
+              >
+                {type}
+              </FilterPill>
+            ))}
+          </div>
+        )}
+
         {weapons.length === 0 ? (
           <p className="text-[14px] text-[#8d898a]">No weapons available for this game yet.</p>
+        ) : filteredWeapons.length === 0 ? (
+          <p className="text-[14px] text-[#8d898a]">No weapons match your filters.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {weapons.map((weapon) => {
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredWeapons.map((weapon) => {
               const isSelected = selectedWeapons.some((w) => w.id === weapon.id);
               return (
-                <WeaponTile
+                <WeaponCard
                   key={weapon.id}
-                  weapon={{
-                    ...weapon,
-                    typeShort: weapon.typeShort ?? undefined,
-                    imageUrl: weapon.imageUrl ?? undefined,
-                  }}
-                  isSelected={isSelected}
-                  disabled={!isSelected && selectedWeapons.length >= 2}
-                  onToggle={() => toggleWeapon(weapon)}
+                  weapon={weapon}
+                  selected={isSelected}
+                  onSelect={() => toggleWeapon(weapon)}
                 />
               );
             })}
@@ -492,22 +580,23 @@ export function LoadoutBuilder() {
 
       {selectedWeapons.map((weapon) => (
         <div key={weapon.id} className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
-          <div className="flex items-center gap-3">
-            <span className="h-7 px-2.5 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] uppercase text-[#fafafa] tracking-[0.5px]">
-              {weapon.typeShort || "—"}
-            </span>
-            <p className="text-[16px] text-[#fafafa] font-semibold flex-1">{weapon.name} build</p>
-          </div>
+          <h2>Attachments</h2>
 
           {attachmentTypes.length === 0 ? (
             <p className="text-[14px] text-[#8d898a]">No attachments configured for this game yet.</p>
           ) : (
             <div className="flex flex-col gap-4">
-              {attachmentTypes.map((type) => (
+              {attachmentTypes.map((type) => {
+                const typeImageUrl = attachmentsByType[type][0]?.typeImageUrl;
+                return (
                 <div key={type} className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-md bg-white/[0.02] border border-white/[0.18] flex items-center justify-center shrink-0">
-                      <Puzzle className="w-3.5 h-3.5 text-[#8d898a]" />
+                    <div>
+                      {typeImageUrl ? (
+                        <img src={typeImageUrl} alt="" className="size-5 opacity-50 object-contain" />
+                      ) : (
+                        null
+                      )}
                     </div>
                     <p className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
                       {type}
@@ -519,40 +608,20 @@ export function LoadoutBuilder() {
                         key={att.id}
                         label={att.name}
                         isSelected={weapon.attachments[type] === att.name}
-                        accent={accent}
                         onClick={() => setWeaponAttachment(weapon.id, type, att.name)}
                       />
                     ))}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
       ))}
 
-      {tags.length > 0 && (
-        <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
-          <div className="flex items-center justify-between">
-            <p className="text-[16px] text-[#fafafa] font-semibold">Tag</p>
-            <span className="h-7 px-3 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] text-[#fafafa]">
-              {selectedTagId != null ? "1/1 selected" : "0/1 selected"}
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <TagOption
-                key={tag.id}
-                tag={tag}
-                isSelected={selectedTagId === tag.id}
-                disabled={selectedTagId !== tag.id && !isTagAllowed(tag)}
-                onClick={() => toggleTag(tag)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
+      { /* Perks and Equipment sections 
       <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <p className="text-[16px] text-[#fafafa] font-semibold">Perks</p>
@@ -569,7 +638,6 @@ export function LoadoutBuilder() {
                 key={perk.id}
                 label={perk.name}
                 isSelected={selectedPerks.includes(perk.name)}
-                accent={accent}
                 onClick={() => togglePerk(perk.name)}
               />
             ))}
@@ -593,13 +661,12 @@ export function LoadoutBuilder() {
                 key={equipment.id}
                 label={equipment.name}
                 isSelected={selectedEquipment.includes(equipment.name)}
-                accent={accent}
                 onClick={() => toggleEquipment(equipment.name)}
               />
             ))}
           </div>
         )}
-      </div>
+      </div>*/ }
     </AppLayout>
   );
 }

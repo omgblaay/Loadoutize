@@ -5,8 +5,10 @@ import { gameMeta } from "../utils/games";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout, useGameName } from "./AppLayout";
 import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, type CardTag } from "./ui/LoadoutCard";
-import { SlidersHorizontal, ArrowUpDown, ChevronDown, X } from "lucide-react";
+import { SlidersHorizontal, ArrowUpDown, ChevronDown, X, Globe } from "lucide-react";
 import { SearchBar } from "./ui/searchbar";
+import { NavIcon } from "./ui/nav-icon-3d";
+import { FilterPill } from "./ui/filter-pill";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -124,8 +126,9 @@ export function GameDashboard() {
       {/* Header: title + search */}
       <div className="flex items-center gap-5 w-full flex-wrap">
         <h1
-          className="text-3xl font-semibold bg-clip-text shrink-0"
+          className="text-3xl font-semibold bg-clip-text shrink-0 flex items-center gap-3"
         >
+          <NavIcon icon="explore" flat={<Globe className="w-7 h-7" />} active hovered={false} size={32} />
           Explore
         </h1>
         <SearchBar isExplore={false} value={searchQuery} onChange={setSearchQuery} />
@@ -185,15 +188,9 @@ export function GameDashboard() {
           {categories.map((cat) => {
             const active = activeCategory === cat;
             return (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(active ? null : cat)}
-                className={`h-8 px-3 rounded-xl text-[14px] ${
-                  active ? "bg-[#2a2829] text-[#fafafa]" : "text-[#8d898a] hover:text-[#fafafa]"
-                }`}
-              >
+              <FilterPill key={cat} active={active} onClick={() => setActiveCategory(active ? null : cat)} size="sm">
                 {cat}
-              </button>
+              </FilterPill>
             );
           })}
         </div>
@@ -208,7 +205,7 @@ export function GameDashboard() {
               : "No loadouts match your filters."}
           </p>
           {hasActiveFilters && (
-            <button onClick={clearFilters} className="mt-3 text-[14px]" style={{ color: accent }}>
+            <button onClick={clearFilters} className="mt-3 text-[14px] text-[#fafafa]">
               Clear filters
             </button>
           )}

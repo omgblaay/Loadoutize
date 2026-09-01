@@ -6,7 +6,7 @@ import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "./AppLayout";
 import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, type CardTag } from "./ui/LoadoutCard";
 import { ChevronRight, Crosshair, Flame, Sparkles, Youtube, Twitch, Video, Music2 } from "lucide-react";
-import { WeaponImage } from "./ui/WeaponImage";
+import { WeaponCard } from "./ui/WeaponCard";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -157,7 +157,7 @@ export function GameSelector() {
     .sort((a, b) => b.score - a.score)
     .slice(0, 6);
 
-  const topWeapons = weapons.slice(0, 5);
+  const topWeapons = weapons.slice(0, 4);
 
   if (loading) {
     return (
@@ -249,27 +249,27 @@ export function GameSelector() {
       {/* Top weapons + popular loadouts */}
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
-          <p className="text-[16px] text-[#fafafa] font-semibold flex items-center gap-2">
-            <Flame className="w-4 h-4" style={{ color: accent }} />
-            Top 5 weapons
-          </p>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-[16px] text-[#fafafa] font-semibold flex items-center gap-2">
+              <Flame className="w-4 h-4" style={{ color: accent }} />
+              Top Weapons in {activeName} 
+            </h2>
+            <button
+              onClick={() => navigate(`/${selectedGame}/meta`)}
+              className="text-[14px] text-[#8d898a] hover:text-[#fafafa] flex items-center gap-1 shrink-0"
+            >
+              View full Meta
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
           {topWeapons.length > 0 ? (
-            <div className="flex flex-row flex-wrap gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {topWeapons.map((w) => (
-                <button
+                <WeaponCard
                   key={w.id}
-                  onClick={() => navigate(`/${selectedGame}/explore?weapon=${encodeURIComponent(w.name)}`)}
-                  className="flex-1 max-w-sm min-w-xs rounded-xl border border-white/[0.18] p-4 flex flex-col items-center gap-3 text-left hover:border-white/[0.32]"
-                  style={{ backgroundImage: "linear-gradient(180deg, rgb(64,49,57) 0%, rgba(64,49,57,0) 20%), #201e1f" }}
-                >
-                  <div className="w-full h-16 rounded-lg flex items-center justify-center overflow-hidden">
-                  <WeaponImage variant="small" imageUrl={w.imageUrl} />
-                  </div>
-                  <div className="flex items-center gap-2 w-full">
-
-                    <span className="text-[14px] text-[#fafafa] font-semibold flex-1">{w.name}</span>
-                  </div>
-                </button>
+                  weapon={w}
+                  onSelect={() => navigate(`/${selectedGame}/explore?weapon=${encodeURIComponent(w.name)}`)}
+                />
               ))}
             </div>
           ) : (
@@ -281,10 +281,7 @@ export function GameSelector() {
 
         <div className="flex flex-col gap-4">
           <div>
-            <p className="text-[16px] text-[#fafafa] font-semibold">Most popular loadouts</p>
-            <p className="text-[14px] text-[#8d898a]">
-              Class setups from the latest patch that are currently dominating the game.
-            </p>
+            <h2 className="text-[16px] text-[#fafafa] font-semibold">Recent Loadouts</h2>
           </div>
           {metaLoadouts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">

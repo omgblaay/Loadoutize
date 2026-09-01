@@ -2,6 +2,7 @@ import * as React from "react";
 import { useNavigate } from "react-router";
 
 import { cn } from "./utils";
+import { AppTooltip } from "./tooltip";
 
 function hexToRgb(hex: string): [number, number, number] {
   const normalized = hex.replace("#", "");
@@ -35,9 +36,15 @@ export interface TagProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: React.ReactNode;
   /** Internal route path (e.g. `/mw4/explore?category=SMG`). When set, the tag becomes clickable and navigates there. */
   link?: string;
+  /** Text shown in the shared black tooltip on hover. */
+  tooltip?: React.ReactNode;
+  tooltipSide?: "top" | "right" | "bottom" | "left";
 }
 
-export function Tag({ color, icon, children, className, style, link, onClick, ...props }: TagProps) {
+export const Tag = React.forwardRef<HTMLElement, TagProps>(function Tag(
+  { color, icon, children, className, style, link, onClick, tooltip, tooltipSide, ...props },
+  ref,
+) {
   const navigate = useNavigate();
 
   const sharedClassName = cn(
@@ -62,26 +69,35 @@ export function Tag({ color, icon, children, className, style, link, onClick, ..
     </>
   );
 
-  if (link) {
-    return (
-      <button
-        type="button"
-        className={sharedClassName}
-        style={sharedStyle}
-        onClick={(e) => {
-          onClick?.(e as unknown as React.MouseEvent<HTMLSpanElement>);
-          navigate(link);
-        }}
-        {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
-      >
-        {content}
-      </button>
-    );
-  }
-
-  return (
-    <span className={sharedClassName} style={sharedStyle} onClick={onClick} {...props}>
+  const tag = link ? (
+    <button
+      ref={ref as React.Ref<HTMLButtonElement>}
+      type="button"
+      className={sharedClassName}
+      style={sharedStyle}
+      onClick={(e) => {
+        onClick?.(e as unknown as React.MouseEvent<HTMLSpanElement>);
+        navigate(link);
+      }}
+      {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+    >
+      {content}
+    </button>
+  ) : (
+    <span
+      ref={ref as React.Ref<HTMLSpanElement>}
+      className={sharedClassName}
+      style={sharedStyle}
+      onClick={onClick}
+      {...props}
+    >
       {content}
     </span>
   );
-}
+
+  return (
+    <AppTooltip content={tooltip} side={tooltipSide}>
+      {tag}
+    </AppTooltip>
+  );
+});

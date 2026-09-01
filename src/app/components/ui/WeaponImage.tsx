@@ -2,18 +2,18 @@ export function WeaponImage({ imageUrl, variant }: {  imageUrl?: string | null; 
     const getVariantClasses = () => {
         switch (variant) {
             case "small":
-                return "w-[14rem] aspect-[2/1] rounded-xl flex items-center justify-center shrink-0 overflow-hidden";
+                return "max-w-[14rem]";
             case "large":
-                return "w-full aspect-[2/1] rounded-xl flex items-center justify-center shrink-0 overflow-hidden";
+                return "max-w-[32rem]";
             default:
-                return "w-full aspect-[2/1] rounded-xl flex items-center justify-center shrink-0 overflow-hidden";
+                return "max-w-[22rem]";
         }
     };
 
   return (
     <div
       className={getVariantClasses()}>
-        <img src={imageUrl ?? undefined} alt="" className="w-full h-full object-contain p-2" />
+        <img src={imageUrl ?? undefined} alt="" className="flex aspect-[2/1] w-full items-center justify-center object-fit" />
     </div>
   );    
 }

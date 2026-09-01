@@ -124,6 +124,7 @@
   --font-sans: 'Aspekta', ui-sans-serif, system-ui, sans-serif;
   --font-heading: 'BBH Bartle', 'Aspekta', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-handwritten: 'Kabur', cursive;
 }
 
 @layer base {

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "
 import { AuthProvider } from "./components/AuthContext";
 import { GameSelector } from "./components/GameSelector";
 import { GameDashboard } from "./components/GameDashboard";
+import { MetaView } from "./components/MetaView";
 import { LoadoutBuilder } from "./components/LoadoutBuilder";
 import { LoadoutPreview } from "./components/LoadoutPreview";
 import { WeaponConfigPreview } from "./components/WeaponConfigPreview";
@@ -41,6 +42,14 @@ export default function App() {
             element={
               <GameLock>
                 <GameDashboard />
+              </GameLock>
+            }
+          />
+          <Route
+            path="/:gameId/meta"
+            element={
+              <GameLock>
+                <MetaView />
               </GameLock>
             }
           />

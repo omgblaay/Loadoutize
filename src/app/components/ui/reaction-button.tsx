@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "./utils";
+import { AppTooltip } from "./tooltip";
 
 function hexToRgb(hex: string): [number, number, number] {
   const normalized = hex.replace("#", "");
@@ -46,9 +47,18 @@ export interface ReactionButtonProps {
   onClick: () => Promise<boolean>;
   disabled?: boolean;
   className?: string;
+  /** Stretch to the parent's width (e.g. a 50/50 button row) instead of sizing to content. Still collapses to the fixed-size spinner circle while loading. */
+  fillWidth?: boolean;
+  /** Squares off the pill's corners -- e.g. when the button is a full-bleed edge of its container. */
+  square?: boolean;
+  /** Only draws the top border -- e.g. when the button is a full-bleed edge and the container's own border already covers the other sides. */
+  borderTopOnly?: boolean;
+  /** Text shown in the shared black tooltip on hover. */
+  tooltip?: React.ReactNode;
+  tooltipSide?: "top" | "right" | "bottom" | "left";
 }
 
-export function ReactionButton({
+export const ReactionButton = React.forwardRef<HTMLButtonElement, ReactionButtonProps>(function ReactionButton({
   icon,
   label,
   count,
@@ -57,7 +67,12 @@ export function ReactionButton({
   onClick,
   disabled,
   className,
-}: ReactionButtonProps) {
+  fillWidth,
+  square,
+  borderTopOnly,
+  tooltip,
+  tooltipSide,
+}, ref) {
   const [phase, setPhase] = React.useState<Phase>("idle");
   const [isHovered, setIsHovered] = React.useState(false);
   const measureRef = React.useRef<HTMLSpanElement>(null);
@@ -91,7 +106,9 @@ export function ReactionButton({
   const isLoading = phase === "loading";
   const isDisabled = disabled || isLoading;
 
-  const width = isLoading ? HEIGHT : idleWidth ?? undefined;
+  // fillWidth buttons hold their 50/50 share through the loading state too --
+  // only content-sized buttons collapse to the circle while a request is in flight.
+  const width = fillWidth ? "100%" : isLoading ? HEIGHT : idleWidth ?? undefined;
 
   const baseRgb = hexToRgb(accent);
   // Hovering brightens whichever accent-derived color is currently showing --
@@ -108,7 +125,9 @@ export function ReactionButton({
   const buttonColor = showAccent || isHovered ? rgba(effectiveRgb, 1) : "#fafafa";
 
   return (
+    <AppTooltip content={tooltip} side={tooltipSide}>
     <button
+      ref={ref}
       type="button"
       disabled={isDisabled}
       onClick={handleClick}
@@ -121,9 +140,11 @@ export function ReactionButton({
         cursor: isDisabled ? "default" : "pointer",
         height: HEIGHT,
         width,
-        borderRadius: HEIGHT / 2,
+        borderRadius: square ? 0 : HEIGHT / 2,
         background: buttonBg,
-        border: `1px solid ${buttonBorder}`,
+        ...(borderTopOnly
+          ? { borderTop: `1px solid ${buttonBorder}` }
+          : { border: `1px solid ${buttonBorder}` }),
         color: buttonColor,
         display: "flex",
         alignItems: "center",
@@ -131,8 +152,8 @@ export function ReactionButton({
         position: "relative",
         overflow: "hidden",
         transition: prefersReducedMotion
-          ? "width 0.001ms, background 0.001ms, border-color 0.001ms, color 0.001ms"
-          : "width 0.38s cubic-bezier(0.4, 0, 0.2, 1), background 0.28s ease, border-color 0.28s ease, color 0.28s ease",
+          ? `width 0.001ms, background 0.001ms, ${borderTopOnly ? "border-top-color" : "border-color"} 0.001ms, color 0.001ms`
+          : `width 0.38s cubic-bezier(0.4, 0, 0.2, 1), background 0.28s ease, ${borderTopOnly ? "border-top-color" : "border-color"} 0.28s ease, color 0.28s ease`,
       }}
     >
       {/* Idle / resting-active label */}
@@ -179,5 +200,7 @@ export function ReactionButton({
         }
       `}</style>
     </button>
+    </AppTooltip>
   );
-}
+});
+ReactionButton.displayName = "ReactionButton";

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { WeaponImage } from "./WeaponImage";
 import { Tag } from "./tag";
+import { RatingRing } from "./rating-ring";
 
 export interface CardLoadout {
   id: string;
@@ -40,32 +41,6 @@ export interface CardTag {
 const MAX_ATTACHMENT_ICONS = 10;
 
 
-function RatingRing({ percent, accent }: { percent: number | null; accent: string }) {
-  if (percent == null) {
-    return (
-      <div
-        className="relative shrink-0 size-14 rounded-full flex items-center justify-center"
-        style={{ background: "rgba(255,255,255,0.1)" }}
-      >
-        <div className="absolute inset-[3px] rounded-full bg-[#201e1f] border border-white/5 flex items-center justify-center">
-          <span className="text-[10px] font-semibold text-teritary tracking-[-0.3px]">New</span>
-        </div>
-      </div>
-    );
-  }
-  const color = percent >= 90 ? "#36D27A" : percent >= 70 ? accent : "#FF4D63";
-  return (
-    <div
-      className="relative shrink-0 size-14 rounded-full flex items-center justify-center"
-      style={{ background: `conic-gradient(${color} ${percent * 3.6}deg, rgba(255,255,255,0.1) 0deg)` }}
-    >
-      <div className="absolute inset-[3px] rounded-full bg-[#201e1f] border border-white/5 flex items-center justify-center">
-        <span className="text-[11px] font-semibold text-white tracking-[-0.3px]">{percent}%</span>
-      </div>
-    </div>
-  );
-}
-
 export function LoadoutCard({
   loadout,
   weapons,
@@ -95,6 +70,14 @@ export function LoadoutCard({
     .slice(0, MAX_ATTACHMENT_ICONS);
   const tag = loadout.tagId != null ? tags.find((t) => t.id === loadout.tagId) : undefined;
   const glowColor = tag?.color ?? accent;
+  const ratingColor =
+    loadout.ratingPercent == null
+      ? accent
+      : loadout.ratingPercent >= 90
+        ? "#36D27A"
+        : loadout.ratingPercent >= 70
+          ? accent
+          : "#FF4D63";
 
   return (
     <button
@@ -110,17 +93,29 @@ export function LoadoutCard({
       />
 
       <div className="relative flex p-4 items-start gap-[9px] w-full">
-        <RatingRing percent={loadout.ratingPercent} accent={accent} />
+        <RatingRing
+          percent={loadout.ratingPercent}
+          color={ratingColor}
+          size={56}
+          innerClassName="border border-white/5"
+          labelClassName={
+            loadout.ratingPercent == null ? "text-[10px] text-teritary" : "text-[11px] text-white"
+          }
+          fallbackLabel="New"
+        />
         <div className="flex-1 min-w-0 flex flex-col gap-0 justify-center">
           <p className="text-lg font-semibold">{loadout.name}</p>
           <p className="text-sm text-teritary truncate">{loadout.description}</p>
         </div>
       </div>
+      <div className="h-full flex items-center justify-center" >
+        <WeaponImage imageUrl={primaryWeaponData?.imageUrl} variant="small" />
+        </div>
+      <div className="p-4 pt-0 flex flex-col items-center w-full">
 
-      <div className="px-4 pb-4 flex flex-col items-center w-full">
 
-          <WeaponImage imageUrl={primaryWeaponData?.imageUrl} variant="small" />
-        <div className="flex items-center justify-center gap-2 w-full">
+        
+        <div className="flex mt-2 items-center justify-center gap-2 w-full">
 
           <Tag color={""}>{primaryWeaponData?.typeShort || gameShort}</Tag>
           <p className="w-full font-mono text-body text-sm">{primaryWeapon}</p>

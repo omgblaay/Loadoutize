@@ -178,11 +178,11 @@ app.get("/make-server-6db475c7/games/:gameId/attachments", async (c) => {
     const gameId = c.req.param("gameId");
     const { data, error } = await supabase
       .from('attachments_with_images')
-      .select('id, name, description, stats, image, type_name, type_slug')
+      .select('id, name, description, stats, image, type_name, type_slug, type_image')
       .eq('game_id', gameId);
     if (error) throw error;
 
-    const urlById = await resolveImageUrls((data ?? []).map((a: any) => a.image));
+    const urlById = await resolveImageUrls((data ?? []).flatMap((a: any) => [a.image, a.type_image]));
     const attachments = (data ?? []).map((a: any) => ({
       id: a.id,
       name: a.name,
@@ -191,6 +191,7 @@ app.get("/make-server-6db475c7/games/:gameId/attachments", async (c) => {
       type: a.type_name,
       typeSlug: a.type_slug,
       imageUrl: a.image ? urlById.get(a.image) ?? null : null,
+      typeImageUrl: a.type_image ? urlById.get(a.type_image) ?? null : null,
     }));
     return c.json({ attachments });
   } catch (error) {
@@ -441,6 +442,7 @@ function mapLoadout(l: any, viewerId?: string | null) {
     userName: l.user_name,
     name: l.name,
     description: l.description,
+    gameLoadoutCode: l.game_loadout_code ?? null,
     weapons,
     perks,
     equipment,
@@ -630,6 +632,7 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
         user_name: user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous',
         name: body.name,
         description: body.description || '',
+        game_loadout_code: body.gameLoadoutCode || null,
         tag_id: tagId,
       })
       .select()
@@ -688,6 +691,7 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
       .update({
         name: body.name,
         description: body.description ?? '',
+        game_loadout_code: body.gameLoadoutCode || null,
         tag_id: tagId,
         updated_at: new Date().toISOString(),
       })

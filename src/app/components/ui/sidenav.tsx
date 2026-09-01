@@ -2,6 +2,8 @@ import { useState } from "react";
 import { HomeIcon, Globe, Flame, Crown, Zap, Menu, X } from "lucide-react";
 import { SideNavButton } from "./sidenav-button";
 import { SearchBar } from "./searchbar";
+import { AppTooltip } from "./tooltip";
+import { NavIcon, type NavIconKey } from "./nav-icon-3d";
 
 export interface SideNavCategory {
   name: string;
@@ -11,6 +13,7 @@ export interface SideNavCategory {
 export function SideNav({
   isHome,
   isExplore,
+  isMeta,
   selectedGame,
   categories,
   navigate,
@@ -19,6 +22,7 @@ export function SideNav({
 }: {
   isHome: boolean;
   isExplore: boolean;
+  isMeta: boolean;
   selectedGame: string;
   categories: SideNavCategory[];
   navigate: (path: string) => void;
@@ -26,6 +30,14 @@ export function SideNav({
   setShowAuthModal: (show: boolean) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  // Shared between the full menu and the icon rail -- only one of the two
+  // layouts is ever hit-testable at a given viewport width (the other is
+  // `hidden`), so one hover key covers both without cross-wiring.
+  const [hoveredIcon, setHoveredIcon] = useState<NavIconKey | null>(null);
+  const hoverHandlers = (key: NavIconKey) => ({
+    onMouseEnter: () => setHoveredIcon(key),
+    onMouseLeave: () => setHoveredIcon((h) => (h === key ? null : h)),
+  });
 
   // Shared by the full menu (xl+, and inside the overlay below xl) so both
   // stay in sync -- closes the overlay after navigating, a no-op when it's
@@ -37,24 +49,29 @@ export function SideNav({
 
   const fullMenu = (
     <>
-      <SearchBar isExplore={isExplore} />
+      {/*  <SearchBar isExplore={isExplore} /> Search bar is only shown in the full menu, not the icon rail below xl */}
+
 
       <div className="flex flex-col gap-1 w-full">
         <p className="text-[10px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold mb-2">Menu</p>
-        <SideNavButton state={isHome ? "active" : "default"} onClick={() => go("/")}>
-          <HomeIcon className="w-5 h-5" />
+        <SideNavButton state={isHome ? "active" : "default"} onClick={() => go("/")} {...hoverHandlers("home")}>
+          <NavIcon icon="home" flat={<HomeIcon className="w-5 h-5" />} active={isHome} hovered={hoveredIcon === "home"} />
           Home
         </SideNavButton>
-        <SideNavButton state={isExplore ? "active" : "default"} onClick={() => go(`/${selectedGame}/explore`)}>
-          <Globe className="w-5 h-5" />
+        <SideNavButton
+          state={isExplore ? "active" : "default"}
+          onClick={() => go(`/${selectedGame}/explore`)}
+          {...hoverHandlers("explore")}
+        >
+          <NavIcon icon="explore" flat={<Globe className="w-5 h-5" />} active={isExplore} hovered={hoveredIcon === "explore"} />
           Explore
         </SideNavButton>
-        <SideNavButton>
-          <Flame className="w-5 h-5" />
+        <SideNavButton {...hoverHandlers("trending")}>
+          <NavIcon icon="trending" flat={<Flame className="w-5 h-5" />} active={false} hovered={hoveredIcon === "trending"} />
           Trending
         </SideNavButton>
-        <SideNavButton>
-          <Crown className="w-5 h-5" />
+        <SideNavButton state={isMeta ? "active" : "default"} onClick={() => go(`/${selectedGame}/meta`)} {...hoverHandlers("meta")}>
+          <NavIcon icon="meta" flat={<Crown className="w-5 h-5" />} active={isMeta} hovered={hoveredIcon === "meta"} />
           Meta
         </SideNavButton>
       </div>
@@ -105,62 +122,127 @@ export function SideNav({
       {/* Full menu, shown in-flow at xl (1280px) and up */}
       <aside className="hidden xl:flex flex-col gap-6 w-[320px] shrink-0">{fullMenu}</aside>
 
-      {/* Icon-only rail, below xl: nav links as icons, "Best of" as typeShort, no search */}
-      <aside className="flex xl:hidden flex-col items-center gap-4 w-[72px] shrink-0">
-        <button
-          onClick={() => setExpanded(true)}
-          title="Show full menu"
-          aria-label="Show full menu"
-          className="min-h-10 w-11 rounded-xl flex items-center justify-center text-[#8d898a] hover:text-[#fafafa] hover:bg-white/[0.05]"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+      {/* Icon-only rail, sm-xl: nav links as icons, "Best of" as typeShort, no search. Below sm, the bottom bar takes over instead. */}
+      <aside className="hidden sm:flex xl:hidden flex-col items-center gap-4 w-[72px] shrink-0">
+        <AppTooltip content="Show full menu" side="right">
+          <button
+            onClick={() => setExpanded(true)}
+            aria-label="Show full menu"
+            className="min-h-10 w-11 rounded-xl flex items-center justify-center text-[#8d898a] hover:text-[#fafafa] hover:bg-white/[0.05]"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        </AppTooltip>
 
         <div className="flex flex-col items-center gap-1 w-full">
           <SideNavButton
             state={isHome ? "active" : "default"}
             onClick={() => go("/")}
             className="justify-center px-0 w-11"
-            title="Home"
+            tooltip="Home"
             aria-label="Home"
+            {...hoverHandlers("home")}
           >
-            <HomeIcon className="w-5 h-5" />
+            <NavIcon icon="home" flat={<HomeIcon className="w-5 h-5" />} active={isHome} hovered={hoveredIcon === "home"} />
           </SideNavButton>
           <SideNavButton
             state={isExplore ? "active" : "default"}
             onClick={() => go(`/${selectedGame}/explore`)}
             className="justify-center px-0 w-11"
-            title="Explore"
+            tooltip="Explore"
             aria-label="Explore"
+            {...hoverHandlers("explore")}
           >
-            <Globe className="w-5 h-5" />
+            <NavIcon icon="explore" flat={<Globe className="w-5 h-5" />} active={isExplore} hovered={hoveredIcon === "explore"} />
           </SideNavButton>
-          <SideNavButton className="justify-center px-0 w-11" title="Trending" aria-label="Trending">
-            <Flame className="w-5 h-5" />
+          <SideNavButton className="justify-center px-0 w-11" tooltip="Trending" aria-label="Trending" {...hoverHandlers("trending")}>
+            <NavIcon icon="trending" flat={<Flame className="w-5 h-5" />} active={false} hovered={hoveredIcon === "trending"} />
           </SideNavButton>
-          <SideNavButton className="justify-center px-0 w-11" title="Meta" aria-label="Meta">
-            <Crown className="w-5 h-5" />
+          <SideNavButton
+            state={isMeta ? "active" : "default"}
+            onClick={() => go(`/${selectedGame}/meta`)}
+            className="justify-center px-0 w-11"
+            tooltip="Meta"
+            aria-label="Meta"
+            {...hoverHandlers("meta")}
+          >
+            <NavIcon icon="meta" flat={<Crown className="w-5 h-5" />} active={isMeta} hovered={hoveredIcon === "meta"} />
           </SideNavButton>
         </div>
 
         {categories.length > 0 && (
           <div className="flex flex-col items-center gap-1 w-full">
             {categories.map((cat) => (
-              <button
-                key={cat.name}
-                onClick={() => go(`/${selectedGame}/explore?category=${encodeURIComponent(cat.name)}`)}
-                title={cat.name}
-                aria-label={cat.name}
-                className="min-h-10 w-11 rounded-xl flex items-center justify-center text-[#fafafa] uppercase text-[11px] font-semibold hover:bg-white/[0.05]"
-              >
-                {cat.typeShort ?? cat.name.slice(0, 3)}
-              </button>
+              <AppTooltip key={cat.name} content={cat.name} side="right">
+                <button
+                  onClick={() => go(`/${selectedGame}/explore?category=${encodeURIComponent(cat.name)}`)}
+                  aria-label={cat.name}
+                  className="min-h-10 w-11 rounded-xl flex items-center justify-center text-[#fafafa] uppercase text-[11px] font-semibold hover:bg-white/[0.05]"
+                >
+                  {cat.typeShort ?? cat.name.slice(0, 3)}
+                </button>
+              </AppTooltip>
             ))}
           </div>
         )}
       </aside>
 
-      {/* Full menu overlay, opened from the icon rail below xl */}
+      {/* Bottom tab bar, below sm: primary nav links + a "More" tab for categories/join, reusing the same overlay */}
+      <nav
+        className="sm:hidden fixed inset-x-0 bottom-0 z-40 bg-[#0a0909] border-t border-white/[0.08] pb-[env(safe-area-inset-bottom)]"
+        aria-label="Primary"
+      >
+        <div className="grid grid-cols-5 h-14">
+          <button
+            onClick={() => go("/")}
+            aria-label="Home"
+            aria-current={isHome ? "page" : undefined}
+            className={`flex flex-col items-center justify-center gap-0.5 ${isHome ? "text-[#fafafa]" : "text-[#8d898a]"}`}
+            {...hoverHandlers("home")}
+          >
+            <NavIcon icon="home" flat={<HomeIcon className="w-5 h-5" />} active={isHome} hovered={hoveredIcon === "home"} />
+            <span className="text-[9px] uppercase tracking-[0.3px] font-medium">Home</span>
+          </button>
+          <button
+            onClick={() => go(`/${selectedGame}/explore`)}
+            aria-label="Explore"
+            aria-current={isExplore ? "page" : undefined}
+            className={`flex flex-col items-center justify-center gap-0.5 ${isExplore ? "text-[#fafafa]" : "text-[#8d898a]"}`}
+            {...hoverHandlers("explore")}
+          >
+            <NavIcon icon="explore" flat={<Globe className="w-5 h-5" />} active={isExplore} hovered={hoveredIcon === "explore"} />
+            <span className="text-[9px] uppercase tracking-[0.3px] font-medium">Explore</span>
+          </button>
+          <button
+            aria-label="Trending"
+            className="flex flex-col items-center justify-center gap-0.5 text-[#8d898a]"
+            {...hoverHandlers("trending")}
+          >
+            <NavIcon icon="trending" flat={<Flame className="w-5 h-5" />} active={false} hovered={hoveredIcon === "trending"} />
+            <span className="text-[9px] uppercase tracking-[0.3px] font-medium">Trending</span>
+          </button>
+          <button
+            onClick={() => go(`/${selectedGame}/meta`)}
+            aria-label="Meta"
+            aria-current={isMeta ? "page" : undefined}
+            className={`flex flex-col items-center justify-center gap-0.5 ${isMeta ? "text-[#fafafa]" : "text-[#8d898a]"}`}
+            {...hoverHandlers("meta")}
+          >
+            <NavIcon icon="meta" flat={<Crown className="w-5 h-5" />} active={isMeta} hovered={hoveredIcon === "meta"} />
+            <span className="text-[9px] uppercase tracking-[0.3px] font-medium">Meta</span>
+          </button>
+          <button
+            onClick={() => setExpanded(true)}
+            aria-label="More"
+            className="flex flex-col items-center justify-center gap-0.5 text-[#8d898a]"
+          >
+            <Menu className="w-5 h-5" />
+            <span className="text-[9px] uppercase tracking-[0.3px] font-medium">More</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Full menu overlay, opened from the icon rail below xl, or the More tab below sm */}
       {expanded && (
         <div className="xl:hidden fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-black/60" onClick={() => setExpanded(false)} />

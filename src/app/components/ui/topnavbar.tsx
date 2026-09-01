@@ -4,6 +4,7 @@ import { ChevronDown, Globe, Heart, LogOut, Star } from "lucide-react";
 import { useAuth } from "../AuthContext";
 import { gameMeta } from "@/app/utils/games";
 import { Logo } from "./logo";
+import { NavIcon } from "./nav-icon-3d";
 
 export function TopNavBar({
   activeLogoUrl,
@@ -24,6 +25,7 @@ export function TopNavBar({
   const { logout } = useAuth();
 
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
+  const [favouritesHovered, setFavouritesHovered] = useState(false);
 
   const activeMeta = gameMeta[selectedGame];
   const activeName = orderedGames.find((g) => g.id === selectedGame)?.name ?? activeMeta?.name ?? selectedGame;
@@ -34,7 +36,7 @@ export function TopNavBar({
             <a href="/" className="flex items-center gap-1.5">
               <Logo />
             </a>
-            <span className="text-[#5D5658] px-1">/</span>
+            {/*<span className="text-[#5D5658] px-1">/</span>
             <div className="relative">
               <button
                 onClick={() => setGameMenuOpen((v) => !v)}
@@ -76,14 +78,19 @@ export function TopNavBar({
                 </div>
               )}
             </div>
+            */}
           </div>
 
           <div className="flex-1" />
 
           <div className="flex items-center gap-4 shrink-0">
             {user && (
-              <button className="h-[52px] px-4 rounded-xl border border-white/[0.18] flex items-center gap-2 text-[#efedf1]">
-                <Heart className="w-4 h-4" />
+              <button
+                className="h-[52px] px-4 rounded-xl border border-white/[0.18] flex items-center gap-2 text-[#efedf1]"
+                onMouseEnter={() => setFavouritesHovered(true)}
+                onMouseLeave={() => setFavouritesHovered(false)}
+              >
+                <NavIcon icon="favourites" flat={<Heart className="w-4 h-4" />} active={false} hovered={favouritesHovered} size={16} />
                 <span>Favourites</span>
               </button>
             )}

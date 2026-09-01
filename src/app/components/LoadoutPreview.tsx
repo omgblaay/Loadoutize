@@ -12,6 +12,7 @@ import type { CardWeapon, CardTag, CardAttachment } from "./ui/LoadoutCard";
 import { Tag } from "./ui/tag";
 import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
 import { ReactionButton } from "./ui/reaction-button";
+import { RatingRing } from "./ui/rating-ring";
 import {
   Edit,
   Trash2,
@@ -22,6 +23,8 @@ import {
   Puzzle,
   Crosshair,
   Icon,
+  Copy,
+  Check,
 } from "lucide-react";
 import * as React from "react";
 
@@ -37,6 +40,7 @@ interface Loadout {
   userName: string;
   name: string;
   description?: string;
+  gameLoadoutCode?: string | null;
   weapons: Weapon[];
   perks?: string[];
   equipment?: string[];
@@ -65,6 +69,7 @@ export function LoadoutPreview() {
   const [catalogTags, setCatalogTags] = useState<CardTag[]>([]);
   const [loading, setLoading] = useState(true);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   useEffect(() => {
     if (gameId && loadoutId) {
@@ -189,6 +194,13 @@ export function LoadoutPreview() {
     a.click();
   };
 
+  const copyGameLoadoutCode = () => {
+    if (!loadout?.gameLoadoutCode) return;
+    navigator.clipboard.writeText(loadout.gameLoadoutCode);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+  };
+
   const meta = gameMeta[gameId] ?? gameMeta.mw4;
   const { game: activeGame } = useGameName(gameId);
   const accent = getGameColor(gameId).primary;
@@ -259,26 +271,42 @@ export function LoadoutPreview() {
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Weapon build */}
-        <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-4">
+        <div className="bg-[#121011] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-4">
           <div className="flex items-center gap-4">
-            <Tag
+            
+              <RatingRing
+                percent={loadout.ratingPercent}
+                color="#01a059"
+                size={64}
+                className="border border-[#2a2829]"
+                labelClassName="text-[14px] text-white font-medium"
+              />
+            
+             <h1 className="text-xl wrap-anywhere">
+
+              <span style={{ color: catalogTags.find((t) => t.id === loadout.tagId)?.color }} className="font-handwritten py-4 font-light">{catalogTags.find((t) => t.id === loadout.tagId)?.name}</span>
+              {" "}
+              <Tag
               color={""}
+              className="inline relative top-[-5px]"
               link={
                 primaryWeaponCatalog?.type
                   ? `/${gameId}/explore?category=${encodeURIComponent(primaryWeaponCatalog.type)}`
                   : undefined
               }
-            >
+              >
               {primaryWeaponCatalog?.typeShort || meta.short}
-            </Tag>
-            <p className="text-md text-body">
-              {primaryWeaponCatalog?.name ?? loadout.name}
-            </p>
-          </div>
+              </Tag>
+              <span className="font-base font-sans  text-teritary">{" "}{primaryWeaponCatalog?.name}</span>
+              {" "}{loadout.name}
+            </h1>
+          </div>                
+          <div className="flex flex-wrap items-center text-sm gap-1.5">
+                   <span className="text-teritary">by</span> <span className=""> {loadout.userName}</span>
+                </div>
 
           <div className="flex flex-col items-center gap-2 py-4">
             <div
-              className="w-full max-w-[400px] h-[150px] rounded-xl flex items-center justify-center overflow-hidden"
               style={{ background: `radial-gradient(ellipse at center, ${accent}14, transparent 70%)` }}
             >
               <WeaponImage imageUrl={primaryWeaponImage} />
@@ -295,7 +323,7 @@ export function LoadoutPreview() {
                       {attachment?.imageUrl ? (
                         <img src={attachment.imageUrl} alt={value} className="w-full opacity-50 h-full object-contain" />
                       ) : (
-                        <Puzzle className="w-3.5 h-3.5 text-[#8d898a]" />
+                        null
                       )}
                     </div>
                     <span className="text-[14px] text-[#8d898a] flex-1">{slot}</span>
@@ -322,65 +350,66 @@ export function LoadoutPreview() {
         </div>
 
         {/* Rating / share */}
-        <div className="flex flex-col gap-6">
-          <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
-            <div className="flex items-center gap-3">
-              <div
-                className="relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center border border-[#2a2829]"
-                style={{
-                  background:
-                    loadout.ratingPercent != null
-                      ? `conic-gradient(#01a059 ${loadout.ratingPercent * 3.6}deg, rgba(255,255,255,0.1) 0deg)`
-                      : "rgba(255,255,255,0.1)",
-                }}
-              >
-                <div className="absolute inset-[3px] rounded-full bg-[#201e1f] flex items-center justify-center">
-                  <span className="text-[14px] text-white font-medium">
-                    {loadout.ratingPercent != null ? `${loadout.ratingPercent}%` : "—"}
-                  </span>
-                </div>
-              </div>
-              <div className="flex-1 flex flex-col gap-2">
+        <div className="flex relative flex-col overflow-hidden gap-6">
+                
+          <div className="bg-[#121111] border border-[#201e1f] rounded-3xl overflow-hidden flex flex-col gap-5">
+          <div className="p-6 flex flex-col gap-5">
 
-            <h1 className="text-lg wrap-anywhere">{loadout.name}</h1>
-                <div className="flex flex-wrap items-center text-sm gap-1.5">
-                   <span className="text-teritary">by</span> <span className=""> {loadout.userName}</span>
-                </div>
-              </div>
-            </div>
-          {loadout.tagId != null && (() => {
-            const tag = catalogTags.find((t) => t.id === loadout.tagId);
-            return tag ? <Tag color={tag.color}>{tag.name}</Tag> : null;
-          })()}
+            {/*<Tag color={loadout.tagId ? catalogTags.find((t) => t.id === loadout.tagId)?.color : undefined} 
+              className="!font-handwritten py-4 font-light !text-lg">{catalogTags.find((t) => t.id === loadout.tagId)?.name}</Tag>
+*/}
             {loadout.description && (
               <p className="text-body text-base">{loadout.description}</p>
             )}
 
-            <div className="h-px w-full bg-white/[0.07]" />
-                <p className="text-teritary text-sm">
-                  How would you rate this loadout?
-                </p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <ReactionButton
-                icon={<ThumbsUp className="w-4 h-4" />}
-                label="Like"
-                count={loadout.likes}
-                active={loadout.liked}
-                accent="#01a059"
-                onClick={() => react("like")}
-              />
-              <ReactionButton
-                icon={<ThumbsDown className="w-4 h-4" />}
-                label="Dislike"
-                count={loadout.dislikes}
-                active={loadout.disliked}
-                accent="#d00050"
-                onClick={() => react("dislike")}
-              />
-              <p className="text-[12px] text-[#8d898a]">Score: {loadout.score}</p>
-
-            </div>
           </div>
+          <div className="flex items-center w-full">
+            <ReactionButton
+              icon={<ThumbsUp className="w-4 h-4" />}
+              label={loadout.liked ? "Liked" : "Like"}
+              count={loadout.likes}
+              active={loadout.liked}
+              accent="#01a059"
+              onClick={() => react("like")}
+              fillWidth
+              square
+              borderTopOnly
+              className="flex-1 "
+            />
+            <ReactionButton
+              icon={<ThumbsDown className="w-4 h-4" />}
+              label={loadout.disliked ? "Disliked" : "Dislike"}
+              count={loadout.dislikes}
+              active={loadout.disliked}
+              accent="#d00050"
+              onClick={() => react("dislike")}
+              fillWidth
+              square
+              borderTopOnly
+              className="flex-1"
+            />
+          </div>
+          </div>
+
+          {loadout.gameLoadoutCode && (
+            <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-3">
+              <h3 className="text-[12px] tracking-[0.5px] uppercase text-[#fafafa] font-medium">
+                In-game loadout code
+              </h3>
+              <div className="flex items-center gap-3">
+                <code className="flex-1 min-w-0 font-mono text-[14px] text-[#fafafa] bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-3 break-all">
+                  {loadout.gameLoadoutCode}
+                </code>
+                <Button onClick={copyGameLoadoutCode} variant="outline" size="icon" aria-label="Copy loadout code">
+                  {codeCopied ? (
+                    <Check className="w-4 h-4 text-[#01a059]" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-[#fafafa]" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
 
           <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex items-center gap-5 flex-wrap">
             {qrDataUrl && <img src={qrDataUrl} alt="QR code linking to this loadout" className="w-[104px] h-[104px] shrink-0" />}

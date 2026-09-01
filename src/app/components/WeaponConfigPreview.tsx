@@ -135,8 +135,7 @@ export function WeaponConfigPreview() {
               {canEdit && (
                 <button
                   onClick={() => navigate(`/${gameId}/explore/weapon-builder?edit=${configId}`)}
-                  className="flex items-center gap-2 px-4 py-2 text-neutral-900 font-bold transition-opacity hover:opacity-90"
-                  style={{ backgroundColor: accentColor.primary }}
+                  className="flex items-center gap-2 px-4 py-2 text-neutral-900 font-bold transition-opacity hover:opacity-90 bg-[#fafafa]"
                 >
                   <Edit className="w-4 h-4" />
                   Edit
@@ -238,8 +237,8 @@ export function WeaponConfigPreview() {
             onClick={likeConfig}
             className="flex items-center gap-3 px-8 py-4 border-2 border-neutral-700 hover:text-neutral-900 text-white font-black text-lg transition-all"
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = accentColor.primary;
-              e.currentTarget.style.borderColor = accentColor.primary;
+              e.currentTarget.style.backgroundColor = "#fafafa";
+              e.currentTarget.style.borderColor = "#fafafa";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = '';

@@ -11,6 +11,14 @@
 }
 
 @font-face {
+  font-family: 'Kabur';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/Kabur.ttf') format('truetype');
+}
+
+@font-face {
   font-family: 'Aspekta';
   font-style: normal;
   font-weight: 50;
