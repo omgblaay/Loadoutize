@@ -8,6 +8,7 @@ import { LoadoutBuilder } from "./components/LoadoutBuilder";
 import { LoadoutPreview } from "./components/LoadoutPreview";
 import { WeaponConfigPreview } from "./components/WeaponConfigPreview";
 import { UserPage } from "./components/UserPage";
+import { NotFound } from "./components/NotFound";
 import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "./utils/games";
 
 function GameRedirect() {
@@ -77,6 +78,7 @@ export default function App() {
               </GameLock>
             }
           />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

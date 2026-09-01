@@ -13,6 +13,8 @@ import { Tag } from "./ui/tag";
 import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
 import { ReactionButton } from "./ui/reaction-button";
 import { RatingRing } from "./ui/rating-ring";
+import { usePageTitle } from "../hooks/usePageTitle";
+import { Loading } from "./ui/loading";
 import {
   Edit,
   Trash2,
@@ -205,12 +207,14 @@ export function LoadoutPreview() {
   const { game: activeGame } = useGameName(gameId);
   const accent = getGameColor(gameId).primary;
 
+  const titleWeapon = catalogWeapons.find((w) => w.id === loadout?.weapons?.[0]?.id);
+  const titleTag = loadout?.tagId != null ? catalogTags.find((t) => t.id === loadout.tagId) : undefined;
+  usePageTitle(
+    loadout ? [titleTag?.name, titleWeapon?.name, loadout.name].filter(Boolean).join(" • ") : undefined
+  );
+
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0909]">
-        <div className="text-[#efedf1]">Loading…</div>
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   if (!loadout) {

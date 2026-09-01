@@ -4,6 +4,7 @@ import { projectId, publicAnonKey } from "/utils/supabase/info";
 import { getGameColor } from "../utils/gameColors";
 import { ArrowLeft, Heart, Eye, User, Share2, Edit } from "lucide-react";
 import { useAuth } from "./AuthContext";
+import { Loading } from "./ui/loading";
 
 interface WeaponConfig {
   id: string;
@@ -86,11 +87,7 @@ export function WeaponConfigPreview() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-neutral-950">
-        <div className="text-white text-xl font-bold">Loading...</div>
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   if (!config) {

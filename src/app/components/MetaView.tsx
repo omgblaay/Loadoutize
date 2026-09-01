@@ -9,6 +9,7 @@ import { WeaponCard } from "./ui/WeaponCard";
 import { Star, TrendingUp, Crown } from "lucide-react";
 import { NavIcon } from "./ui/nav-icon-3d";
 import { FilterPill } from "./ui/filter-pill";
+import { Loading } from "./ui/loading";
 
 interface Weapon {
   id: string;
@@ -180,11 +181,7 @@ export function MetaView() {
     `/${selectedGame}/explore${weapon.type ? `?category=${encodeURIComponent(weapon.type)}` : ""}`;
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0909]">
-        <div className="text-[#efedf1]">Loading…</div>
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   return (

@@ -9,6 +9,8 @@ import { SlidersHorizontal, ArrowUpDown, ChevronDown, X, Globe } from "lucide-re
 import { SearchBar } from "./ui/searchbar";
 import { NavIcon } from "./ui/nav-icon-3d";
 import { FilterPill } from "./ui/filter-pill";
+import { usePageTitle } from "../hooks/usePageTitle";
+import { Loading } from "./ui/loading";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -72,6 +74,7 @@ export function GameDashboard() {
   const accent = getGameColor(selectedGame).primary;
   const meta = gameMeta[selectedGame] ?? gameMeta.blackops7;
   const { name: gameName } = useGameName(selectedGame);
+  usePageTitle(`Explore • Loadoutize • ${gameName}`);
   const categories = Array.from(
     new Set(weapons.map((w) => w.type).filter((t): t is string => Boolean(t)))
   ).slice(0, 6);
@@ -114,11 +117,7 @@ export function GameDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0909]">
-        <div className="text-[#efedf1]">Loading…</div>
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   return (

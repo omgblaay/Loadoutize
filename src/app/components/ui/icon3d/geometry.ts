@@ -59,3 +59,41 @@ function normalize(geometry: THREE.BufferGeometry, depth: number) {
   geometry.translate(-VIEW_CENTER, -VIEW_CENTER, -depth / 2);
   geometry.scale(SCALE, -SCALE, SCALE);
 }
+
+// Camera in Scene3D/LoaderScene3D uses fov 32 at distance 3.4, which only
+// shows roughly +/-0.975 of vertical extent at the object's depth -- lucide
+// icons never hit that edge because their artwork has built-in padding
+// within the 24x24 viewBox, but a logo mark like the loader typically fills
+// its viewBox edge-to-edge, so mapping it to a literal +/-1 clips top and
+// bottom against the camera frustum. This margin backs it off to ~0.8 so it
+// sits comfortably inside frame like the icons do.
+const FRAME_MARGIN = 1.22;
+
+// Same extrusion pipeline as solidGeometry()/normalize() above, generalized
+// to an arbitrary source viewBox instead of the fixed 24x24 lucide grid --
+// for one-off marks (e.g. the loading spinner) that aren't lucide icons.
+// Depth/bevel are kept proportional to the viewBox's longer side so the
+// result reads the same as the lucide-derived icons despite the different
+// source scale.
+export function solidGeometryFromViewBox(
+  d: string,
+  viewBox: { width: number; height: number },
+  depthRatio: number = SOLID_DEPTH / (VIEW_CENTER * 2)
+): THREE.BufferGeometry[] {
+  const size = Math.max(viewBox.width, viewBox.height);
+  const depth = depthRatio * size;
+  const scale = 1 / ((size * FRAME_MARGIN) / 2);
+  return toShapes(d).map((shape) => {
+    const geometry = new THREE.ExtrudeGeometry(shape, {
+      depth,
+      bevelEnabled: true,
+      bevelThickness: depth * 0.133,
+      bevelSize: depth * 0.1,
+      bevelSegments: 2,
+      curveSegments: 12,
+    });
+    geometry.translate(-viewBox.width / 2, -viewBox.height / 2, -depth / 2);
+    geometry.scale(scale, -scale, scale);
+    return geometry;
+  });
+}

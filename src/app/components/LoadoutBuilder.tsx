@@ -16,6 +16,7 @@ import { WeaponCard } from "./ui/WeaponCard";
 import { Tag } from "./ui/tag";
 import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
 import { FilterPill } from "./ui/filter-pill";
+import { Loading } from "./ui/loading";
 
 interface Weapon {
   imageUrl: string | null | undefined;
@@ -382,11 +383,7 @@ export function LoadoutBuilder() {
   }, [weapons, pendingWeaponRefs]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0909]">
-        <div className="text-[#efedf1]">Loading…</div>
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   const meta = gameMeta[gameId] ?? gameMeta.mw4;

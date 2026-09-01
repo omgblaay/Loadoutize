@@ -7,6 +7,8 @@ import { AppLayout } from "./AppLayout";
 import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, type CardTag } from "./ui/LoadoutCard";
 import { ChevronRight, Crosshair, Flame, Sparkles, Youtube, Twitch, Video, Music2 } from "lucide-react";
 import { WeaponCard } from "./ui/WeaponCard";
+import { usePageTitle } from "../hooks/usePageTitle";
+import { Loading } from "./ui/loading";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -21,6 +23,8 @@ interface Game {
 }
 
 export function GameSelector() {
+  usePageTitle("Loadoutize • Build, Rate, and Share Elite Loadouts");
+
   const [games, setGames] = useState<Game[]>([]);
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
   const [weapons, setWeapons] = useState<CardWeapon[]>([]);
@@ -160,11 +164,7 @@ export function GameSelector() {
   const topWeapons = weapons.slice(0, 4);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0909]">
-        <div className="text-[#efedf1]">Loading…</div>
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   return (
