@@ -326,8 +326,9 @@ export function LoadoutPreview() {
                         null
                       )}
                     </div>
-                    <span className="text-[14px] text-[#8d898a] flex-1">{slot}</span>
-                    <span className="text-[14px] text-[#fafafa] font-medium">{value}</span>
+                    <span className="font-medium">{value}</span>
+                   <span className="text-teritary">{"•"}</span>
+                    <span className="text-teritary flex-1">{slot}</span>
                   </div>
                 );
               })}
