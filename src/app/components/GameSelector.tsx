@@ -11,6 +11,7 @@ import { usePageTitle } from "../hooks/usePageTitle";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
 import { Countdown } from "./ui/Countdown";
+import { Button } from "react-day-picker";
 
 // Oct 23, 2026, 12:00 AM EDT (UTC-4)
 const MW4_RELEASE_DATE = new Date("2026-10-23T04:00:00Z");
@@ -229,7 +230,7 @@ export function GameSelector() {
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
 
-              <img src="src/assets/mw4_logo.png" alt="Modern Warfare 4" className="w-56 object-contain" />
+              <img src="../src/assets/mw4_logo.png" alt="Modern Warfare 4" className="w-56 object-contain" />
           <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">
             Meta Vault
           </h1>
@@ -306,13 +307,12 @@ export function GameSelector() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-[16px] text-[#fafafa] font-semibold flex items-center gap-2">
-              <Flame className="w-4 h-4" style={{ color: accent }} />
-              Top Weapons in {activeName} 
+            <h2 className="">
+              Top Weapons
             </h2>
             <Link
               to={`/${selectedGame}/meta`}
-              className="text-[14px] text-[#8d898a] hover:text-[#fafafa] flex items-center gap-1 shrink-0"
+              className="text-[14px] text-teritary hover:text-[#fafafa] flex items-center gap-1 shrink-0"
             >
               View full Meta
               <ChevronRight className="w-4 h-4" />
@@ -330,14 +330,14 @@ export function GameSelector() {
             </div>
           ) : (
             <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-8 text-center">
-              <p className="text-[#8d898a]">No weapon data for {activeName} yet.</p>
+              <p className="text-teritary">No weapon data for {activeName} yet.</p>
             </div>
           )}
         </div>
 
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className="text-[16px] text-[#fafafa] font-semibold">Recent Loadouts</h2>
+            <h2>Recent Loadouts</h2>
           </div>
           {metaLoadouts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -351,17 +351,44 @@ export function GameSelector() {
                   accent={accent}
                   gameShort={activeShort}
                   index={i}
-                  onClick={() => navigate(`/${l.gameId}/loadout/${l.id}`)}
+                  to={`/${l.gameId}/l/${l.id}`}
                 />
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
-              <p className="text-[#8d898a]">
-                No loadouts published for {activeName} yet. Be the first to create one!
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 flex gap-8 text-center">
+              <p className="text-teritary">
+                No loadouts published yet. Be the first to create one!
               </p>
+              <Button>
+                Create new loadout
+              </Button>
             </div>
           )}
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <h2>Supported games</h2>
+          <p className="text-teritary text-sm max-w-2xl">
+            Modern Warfare 4 is live now. Loadouts for these titles are coming soon.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {GAME_ORDER.filter((id) => id !== "mw4").map((gameId) => {
+              const meta = gameMeta[gameId];
+              const Icon = meta?.icon ?? Crosshair;
+              return (
+                <Link
+                  key={gameId}
+                  to={`/${gameId}/explore`}
+                  className="relative rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 flex flex-col items-center gap-2 text-center hover:border-white/20 transition-colors"
+                >
+                  <Icon className="w-6 h-6" style={{ color: getGameColor(gameId).primary }} />
+                  <span className="text-sm text-[#efedf1]">{meta?.name ?? gameId}</span>
+                  <span className="text-xs text-teritary">Coming soon</span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
     </AppLayout>

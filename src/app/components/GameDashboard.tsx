@@ -261,7 +261,7 @@ export function GameDashboard() {
               accent={accent}
               gameShort={meta.short}
               index={i}
-              onClick={() => navigate(`/${selectedGame}/loadout/${l.id}`)}
+              to={`/${selectedGame}/l/${l.id}`}
             />
           ))}
         </div>

@@ -787,6 +787,34 @@ async function isTagAllowedForWeapons(gameId: string, tagId: number, weapons: an
 // unlike weapons, nothing else about their frontend shape needed to change.
 const LOADOUT_SELECT = `*, loadout_weapons(id, weapon_id, slot_order, loadout_weapon_attachments(attachments(name, attachment_types(name)))), loadout_perks(perks(name)), loadout_equipment(equipment(name)), loadout_reactions(type, user_id)`;
 
+// Loadout share links use short IDs (loadoutize.com/mw4/l/ab12) rather than a
+// full UUID -- 4 lowercase hex characters (16^4 = 65,536 combos) is plenty
+// for now. Each candidate ID is inserted optimistically; a Postgres
+// unique-violation (23505) on the `loadouts` primary key means it collided,
+// so we retry with a fresh random ID -- no separate existence check/race
+// condition, the PK constraint is the actual source of truth. Once several
+// attempts in a row all collide (a strong signal the 4-char space is close
+// to exhausted), the next tier grows to 5 characters (16^5 ≈ 1.05M) instead
+// of failing outright. Extending further later is just adding to this list.
+const LOADOUT_ID_LENGTH_TIERS = [4, 5];
+const LOADOUT_ID_ATTEMPTS_PER_TIER = 10;
+
+async function insertLoadoutWithUniqueId(payload: Record<string, unknown>) {
+  for (const length of LOADOUT_ID_LENGTH_TIERS) {
+    for (let attempt = 0; attempt < LOADOUT_ID_ATTEMPTS_PER_TIER; attempt++) {
+      const id = crypto.randomUUID().replace(/-/g, "").slice(0, length);
+      const { data, error } = await supabase
+        .from('loadouts')
+        .insert({ id, ...payload })
+        .select()
+        .single();
+      if (!error) return data;
+      if (error.code !== '23505') throw error;
+    }
+  }
+  throw new Error("Could not generate a unique loadout ID after multiple attempts");
+}
+
 async function saveLoadoutWeapons(loadoutId: string, gameId: string, weaponsPayload: any[]) {
   // Cascades: deleting a loadout_weapons row cascades to its loadout_weapon_attachments rows.
   const { error: deleteError } = await supabase.from('loadout_weapons').delete().eq('loadout_id', loadoutId);
@@ -1265,7 +1293,6 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
 
     const gameId = c.req.param("gameId");
     const body = await c.req.json();
-    const loadoutId = crypto.randomUUID().replace(/-/g, "").slice(0, 8);
 
     let tagId = body.tagId ?? null;
     if (tagId != null && !(await isTagAllowedForWeapons(gameId, tagId, body.weapons ?? []))) {
@@ -1277,22 +1304,17 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
       return c.json({ error: videoError }, 400);
     }
 
-    const { data: inserted, error } = await supabase
-      .from('loadouts')
-      .insert({
-        id: loadoutId,
-        game_id: gameId,
-        user_id: user.id,
-        user_name: user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous',
-        name: body.name,
-        description: body.description || '',
-        game_loadout_code: body.gameLoadoutCode || null,
-        video,
-        tag_id: tagId,
-      })
-      .select()
-      .single();
-    if (error) throw error;
+    const inserted = await insertLoadoutWithUniqueId({
+      game_id: gameId,
+      user_id: user.id,
+      user_name: user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous',
+      name: body.name,
+      description: body.description || '',
+      game_loadout_code: body.gameLoadoutCode || null,
+      video,
+      tag_id: tagId,
+    });
+    const loadoutId = inserted.id;
 
     await saveLoadoutWeapons(loadoutId, gameId, body.weapons ?? []);
     await saveLoadoutPerks(loadoutId, gameId, body.perks ?? []);

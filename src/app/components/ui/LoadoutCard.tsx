@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "react-router";
 import { WeaponImage } from "./WeaponImage";
 import { Tag } from "./tag";
 import { RatingRing } from "./rating-ring";
@@ -52,7 +53,7 @@ export function LoadoutCard({
   accent,
   gameShort,
   index,
-  onClick,
+  to,
   fire = false,
 }: {
   loadout: CardLoadout;
@@ -62,7 +63,8 @@ export function LoadoutCard({
   accent: string;
   gameShort: string;
   index: number;
-  onClick: () => void;
+  /** Route to the loadout's own page -- rendered as a real `<a href>` (via react-router's Link) so search engines and "open in new tab" can follow it, not just an onClick handler. */
+  to: string;
   /** Layers a shader flame effect over the card's edge -- reserve for a single standout card (e.g. the #1 ranked loadout), not whole grids: each instance is its own WebGL context. */
   fire?: boolean;
 }) {
@@ -88,8 +90,8 @@ export function LoadoutCard({
   return (
     <div className="relative w-full">
       {fire && <FireCardEffect radius={12} />}
-    <button
-      onClick={onClick}
+    <Link
+      to={to}
       className="relative bg-card rounded-xl border border-white/[0.08] hover:bg-[#1a161a] hover:border-white/20 transition-all flex flex-col text-left overflow-hidden w-full h-full"
       style={{
         boxShadow: "0px 30px 70px -36px rgba(0,0,0,0.85)",
@@ -158,7 +160,7 @@ export function LoadoutCard({
       )}
 
       <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[inset_0px_0px_0px_1px_rgba(255,255,255,0.07)]" />
-    </button>
+    </Link>
     </div>
   );
 }

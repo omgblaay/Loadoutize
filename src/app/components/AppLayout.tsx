@@ -152,7 +152,7 @@ export function AppLayout({
 
 
       {/* Footer */}
-      <Footer handleGameSelect={handleGameSelect} navigate={navigate} selectedGame={selectedGame} orderedGames={orderedGames} gameMeta={gameMeta} />
+      <Footer selectedGame={selectedGame} orderedGames={orderedGames} gameMeta={gameMeta} />
 
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} isOpen={showAuthModal} />}
     </div>

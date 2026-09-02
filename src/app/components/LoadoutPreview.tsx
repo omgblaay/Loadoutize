@@ -93,20 +93,19 @@ function LoadoutPreviewSkeleton() {
       </Container>
 
       <div className="flex flex-col gap-4">
-        {/* Description / Rating */}
-        <Container>
-          <Skeleton className={cn("h-3 w-24", block)} />
-          <Skeleton className={cn("h-4 w-full", block)} />
-          <Skeleton className={cn("h-4 w-2/3", block)} />
-          <div className="flex items-center w-full gap-2 pt-2">
-            <Skeleton className={cn("h-11 flex-1 rounded-xl", block)} />
-            <Skeleton className={cn("h-11 flex-1 rounded-xl", block)} />
+        {/* Description, reactions, author -- one merged info panel now */}
+        <Container className="">
+          <div className="flex flex-col gap-3 pb-5">
+            <Skeleton className={cn("h-3 w-24", block)} />
+            <Skeleton className={cn("h-4 w-full", block)} />
+            <Skeleton className={cn("h-4 w-2/3", block)} />
+            <div className="flex items-center w-full gap-2 pt-2">
+              <Skeleton className={cn("h-11 flex-1 rounded-xl", block)} />
+              <Skeleton className={cn("h-11 flex-1 rounded-xl", block)} />
+            </div>
           </div>
-        </Container>
 
-        {/* Author */}
-        <Container>
-          <div className="flex flex-wrap items-center text-sm gap-4">
+          <div className="flex flex-wrap items-center text-sm gap-4 py-5">
             <Skeleton className={cn("w-20 h-20 rounded-lg shrink-0", block)} />
             <div className="flex flex-col gap-2">
               <Skeleton className={cn("h-4 w-32", block)} />
@@ -355,11 +354,11 @@ export function LoadoutPreview() {
               color="#01a059"
               size={64}
               className="border border-[#2a2829]"
-              labelClassName="text-[14px] text-[#fafafa] font-medium"
+              labelClassName="font-mono font-medium"
             />
-            <h1 className="text-sm sm:text-xl wrap-anywhere">
+            <h1 className="text-sm antialiased sm:text-xl wrap-anywhere">
 
-              <span style={{ color: catalogTags.find((t) => t.id === loadout.tagId)?.color }} className="font-handwritten text-base py-4 font-light">{catalogTags.find((t) => t.id === loadout.tagId)?.name}</span>
+              <span style={{ color: catalogTags.find((t) => t.id === loadout.tagId)?.color }} className="font-handwritten text-2xl py-4 font-light">{catalogTags.find((t) => t.id === loadout.tagId)?.name}</span>
               {" "}
               <Tag
                 color={""}
@@ -386,13 +385,39 @@ export function LoadoutPreview() {
               <WeaponImage imageUrl={primaryWeaponImage} variant="small" />
             </div>
           </div>
+                        <div className="flex items-center w-full gap-2">
+                <ReactionButton
+                  icon={<ThumbsUp className="w-4 h-4" />}
+                  label={loadout.liked ? "Liked" : "Like"}
+                  count={loadout.likes}
+                  active={loadout.liked}
+                  accent="#01a059"
+                  onClick={() => react("like")}
+                  fillWidth
+                  radius={12}
+                  tintIdle
+                  className="flex-1"
+                />
+                <ReactionButton
+                  icon={<ThumbsDown className="w-4 h-4" />}
+                  label={loadout.disliked ? "Disliked" : "Dislike"}
+                  count={loadout.dislikes}
+                  active={loadout.disliked}
+                  accent="#d00050"
+                  onClick={() => react("dislike")}
+                  fillWidth
+                  radius={12}
+                  tintIdle
+                  className="flex-1"
+                />
+              </div>
 
-          <div className="flex flex-col w-full">
+          <div className="divide-y-1 divide-solid divide-white/5 w-full">
             {primaryWeapon?.attachments &&
               Object.entries(primaryWeapon.attachments).map(([slot, value]) => {
                 const attachment = catalogAttachments.find((a) => a.type === slot && a.name === value);
                 return (
-                  <div key={slot} className="flex items-center gap-4 py-3 border-b border-white/5 w-full">
+                  <div key={slot} className="flex items-center gap-4 py-3 w-full">
                     <div className="w-6 h-6 flex items-center justify-center shrink-0 overflow-hidden">
                       {attachment?.imageUrl ? (
                         <img src={attachment.imageUrl} alt={value} className="w-full opacity-50 h-full object-contain" />
@@ -401,7 +426,7 @@ export function LoadoutPreview() {
                       )}
                     </div>
                     <span className="font-medium">{value}</span>
-                    <span className="text-teritary">{"•"}</span>
+                    <span className="text-white/20">{"•"}</span>
                     <span className="text-teritary flex-1">{slot}</span>
                   </div>
                 );
@@ -409,7 +434,7 @@ export function LoadoutPreview() {
 
             {!primaryWeapon?.attachments &&
               (loadout.equipment ?? []).map((item, i) => (
-                <div key={i} className="flex items-center gap-4 py-3 border-b border-white/5 w-full">
+                <div key={i} className="divide-y-4 divide-solid divide-white w-full">
                   <div className="w-6 h-6 rounded-md bg-white/[0.02] border border-white/[0.18] flex items-center justify-center shrink-0">
                     <Puzzle className="w-3.5 h-3.5 text-[#8d898a]" />
                   </div>
@@ -421,51 +446,40 @@ export function LoadoutPreview() {
             {!primaryWeapon?.attachments && !(loadout.equipment ?? []).length && (
               <p className="text-[14px] text-[#8d898a] py-2">No build details published for this loadout.</p>
             )}
+
+                        {loadout.gameLoadoutCode && (
+              <div className="flex flex-row bg-white/[0.03] h-10 rounded-lg items-center mt-4 gap-4 justify-center w-full">
+                              <span className="text-sm text-teritary/50">
+                  In-game code:
+                </span>
+                <div className="flex items-center gap-2">
+                  <code className="uppercase tracking-wider text-sm text-secondary">
+                    {loadout.gameLoadoutCode}
+                  </code>
+                  <Button onClick={copyGameLoadoutCode} variant="ghost" size="sm" aria-label="Copy loadout code" className="text-sm">
+                    {codeCopied ? (
+                      <><Check className="size-3 text-[#01a059]" /> <span className="text-sm">Copied</span></>
+                    ) : (
+                      <><Copy className="size-3 text-[#fafafa]" /></>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </Container>
 
-        <div className="flex flex-col gap-4">{/* Description / Rating */}
-          <Container>
-                    <span className="text-sm text-teritary uppercase font-medium">
-                      Description
-                    </span>
-            {loadout.description && (
-              <p className="text-primary text-base">{loadout.description}</p>
-            )}
-            <div className="flex items-center w-full">
-              <ReactionButton
-                icon={<ThumbsUp className="w-4 h-4" />}
-                label={loadout.liked ? "Liked" : "Like"}
-                count={loadout.likes}
-                active={loadout.liked}
-                accent="#01a059"
-                onClick={() => react("like")}
-                fillWidth
-                square
-                borderTopOnly
-                className="flex-1 "
-              />
-              <ReactionButton
-                icon={<ThumbsDown className="w-4 h-4" />}
-                label={loadout.disliked ? "Disliked" : "Dislike"}
-                count={loadout.dislikes}
-                active={loadout.disliked}
-                accent="#d00050"
-                onClick={() => react("dislike")}
-                fillWidth
-                square
-                borderTopOnly
-                className="flex-1"
-              />
-            </div>
-          </Container>
-
-          {/* Author */}
-          <Container>
-            <div className="flex flex-wrap items-center text-sm gap-4">
+        <div className="flex flex-col gap-4">
+          {/* Description, reactions, author, in-game code, and video are all
+              one info panel now instead of separate cards -- divide-y draws
+              the hairline between sections (none above the first). */}
+          <Container className="gap-0">
+            <div className="flex flex-col gap-3 pb-5">
+               {/* Author */}
+            <div className="flex flex-wrap items-center text-sm gap-2">
               {(() => {
                 const avatar = (
-                  <div className="w-20 h-20 rounded-lg border border-white/10 overflow-hidden flex items-center justify-center  bg-white/[0.04]">
+                  <div className="w-10 h-10 rounded-lg border border-white/10 overflow-hidden flex items-center justify-center  bg-white/[0.04]">
                     {loadout.authorAvatarUrl ? (
                       <img src={loadout.authorAvatarUrl} alt="" className="w-full h-full object-cover" />
                     ) : (
@@ -476,15 +490,15 @@ export function LoadoutPreview() {
                   </div>
                 );
                 return loadout.authorNickname ? (
-                  <Link to={`/u/${loadout.authorNickname}`}>{avatar}</Link>
+                  <Link to={`/u/${loadout.userName}`}>{avatar}</Link>
                 ) : (
                   avatar
                 );
               })()}
               <div className="flex flex-col gap-2 text-base">
                 {loadout.authorNickname ? (
-                  <Link to={`/u/${loadout.authorNickname}`} className="hover:underline">
-                    {loadout.userName}
+                  <Link to={`/u/${loadout.userName}`} className="font-medium hover:underline">
+                    {loadout.userName} <span className="text-teritary">@{loadout.authorNickname}</span>
                   </Link>
                 ) : (
                   <span>{loadout.userName}</span>
@@ -503,78 +517,66 @@ export function LoadoutPreview() {
                               aria-label={label}
                             >
                               <Icon className="w-3.5 h-3.5" />
-                              <span className="text-[10px] text-[#8d898a] font-mono">{count ?? "—"}</span>
+                              <span className="text-[10px] text-teritary font-mono">{count ?? "—"}</span>
                             </a>
                           </Button>
                         );
                       }
                     )}
                   </div>
+                )}
+              </div>
+            </div>
 
-                )}</div>
+             {/* Description */}
+              {loadout.description && <p className="text-secondary text-base">{loadout.description}</p>}
+
+
+
 
             </div>
 
+           
 
-          </Container>
 
-    
 
-          {loadout.gameLoadoutCode && (
-            <Container>
-              <h3 className="text-[12px] tracking-[0.5px] uppercase text-[#fafafa] font-medium">
-                In-game loadout code
-              </h3>
-              <div className="flex items-center gap-3">
-                <code className="flex-1 min-w-0 font-mono text-[14px] text-[#fafafa] bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-3 break-all">
-                  {loadout.gameLoadoutCode}
-                </code>
-                <Button onClick={copyGameLoadoutCode} variant="outline" size="icon" aria-label="Copy loadout code">
-                  {codeCopied ? (
-                    <Check className="w-4 h-4 text-[#01a059]" />
+            {loadout.video && (() => {
+              const platformMeta = VIDEO_PLATFORM_META[loadout.video.platform];
+              const PlatformIcon = platformMeta.icon;
+              // TikTok/Instagram are reels -- portrait 9:16; YouTube is landscape 16:9.
+              const isPortrait = loadout.video.platform !== "youtube";
+              const thumbClass = cn("shrink-0 rounded-lg object-cover bg-white/[0.04]", isPortrait ? "h-full aspect-[9/16]" : "h-24 aspect-[16/9]");
+              return (<>
+              <div className="flex items-center gap-2 text-teritary mb-4">
+                      <PlatformIcon className="size-5" />
+                      <span className="text-xs tracking-[0.5px] uppercase font-medium">{platformMeta.label} video attached</span>
+                    </div>
+                <div className="flex bg-white/5 gap-4 p-4 rounded-lg items-center">
+                  {loadout.video.thumbnailUrl ? (
+                    <img src={loadout.video.thumbnailUrl} alt={loadout.video.title ?? ""} className={thumbClass} />
                   ) : (
-                    <Copy className="w-4 h-4 text-[#fafafa]" />
+                    <div className={cn(thumbClass, "border border-white/[0.07] flex items-center justify-center")}>
+                    </div>
                   )}
-                </Button>
-              </div>
-            </Container>
-          )}
-
-          {loadout.video && (() => {
-            const platformMeta = VIDEO_PLATFORM_META[loadout.video.platform];
-            const PlatformIcon = platformMeta.icon;
-            return (
-              <Container>
-                {loadout.video.thumbnailUrl && (
-                  <img
-                    src={loadout.video.thumbnailUrl}
-                    alt={loadout.video.title ?? ""}
-                    className="w-full aspect-video object-cover"
-                  />
-                )}
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-2 text-[#8d898a]">
-                    <PlatformIcon className="w-4 h-4" />
-                    <span className="text-[12px] tracking-[0.5px] uppercase font-medium">
-                      {platformMeta.label}
-                    </span>
+                  <div className="flex flex-col gap-1.5 min-w-0 flex-1 justify-center">
+  
+                    {loadout.video.title && (
+                      <p className="text-[14px] text-[#fafafa] font-medium line-clamp-2">{loadout.video.title}</p>
+                    )}
+                    {loadout.video.authorName && (
+                      <p className="text-[12px] text-[#8d898a]">by {loadout.video.authorName}</p>
+                    )}
+                    <a href={loadout.video.url} target="_blank" rel="noopener noreferrer" className="w-fit">
+                      <Button variant="outline" size="sm">
+                        <ExternalLink className="w-3.5 h-3.5 text-[#fafafa]" />
+                        <span className="text-[13px] text-[#fafafa]">Watch on {platformMeta.label}</span>
+                      </Button>
+                    </a>
                   </div>
-                  {loadout.video.title && (
-                    <p className="text-[14px] text-[#fafafa] font-medium">{loadout.video.title}</p>
-                  )}
-                  {loadout.video.authorName && (
-                    <p className="text-[12px] text-[#8d898a]">by {loadout.video.authorName}</p>
-                  )}
-                  <a href={loadout.video.url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" className="w-full">
-                      <ExternalLink className="w-4 h-4 text-[#fafafa]" />
-                      <span className="text-[14px] text-[#fafafa]">Watch on {platformMeta.label}</span>
-                    </Button>
-                  </a>
                 </div>
-              </Container>
-            );
-          })()}
+             </>);
+            })()}
+          </Container>
 
           <Container className="flex flex-row items-center gap-4">
             {qrDataUrl && <img src={qrDataUrl} alt="QR code linking to this loadout" className="w-[104px] h-[104px] shrink-0" />}

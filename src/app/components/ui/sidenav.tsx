@@ -3,6 +3,8 @@ import { HomeIcon, Globe, Flame, Crown, Zap, Menu, X } from "lucide-react";
 import { SideNavButton } from "./sidenav-button";
 import { AppTooltip } from "./tooltip";
 import { NavIcon, type NavIconKey } from "./nav-icon-3d";
+import { Button } from "./button";
+import { Tag } from "./tag";
 
 export interface SideNavCategory {
   name: string;
@@ -79,13 +81,13 @@ export function SideNav({
         <div className="flex flex-col gap-0.5 w-full">
           <p className="text-[10px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold mb-2">Best of</p>
           {categories.map((cat) => (
-            <button
+            <SideNavButton
               key={cat.name}
               onClick={() => go(`/${selectedGame}/explore?category=${encodeURIComponent(cat.name)}`)}
-              className="min-h-10 rounded-xl px-3.5 py-2 flex items-center text-[#fafafa] uppercase text-[14px] font-medium hover:bg-white/[0.05] text-left"
             >
+              <Tag>{cat.typeShort ?? cat.name.slice(0, 3)}</Tag>
               {cat.name}
-            </button>
+            </SideNavButton>
           ))}
         </div>
       )}
@@ -176,9 +178,9 @@ export function SideNav({
                 <SideNavButton
                   onClick={() => go(`/${selectedGame}/explore?category=${encodeURIComponent(cat.name)}`)}
                   aria-label={cat.name}
-                  className="min-h-10 w-11 rounded-xl flex items-center justify-center text-[#fafafa] uppercase text-[11px] font-semibold hover:bg-white/[0.05]"
+                  className="hover:bg-white/[0.05] !h-max-[20px]"
                 >
-                  {cat.typeShort ?? cat.name.slice(0, 3)}
+                  <Tag>{cat.typeShort ?? cat.name.slice(0, 3)}</Tag>
                 </SideNavButton>
               </AppTooltip>
             ))}
@@ -246,13 +248,14 @@ export function SideNav({
         <div className="xl:hidden fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-black/60" onClick={() => setExpanded(false)} />
           <aside className="relative w-[320px] max-w-[85vw] h-full bg-[#0a0909] border-r border-white/[0.08] p-6 flex flex-col gap-6 overflow-y-auto">
-            <button
+            <Button
               onClick={() => setExpanded(false)}
               aria-label="Close menu"
-              className="self-end text-[#8d898a] hover:text-[#fafafa]"
+              className="self-end"
+              variant="ghost"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
             {fullMenu}
           </aside>
         </div>

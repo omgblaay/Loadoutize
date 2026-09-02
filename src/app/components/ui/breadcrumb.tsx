@@ -15,7 +15,7 @@ export function BreadcrumbLink({ to, className, children, ...props }: Breadcrumb
     <button
       type="button"
       onClick={() => navigate(to)}
-      className={cn("text-body hover:text-primary text-base transition-colors", className)}
+      className={cn("text-sm hover:text-primary transition-colors", className)}
       {...props}
     >
       {children}
@@ -24,5 +24,5 @@ export function BreadcrumbLink({ to, className, children, ...props }: Breadcrumb
 }
 
 export function BreadcrumbSpacer() {
-  return <span className="text-teritary">/</span>;
+  return <span className="text-[#342e32]">/</span>;
 }

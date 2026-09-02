@@ -1,6 +1,7 @@
+import { Link } from "react-router";
 import { Logo } from "./logo";
 
-export function Footer({ handleGameSelect, navigate, selectedGame, orderedGames, gameMeta }: { handleGameSelect: (id: string) => void; navigate: (path: string) => void; selectedGame: string; orderedGames: { id: string; name: string }[]; gameMeta: Record<string, { name: string }> }) {
+export function Footer({ selectedGame, orderedGames, gameMeta }: { selectedGame: string; orderedGames: { id: string; name: string }[]; gameMeta: Record<string, { name: string }> }) {
   return (
       <footer className="w-full border-t border-white/[0.18] mt-4">
         <div className="max-w-[1440px] mx-auto px-6 py-7 flex flex-wrap gap-6">
@@ -22,33 +23,19 @@ export function Footer({ handleGameSelect, navigate, selectedGame, orderedGames,
           </div>
 
           <div className="flex-1 min-w-[140px] flex flex-col gap-3 text-[14px] text-[#aea6a8]">
-            <a onClick={() => navigate("/")} className="hover:text-[#efedf1] cursor-pointer">
+            <Link to="/" className="hover:text-[#efedf1]">
               Home
-            </a>
-            <a onClick={() => navigate(`/${selectedGame}/explore`)} className="hover:text-[#efedf1] cursor-pointer">
+            </Link>
+            <Link to={`/${selectedGame}/explore`} className="hover:text-[#efedf1]">
               Explore
-            </a>
-            <a className="hover:text-[#efedf1]">Ranking</a>
-            <a className="hover:text-[#efedf1]">Creator</a>
-            <a className="hover:text-[#efedf1]">Favourites</a>
-          </div>
-
-          <div className="flex-1 min-w-[140px] flex flex-col gap-3 text-[14px] text-[#aea6a8]">
-            <a className="hover:text-[#efedf1]">Privacy Policy</a>
-            <a className="hover:text-[#efedf1]">Terms of Use</a>
-            <a className="hover:text-[#efedf1]">About us</a>
-            <a className="hover:text-[#efedf1]">Blog</a>
+            </Link>
           </div>
 
           <div className="flex-1 min-w-[140px] flex flex-col gap-3 text-[14px] text-[#aea6a8]">
             {orderedGames.map((game) => (
-              <a
-                key={game.id}
-                onClick={() => handleGameSelect(game.id)}
-                className="hover:text-[#efedf1] cursor-pointer"
-              >
+              <Link key={game.id} to={`/${game.id}/explore`} className="hover:text-[#efedf1]">
                 {gameMeta[game.id]?.name ?? game.name}
-              </a>
+              </Link>
             ))}
           </div>
         </div>

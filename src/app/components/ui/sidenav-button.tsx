@@ -6,7 +6,7 @@ import { cn } from "./utils";
 import { AppTooltip } from "./tooltip";
 
 const buttonVariants = cva(
-  "min-h-[52px] text-[#fafafa] items-center rounded-xl px-4 flex flex-row gap-3 text-[#fafafa] uppercase text-[.8rem] font-medium hover:bg-white/[0.12]",
+  "h-14 items-center !min-w-14 rounded-xl px-3 flex flex-row gap-3 uppercase font-medium hover:bg-white/5",
   {
   variants: {
     state: {

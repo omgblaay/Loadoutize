@@ -342,7 +342,7 @@ export function LoadoutBuilder() {
 
       if (response.ok) {
         const { loadout } = await response.json();
-        navigate(`/${gameId}/loadout/${loadout.id}`);
+        navigate(`/${gameId}/l/${loadout.id}`);
       } else {
         const error = await response.json();
         console.error("Error saving loadout:", error);

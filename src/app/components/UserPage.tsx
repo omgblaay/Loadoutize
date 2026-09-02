@@ -258,7 +258,7 @@ export function UserPage() {
                     accent={accent}
                     gameShort={meta.short}
                     index={i}
-                    onClick={() => navigate(`/${l.gameId}/loadout/${l.id}`)}
+                    to={`/${l.gameId}/l/${l.id}`}
                   />
                 );
               })}

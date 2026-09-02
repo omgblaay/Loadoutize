@@ -20,6 +20,14 @@ function GameRedirect() {
   return <Navigate to={`/${target}/explore`} replace />;
 }
 
+// Loadout links moved from /:gameId/loadout/:id to the shorter /:gameId/l/:id
+// -- this keeps any already-shared /loadout/ link (Discord, QR codes, etc.)
+// working instead of 404ing.
+function LegacyLoadoutRedirect() {
+  const { gameId, loadoutId } = useParams();
+  return <Navigate to={`/${gameId}/l/${loadoutId}`} replace />;
+}
+
 // While the game selector is disabled, any /:gameId/* route for a game other
 // than LOCKED_GAME_ID redirects to its Modern Warfare 4 equivalent instead of
 // rendering — so switching is off everywhere, not just hidden from the UI.
@@ -69,13 +77,14 @@ export default function App() {
             }
           />
           <Route
-            path="/:gameId/loadout/:loadoutId"
+            path="/:gameId/l/:loadoutId"
             element={
               <GameLock>
                 <LoadoutPreview />
               </GameLock>
             }
           />
+          <Route path="/:gameId/loadout/:loadoutId" element={<LegacyLoadoutRedirect />} />
           <Route
             path="/:gameId/weapon/:configId"
             element={

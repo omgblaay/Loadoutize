@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Clock } from "lucide-react";
 import { NavIcon } from "./nav-icon-3d";
+import { Container } from "./container";
 
 interface CountdownProps {
   targetDate: Date;
@@ -28,10 +29,10 @@ function getTimeLeft(targetDate: Date): TimeLeft {
 function Unit({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center min-w-[44px]">
-      <span className="text-[20px] leading-[24px] text-[#fafafa] font-semibold tabular-nums">
+      <span className="text-[20px] leading-[24px] text-[#fafafa] font-semibold tabular-nums font-mono">
         {String(value).padStart(2, "0")}
       </span>
-      <span className="text-xs uppercase text-teritary">{label}</span>
+      <span className="text-xs uppercase text-teritary font-mono">{label}</span>
     </div>
   );
 }
@@ -47,19 +48,19 @@ export function Countdown({ targetDate, label, accent }: CountdownProps) {
   const done = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-white/[0.1] bg-white/[0.02] px-5 py-3.5">
+    <Container className="flex flex-col sm:flex-row gap-2.5 justify-center not-smitems-center">
       <div className="flex flex-1 items-center gap-2.5">
         <NavIcon
           icon="clock"
-          flat={<Clock className="w-4 h-4 shrink-0 text-teritary" />}
+          flat={<Clock />}
           active
           hovered={false}
-          size={16}
+          size={20}
         />
         {label}
       </div>
       {done ? (
-        <span className="text-[14px] text-[#fafafa] font-semibold">It's here!</span>
+        <h2>It's here!</h2>
       ) : (
         <div className="flex items-center gap-3">
           <Unit value={timeLeft.days} label="Days" />
@@ -68,6 +69,6 @@ export function Countdown({ targetDate, label, accent }: CountdownProps) {
           <Unit value={timeLeft.seconds} label="Sec" />
         </div>
       )}
-    </div>
+    </Container>
   );
 }

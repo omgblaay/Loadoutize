@@ -12,8 +12,9 @@ export function WeaponImage({ imageUrl, variant, alt = "" }: {  imageUrl?: strin
 
   return (
     <div
-      className={getVariantClasses()}>
-        <img src={imageUrl ?? undefined} alt={alt} className="flex aspect-[2/1] w-full items-center justify-center object-fit" />
+      className={getVariantClasses()}
+    >
+      <img src={imageUrl ?? undefined} alt={alt} className="flex h-full w-full items-center justify-center object-contain" />
     </div>
   );    
 }

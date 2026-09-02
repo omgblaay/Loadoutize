@@ -53,9 +53,13 @@ export interface ReactionButtonProps {
   square?: boolean;
   /** Only draws the top border -- e.g. when the button is a full-bleed edge and the container's own border already covers the other sides. */
   borderTopOnly?: boolean;
+  /** Overrides the corner radius (px) instead of the `square`-or-full-pill default -- e.g. `12` to match a `rounded-xl` card it sits in. */
+  radius?: number;
   /** Text shown in the shared black tooltip on hover. */
   tooltip?: React.ReactNode;
   tooltipSide?: "top" | "right" | "bottom" | "left";
+  /** Shows a faint accent-tinted border/bg at rest (not just on hover/active) -- the original look of the Like/Dislike buttons before this component existed. */
+  tintIdle?: boolean;
 }
 
 export const ReactionButton = React.forwardRef<HTMLButtonElement, ReactionButtonProps>(function ReactionButton({
@@ -70,8 +74,10 @@ export const ReactionButton = React.forwardRef<HTMLButtonElement, ReactionButton
   fillWidth,
   square,
   borderTopOnly,
+  radius,
   tooltip,
   tooltipSide,
+  tintIdle = false,
 }, ref) {
   const [phase, setPhase] = React.useState<Phase>("idle");
   const [isHovered, setIsHovered] = React.useState(false);
@@ -116,12 +122,20 @@ export const ReactionButton = React.forwardRef<HTMLButtonElement, ReactionButton
   const effectiveRgb = isHovered ? lighten(baseRgb, 0.2) : baseRgb;
 
   const showAccent = phase === "idle" && active;
-  const buttonBg = showAccent ? rgba(effectiveRgb, 0.12) : isHovered ? rgba(effectiveRgb, 0.08) : "transparent";
+  const buttonBg = showAccent
+    ? rgba(effectiveRgb, 0.12)
+    : isHovered
+      ? rgba(effectiveRgb, 0.08)
+      : tintIdle
+        ? rgba(effectiveRgb, 0.06)
+        : "transparent";
   const buttonBorder = showAccent
     ? rgba(effectiveRgb, 0.55)
     : isHovered
       ? rgba(effectiveRgb, 0.33)
-      : "rgba(255,255,255,0.18)";
+      : tintIdle
+        ? rgba(effectiveRgb, 0.3)
+        : "rgba(255,255,255,0.18)";
   const buttonColor = showAccent || isHovered ? rgba(effectiveRgb, 1) : "#fafafa";
 
   return (
@@ -140,7 +154,7 @@ export const ReactionButton = React.forwardRef<HTMLButtonElement, ReactionButton
         cursor: isDisabled ? "default" : "pointer",
         height: HEIGHT,
         width,
-        borderRadius: square ? 0 : HEIGHT / 2,
+        borderRadius: radius ?? (square ? 0 : HEIGHT / 2),
         background: buttonBg,
         ...(borderTopOnly
           ? { borderTop: `1px solid ${buttonBorder}` }
