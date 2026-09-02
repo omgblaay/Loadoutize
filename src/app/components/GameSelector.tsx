@@ -12,6 +12,7 @@ import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
 import { Countdown } from "./ui/Countdown";
 import { Button } from "react-day-picker";
+import gameLogo from "figma:asset/mw4_logo.png";
 
 // Oct 23, 2026, 12:00 AM EDT (UTC-4)
 const MW4_RELEASE_DATE = new Date("2026-10-23T04:00:00Z");
@@ -230,7 +231,7 @@ export function GameSelector() {
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
 
-              <img src="src/assets/mw4_logo.png" alt="Modern Warfare 4" className="w-56 object-contain" />
+              <img src={gameLogo} alt="Modern Warfare 4" className="w-56 object-contain" />
           <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">
             Meta Vault
           </h1>
