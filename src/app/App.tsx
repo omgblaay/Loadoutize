@@ -9,7 +9,6 @@ import { LoadoutPreview } from "./components/LoadoutPreview";
 import { WeaponConfigPreview } from "./components/WeaponConfigPreview";
 import { UserPage } from "./components/UserPage";
 import { Settings } from "./components/Settings";
-import { ComponentTest } from "./components/ComponentTest";
 import { NotFound } from "./components/NotFound";
 import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "./utils/games";
 
@@ -40,7 +39,6 @@ export default function App() {
           <Route path="/" element={<GameSelector />} />
           <Route path="/u/:nickname" element={<UserPage />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/component-test" element={<ComponentTest />} />
           <Route path="/:gameId" element={<GameRedirect />} />
           <Route
             path="/:gameId/explore"
