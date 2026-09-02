@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { getGameColor } from "../utils/gameColors";
 import { gameMeta, GAME_ORDER, LAST_SELECTED_GAME_KEY, GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "../utils/games";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
@@ -8,7 +8,12 @@ import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, ty
 import { ChevronRight, Crosshair, Flame, Sparkles, Youtube, Twitch, Video, Music2 } from "lucide-react";
 import { WeaponCard } from "./ui/WeaponCard";
 import { usePageTitle } from "../hooks/usePageTitle";
-import { Loading } from "./ui/loading";
+import { Skeleton } from "./ui/skeleton";
+import { cn } from "./ui/utils";
+import { Countdown } from "./ui/Countdown";
+
+// Oct 23, 2026, 12:00 AM EDT (UTC-4)
+const MW4_RELEASE_DATE = new Date("2026-10-23T04:00:00Z");
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -20,6 +25,53 @@ interface Game {
   name: string;
   slug: string;
   logoUrl: string | null;
+}
+
+function GameSelectorSkeleton() {
+  const block = "bg-white/[0.06]";
+
+  return (
+    <>
+      {/* Header */}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Skeleton className={cn("w-12 h-12 rounded-full", block)} />
+          <Skeleton className={cn("h-8 w-64", block)} />
+        </div>
+        <Skeleton className={cn("h-5 w-80 max-w-full", block)} />
+      </div>
+
+      {/* Feature row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <Skeleton className={cn("rounded-2xl h-[296px]", block)} />
+        <Skeleton className={cn("rounded-2xl h-[296px]", block)} />
+      </div>
+
+      {/* Top weapons + popular loadouts */}
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-3">
+            <Skeleton className={cn("h-5 w-48", block)} />
+            <Skeleton className={cn("h-5 w-28", block)} />
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className={cn("rounded-2xl aspect-square", block)} />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <Skeleton className={cn("h-5 w-40", block)} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className={cn("rounded-2xl h-[220px]", block)} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
 
 export function GameSelector() {
@@ -164,7 +216,11 @@ export function GameSelector() {
   const topWeapons = weapons.slice(0, 4);
 
   if (loading) {
-    return <Loading fullScreen />;
+    return (
+      <AppLayout selectedGame={selectedGame} onGameSelect={setSelectedGame}>
+        <GameSelectorSkeleton />
+      </AppLayout>
+    );
   }
 
   return (
@@ -172,21 +228,21 @@ export function GameSelector() {
       {/* Header */}
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="w-12 h-12 flex items-center justify-center">
-            {activeLogoUrl ? (
-              <img src={activeLogoUrl} alt="" className="w-full h-full object-contain" />
-            ) : (
-              <ActiveIcon className="w-12 h-12 text-[#efedf1]" />
-            )}
-          </div>
+
+              <img src="src/assets/mw4_logo.png" alt="Modern Warfare 4" className="w-56 object-contain" />
           <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">
-            {activeName} Meta Vault
+            Meta Vault
           </h1>
         </div>
-        <p className="text-[16px] leading-[24px] text-[#bebcbc]">
-          Build a class, share a link, watch the community rate it.
+        <p className="text-secondary text-lg max-w-2xl">
+          Build the best Modern Warfare 4 loadouts, rate the community's top class setups, and share your own weapon
+          builds and attachments with a link.
         </p>
       </div>
+
+      {selectedGame === "mw4" && (
+        <Countdown targetDate={MW4_RELEASE_DATE} label="Modern Warfare 4 releases on Friday 23 October 2026" accent={accent} />
+      )}
 
       {/* Feature row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -236,13 +292,13 @@ export function GameSelector() {
           <p className="text-[14px] text-[#bebcbc] w-[320px] max-w-full flex-1">
             Check what they are currently running in-game for the best outcome.
           </p>
-          <button
-            onClick={() => navigate(`/${selectedGame}/explore`)}
+          <Link
+            to={`/${selectedGame}/explore`}
             className="bg-[#2a2829] border border-white/[0.08] rounded-xl h-[52px] px-4 self-start flex items-center gap-2.5 text-[#fafafa]"
           >
             <span>Explore setups</span>
             <ChevronRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -254,13 +310,13 @@ export function GameSelector() {
               <Flame className="w-4 h-4" style={{ color: accent }} />
               Top Weapons in {activeName} 
             </h2>
-            <button
-              onClick={() => navigate(`/${selectedGame}/meta`)}
+            <Link
+              to={`/${selectedGame}/meta`}
               className="text-[14px] text-[#8d898a] hover:text-[#fafafa] flex items-center gap-1 shrink-0"
             >
               View full Meta
               <ChevronRight className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
           {topWeapons.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

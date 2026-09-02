@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://loadoutize.com/sitemap.xml

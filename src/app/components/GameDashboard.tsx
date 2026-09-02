@@ -10,7 +10,8 @@ import { SearchBar } from "./ui/searchbar";
 import { NavIcon } from "./ui/nav-icon-3d";
 import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
 import { usePageTitle } from "../hooks/usePageTitle";
-import { Loading } from "./ui/loading";
+import { Skeleton } from "./ui/skeleton";
+import { cn } from "./ui/utils";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -18,6 +19,40 @@ interface Loadout extends CardLoadout {
 }
 
 type SortMode = "likes" | "newest";
+
+function GameDashboardSkeleton() {
+  const block = "bg-white/[0.06]";
+
+  return (
+    <>
+      {/* Header: title + search */}
+      <div className="flex items-center gap-5 w-full flex-wrap">
+        <Skeleton className={cn("h-9 w-32 shrink-0", block)} />
+        <Skeleton className={cn("h-10 flex-1 min-w-[200px] rounded-xl", block)} />
+      </div>
+
+      {/* Filter / sort row */}
+      <div className="flex items-center gap-3 w-full flex-wrap">
+        <Skeleton className={cn("h-10 w-24 rounded-xl", block)} />
+        <Skeleton className={cn("h-10 w-28 rounded-xl ml-auto", block)} />
+      </div>
+
+      {/* Category filter pills */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className={cn("h-8 w-20 rounded-full", block)} />
+        ))}
+      </div>
+
+      {/* Loadout grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className={cn("rounded-2xl h-[220px]", block)} />
+        ))}
+      </div>
+    </>
+  );
+}
 
 export function GameDashboard() {
   const { gameId: selectedGame = "blackops7" } = useParams<{ gameId: string }>();
@@ -117,7 +152,11 @@ export function GameDashboard() {
   };
 
   if (loading) {
-    return <Loading fullScreen />;
+    return (
+      <AppLayout selectedGame={selectedGame} onGameSelect={(id) => navigate(`/${id}/explore`)}>
+        <GameDashboardSkeleton />
+      </AppLayout>
+    );
   }
 
   return (

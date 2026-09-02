@@ -4,7 +4,8 @@ import { projectId, publicAnonKey } from "/utils/supabase/info";
 import { getGameColor } from "../utils/gameColors";
 import { ArrowLeft, Heart, Eye, User, Share2, Edit } from "lucide-react";
 import { useAuth } from "./AuthContext";
-import { Loading } from "./ui/loading";
+import { Skeleton } from "./ui/skeleton";
+import { cn } from "./ui/utils";
 
 interface WeaponConfig {
   id: string;
@@ -18,6 +19,71 @@ interface WeaponConfig {
   likes: number;
   views: number;
   createdAt: string;
+}
+
+function WeaponConfigPreviewSkeleton() {
+  const block = "bg-white/[0.06]";
+
+  return (
+    <div className="min-h-screen bg-neutral-950">
+      <header className="border-b border-neutral-800 bg-neutral-900 sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Skeleton className={cn("h-5 w-16", block)} />
+            <div className="flex items-center gap-3">
+              <Skeleton className={cn("h-10 w-24", block)} />
+              <Skeleton className={cn("h-10 w-20", block)} />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-6 py-12">
+        <div className="mb-8">
+          <Skeleton className={cn("h-6 w-32 mb-4", block)} />
+          <Skeleton className={cn("h-12 w-2/3 mb-4", block)} />
+          <div className="flex items-center gap-6 mb-6">
+            <Skeleton className={cn("h-8 w-8", block)} />
+            <Skeleton className={cn("h-5 w-32", block)} />
+            <Skeleton className={cn("h-5 w-24", block)} />
+          </div>
+          <Skeleton className={cn("h-6 w-full max-w-xl", block)} />
+        </div>
+
+        <div className="bg-neutral-900 border-2 border-neutral-800 p-8 mb-6">
+          <Skeleton className={cn("h-4 w-28 mb-6", block)} />
+          <div className="bg-neutral-950 border border-neutral-800 p-6">
+            <Skeleton className={cn("h-8 w-40 mb-2", block)} />
+            <Skeleton className={cn("h-5 w-28 mb-6", block)} />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i}>
+                  <Skeleton className={cn("h-3 w-16 mb-2", block)} />
+                  <Skeleton className={cn("h-7 w-12", block)} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-neutral-900 border-2 border-neutral-800 p-8 mb-8">
+          <Skeleton className={cn("h-4 w-28 mb-6", block)} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-neutral-950 border border-neutral-800 p-4">
+                <Skeleton className={cn("h-3 w-20 mb-2", block)} />
+                <Skeleton className={cn("h-5 w-32", block)} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-center">
+          <Skeleton className={cn("h-14 w-52", block)} />
+        </div>
+      </main>
+    </div>
+  );
 }
 
 export function WeaponConfigPreview() {
@@ -87,7 +153,7 @@ export function WeaponConfigPreview() {
   };
 
   if (loading) {
-    return <Loading fullScreen />;
+    return <WeaponConfigPreviewSkeleton />;
   }
 
   if (!config) {

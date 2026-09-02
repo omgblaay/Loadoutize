@@ -7,9 +7,9 @@
 // `solids` are closed silhouette paths (end in Z) -> extruded as solid fill.
 // `tubes` are open stroke paths -> rendered as round 3D tubes, matching
 // lucide's stroke-width:2 / round line caps.
-export type NavIconKey = "home" | "explore" | "trending" | "meta" | "favourites";
+export type NavIconKey = "home" | "explore" | "trending" | "meta" | "favourites" | "clock";
 
-export const ICON_PATHS: Record<Exclude<NavIconKey, "explore">, { solids: string[]; tubes: string[] }> = {
+export const ICON_PATHS: Record<Exclude<NavIconKey, "explore" | "clock">, { solids: string[]; tubes: string[] }> = {
   home: {
     solids: [
       "M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",

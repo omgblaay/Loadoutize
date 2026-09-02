@@ -5,7 +5,7 @@ import { solidGeometry, tubeGeometry } from "./geometry";
 
 const MATERIAL_PROPS = { color: "#fafafa", roughness: 0.35, metalness: 0.15 } as const;
 
-function ExtrudedIcon({ iconKey }: { iconKey: Exclude<NavIconKey, "explore"> }) {
+function ExtrudedIcon({ iconKey }: { iconKey: Exclude<NavIconKey, "explore" | "clock"> }) {
   const geometries = React.useMemo(() => {
     const { solids, tubes } = ICON_PATHS[iconKey];
     return [...solids.flatMap((d) => solidGeometry(d)), ...tubes.flatMap((d) => tubeGeometry(d))];
@@ -52,6 +52,32 @@ function GlobeIcon() {
   );
 }
 
+// Clock is special-cased the same way as Explore's globe: extruding the flat
+// icon's outline circle would produce a solid disc, not a ring, so the face
+// is a torus instead. The hour/minute hands are lucide's own stroke path
+// ("M12 6 12 12 16 14"), rendered as a tube like any other open stroke path.
+function ClockIcon() {
+  const hands = React.useMemo(() => tubeGeometry("M12 6 12 12 16 14"), []);
+  React.useEffect(() => () => hands.forEach((g) => g.dispose()), [hands]);
+
+  return (
+    <group>
+      {/* No rotation: the default torus orientation already faces the camera, like the un-rotated "equator" ring in GlobeIcon above. */}
+      <mesh>
+        <torusGeometry args={[0.85, 0.09, 12, 48]} />
+        <meshStandardMaterial {...MATERIAL_PROPS} />
+      </mesh>
+      {hands.map((geometry, i) => (
+        <mesh key={i} geometry={geometry}>
+          <meshStandardMaterial {...MATERIAL_PROPS} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 export function IconMesh({ icon }: { icon: NavIconKey }) {
-  return icon === "explore" ? <GlobeIcon /> : <ExtrudedIcon iconKey={icon} />;
+  if (icon === "explore") return <GlobeIcon />;
+  if (icon === "clock") return <ClockIcon />;
+  return <ExtrudedIcon iconKey={icon} />;
 }

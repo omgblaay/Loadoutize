@@ -8,7 +8,9 @@ import { LoadoutBuilder } from "./components/LoadoutBuilder";
 import { LoadoutPreview } from "./components/LoadoutPreview";
 import { WeaponConfigPreview } from "./components/WeaponConfigPreview";
 import { UserPage } from "./components/UserPage";
+import { LikedLoadouts } from "./components/LikedLoadouts";
 import { Settings } from "./components/Settings";
+import { AuthCallback } from "./components/AuthCallback";
 import { NotFound } from "./components/NotFound";
 import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "./utils/games";
 
@@ -38,7 +40,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<GameSelector />} />
           <Route path="/u/:nickname" element={<UserPage />} />
+          <Route path="/liked" element={<LikedLoadouts />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/:gameId" element={<GameRedirect />} />
           <Route
             path="/:gameId/explore"

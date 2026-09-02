@@ -16,7 +16,8 @@ import { WeaponCard } from "./ui/WeaponCard";
 import { Tag } from "./ui/tag";
 import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
 import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
-import { Loading } from "./ui/loading";
+import { Skeleton } from "./ui/skeleton";
+import { cn } from "./ui/utils";
 import { detectVideoPlatform, VIDEO_PLATFORM_META } from "../utils/video";
 import { Container } from "./ui/container";
 import { Button } from "./ui/button";
@@ -115,6 +116,42 @@ function TagOption({
     >
       <Tag color={tag.color}>{tag.name}</Tag>
     </button>
+  );
+}
+
+function LoadoutBuilderSkeleton() {
+  const block = "bg-white/[0.06]";
+
+  return (
+    <>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <Skeleton className={cn("rounded-xl w-14 h-14", block)} />
+        <div className="flex flex-col flex-1 gap-2">
+          <Skeleton className={cn("h-8 w-64", block)} />
+          <Skeleton className={cn("h-4 w-80 max-w-full", block)} />
+        </div>
+        <Skeleton className={cn("h-[52px] w-32 rounded-xl", block)} />
+      </div>
+
+      <Container>
+        <Skeleton className={cn("h-5 w-40", block)} />
+        <div className="flex flex-col gap-4">
+          <Skeleton className={cn("h-12 rounded-xl", block)} />
+          <Skeleton className={cn("h-20 rounded-xl", block)} />
+          <Skeleton className={cn("h-12 rounded-xl", block)} />
+          <Skeleton className={cn("h-12 rounded-xl", block)} />
+        </div>
+      </Container>
+
+      <Container>
+        <Skeleton className={cn("h-5 w-32", block)} />
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className={cn("rounded-2xl aspect-square", block)} />
+          ))}
+        </div>
+      </Container>
+    </>
   );
 }
 
@@ -396,11 +433,25 @@ export function LoadoutBuilder() {
     setPendingWeaponRefs(null);
   }, [weapons, pendingWeaponRefs]);
 
-  if (loading) {
-    return <Loading fullScreen />;
-  }
-
   const meta = gameMeta[gameId] ?? gameMeta.mw4;
+
+  if (loading) {
+    return (
+      <AppLayout
+        selectedGame={gameId}
+        onGameSelect={(id) => navigate(`/${id}/create`)}
+        breadcrumb={
+          <>
+            <BreadcrumbLink to={`/${gameId}/explore`}>{meta.short}</BreadcrumbLink>
+            <BreadcrumbSpacer />
+            <span className="text-[#fafafa]">{editId ? "Edit Loadout" : "New Loadout"}</span>
+          </>
+        }
+      >
+        <LoadoutBuilderSkeleton />
+      </AppLayout>
+    );
+  }
 
   const attachmentsByType = attachments.reduce<Record<string, Attachment[]>>((acc, a) => {
     (acc[a.type] ??= []).push(a);

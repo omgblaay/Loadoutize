@@ -5,7 +5,8 @@ import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { LOCKED_GAME_ID } from "../utils/games";
 import { AppLayout } from "./AppLayout";
 import { usePageTitle } from "../hooks/usePageTitle";
-import { Loading } from "./ui/loading";
+import { Skeleton } from "./ui/skeleton";
+import { cn } from "./ui/utils";
 import { Instagram, Youtube, Twitch, Video, Gamepad2, Upload } from "lucide-react";
 
 const NICKNAME_PATTERN = /^[a-z0-9_-]{3,20}$/;
@@ -20,6 +21,54 @@ const LINK_FIELDS: { key: "tiktok" | "instagram" | "youtube" | "twitch" | "kick"
   { key: "twitch", label: "Twitch", icon: Twitch },
   { key: "kick", label: "Kick", icon: Gamepad2 },
 ];
+
+function SettingsSkeleton() {
+  const block = "bg-white/[0.06]";
+
+  return (
+    <>
+      <div className="flex flex-col gap-1">
+        <Skeleton className={cn("h-9 w-40", block)} />
+        <Skeleton className={cn("h-4 w-72 max-w-full", block)} />
+      </div>
+
+      <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
+        <Skeleton className={cn("h-5 w-20", block)} />
+        <div className="flex items-center gap-5">
+          <Skeleton className={cn("w-20 h-20 rounded-2xl", block)} />
+          <div className="flex flex-col gap-2">
+            <Skeleton className={cn("h-11 w-40 rounded-xl", block)} />
+            <Skeleton className={cn("h-3 w-56 max-w-full", block)} />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
+        <Skeleton className={cn("h-5 w-20", block)} />
+        <div className="flex flex-col gap-4">
+          {Array.from({ length: 2 + 5 }).map((_, i) => (
+            <div key={i} className="flex flex-col gap-2">
+              <Skeleton className={cn("h-3 w-16", block)} />
+              <Skeleton className={cn("h-12 rounded-xl", block)} />
+            </div>
+          ))}
+          <Skeleton className={cn("h-11 w-32 rounded-xl", block)} />
+        </div>
+      </div>
+
+      <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
+        <Skeleton className={cn("h-5 w-24", block)} />
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Skeleton className={cn("h-3 w-28", block)} />
+            <Skeleton className={cn("h-12 rounded-xl", block)} />
+          </div>
+          <Skeleton className={cn("h-11 w-40 rounded-xl", block)} />
+        </div>
+      </div>
+    </>
+  );
+}
 
 export function Settings() {
   usePageTitle("Loadoutize • Settings");
@@ -171,7 +220,15 @@ export function Settings() {
   };
 
   if (authLoading || loading) {
-    return <Loading fullScreen />;
+    return (
+      <AppLayout
+        selectedGame={LOCKED_GAME_ID}
+        onGameSelect={(id) => navigate(`/${id}/explore`)}
+        breadcrumb={<span className="text-[#fafafa]">Settings</span>}
+      >
+        <SettingsSkeleton />
+      </AppLayout>
+    );
   }
 
   return (

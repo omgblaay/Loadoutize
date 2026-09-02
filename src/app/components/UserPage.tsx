@@ -7,7 +7,8 @@ import { getGameColor } from "../utils/gameColors";
 import { gameMeta, GAME_ORDER, GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "../utils/games";
 import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, type CardTag } from "./ui/LoadoutCard";
 import { Button } from "./ui/button";
-import { Loading } from "./ui/loading";
+import { Skeleton } from "./ui/skeleton";
+import { cn } from "./ui/utils";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { Settings as SettingsIcon } from "lucide-react";
 import { SOCIAL_LINK_FIELDS, formatCount, type SocialLinks, type SocialStats } from "../utils/social";
@@ -34,6 +35,44 @@ interface GameCatalog {
 }
 
 const GAMES_TO_LOAD = GAME_SELECTOR_ENABLED ? GAME_ORDER : [LOCKED_GAME_ID];
+
+function UserPageSkeleton() {
+  const block = "bg-white/[0.06]";
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,320px)_1fr] gap-6 items-start">
+      {/* Profile hero */}
+      <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
+        <div className="flex flex-col items-center text-center gap-3">
+          <Skeleton className={cn("w-24 h-24 rounded-2xl", block)} />
+          <div className="flex flex-col items-center gap-2">
+            <Skeleton className={cn("h-5 w-32", block)} />
+            <Skeleton className={cn("h-4 w-20", block)} />
+          </div>
+        </div>
+        <div className="flex items-start justify-center gap-2 flex-wrap">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className={cn("w-14 h-14 rounded-xl", block)} />
+          ))}
+        </div>
+        <div className="h-px w-full bg-white/[0.07]" />
+        <div className="flex justify-center w-full">
+          <Skeleton className={cn("h-9 w-32 rounded-md", block)} />
+        </div>
+      </div>
+
+      {/* Loadouts */}
+      <div className="flex flex-col gap-4">
+        <Skeleton className={cn("h-5 w-28", block)} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className={cn("rounded-2xl h-[220px]", block)} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function UserPage() {
   const { nickname } = useParams<{ nickname: string }>();
@@ -119,7 +158,11 @@ export function UserPage() {
   const isOwnProfile = user?.id === profile?.id;
 
   if (loading) {
-    return <Loading fullScreen />;
+    return (
+      <AppLayout selectedGame={LOCKED_GAME_ID} onGameSelect={(id) => navigate(`/${id}/explore`)}>
+        <UserPageSkeleton />
+      </AppLayout>
+    );
   }
 
   if (notFound || !profile) {

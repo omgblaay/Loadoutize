@@ -9,7 +9,8 @@ import { WeaponCard } from "./ui/WeaponCard";
 import { Star, TrendingUp, Crown } from "lucide-react";
 import { NavIcon } from "./ui/nav-icon-3d";
 import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
-import { Loading } from "./ui/loading";
+import { Skeleton } from "./ui/skeleton";
+import { cn } from "./ui/utils";
 
 interface Weapon {
   id: string;
@@ -69,6 +70,43 @@ interface WeaponAgg {
   weapon: Weapon;
   count: number;
   avgRating: number | null;
+}
+
+function MetaViewSkeleton() {
+  const block = "bg-white/[0.06]";
+
+  return (
+    <>
+      {/* Header */}
+      <div className="flex items-center justify-between gap-5 w-full flex-wrap">
+        <div className="flex flex-col gap-2">
+          <Skeleton className={cn("h-9 w-40", block)} />
+          <Skeleton className={cn("h-4 w-64 max-w-full", block)} />
+        </div>
+        <Skeleton className={cn("h-10 w-64 rounded-xl", block)} />
+      </div>
+
+      {/* Scope tabs */}
+      <Skeleton className={cn("h-9 w-72 rounded-xl", block)} />
+
+      {/* Tier rows */}
+      <div className="flex flex-col gap-4 w-full">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-stretch rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden h-[164px]"
+          >
+            <Skeleton className={cn("w-16 shrink-0 rounded-none", block)} />
+            <div className="flex-1 flex flex-wrap gap-3 p-4">
+              {Array.from({ length: 4 }).map((_, j) => (
+                <Skeleton key={j} className={cn("w-[132px] h-[132px] rounded-xl", block)} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
 }
 
 export function MetaView() {
@@ -181,7 +219,11 @@ export function MetaView() {
     `/${selectedGame}/explore${weapon.type ? `?category=${encodeURIComponent(weapon.type)}` : ""}`;
 
   if (loading) {
-    return <Loading fullScreen />;
+    return (
+      <AppLayout selectedGame={selectedGame} onGameSelect={(id) => navigate(`/${id}/meta`)}>
+        <MetaViewSkeleton />
+      </AppLayout>
+    );
   }
 
   return (

@@ -15,7 +15,8 @@ import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
 import { ReactionButton } from "./ui/reaction-button";
 import { RatingRing } from "./ui/rating-ring";
 import { usePageTitle } from "../hooks/usePageTitle";
-import { Loading } from "./ui/loading";
+import { Skeleton } from "./ui/skeleton";
+import { cn } from "./ui/utils";
 import { VIDEO_PLATFORM_META, type LoadoutVideo } from "../utils/video";
 import { SOCIAL_LINK_FIELDS, formatCount, type SocialLinks, type SocialStats } from "../utils/social";
 import { ExternalLink } from "lucide-react";
@@ -66,6 +67,67 @@ interface Loadout {
 }
 
 type ReactionType = "like" | "dislike" | "favorite";
+
+function LoadoutPreviewSkeleton() {
+  const block = "bg-white/[0.06]";
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      {/* Weapon build */}
+      <Container>
+        <div className="flex items-center gap-4">
+          <Skeleton className={cn("w-16 h-16 rounded-full shrink-0", block)} />
+          <Skeleton className={cn("h-6 w-3/4", block)} />
+        </div>
+        <div className="flex flex-col items-center gap-2 py-4">
+          <Skeleton className={cn("w-full h-[220px] rounded-xl", block)} />
+        </div>
+        <div className="flex flex-col w-full gap-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-4 py-3 border-b border-white/5 w-full">
+              <Skeleton className={cn("w-6 h-6 rounded-md shrink-0", block)} />
+              <Skeleton className={cn("h-4 flex-1", block)} />
+            </div>
+          ))}
+        </div>
+      </Container>
+
+      <div className="flex flex-col gap-4">
+        {/* Description / Rating */}
+        <Container>
+          <Skeleton className={cn("h-3 w-24", block)} />
+          <Skeleton className={cn("h-4 w-full", block)} />
+          <Skeleton className={cn("h-4 w-2/3", block)} />
+          <div className="flex items-center w-full gap-2 pt-2">
+            <Skeleton className={cn("h-11 flex-1 rounded-xl", block)} />
+            <Skeleton className={cn("h-11 flex-1 rounded-xl", block)} />
+          </div>
+        </Container>
+
+        {/* Author */}
+        <Container>
+          <div className="flex flex-wrap items-center text-sm gap-4">
+            <Skeleton className={cn("w-20 h-20 rounded-lg shrink-0", block)} />
+            <div className="flex flex-col gap-2">
+              <Skeleton className={cn("h-4 w-32", block)} />
+              <Skeleton className={cn("h-8 w-40", block)} />
+            </div>
+          </div>
+        </Container>
+
+        {/* Share */}
+        <Container className="flex flex-row items-center gap-4">
+          <Skeleton className={cn("w-[104px] h-[104px] shrink-0", block)} />
+          <div className="flex-1 min-w-[200px] flex flex-col gap-3">
+            <Skeleton className={cn("h-3 w-28", block)} />
+            <Skeleton className={cn("h-3 w-full", block)} />
+            <Skeleton className={cn("h-9 w-32 rounded-xl", block)} />
+          </div>
+        </Container>
+      </div>
+    </div>
+  );
+}
 
 export function LoadoutPreview() {
   const { gameId = "mw4", loadoutId } = useParams<{ gameId: string; loadoutId: string }>();
@@ -220,7 +282,11 @@ export function LoadoutPreview() {
   );
 
   if (loading) {
-    return <Loading fullScreen />;
+    return (
+      <AppLayout selectedGame={gameId} onGameSelect={(id) => navigate(`/${id}/explore`)}>
+        <LoadoutPreviewSkeleton />
+      </AppLayout>
+    );
   }
 
   if (!loadout) {

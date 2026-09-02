@@ -2,6 +2,7 @@ import { WeaponImage } from "./WeaponImage";
 import { Tag } from "./tag";
 import { cn } from "./utils";
 import { Check } from "lucide-react";
+import { FireCardEffect } from "./FireCardEffect";
 
 type Weapon = {
   name: string;
@@ -24,6 +25,7 @@ export function WeaponCard({
   disabled = false,
   stat,
   className,
+  fire = false,
 }: {
   weapon: Weapon;
   onSelect: () => void;
@@ -31,13 +33,17 @@ export function WeaponCard({
   disabled?: boolean;
   stat?: string;
   className?: string;
+  /** Layers a shader flame effect over the card's edge -- reserve for a single standout card (e.g. the #1 meta weapon), not whole grids: each instance is its own WebGL context. */
+  fire?: boolean;
 }) {
   return (
+    <div className="relative">
+      {fire && <FireCardEffect radius={12} margin={{ x: 14, top: 30, bottom: 10 }} />}
     <button
       onClick={onSelect}
       disabled={disabled}
       className={cn(
-        "relative rounded-xl border transition-all flex flex-col p-2 sm:p-4",
+        "relative rounded-xl border transition-all flex flex-col p-2 sm:p-4 w-full h-full",
         selected
           ? "border-white/60 bg-white/[0.05]"
           : "border-white/[0.08] bg-[#121111] hover:border-white/20 hover:bg-[#1a161a]",
@@ -51,7 +57,7 @@ export function WeaponCard({
         </span>
       )}
       <div className="mx-4">
-        <WeaponImage imageUrl={weapon.imageUrl} variant="large" />
+        <WeaponImage imageUrl={weapon.imageUrl} variant="large" alt={weapon.name} />
       </div>
       <div className="flex gap-2 items-center w-full">
       {weapon.typeShort && <Tag>{weapon.typeShort}</Tag>}
@@ -59,5 +65,6 @@ export function WeaponCard({
       </div>
       {stat && <p className="text-xs font-teritary">{stat}</p>}
     </button>
+    </div>
   );
 }

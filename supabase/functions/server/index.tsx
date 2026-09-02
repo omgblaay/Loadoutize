@@ -295,6 +295,106 @@ app.post("/make-server-6db475c7/auth/signup", async (c) => {
   }
 });
 
+app.get("/make-server-6db475c7/nickname-available", async (c) => {
+  try {
+    const nickname = String(c.req.query("nickname") ?? "").toLowerCase().trim();
+    if (!NICKNAME_PATTERN.test(nickname)) {
+      return c.json({ error: "Nickname must be 3-20 characters: lowercase letters, numbers, - or _" }, 400);
+    }
+
+    const { data: existing, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('nickname', nickname)
+      .maybeSingle();
+    if (error) throw error;
+
+    return c.json({ available: !existing });
+  } catch (error) {
+    console.log(`Error checking nickname availability: ${error}`);
+    return c.json({ error: "Failed to check nickname", details: error.message }, 500);
+  }
+});
+
+// One-time step for a user who authenticated (e.g. via Google) but has no
+// `profiles` row yet -- creates it. Unlike PUT /users/me this only ever
+// inserts, so a user who already has a profile can't hit it again.
+app.post("/make-server-6db475c7/auth/complete-profile", async (c) => {
+  try {
+    const user = await getUserFromRequest(c);
+    if (!user?.id) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
+
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (existingProfile) {
+      return c.json({ error: "Profile already exists" }, 400);
+    }
+
+    const form = await c.req.formData();
+    const nickname = String(form.get('nickname') ?? "").toLowerCase().trim();
+    if (!NICKNAME_PATTERN.test(nickname)) {
+      return c.json({ error: "Nickname must be 3-20 characters: lowercase letters, numbers, - or _" }, 400);
+    }
+
+    const { data: existingNickname, error: existingError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('nickname', nickname)
+      .maybeSingle();
+    if (existingError) throw existingError;
+    if (existingNickname) {
+      return c.json({ error: "That nickname is already taken" }, 400);
+    }
+
+    const metadata = user.user_metadata ?? {};
+    const name = String(metadata.full_name ?? metadata.name ?? user.email?.split('@')[0] ?? "Player").trim();
+
+    // Avatar comes from the verified OAuth identity's own metadata (never a
+    // client-supplied URL -- fetching an arbitrary attacker-chosen URL
+    // server-side would be an SSRF vector).
+    let avatarPath: string | null = null;
+    const file = form.get('file');
+    if (file instanceof File) {
+      try {
+        avatarPath = await uploadAvatarBytes(user.id, new Uint8Array(await file.arrayBuffer()));
+      } catch (error) {
+        return c.json({ error: error.message }, 400);
+      }
+    } else {
+      const oauthAvatarUrl = metadata.avatar_url ?? metadata.picture ?? null;
+      if (oauthAvatarUrl) {
+        try {
+          const response = await fetch(oauthAvatarUrl);
+          if (response.ok) {
+            const bytes = new Uint8Array(await response.arrayBuffer());
+            avatarPath = await uploadAvatarBytes(user.id, bytes);
+          }
+        } catch (error) {
+          // Non-critical -- proceed without an avatar rather than failing registration.
+          console.log(`Could not re-host OAuth avatar: ${error}`);
+        }
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert({ id: user.id, nickname, name, avatar_path: avatarPath })
+      .select()
+      .single();
+    if (error) throw error;
+
+    return c.json({ profile: mapProfile(data) });
+  } catch (error) {
+    console.log(`Error completing profile: ${error}`);
+    return c.json({ error: "Failed to complete profile", details: error.message }, 500);
+  }
+});
+
 // ---------------------------------------------------------------------------
 // Profiles
 // ---------------------------------------------------------------------------
@@ -405,6 +505,32 @@ const IMAGE_SIGNATURES: { mime: string; ext: string; check: (b: Uint8Array) => b
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB for png/jpeg/webp
 const MAX_GIF_BYTES = 2 * 1024 * 1024; // 2MB -- "small gifs" only
 
+// Checks magic bytes + size and throws a user-facing message if invalid --
+// shared by the direct-upload route and Google-onboarding's "re-host their
+// picture" path.
+function validateAvatarBytes(bytes: Uint8Array) {
+  const signature = IMAGE_SIGNATURES.find((s) => s.check(bytes));
+  if (!signature) {
+    throw new Error("File must be a PNG, JPEG, WEBP, or GIF image");
+  }
+  const maxBytes = signature.mime === 'image/gif' ? MAX_GIF_BYTES : MAX_IMAGE_BYTES;
+  if (bytes.length > maxBytes) {
+    throw new Error(`File too large -- max ${Math.round(maxBytes / 1024 / 1024)}MB`);
+  }
+  return signature;
+}
+
+// Validates + uploads to the avatars bucket, returning the storage path.
+async function uploadAvatarBytes(userId: string, bytes: Uint8Array): Promise<string> {
+  const signature = validateAvatarBytes(bytes);
+  const path = `${userId}/avatar.${signature.ext}`;
+  const { error: uploadError } = await supabase.storage
+    .from(AVATARS_BUCKET)
+    .upload(path, bytes, { contentType: signature.mime, upsert: true });
+  if (uploadError) throw uploadError;
+  return path;
+}
+
 app.post("/make-server-6db475c7/users/me/avatar", async (c) => {
   try {
     const user = await getUserFromRequest(c);
@@ -419,21 +545,12 @@ app.post("/make-server-6db475c7/users/me/avatar", async (c) => {
     }
 
     const bytes = new Uint8Array(await file.arrayBuffer());
-    const signature = IMAGE_SIGNATURES.find((s) => s.check(bytes));
-    if (!signature) {
-      return c.json({ error: "File must be a PNG, JPEG, WEBP, or GIF image" }, 400);
+    try {
+      validateAvatarBytes(bytes);
+    } catch (error) {
+      return c.json({ error: error.message }, 400);
     }
-
-    const maxBytes = signature.mime === 'image/gif' ? MAX_GIF_BYTES : MAX_IMAGE_BYTES;
-    if (bytes.length > maxBytes) {
-      return c.json({ error: `File too large -- max ${Math.round(maxBytes / 1024 / 1024)}MB` }, 400);
-    }
-
-    const path = `${user.id}/avatar.${signature.ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from(AVATARS_BUCKET)
-      .upload(path, bytes, { contentType: signature.mime, upsert: true });
-    if (uploadError) throw uploadError;
+    const path = await uploadAvatarBytes(user.id, bytes);
 
     const { data, error } = await supabase
       .from('profiles')

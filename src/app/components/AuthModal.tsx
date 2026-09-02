@@ -1,10 +1,39 @@
 import { useState } from "react";
 import { useAuth } from "./AuthContext";
 import { X, LogIn, UserPlus } from "lucide-react";
+import { projectId } from "../../../utils/supabase/info";
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-4 h-4" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.48a5.54 5.54 0 0 1-2.4 3.63v3.02h3.88c2.27-2.09 3.56-5.17 3.56-8.84Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.96-1.07 7.96-2.9l-3.88-3.02c-1.08.72-2.46 1.15-4.08 1.15-3.13 0-5.78-2.11-6.73-4.96H1.26v3.11A12 12 0 0 0 12 24Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.27 14.27a7.2 7.2 0 0 1 0-4.54V6.62H1.26a12 12 0 0 0 0 10.76l4.01-3.11Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.77c1.76 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.26 6.62l4.01 3.11C6.22 6.88 8.87 4.77 12 4.77Z"
+      />
+    </svg>
+  );
+}
+
+function continueWithGoogle() {
+  const redirectTo = `${window.location.origin}/auth/callback`;
+  window.location.href = `https://${projectId}.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`;
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
@@ -67,6 +96,21 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 ? "Sign in to create and share loadouts"
                 : "Join the LOADOUTIZE community"}
             </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={continueWithGoogle}
+            className="w-full bg-white hover:bg-white/90 text-black font-semibold py-2.5 transition-all flex items-center justify-center gap-2.5 rounded-md text-sm"
+          >
+            <GoogleIcon />
+            Continue with Google
+          </button>
+
+          <div className="flex items-center gap-3 my-5">
+            <div className="h-px flex-1 bg-white/5" />
+            <span className="text-xs text-neutral-500 font-medium">OR</span>
+            <div className="h-px flex-1 bg-white/5" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

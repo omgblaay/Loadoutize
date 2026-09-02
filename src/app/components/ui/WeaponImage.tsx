@@ -1,4 +1,4 @@
-export function WeaponImage({ imageUrl, variant }: {  imageUrl?: string | null; variant?: "small" | "large" }) {
+export function WeaponImage({ imageUrl, variant, alt = "" }: {  imageUrl?: string | null; variant?: "small" | "large"; alt?: string }) {
     const getVariantClasses = () => {
         switch (variant) {
             case "small":
@@ -13,7 +13,7 @@ export function WeaponImage({ imageUrl, variant }: {  imageUrl?: string | null; 
   return (
     <div
       className={getVariantClasses()}>
-        <img src={imageUrl ?? undefined} alt="" className="flex aspect-[2/1] w-full items-center justify-center object-fit" />
+        <img src={imageUrl ?? undefined} alt={alt} className="flex aspect-[2/1] w-full items-center justify-center object-fit" />
     </div>
   );    
 }

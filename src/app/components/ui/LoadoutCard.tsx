@@ -2,6 +2,7 @@ import * as React from "react";
 import { WeaponImage } from "./WeaponImage";
 import { Tag } from "./tag";
 import { RatingRing } from "./rating-ring";
+import { FireCardEffect } from "./FireCardEffect";
 import { VIDEO_PLATFORM_META, type LoadoutVideo } from "../../utils/video";
 
 export interface CardLoadout {
@@ -52,6 +53,7 @@ export function LoadoutCard({
   gameShort,
   index,
   onClick,
+  fire = false,
 }: {
   loadout: CardLoadout;
   weapons: CardWeapon[];
@@ -61,6 +63,8 @@ export function LoadoutCard({
   gameShort: string;
   index: number;
   onClick: () => void;
+  /** Layers a shader flame effect over the card's edge -- reserve for a single standout card (e.g. the #1 ranked loadout), not whole grids: each instance is its own WebGL context. */
+  fire?: boolean;
 }) {
   const primaryWeaponId = loadout.weapons?.[0]?.id;
   const primaryWeaponData = weapons.find((w) => w.id === primaryWeaponId);
@@ -82,9 +86,11 @@ export function LoadoutCard({
           : "#FF4D63";
 
   return (
+    <div className="relative w-full">
+      {fire && <FireCardEffect radius={12} />}
     <button
       onClick={onClick}
-      className="relative bg-card rounded-xl border border-white/[0.08] hover:bg-[#1a161a] hover:border-white/20 transition-all flex flex-col text-left overflow-hidden w-full"
+      className="relative bg-card rounded-xl border border-white/[0.08] hover:bg-[#1a161a] hover:border-white/20 transition-all flex flex-col text-left overflow-hidden w-full h-full"
       style={{
         boxShadow: "0px 30px 70px -36px rgba(0,0,0,0.85)",
       }}
@@ -153,5 +159,6 @@ export function LoadoutCard({
 
       <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[inset_0px_0px_0px_1px_rgba(255,255,255,0.07)]" />
     </button>
+    </div>
   );
 }

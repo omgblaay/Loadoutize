@@ -12,8 +12,14 @@ interface User {
 interface AuthContextType {
   user: User | null;
   accessToken: string | null;
+  /** Google's profile picture URL while the user is mid-onboarding (no profile yet); null otherwise. */
+  pendingOAuthAvatarUrl: string | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string, nickname: string) => Promise<void>;
+  /** Adopts an already-issued Supabase access token (e.g. from an OAuth redirect) without a password grant. Resolves to whether the user already has a profile. */
+  loginWithAccessToken: (token: string) => Promise<boolean>;
+  /** Creates the `profiles` row for a user who authenticated but doesn't have one yet (Google onboarding). */
+  completeProfile: (nickname: string, avatarFile: File | null) => Promise<void>;
   logout: () => void;
   loading: boolean;
   /** Re-fetches the profile fields (nickname/avatarUrl) onto the current user -- call after editing them in Settings. */
@@ -26,8 +32,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  // Google's profile picture URL for a user mid-onboarding (no `profiles`
+  // row yet) -- shown as the default avatar on the "complete your profile"
+  // step. Cleared once that step is done.
+  const [pendingOAuthAvatarUrl, setPendingOAuthAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
+    // /auth/callback adopts its own token via loginWithAccessToken -- running
+    // checkSession() there too would race it (both mount-time effects mutate
+    // the same user/accessToken state), and whichever resolves last wins,
+    // potentially silently swapping back to a stale logged-in identity.
+    if (window.location.pathname === "/auth/callback") {
+      setLoading(false);
+      return;
+    }
     checkSession();
   }, []);
 
@@ -146,11 +164,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     setAccessToken(null);
+    setPendingOAuthAvatarUrl(null);
     localStorage.removeItem("access_token");
   };
 
+  // Used after an OAuth redirect (e.g. Google): we already have a Supabase
+  // access token from the URL fragment, so this just validates it and loads
+  // the user the same way checkSession/login do -- no password grant. The
+  // profile fetch is expected to 404 for a brand-new OAuth user; fetchProfile
+  // already returns null in that case rather than throwing.
+  const loginWithAccessToken = async (token: string) => {
+    const response = await fetch(`https://${projectId}.supabase.co/auth/v1/user`, {
+      headers: { Authorization: `Bearer ${token}`, apikey: publicAnonKey },
+    });
+    const userData = await response.json();
+    if (!response.ok) {
+      throw new Error(userData.error_description || userData.msg || "Failed to sign in");
+    }
+
+    const profile = await fetchProfile(token);
+    setUser({
+      id: userData.id,
+      email: userData.email,
+      name: userData.user_metadata?.name || userData.email.split("@")[0],
+      nickname: profile?.nickname ?? null,
+      avatarUrl: profile?.avatarUrl ?? null,
+    });
+    setPendingOAuthAvatarUrl(
+      profile ? null : userData.user_metadata?.avatar_url || userData.user_metadata?.picture || null
+    );
+    setAccessToken(token);
+    localStorage.setItem("access_token", token);
+    return !!profile;
+  };
+
+  const completeProfile = async (nickname: string, avatarFile: File | null) => {
+    if (!accessToken) throw new Error("Not signed in");
+
+    const form = new FormData();
+    form.append("nickname", nickname);
+    if (avatarFile) form.append("file", avatarFile);
+
+    const response = await fetch(
+      `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/auth/complete-profile`,
+      { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: form }
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to complete profile");
+    }
+
+    setUser((prev) => (prev ? { ...prev, nickname: data.profile.nickname, avatarUrl: data.profile.avatarUrl } : prev));
+    setPendingOAuthAvatarUrl(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, accessToken, login, signup, logout, loading, refreshProfile }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        accessToken,
+        pendingOAuthAvatarUrl,
+        login,
+        signup,
+        loginWithAccessToken,
+        completeProfile,
+        logout,
+        loading,
+        refreshProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

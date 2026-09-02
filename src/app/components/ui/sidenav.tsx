@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { HomeIcon, Globe, Flame, Crown, Zap, Menu, X } from "lucide-react";
 import { SideNavButton } from "./sidenav-button";
-import { SearchBar } from "./searchbar";
 import { AppTooltip } from "./tooltip";
 import { NavIcon, type NavIconKey } from "./nav-icon-3d";
 
@@ -174,13 +173,13 @@ export function SideNav({
           <div className="flex flex-col items-center gap-1 w-full">
             {categories.map((cat) => (
               <AppTooltip key={cat.name} content={cat.name} side="right">
-                <button
+                <SideNavButton
                   onClick={() => go(`/${selectedGame}/explore?category=${encodeURIComponent(cat.name)}`)}
                   aria-label={cat.name}
                   className="min-h-10 w-11 rounded-xl flex items-center justify-center text-[#fafafa] uppercase text-[11px] font-semibold hover:bg-white/[0.05]"
                 >
                   {cat.typeShort ?? cat.name.slice(0, 3)}
-                </button>
+                </SideNavButton>
               </AppTooltip>
             ))}
           </div>
@@ -193,7 +192,7 @@ export function SideNav({
         aria-label="Primary"
       >
         <div className="grid grid-cols-5 h-14">
-          <button
+          <SideNavButton
             onClick={() => go("/")}
             aria-label="Home"
             aria-current={isHome ? "page" : undefined}
@@ -202,8 +201,8 @@ export function SideNav({
           >
             <NavIcon icon="home" flat={<HomeIcon className="w-5 h-5" />} active={isHome} hovered={hoveredIcon === "home"} />
             <span className="text-[9px] uppercase tracking-[0.3px] font-medium">Home</span>
-          </button>
-          <button
+          </SideNavButton>
+          <SideNavButton    
             onClick={() => go(`/${selectedGame}/explore`)}
             aria-label="Explore"
             aria-current={isExplore ? "page" : undefined}
@@ -212,16 +211,16 @@ export function SideNav({
           >
             <NavIcon icon="explore" flat={<Globe className="w-5 h-5" />} active={isExplore} hovered={hoveredIcon === "explore"} />
             <span className="text-[9px] uppercase tracking-[0.3px] font-medium">Explore</span>
-          </button>
-          <button
+          </SideNavButton>
+          <SideNavButton
             aria-label="Trending"
             className="flex flex-col items-center justify-center gap-0.5 text-[#8d898a]"
             {...hoverHandlers("trending")}
           >
             <NavIcon icon="trending" flat={<Flame className="w-5 h-5" />} active={false} hovered={hoveredIcon === "trending"} />
             <span className="text-[9px] uppercase tracking-[0.3px] font-medium">Trending</span>
-          </button>
-          <button
+          </SideNavButton>
+          <SideNavButton
             onClick={() => go(`/${selectedGame}/meta`)}
             aria-label="Meta"
             aria-current={isMeta ? "page" : undefined}
@@ -230,15 +229,15 @@ export function SideNav({
           >
             <NavIcon icon="meta" flat={<Crown className="w-5 h-5" />} active={isMeta} hovered={hoveredIcon === "meta"} />
             <span className="text-[9px] uppercase tracking-[0.3px] font-medium">Meta</span>
-          </button>
-          <button
+          </SideNavButton>
+          <SideNavButton
             onClick={() => setExpanded(true)}
             aria-label="More"
             className="flex flex-col items-center justify-center gap-0.5 text-[#8d898a]"
           >
             <Menu className="w-5 h-5" />
             <span className="text-[9px] uppercase tracking-[0.3px] font-medium">More</span>
-          </button>
+          </SideNavButton>
         </div>
       </nav>
 
