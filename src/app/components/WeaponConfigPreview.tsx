@@ -94,10 +94,10 @@ export function WeaponConfigPreview() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-neutral-950">
         <div className="text-center">
-          <h1 className="text-2xl font-black text-white mb-4">Weapon Config Not Found</h1>
+          <h1 className="text-2xl font-black text-[#fafafa] mb-4">Weapon Config Not Found</h1>
           <button
             onClick={() => navigate(`/${gameId}/explore`)}
-            className="bg-white text-neutral-900 font-bold py-3 px-6"
+            className="bg-[#fafafa] text-neutral-900 font-bold py-3 px-6"
           >
             Back to Game
           </button>
@@ -116,7 +116,7 @@ export function WeaponConfigPreview() {
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate(`/${gameId}/explore`)}
-              className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors font-medium"
+              className="flex items-center gap-2 text-neutral-400 hover:text-[#fafafa] transition-colors font-medium"
             >
               <ArrowLeft className="w-5 h-5" />
               Back
@@ -124,7 +124,7 @@ export function WeaponConfigPreview() {
             <div className="flex items-center gap-3">
               <button
                 onClick={copyShareLink}
-                className="flex items-center gap-2 px-4 py-2 border-2 border-neutral-700 hover:border-neutral-600 text-white font-bold transition-colors"
+                className="flex items-center gap-2 px-4 py-2 border-2 border-neutral-700 hover:border-neutral-600 text-[#fafafa] font-bold transition-colors"
               >
                 <Share2 className="w-4 h-4" />
                 Share
@@ -151,7 +151,7 @@ export function WeaponConfigPreview() {
           >
             Weapon Config
           </div>
-          <h1 className="text-5xl font-black text-white mb-4 tracking-tight">
+          <h1 className="text-5xl font-black text-[#fafafa] mb-4 tracking-tight">
             {config.name}
           </h1>
           <div className="flex items-center gap-6 mb-6">
@@ -162,7 +162,7 @@ export function WeaponConfigPreview() {
               >
                 <User className="w-4 h-4 text-neutral-900" />
               </div>
-              <span className="font-semibold text-white">{config.userName}</span>
+              <span className="font-semibold text-[#fafafa]">{config.userName}</span>
             </div>
             <div className="flex items-center gap-4 text-neutral-500">
               <div className="flex items-center gap-2">
@@ -193,16 +193,16 @@ export function WeaponConfigPreview() {
             Base Weapon
           </h2>
           <div className="bg-neutral-950 border border-neutral-800 p-6">
-            <h3 className="text-3xl font-black text-white mb-2">{config.weapon.name}</h3>
+            <h3 className="text-3xl font-black text-[#fafafa] mb-2">{config.weapon.name}</h3>
             <p className="text-lg text-neutral-400 mb-6">{config.weapon.type}</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div>
                 <span className="text-xs text-neutral-500 uppercase tracking-wider">Damage</span>
-                <p className="text-2xl text-white font-black">{config.weapon.damage}</p>
+                <p className="text-2xl text-[#fafafa] font-black">{config.weapon.damage}</p>
               </div>
               <div>
                 <span className="text-xs text-neutral-500 uppercase tracking-wider">Fire Rate</span>
-                <p className="text-2xl text-white font-black">{config.weapon.fireRate}</p>
+                <p className="text-2xl text-[#fafafa] font-black">{config.weapon.fireRate}</p>
               </div>
             </div>
           </div>
@@ -222,7 +222,7 @@ export function WeaponConfigPreview() {
                   <p className="text-xs text-neutral-500 uppercase tracking-wider mb-2">
                     {attachment.type}
                   </p>
-                  <p className="text-lg font-black text-white">{attachment.name}</p>
+                  <p className="text-lg font-black text-[#fafafa]">{attachment.name}</p>
                 </div>
               ))}
             </div>
@@ -232,7 +232,7 @@ export function WeaponConfigPreview() {
         <div className="flex justify-center">
           <button
             onClick={likeConfig}
-            className="flex items-center gap-3 px-8 py-4 border-2 border-neutral-700 hover:text-neutral-900 text-white font-black text-lg transition-all"
+            className="flex items-center gap-3 px-8 py-4 border-2 border-neutral-700 hover:text-neutral-900 text-[#fafafa] font-black text-lg transition-all"
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "#fafafa";
               e.currentTarget.style.borderColor = "#fafafa";

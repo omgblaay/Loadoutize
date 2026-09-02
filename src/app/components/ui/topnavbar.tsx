@@ -31,7 +31,7 @@ export function TopNavBar({
   const activeName = orderedGames.find((g) => g.id === selectedGame)?.name ?? activeMeta?.name ?? selectedGame;
   const ActiveIcon = activeMeta?.icon ?? Globe;
     return (<div className="w-full backdrop-blur-md bg-[rgba(6,5,9,0.6)] border-b border-white/[0.16] sticky top-0 z-40">
-        <div className="max-w-[1440px] mx-auto px-6 h-[72px] flex items-center gap-5">
+        <div className="max-w-[1440px] mx-auto p-2 sm:p-6  h-[72px] flex items-center gap-5">
           <div className="flex items-center gap-3 shrink-0">
             <a href="/" className="flex items-center gap-1.5">
               <Logo />
@@ -91,7 +91,7 @@ export function TopNavBar({
                 onMouseLeave={() => setFavouritesHovered(false)}
               >
                 <NavIcon icon="favourites" flat={<Heart className="w-4 h-4" />} active={false} hovered={favouritesHovered} size={16} />
-                <span>Favourites</span>
+                <span className="sm:block hidden">Favourites</span>
               </button>
             )}
             <button
@@ -103,11 +103,19 @@ export function TopNavBar({
             {user ? (
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => navigate(`/u/${user.name}`)}
-                  className="w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center text-white"
-                  style={{ backgroundImage: "linear-gradient(135deg, rgb(207,206,212) 0%, rgb(64,62,67) 100%)" }}
+                  onClick={() => navigate(`/u/${user.nickname ?? user.name}`)}
+                  className="w-12 h-12 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center text-[#fafafa]"
+                  style={
+                    user.avatarUrl
+                      ? undefined
+                      : { backgroundImage: "linear-gradient(135deg, rgb(207,206,212) 0%, rgb(64,62,67) 100%)" }
+                  }
                 >
-                  {user.email?.[0]?.toUpperCase() || "U"}
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    user.email?.[0]?.toUpperCase() || "U"
+                  )}
                 </button>
                 <button onClick={logout} className="text-[#979098] hover:text-[#efedf1]">
                   <LogOut className="w-4 h-4" />

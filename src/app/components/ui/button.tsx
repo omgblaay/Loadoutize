@@ -4,31 +4,31 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "./utils";
 import { AppTooltip } from "./tooltip";
+<title>Loadoutize - Compio</title>
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-all [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:opacity-50 disabled:cursor-not-allowed",
   {
     variants: {
       variant: {
-        default: "text-primary-foreground hover:bg-white/5",
+        default: "bg-slate-100 text-[#0C0B0B] hover:bg-[#D8CED6]",
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20",
+          "bg-destructive hover:bg-destructive/90 focus-visible:ring-destructive/20",
         outline:
-          "border border-secondary text-foreground hover:bg-secondary hover:text-accent-foreground dark:bg-input/30",
+            "rounded-xl border border-white/[0.18] text-teritary hover:border-white hover:text-[#efedf1]",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-container-alt alt-foreground hover:bg-[#353132]",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
-        sidenav: "min-h-[52px] text-[#fafafa] hover:bg-white/[0.05] rounded-xl px-4 flex gap-2 text-[#fafafa] uppercase text-[14px] font-medium hover:bg-white/[0.05]",
-        sidenavActive: "min-h-[52px] text-[#fafafa] hover:bg-white/[0.05] bg-white/[0.08] text-[#fafafa] rounded-xl px-4 flex gap-2 text-[#fafafa] uppercase text-[14px] font-medium hover:bg-white/[0.05]",
-
+          "hover:bg-accent hover:bg-white/10",
+        link: "underline-offset-4 hover:underline",
+        sidenav: "min-h-[52px] hover:bg-white/[0.05] rounded-xl px-4 flex gap-2 uppercase hover:bg-white/[0.05]",
+        sidenavActive: "min-h-[52px] hover:bg-white/[0.05] bg-white/[0.08] rounded-xl px-4 flex gap-2 uppercase  hover:bg-white/[0.05]",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        default: "h-10 px-6 has-[>svg]:px-4",
         sm: "h-8 gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 px-6 has-[>svg]:px-4",
-        icon: "size-9",
+        icon: "h-10 aspect-square p-0",
+        iconsm: "h-8 aspect-square p-0",
       },
     },
     defaultVariants: {

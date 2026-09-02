@@ -42,6 +42,170 @@ async function getUserFromRequest(c: any) {
   return user ?? null;
 }
 
+const AVATARS_BUCKET = "avatars";
+const NICKNAME_PATTERN = /^[a-z0-9_-]{3,20}$/;
+
+function avatarUrl(path: string | null): string | null {
+  return path ? `${SUPABASE_URL}/storage/v1/object/public/${AVATARS_BUCKET}/${path}` : null;
+}
+
+function mapProfile(p: any) {
+  return {
+    id: p.id,
+    nickname: p.nickname,
+    name: p.name,
+    avatarUrl: avatarUrl(p.avatar_path),
+    links: {
+      tiktok: p.tiktok ?? null,
+      instagram: p.instagram ?? null,
+      youtube: p.youtube ?? null,
+      twitch: p.twitch ?? null,
+      kick: p.kick ?? null,
+    },
+    socialStats: p.social_stats ?? null,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Social follower/subscriber counts -- best-effort. Only Kick has a real
+// public API; the rest scrape public pages or use undocumented endpoints, so
+// any of these can silently start returning null if a platform changes its
+// markup, rate-limits this server's IP, or tightens access further. Fetched
+// in parallel and cached on profiles.social_stats whenever links are edited
+// (see PUT /users/me) rather than live on every profile view.
+// ---------------------------------------------------------------------------
+
+const BROWSER_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+
+async function fetchKickFollowers(handle: string): Promise<number | null> {
+  try {
+    const response = await fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(handle)}`, {
+      headers: { "User-Agent": BROWSER_USER_AGENT },
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return typeof data.followers_count === "number" ? data.followers_count : null;
+  } catch (error) {
+    console.log(`Could not fetch Kick followers: ${error}`);
+    return null;
+  }
+}
+
+async function fetchTikTokFollowers(handle: string): Promise<number | null> {
+  try {
+    const response = await fetch(`https://www.tiktok.com/@${encodeURIComponent(handle)}`, {
+      headers: { "User-Agent": BROWSER_USER_AGENT },
+    });
+    if (!response.ok) return null;
+    const html = await response.text();
+    const match = html.match(/"followerCount":(\d+)/);
+    return match ? Number(match[1]) : null;
+  } catch (error) {
+    console.log(`Could not fetch TikTok followers: ${error}`);
+    return null;
+  }
+}
+
+function parseCompactCount(text: string): number | null {
+  const match = text.replace(/,/g, "").match(/^([\d.]+)([KM])?$/);
+  if (!match) return null;
+  const n = parseFloat(match[1]);
+  if (match[2] === "M") return Math.round(n * 1_000_000);
+  if (match[2] === "K") return Math.round(n * 1_000);
+  return Math.round(n);
+}
+
+// YouTube channel pages also echo other creators' subscriber counts in
+// "recommended channel" shelves elsewhere on the same page, so a single
+// regex match can grab the wrong number -- the real channel's own count is
+// the one that recurs most often (it's duplicated across several metadata
+// blocks for the page's own channel), so take the mode rather than the first match.
+async function fetchYouTubeSubscribers(handle: string): Promise<number | null> {
+  try {
+    const response = await fetch(`https://www.youtube.com/@${encodeURIComponent(handle)}`, {
+      headers: { "User-Agent": BROWSER_USER_AGENT, "Accept-Language": "en-US,en;q=0.9" },
+    });
+    if (!response.ok) return null;
+    const html = await response.text();
+    const matches = [...html.matchAll(/"simpleText":"([\d.,]+[KM]?) subscribers?"/g)].map((m) => m[1]);
+    if (!matches.length) return null;
+
+    const counts = new Map<string, number>();
+    for (const m of matches) counts.set(m, (counts.get(m) ?? 0) + 1);
+    const [mode] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
+    return parseCompactCount(mode);
+  } catch (error) {
+    console.log(`Could not fetch YouTube subscribers: ${error}`);
+    return null;
+  }
+}
+
+async function fetchTwitchFollowers(handle: string): Promise<number | null> {
+  try {
+    // Twitch gated its official follower-count endpoint behind the
+    // broadcaster's own OAuth token in 2023 specifically to stop this kind
+    // of read -- there is no documented public REST equivalent. This uses
+    // the same public (non-secret) Client-Id Twitch's own web frontend uses,
+    // against their internal GraphQL API, for a read-only public query.
+    const response = await fetch("https://gql.twitch.tv/gql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Client-Id": "kimne78kx3ncx6brgo4mv6wki5h1ko" },
+      body: JSON.stringify([
+        {
+          operationName: "ChannelFollows",
+          variables: { login: handle },
+          query: "query ChannelFollows($login: String!) { user(login: $login) { followers { totalCount } } }",
+        },
+      ]),
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    const count = data?.[0]?.data?.user?.followers?.totalCount;
+    return typeof count === "number" ? count : null;
+  } catch (error) {
+    console.log(`Could not fetch Twitch followers: ${error}`);
+    return null;
+  }
+}
+
+async function fetchInstagramFollowers(handle: string): Promise<number | null> {
+  try {
+    // Instagram's web profile-info endpoint generally 401s with
+    // require_login for non-browser-session requests -- kept as a genuine
+    // best-effort attempt (it may succeed from some IPs/sessions) rather
+    // than skipped outright, but null is the expected common case.
+    const response = await fetch(
+      `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(handle)}`,
+      { headers: { "User-Agent": BROWSER_USER_AGENT, "X-IG-App-ID": "936619743392459" } }
+    );
+    if (!response.ok) return null;
+    const data = await response.json();
+    const count = data?.data?.user?.edge_followed_by?.count;
+    return typeof count === "number" ? count : null;
+  } catch (error) {
+    console.log(`Could not fetch Instagram followers: ${error}`);
+    return null;
+  }
+}
+
+async function refreshSocialStats(links: {
+  tiktok: string | null;
+  instagram: string | null;
+  youtube: string | null;
+  twitch: string | null;
+  kick: string | null;
+}) {
+  const [tiktok, instagram, youtube, twitch, kick] = await Promise.all([
+    links.tiktok ? fetchTikTokFollowers(links.tiktok) : Promise.resolve(null),
+    links.instagram ? fetchInstagramFollowers(links.instagram) : Promise.resolve(null),
+    links.youtube ? fetchYouTubeSubscribers(links.youtube) : Promise.resolve(null),
+    links.twitch ? fetchTwitchFollowers(links.twitch) : Promise.resolve(null),
+    links.kick ? fetchKickFollowers(links.kick) : Promise.resolve(null),
+  ]);
+  return { tiktok, instagram, youtube, twitch, kick, fetchedAt: new Date().toISOString() };
+}
+
 // Directus-uploaded images are stored in the Supabase Storage bucket
 // configured in docker-compose.yml (STORAGE_SUPABASE_ROOT is empty, so
 // objects sit at the bucket root under directus_files.filename_disk).
@@ -85,6 +249,21 @@ app.get("/make-server-6db475c7/health", (c) => {
 app.post("/make-server-6db475c7/auth/signup", async (c) => {
   try {
     const body = await c.req.json();
+    const nickname = String(body.nickname ?? "").toLowerCase().trim();
+    if (!NICKNAME_PATTERN.test(nickname)) {
+      return c.json({ error: "Nickname must be 3-20 characters: lowercase letters, numbers, - or _" }, 400);
+    }
+
+    const { data: existing, error: existingError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('nickname', nickname)
+      .maybeSingle();
+    if (existingError) throw existingError;
+    if (existing) {
+      return c.json({ error: "That nickname is already taken" }, 400);
+    }
+
     const { data, error } = await supabase.auth.admin.createUser({
       email: body.email,
       password: body.password,
@@ -98,10 +277,190 @@ app.post("/make-server-6db475c7/auth/signup", async (c) => {
       return c.json({ error: error.message }, 400);
     }
 
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({ id: data.user.id, nickname, name: body.name });
+    if (profileError) {
+      // Nickname race lost, or some other insert failure -- don't leave an
+      // auth user with no profile behind.
+      await supabase.auth.admin.deleteUser(data.user.id);
+      console.log(`Signup profile error: ${profileError.message}`);
+      return c.json({ error: "That nickname is already taken" }, 400);
+    }
+
     return c.json({ user: data.user });
   } catch (error) {
     console.log(`Error during signup: ${error}`);
     return c.json({ error: "Failed to sign up", details: error.message }, 500);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Profiles
+// ---------------------------------------------------------------------------
+
+app.get("/make-server-6db475c7/users/me", async (c) => {
+  try {
+    const user = await getUserFromRequest(c);
+    if (!user?.id) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
+
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    if (error) throw error;
+    if (!data) return c.json({ error: "Profile not found" }, 404);
+
+    return c.json({ profile: mapProfile(data) });
+  } catch (error) {
+    console.log(`Error fetching own profile: ${error}`);
+    return c.json({ error: "Failed to fetch profile", details: error.message }, 500);
+  }
+});
+
+app.put("/make-server-6db475c7/users/me", async (c) => {
+  try {
+    const user = await getUserFromRequest(c);
+    if (!user?.id) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
+
+    const body = await c.req.json();
+    const update: Record<string, any> = { updated_at: new Date().toISOString() };
+
+    if (body.name != null) {
+      const name = String(body.name).trim();
+      if (!name) return c.json({ error: "Name is required" }, 400);
+      update.name = name;
+    }
+
+    if (body.nickname != null) {
+      const nickname = String(body.nickname).toLowerCase().trim();
+      if (!NICKNAME_PATTERN.test(nickname)) {
+        return c.json({ error: "Nickname must be 3-20 characters: lowercase letters, numbers, - or _" }, 400);
+      }
+      const { data: existing, error: existingError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('nickname', nickname)
+        .neq('id', user.id)
+        .maybeSingle();
+      if (existingError) throw existingError;
+      if (existing) return c.json({ error: "That nickname is already taken" }, 400);
+      update.nickname = nickname;
+    }
+
+    for (const platform of ['tiktok', 'instagram', 'youtube', 'twitch', 'kick']) {
+      if (body.links && platform in body.links) {
+        const handle = String(body.links[platform] ?? "").trim().replace(/^@/, "");
+        update[platform] = handle || null;
+      }
+    }
+
+    if (body.links) {
+      const { data: current } = await supabase
+        .from('profiles')
+        .select('tiktok, instagram, youtube, twitch, kick')
+        .eq('id', user.id)
+        .maybeSingle();
+      const finalLinks = {
+        tiktok: 'tiktok' in update ? update.tiktok : current?.tiktok ?? null,
+        instagram: 'instagram' in update ? update.instagram : current?.instagram ?? null,
+        youtube: 'youtube' in update ? update.youtube : current?.youtube ?? null,
+        twitch: 'twitch' in update ? update.twitch : current?.twitch ?? null,
+        kick: 'kick' in update ? update.kick : current?.kick ?? null,
+      };
+      update.social_stats = await refreshSocialStats(finalLinks);
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(update)
+      .eq('id', user.id)
+      .select()
+      .single();
+    if (error) throw error;
+
+    return c.json({ profile: mapProfile(data) });
+  } catch (error) {
+    console.log(`Error updating profile: ${error}`);
+    return c.json({ error: "Failed to update profile", details: error.message }, 500);
+  }
+});
+
+// Real file-type enforcement -- checks magic bytes rather than trusting the
+// client's declared Content-Type/extension, either of which can lie.
+const IMAGE_SIGNATURES: { mime: string; ext: string; check: (b: Uint8Array) => boolean }[] = [
+  { mime: 'image/png', ext: 'png', check: (b) => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47 },
+  { mime: 'image/jpeg', ext: 'jpg', check: (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff },
+  {
+    mime: 'image/webp',
+    ext: 'webp',
+    check: (b) =>
+      b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
+      b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50,
+  },
+  { mime: 'image/gif', ext: 'gif', check: (b) => b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38 },
+];
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB for png/jpeg/webp
+const MAX_GIF_BYTES = 2 * 1024 * 1024; // 2MB -- "small gifs" only
+
+app.post("/make-server-6db475c7/users/me/avatar", async (c) => {
+  try {
+    const user = await getUserFromRequest(c);
+    if (!user?.id) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
+
+    const form = await c.req.formData();
+    const file = form.get('file');
+    if (!(file instanceof File)) {
+      return c.json({ error: "No file uploaded" }, 400);
+    }
+
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const signature = IMAGE_SIGNATURES.find((s) => s.check(bytes));
+    if (!signature) {
+      return c.json({ error: "File must be a PNG, JPEG, WEBP, or GIF image" }, 400);
+    }
+
+    const maxBytes = signature.mime === 'image/gif' ? MAX_GIF_BYTES : MAX_IMAGE_BYTES;
+    if (bytes.length > maxBytes) {
+      return c.json({ error: `File too large -- max ${Math.round(maxBytes / 1024 / 1024)}MB` }, 400);
+    }
+
+    const path = `${user.id}/avatar.${signature.ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from(AVATARS_BUCKET)
+      .upload(path, bytes, { contentType: signature.mime, upsert: true });
+    if (uploadError) throw uploadError;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ avatar_path: path, updated_at: new Date().toISOString() })
+      .eq('id', user.id)
+      .select()
+      .single();
+    if (error) throw error;
+
+    return c.json({ profile: mapProfile(data) });
+  } catch (error) {
+    console.log(`Error uploading avatar: ${error}`);
+    return c.json({ error: "Failed to upload avatar", details: error.message }, 500);
+  }
+});
+
+app.get("/make-server-6db475c7/users/:nickname", async (c) => {
+  try {
+    const nickname = c.req.param("nickname").toLowerCase();
+    const { data, error } = await supabase.from('profiles').select('*').eq('nickname', nickname).maybeSingle();
+    if (error) throw error;
+    if (!data) return c.json({ error: "User not found" }, 404);
+
+    return c.json({ profile: mapProfile(data) });
+  } catch (error) {
+    console.log(`Error fetching profile: ${error}`);
+    return c.json({ error: "Failed to fetch profile", details: error.message }, 500);
   }
 });
 
@@ -400,7 +759,162 @@ const MIN_VOTES_FOR_RATING = 3;
 const FAVORITE_RATING_WEIGHT = 1.5;
 const FAVORITE_SCORE_WEIGHT = 2;
 
-function mapLoadout(l: any, viewerId?: string | null) {
+// ---------------------------------------------------------------------------
+// Attached video (TikTok/Instagram/YouTube) -- oEmbed metadata is fetched
+// server-side and cached on the loadout at save time, rather than live on
+// every read, so listing loadouts never depends on an external API. Only a
+// thumbnail/title/link is stored -- the app never embeds a player.
+// ---------------------------------------------------------------------------
+
+type VideoPlatform = "tiktok" | "instagram" | "youtube";
+
+function detectVideoPlatform(url: string): VideoPlatform | null {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    if (host === "tiktok.com" || host.endsWith(".tiktok.com")) return "tiktok";
+    if (host === "instagram.com" || host.endsWith(".instagram.com")) return "instagram";
+    if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtu.be") return "youtube";
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+const OEMBED_URL: Partial<Record<VideoPlatform, (url: string) => string>> = {
+  youtube: (url) => `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`,
+  tiktok: (url) => `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`,
+};
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+// Instagram's public oEmbed API was deprecated in favor of the Graph API,
+// which requires an app access token we don't have configured -- link
+// preview services (Slack, Discord, etc.) get Instagram thumbnails/titles by
+// reading the Open Graph meta tags Instagram still renders into the public
+// post/reel page's HTML, so we do the same. Unofficial and can break if
+// Instagram changes its markup or starts gating these pages further, but
+// there's no supported alternative without app-review access.
+async function scrapeOpenGraph(url: string): Promise<{ title: string | null; thumbnailUrl: string | null } | null> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        // A realistic desktop User-Agent is required -- Instagram serves a
+        // stripped, tag-less shell to obvious non-browser clients.
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      },
+    });
+    if (!response.ok) return null;
+    const html = await response.text();
+
+    const title = html.match(/<meta property="og:title" content="([^"]*)"/)?.[1] ?? null;
+    const thumbnailUrl = html.match(/<meta property="og:image" content="([^"]*)"/)?.[1] ?? null;
+    if (!title && !thumbnailUrl) return null;
+
+    return { title: title ? decodeHtmlEntities(title) : null, thumbnailUrl };
+  } catch (error) {
+    console.log(`Could not scrape Open Graph metadata: ${error}`);
+    return null;
+  }
+}
+
+async function fetchVideoMeta(url: string, platform: VideoPlatform) {
+  if (platform === "instagram") {
+    const og = await scrapeOpenGraph(url);
+    if (!og) return null;
+    // Instagram's og:title is typically `<name> on Instagram: "<caption>"` --
+    // there's no separate author field in Open Graph tags, so pull it from there.
+    const authorName = og.title?.match(/^(.+?) on Instagram/)?.[1]?.trim() ?? null;
+    return { title: og.title, authorName, thumbnailUrl: og.thumbnailUrl };
+  }
+
+  try {
+    const response = await fetch(OEMBED_URL[platform]!(url));
+    if (!response.ok) return null;
+    const data = await response.json();
+    return {
+      title: data.title ?? null,
+      authorName: data.author_name ?? null,
+      thumbnailUrl: data.thumbnail_url ?? null,
+    };
+  } catch (error) {
+    console.log(`Could not fetch oEmbed metadata for ${platform}: ${error}`);
+    return null;
+  }
+}
+
+/** Resolves a pasted video URL into the stored `video` shape, fetching oEmbed metadata best-effort. */
+async function resolveVideo(videoUrl: string | null | undefined): Promise<{ video: any; error?: string }> {
+  const url = videoUrl?.trim();
+  if (!url) return { video: null };
+
+  const platform = detectVideoPlatform(url);
+  if (!platform) {
+    return { video: null, error: "Video must be a TikTok, Instagram, or YouTube link" };
+  }
+
+  const meta = await fetchVideoMeta(url, platform);
+  return {
+    video: {
+      url,
+      platform,
+      title: meta?.title ?? null,
+      authorName: meta?.authorName ?? null,
+      thumbnailUrl: meta?.thumbnailUrl ?? null,
+    },
+  };
+}
+
+interface AuthorProfile {
+  nickname: string;
+  avatar_path: string | null;
+  tiktok: string | null;
+  instagram: string | null;
+  youtube: string | null;
+  twitch: string | null;
+  kick: string | null;
+  social_stats: any;
+}
+
+// Batch-fetches profiles for a set of loadouts' user_ids, keyed by id --
+// same batching shape as resolveImageUrls, avoiding an N+1 lookup per
+// loadout. Loadouts predate profiles, so an author may not have one yet.
+async function fetchAuthorProfiles(loadouts: any[]): Promise<Map<string, AuthorProfile>> {
+  const userIds = [...new Set(loadouts.map((l) => l.user_id).filter(Boolean))];
+  const byId = new Map<string, AuthorProfile>();
+  if (userIds.length === 0) return byId;
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, nickname, avatar_path, tiktok, instagram, youtube, twitch, kick, social_stats')
+    .in('id', userIds);
+  if (error) {
+    console.log(`Could not resolve author profiles: ${error.message}`);
+    return byId;
+  }
+  for (const p of data ?? []) {
+    byId.set(p.id, {
+      nickname: p.nickname,
+      avatar_path: p.avatar_path,
+      tiktok: p.tiktok,
+      instagram: p.instagram,
+      youtube: p.youtube,
+      twitch: p.twitch,
+      kick: p.kick,
+      social_stats: p.social_stats,
+    });
+  }
+  return byId;
+}
+
+function mapLoadout(l: any, viewerId?: string | null, authorProfiles?: Map<string, AuthorProfile>) {
   const weapons = (l.loadout_weapons ?? [])
     .slice()
     .sort((a: any, b: any) => (a.slot_order ?? 0) - (b.slot_order ?? 0))
@@ -434,15 +948,29 @@ function mapLoadout(l: any, viewerId?: string | null) {
       : null;
   const score = likes + favorites * FAVORITE_SCORE_WEIGHT - dislikes;
   const mine = viewerId ? reactions.filter((r: any) => r.user_id === viewerId).map((r: any) => r.type) : [];
+  const author = authorProfiles?.get(l.user_id);
 
   return {
     id: l.id,
     gameId: l.game_id,
     userId: l.user_id,
     userName: l.user_name,
+    authorNickname: author?.nickname ?? null,
+    authorAvatarUrl: avatarUrl(author?.avatar_path ?? null),
+    authorLinks: author
+      ? {
+          tiktok: author.tiktok,
+          instagram: author.instagram,
+          youtube: author.youtube,
+          twitch: author.twitch,
+          kick: author.kick,
+        }
+      : null,
+    authorSocialStats: author?.social_stats ?? null,
     name: l.name,
     description: l.description,
     gameLoadoutCode: l.game_loadout_code ?? null,
+    video: l.video ?? null,
     weapons,
     perks,
     equipment,
@@ -526,7 +1054,8 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId/react", async 
       .single();
     if (reloadError) throw reloadError;
 
-    return c.json({ loadout: mapLoadout(full, user.id) });
+    const authorProfiles = await fetchAuthorProfiles([full]);
+    return c.json({ loadout: mapLoadout(full, user.id, authorProfiles) });
   } catch (error) {
     console.log(`Error reacting to loadout: ${error}`);
     return c.json({ error: "Failed to react to loadout", details: error.message }, 500);
@@ -558,7 +1087,8 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId/view", async (
       .single();
     if (error) throw error;
 
-    return c.json({ loadout: mapLoadout(updated, user?.id ?? null) });
+    const authorProfiles = await fetchAuthorProfiles([updated]);
+    return c.json({ loadout: mapLoadout(updated, user?.id ?? null, authorProfiles) });
   } catch (error) {
     console.log(`Error incrementing views: ${error}`);
     return c.json({ error: "Failed to increment views", details: error.message }, 500);
@@ -577,7 +1107,8 @@ app.get("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
       .order('created_at', { ascending: false });
     if (error) throw error;
 
-    return c.json({ loadouts: (data ?? []).map((l: any) => mapLoadout(l, user?.id ?? null)) });
+    const authorProfiles = await fetchAuthorProfiles(data ?? []);
+    return c.json({ loadouts: (data ?? []).map((l: any) => mapLoadout(l, user?.id ?? null, authorProfiles)) });
   } catch (error) {
     console.log(`Error fetching loadouts: ${error}`);
     return c.json({ error: "Failed to fetch loadouts", details: error.message }, 500);
@@ -600,7 +1131,8 @@ app.get("/make-server-6db475c7/games/:gameId/my-loadouts", async (c) => {
       .order('created_at', { ascending: false });
     if (error) throw error;
 
-    return c.json({ loadouts: (data ?? []).map((l: any) => mapLoadout(l, user.id)) });
+    const authorProfiles = await fetchAuthorProfiles(data ?? []);
+    return c.json({ loadouts: (data ?? []).map((l: any) => mapLoadout(l, user.id, authorProfiles)) });
   } catch (error) {
     console.log(`Error fetching user loadouts: ${error}`);
     return c.json({ error: "Failed to fetch loadouts", details: error.message }, 500);
@@ -623,6 +1155,11 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
       tagId = null;
     }
 
+    const { video, error: videoError } = await resolveVideo(body.videoUrl);
+    if (videoError) {
+      return c.json({ error: videoError }, 400);
+    }
+
     const { data: inserted, error } = await supabase
       .from('loadouts')
       .insert({
@@ -633,6 +1170,7 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
         name: body.name,
         description: body.description || '',
         game_loadout_code: body.gameLoadoutCode || null,
+        video,
         tag_id: tagId,
       })
       .select()
@@ -650,7 +1188,8 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
       .single();
     if (reloadError) throw reloadError;
 
-    return c.json({ loadout: mapLoadout(full, user.id) });
+    const authorProfiles = await fetchAuthorProfiles([full]);
+    return c.json({ loadout: mapLoadout(full, user.id, authorProfiles) });
   } catch (error) {
     console.log(`Error creating loadout: ${error}`);
     return c.json({ error: "Failed to create loadout", details: error.message }, 500);
@@ -686,12 +1225,18 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
       tagId = null;
     }
 
+    const { video, error: videoError } = await resolveVideo(body.videoUrl);
+    if (videoError) {
+      return c.json({ error: videoError }, 400);
+    }
+
     const { data: updated, error } = await supabase
       .from('loadouts')
       .update({
         name: body.name,
         description: body.description ?? '',
         game_loadout_code: body.gameLoadoutCode || null,
+        video,
         tag_id: tagId,
         updated_at: new Date().toISOString(),
       })
@@ -712,7 +1257,8 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
       .single();
     if (reloadError) throw reloadError;
 
-    return c.json({ loadout: mapLoadout(full, user.id) });
+    const authorProfiles = await fetchAuthorProfiles([full]);
+    return c.json({ loadout: mapLoadout(full, user.id, authorProfiles) });
   } catch (error) {
     console.log(`Error updating loadout: ${error}`);
     return c.json({ error: "Failed to update loadout", details: error.message }, 500);

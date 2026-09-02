@@ -1,31 +1,27 @@
 import * as React from "react";
+import { ToggleGroup, ToggleGroupItem } from "./toggle-group";
 import { cn } from "./utils";
 
-/** Text/icon tab used for filter and scope toggles (category filters, sort/scope tabs). */
-export function FilterPill({
-  active,
-  onClick,
-  size = "md",
-  className,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  size?: "sm" | "md";
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-2 rounded-xl text-[14px] transition-colors",
-        size === "sm" ? "h-8 px-3" : "h-9 px-3.5",
-        active ? "bg-[#2a2829] text-[#fafafa]" : "text-[#8d898a] hover:text-[#fafafa]",
-        className
-      )}
-    >
-      {children}
-    </button>
-  );
-}
+/** Wraps a row of FilterPills into a single- or multi-select toggle group (roving tabindex, arrow-key nav). */
+export const FilterPillGroup = React.forwardRef<
+  React.ElementRef<typeof ToggleGroup>,
+  React.ComponentProps<typeof ToggleGroup>
+>(({ variant = "outline", className, ...props }, ref) => (
+  <ToggleGroup ref={ref} variant={variant} className={cn("flex-wrap", className)} {...props} />
+));
+FilterPillGroup.displayName = "FilterPillGroup";
+
+/** Text/icon tab used for filter and scope toggles (category filters, sort/scope tabs). Must be rendered inside a FilterPillGroup. */
+export const FilterPill = React.forwardRef<
+  React.ElementRef<typeof ToggleGroupItem>,
+  Omit<React.ComponentProps<typeof ToggleGroupItem>, "size"> & {
+    size?: "sm" | "md";
+  }
+>(({ size = "md", className, ...props }, ref) => (
+  <ToggleGroupItem
+    ref={ref}
+    className={cn("text-[14px]", size === "sm" ? "h-8 px-3" : "h-9 px-3.5", className)}
+    {...props}
+  />
+));
+FilterPill.displayName = "FilterPill";

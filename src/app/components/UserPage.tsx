@@ -1,149 +1,228 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
-import { ArrowLeft, Heart, Eye } from "lucide-react";
+import { useAuth } from "./AuthContext";
+import { AppLayout } from "./AppLayout";
+import { getGameColor } from "../utils/gameColors";
+import { gameMeta, GAME_ORDER, GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "../utils/games";
+import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, type CardTag } from "./ui/LoadoutCard";
+import { Button } from "./ui/button";
+import { Loading } from "./ui/loading";
+import { usePageTitle } from "../hooks/usePageTitle";
+import { Settings as SettingsIcon } from "lucide-react";
+import { SOCIAL_LINK_FIELDS, formatCount, type SocialLinks, type SocialStats } from "../utils/social";
 
-interface Loadout {
-  id: string;
+interface Loadout extends CardLoadout {
   gameId: string;
-  userName: string;
-  name: string;
-  description?: string;
-  weapons: any[];
-  likes: number;
-  views: number;
+  userId: string;
   createdAt: string;
 }
 
-const GAME_ORDER = ["mw4", "warzone", "df", "thefinals", "bf6"];
+interface Profile {
+  id: string;
+  nickname: string;
+  name: string;
+  avatarUrl: string | null;
+  links: SocialLinks;
+  socialStats?: SocialStats | null;
+}
+
+interface GameCatalog {
+  weapons: CardWeapon[];
+  attachments: CardAttachment[];
+  tags: CardTag[];
+}
+
+const GAMES_TO_LOAD = GAME_SELECTOR_ENABLED ? GAME_ORDER : [LOCKED_GAME_ID];
 
 export function UserPage() {
   const { nickname } = useParams<{ nickname: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
+  const [catalogs, setCatalogs] = useState<Record<string, GameCatalog>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (nickname) fetchUserLoadouts();
+    if (nickname) fetchProfile();
   }, [nickname]);
 
-  const fetchUserLoadouts = async () => {
+  const fetchProfile = async () => {
+    setLoading(true);
+    setNotFound(false);
     try {
-      const results = await Promise.all(
-        GAME_ORDER.map((gameId) =>
-          fetch(
-            `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts`,
-            { headers: { Authorization: `Bearer ${publicAnonKey}` } }
-          ).then((r) => r.json())
-        )
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/users/${nickname}`,
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
       );
-      const all = results.flatMap((data) =>
-        (data.loadouts ?? []).filter((l: Loadout) => l.userName === nickname)
-      );
-      setLoadouts(all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+      if (!response.ok) {
+        setNotFound(true);
+        setProfile(null);
+        return;
+      }
+      const { profile: found } = await response.json();
+      setProfile(found);
+      await fetchUserContent(found.id);
     } catch (error) {
-      console.error("Error fetching user loadouts:", error);
+      console.error("Error fetching profile:", error);
+      setNotFound(true);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchUserContent = async (userId: string) => {
+    try {
+      const results = await Promise.all(
+        GAMES_TO_LOAD.map(async (gameId) => {
+          const [loadoutsRes, weaponsRes, attachmentsRes, tagsRes] = await Promise.all([
+            fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts`, {
+              headers: { Authorization: `Bearer ${publicAnonKey}` },
+            }).then((r) => r.json()),
+            fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/weapons`, {
+              headers: { Authorization: `Bearer ${publicAnonKey}` },
+            }).then((r) => r.json()),
+            fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/attachments`, {
+              headers: { Authorization: `Bearer ${publicAnonKey}` },
+            }).then((r) => r.json()),
+            fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/tags`, {
+              headers: { Authorization: `Bearer ${publicAnonKey}` },
+            }).then((r) => r.json()),
+          ]);
+          return {
+            gameId,
+            loadouts: (loadoutsRes.loadouts ?? []).filter((l: Loadout) => l.userId === userId),
+            catalog: {
+              weapons: weaponsRes.weapons ?? [],
+              attachments: attachmentsRes.attachments ?? [],
+              tags: tagsRes.tags ?? [],
+            } as GameCatalog,
+          };
+        })
+      );
+
+      setLoadouts(
+        results
+          .flatMap((r) => r.loadouts)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      );
+      setCatalogs(Object.fromEntries(results.map((r) => [r.gameId, r.catalog])));
+    } catch (error) {
+      console.error("Error fetching user loadouts:", error);
+    }
+  };
+
+  usePageTitle(profile ? `${profile.name} (@${profile.nickname}) • Loadoutize` : "Loadoutize • Profile");
+
+  const isOwnProfile = user?.id === profile?.id;
+
   if (loading) {
+    return <Loading fullScreen />;
+  }
+
+  if (notFound || !profile) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0A0A0A]">
-        <div className="text-white text-xl font-bold">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen bg-[#0a0909] flex-col gap-4">
+        <p className="text-[#efedf1] text-xl">User not found.</p>
+        <Button onClick={() => navigate("/")} className="h-11 px-5 rounded-xl bg-[#fafafa] text-[#161414] font-medium">
+          Back to Home
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
-      <header className="border-b border-white/5 bg-[#141414] sticky top-0 z-10">
-        <div className="max-w-[1400px] mx-auto px-8 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => navigate("/")}
-              className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors font-medium text-sm"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </button>
+    <AppLayout
+      selectedGame={LOCKED_GAME_ID}
+      onGameSelect={(id) => navigate(`/${id}/explore`)}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,320px)_1fr] gap-6 items-start">
+        {/* Profile hero */}
+        <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
+          <div className="flex flex-col items-center text-center gap-3">
+            <div className="w-24 h-24 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
+              {profile.avatarUrl ? (
+                <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-3xl font-semibold text-[#fafafa]">
+                  {profile.name?.[0]?.toUpperCase() ?? "U"}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-xl font-semibold text-[#efedf1]">{profile.name}</h1>
+              <p className="text-[14px] text-[#8d898a]">@{profile.nickname}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-xl"
-              style={{ backgroundImage: "linear-gradient(135deg, rgb(207,206,212) 0%, rgb(64,62,67) 100%)" }}
-            >
-              {nickname?.[0]?.toUpperCase() ?? "U"}
+
+          {SOCIAL_LINK_FIELDS.some(({ key }) => profile.links[key]) && (
+            <div className="flex items-start justify-center gap-2 flex-wrap">
+              {SOCIAL_LINK_FIELDS.filter(({ key }) => profile.links[key]).map(({ key, label, icon: Icon, url }) => {
+                const count = formatCount(profile.socialStats?.[key]);
+                return (
+                  <a
+                    key={key}
+                    href={url(profile.links[key]!)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="flex flex-col items-center gap-1 w-14 py-2 rounded-xl border border-white/[0.18] text-[#fafafa] hover:bg-white/[0.05] transition-colors"
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="text-[10px] text-[#8d898a] font-mono">{count ?? "—"}</span>
+                  </a>
+                );
+              })}
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">{nickname}</h1>
-              <p className="text-neutral-500 text-sm font-medium">
-                {loadouts.length} loadout{loadouts.length !== 1 ? "s" : ""}
-              </p>
-            </div>
+          )}
+
+          <div className="h-px w-full bg-white/[0.07]" />
+          <div className="flex justify-center  w-full ">
+
+
+          {isOwnProfile && (
+            <Button onClick={() => navigate("/settings")} variant="outline">
+              <SettingsIcon className="w-4 h-4" />
+              Edit profile
+            </Button>
+          )}
           </div>
         </div>
-      </header>
 
-      <main className="max-w-[1400px] mx-auto px-8 py-12">
-        {loadouts.length === 0 ? (
-          <div className="bg-white/[0.02] border border-white/5 p-20 text-center rounded-lg">
-            <p className="text-neutral-500 text-sm">No loadouts found for this user.</p>
-          </div>
-        ) : (
-          <div className="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/5">
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Game</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Loadout</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Description</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Likes</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Views</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Created</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loadouts.map((loadout) => (
-                  <tr
-                    key={loadout.id}
-                    onClick={() => navigate(`/${loadout.gameId}/loadout/${loadout.id}`)}
-                    className="border-b border-white/5 hover:bg-white/[0.02] cursor-pointer transition-colors"
-                  >
-                    <td className="py-4 px-6">
-                      <span className="text-neutral-400 text-xs font-semibold uppercase tracking-wide">{loadout.gameId}</span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="text-white font-semibold text-sm">{loadout.name}</div>
-                    </td>
-                    <td className="py-4 px-6 max-w-xs">
-                      <p className="text-neutral-400 text-sm line-clamp-1">{loadout.description || "No description"}</p>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-1.5 text-neutral-400">
-                        <Heart className="w-4 h-4" />
-                        <span className="text-sm font-semibold">{loadout.likes}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-1.5 text-neutral-400">
-                        <Eye className="w-4 h-4" />
-                        <span className="text-sm font-semibold">{loadout.views}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="text-neutral-500 text-xs font-medium">
-                        {new Date(loadout.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </main>
-    </div>
+        {/* Loadouts */}
+        <div className="flex flex-col gap-4">
+          <h2 className="text-[16px] text-[#fafafa] font-semibold">loadout{loadouts.length !== 1 ? "s" : ""}        
+            <span className="text-sm ml-2 inline-flex font-mono h-8 w-8 items-center rounded-full justify-center bg-[#171417] text-teritary ">{loadouts.length} </span></h2>
+          {loadouts.length === 0 ? (
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
+              <p className="text-[#8d898a]">No loadouts published yet.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {loadouts.map((l, i) => {
+                const catalog = catalogs[l.gameId];
+                const meta = gameMeta[l.gameId] ?? gameMeta.mw4;
+                const accent = getGameColor(l.gameId).primary;
+                return (
+                  <LoadoutCard
+                    key={l.id}
+                    loadout={l}
+                    weapons={catalog?.weapons ?? []}
+                    attachments={catalog?.attachments ?? []}
+                    tags={catalog?.tags ?? []}
+                    accent={accent}
+                    gameShort={meta.short}
+                    index={i}
+                    onClick={() => navigate(`/${l.gameId}/loadout/${l.id}`)}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </AppLayout>
   );
 }

@@ -2,6 +2,7 @@ import * as React from "react";
 import { WeaponImage } from "./WeaponImage";
 import { Tag } from "./tag";
 import { RatingRing } from "./rating-ring";
+import { VIDEO_PLATFORM_META, type LoadoutVideo } from "../../utils/video";
 
 export interface CardLoadout {
   id: string;
@@ -15,6 +16,7 @@ export interface CardLoadout {
   ratingPercent: number | null;
   views: number;
   tagId?: number | null;
+  video?: LoadoutVideo | null;
 }
 
 export interface CardWeapon {
@@ -82,7 +84,7 @@ export function LoadoutCard({
   return (
     <button
       onClick={onClick}
-      className="relative bg-[#100D10] rounded-xl border border-white/[0.08] hover:bg-[#1a161a] hover:border-white/20 transition-all flex flex-col text-left overflow-hidden w-full"
+      className="relative bg-card rounded-xl border border-white/[0.08] hover:bg-[#1a161a] hover:border-white/20 transition-all flex flex-col text-left overflow-hidden w-full"
       style={{
         boxShadow: "0px 30px 70px -36px rgba(0,0,0,0.85)",
       }}
@@ -99,7 +101,7 @@ export function LoadoutCard({
           size={56}
           innerClassName="border border-white/5"
           labelClassName={
-            loadout.ratingPercent == null ? "text-[10px] text-teritary" : "text-[11px] text-white"
+            loadout.ratingPercent == null ? "text-[10px] text-teritary" : "text-[11px] text-[#fafafa]"
           }
           fallbackLabel="New"
         />
@@ -108,8 +110,18 @@ export function LoadoutCard({
           <p className="text-sm text-teritary truncate">{loadout.description}</p>
         </div>
       </div>
-      <div className="h-full flex items-center justify-center" >
+      <div className="h-full flex items-center justify-center relative" >
         <WeaponImage imageUrl={primaryWeaponData?.imageUrl} variant="small" />
+        {loadout.video && (
+          <div
+            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/[0.12] flex items-center justify-center"
+            title={`Video: ${VIDEO_PLATFORM_META[loadout.video.platform].label}`}
+          >
+            {React.createElement(VIDEO_PLATFORM_META[loadout.video.platform].icon, {
+              className: "w-4 h-4 text-[#fafafa]",
+            })}
+          </div>
+        )}
         </div>
       <div className="p-4 pt-0 flex flex-col items-center w-full">
 

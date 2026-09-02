@@ -12,6 +12,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login, signup } = useAuth();
@@ -21,11 +22,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
+    if (mode === "signup" && !/^[a-z0-9_-]{3,20}$/.test(nickname)) {
+      setError("Nickname must be 3-20 characters: lowercase letters, numbers, - or _");
+      return;
+    }
+
+    setLoading(true);
     try {
       if (mode === "signup") {
-        await signup(email, password, name);
+        await signup(email, password, name, nickname);
       } else {
         await login(email, password);
       }
@@ -33,6 +39,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       setEmail("");
       setPassword("");
       setName("");
+      setNickname("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -52,7 +59,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
         <div className="p-8 relative">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">
+            <h2 className="text-2xl font-bold text-[#fafafa] mb-2">
               {mode === "login" ? "Welcome Back" : "Create Account"}
             </h2>
             <p className="text-neutral-400 font-medium text-sm">
@@ -73,9 +80,31 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full bg-white/[0.02] border border-white/5 px-4 py-2.5 text-white font-medium focus:border-white/20 focus:outline-none transition-all placeholder-neutral-600 rounded-md text-sm"
+                  className="w-full bg-white/[0.02] border border-white/5 px-4 py-2.5 text-[#fafafa] font-medium focus:border-white/20 focus:outline-none transition-all placeholder-neutral-600 rounded-md text-sm"
                   placeholder="Enter your name"
                 />
+              </div>
+            )}
+
+            {mode === "signup" && (
+              <div>
+                <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                  Nickname
+                </label>
+                <input
+                  type="text"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value.toLowerCase())}
+                  required
+                  minLength={3}
+                  maxLength={20}
+                  pattern="[a-z0-9_-]{3,20}"
+                  className="w-full bg-white/[0.02] border border-white/5 px-4 py-2.5 text-[#fafafa] font-medium focus:border-white/20 focus:outline-none transition-all placeholder-neutral-600 rounded-md text-sm"
+                  placeholder="your-public-handle"
+                />
+                <p className="mt-1.5 text-xs text-neutral-500">
+                  Your public profile URL: /u/{nickname || "your-public-handle"}
+                </p>
               </div>
             )}
 
@@ -88,7 +117,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-white/[0.02] border border-white/5 px-4 py-2.5 text-white font-medium focus:border-white/20 focus:outline-none transition-all placeholder-neutral-600 rounded-md text-sm"
+                className="w-full bg-white/[0.02] border border-white/5 px-4 py-2.5 text-[#fafafa] font-medium focus:border-white/20 focus:outline-none transition-all placeholder-neutral-600 rounded-md text-sm"
                 placeholder="Enter your email"
               />
             </div>
@@ -103,7 +132,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full bg-white/[0.02] border border-white/5 px-4 py-2.5 text-white font-medium focus:border-white/20 focus:outline-none transition-all placeholder-neutral-600 rounded-md text-sm"
+                className="w-full bg-white/[0.02] border border-white/5 px-4 py-2.5 text-[#fafafa] font-medium focus:border-white/20 focus:outline-none transition-all placeholder-neutral-600 rounded-md text-sm"
                 placeholder="Minimum 6 characters"
               />
             </div>
@@ -117,7 +146,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-white hover:bg-white/90 disabled:bg-white/10 text-black disabled:text-neutral-500 font-semibold py-2.5 transition-all flex items-center justify-center gap-2 rounded-md text-sm"
+              className="w-full bg-[#fafafa] hover:bg-white/90 disabled:bg-white/10 text-black disabled:text-neutral-500 font-semibold py-2.5 transition-all flex items-center justify-center gap-2 rounded-md text-sm"
             >
               {loading ? (
                 "Please wait..."
@@ -141,7 +170,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 setMode(mode === "login" ? "signup" : "login");
                 setError("");
               }}
-              className="text-neutral-400 hover:text-white transition-colors font-medium text-sm"
+              className="text-neutral-400 hover:text-[#fafafa] transition-colors font-medium text-sm"
             >
               {mode === "login"
                 ? "Don't have an account? Sign up"

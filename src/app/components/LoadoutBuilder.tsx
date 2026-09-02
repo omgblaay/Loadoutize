@@ -15,8 +15,11 @@ import {
 import { WeaponCard } from "./ui/WeaponCard";
 import { Tag } from "./ui/tag";
 import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
-import { FilterPill } from "./ui/filter-pill";
+import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
 import { Loading } from "./ui/loading";
+import { detectVideoPlatform, VIDEO_PLATFORM_META } from "../utils/video";
+import { Container } from "./ui/container";
+import { Button } from "./ui/button";
 
 interface Weapon {
   imageUrl: string | null | undefined;
@@ -125,6 +128,8 @@ export function LoadoutBuilder() {
   const [loadoutName, setLoadoutName] = useState("");
   const [loadoutDescription, setLoadoutDescription] = useState("");
   const [gameLoadoutCode, setGameLoadoutCode] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoError, setVideoError] = useState("");
   const [weapons, setWeapons] = useState<Weapon[]>([]);
   const [selectedWeapons, setSelectedWeapons] = useState<SelectedWeapon[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -241,6 +246,7 @@ export function LoadoutBuilder() {
         setLoadoutName(loadout.name);
         setLoadoutDescription(loadout.description || "");
         setGameLoadoutCode(loadout.gameLoadoutCode || "");
+        setVideoUrl(loadout.video?.url || "");
         setPendingWeaponRefs(
           (loadout.weapons || []).map((w: any) => ({ id: w.id, attachments: w.attachments ?? {} }))
         );
@@ -264,10 +270,18 @@ export function LoadoutBuilder() {
       return;
     }
 
+    const trimmedVideoUrl = videoUrl.trim();
+    if (trimmedVideoUrl && !detectVideoPlatform(trimmedVideoUrl)) {
+      setVideoError("Video must be a TikTok, Instagram, or YouTube link");
+      return;
+    }
+    setVideoError("");
+
     const loadoutData = {
       name: loadoutName,
       description: loadoutDescription,
       gameLoadoutCode: gameLoadoutCode.trim() || null,
+      videoUrl: trimmedVideoUrl || null,
       weapons: selectedWeapons,
       perks: selectedPerks,
       equipment: selectedEquipment,
@@ -417,8 +431,15 @@ export function LoadoutBuilder() {
         </>
       }
     >
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between gap-4 flex-wrap">          
+        <Button
+            onClick={() => navigate(`/${gameId}/explore`)}
+            variant="ghost"
+            className="*:h-14 w-14"
+          >
+            <ArrowLeft className="size-5" />
+          </Button>
+        <div className="flex flex-col flex-1 gap-1">
           <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">
             {editId ? "Edit Loadout" : "New Loadout"}
           </h1>
@@ -427,25 +448,19 @@ export function LoadoutBuilder() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(`/${gameId}/explore`)}
-            className="h-[52px] px-4 rounded-xl border border-white/[0.18] flex items-center gap-2 text-[#bebcbc] hover:text-[#efedf1] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Cancel
-          </button>
-          <button
+
+          <Button
             onClick={saveLoadout}
             disabled={saving}
             className="h-[52px] px-5 rounded-xl flex items-center gap-2 text-[#161414] font-medium disabled:opacity-60 bg-[#fafafa]"
           >
             <Save className="w-4 h-4" />
             {saving ? "Saving…" : editId ? "Update" : "Publish"}
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
+      <Container>
         <h2 className="text-[16px] text-[#fafafa] font-semibold">Loadout details</h2>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
@@ -484,6 +499,29 @@ export function LoadoutBuilder() {
               className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] font-mono text-[#fafafa] placeholder:text-[#8d898a] placeholder:font-sans outline-none focus:border-white/30 transition-colors"
             />
           </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+              Attach a video (optional)
+            </label>
+            <div className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 flex items-center gap-2 focus-within:border-white/30 transition-colors">
+              {(() => {
+                const platform = videoUrl.trim() ? detectVideoPlatform(videoUrl.trim()) : null;
+                const Icon = platform ? VIDEO_PLATFORM_META[platform].icon : null;
+                return Icon ? <Icon className="w-4 h-4 text-[#8d898a] shrink-0" /> : null;
+              })()}
+              <input
+                type="url"
+                value={videoUrl}
+                onChange={(e) => {
+                  setVideoUrl(e.target.value);
+                  setVideoError("");
+                }}
+                placeholder="Paste a TikTok, Instagram, or YouTube link"
+                className="flex-1 bg-transparent text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none"
+              />
+            </div>
+            {videoError && <p className="text-[12px] text-[#ef9696]">{videoError}</p>}
+          </div>
                   {tags.length > 0 && (
           <div>
             <label className="text-[12px] pb-2 tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
@@ -503,13 +541,10 @@ export function LoadoutBuilder() {
           </div>
         )}
         </div>
-      </div>
+      </Container>
 
-      <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
+      <Container>
           <h2 className="text-[16px] text-[#fafafa] font-semibold">Select weapon</h2>
-
-        </div>
 
         {weaponSearchOpen && (
           <input
@@ -524,33 +559,33 @@ export function LoadoutBuilder() {
 
         {weaponTypes.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
-                      <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setWeaponSearchOpen((v) => !v);
-                if (weaponSearchOpen) setWeaponSearchQuery("");
-              }}
-              className="w-9 h-9 rounded-xl border border-white/[0.18] flex items-center justify-center text-[#fafafa] hover:bg-white/[0.05] transition-colors"
-              aria-label={weaponSearchOpen ? "Close search" : "Search weapons"}
-            >
-              {weaponSearchOpen ? <X className="w-4 h-4" /> : <Search className="size-4.5" />}
-            </button>
-
-          </div>
-            <FilterPill active={weaponTypeFilter === null} onClick={() => setWeaponTypeFilter(null)} size="sm">
-              All
-            </FilterPill>
-            {weaponTypes.map((type) => (
-              <FilterPill
-                key={type}
-                active={weaponTypeFilter === type}
-                onClick={() => setWeaponTypeFilter((prev) => (prev === type ? null : type))}
-                size="sm"
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setWeaponSearchOpen((v) => !v);
+                  if (weaponSearchOpen) setWeaponSearchQuery("");
+                }}
+                className="w-9 h-9 rounded-xl border border-white/[0.18] flex items-center justify-center text-[#fafafa] hover:bg-white/[0.05] transition-colors"
+                aria-label={weaponSearchOpen ? "Close search" : "Search weapons"}
               >
-                {type}
+                {weaponSearchOpen ? <X className="w-4 h-4" /> : <Search className="size-4.5" />}
+              </button>
+            </div>
+            <FilterPillGroup
+              type="single"
+              value={weaponTypeFilter ?? ""}
+              onValueChange={(v) => setWeaponTypeFilter(v || null)}
+            >
+              <FilterPill value="" size="sm">
+                All
               </FilterPill>
-            ))}
+              {weaponTypes.map((type) => (
+                <FilterPill key={type} value={type} size="sm">
+                  {type}
+                </FilterPill>
+              ))}
+            </FilterPillGroup>
           </div>
         )}
 
@@ -573,11 +608,11 @@ export function LoadoutBuilder() {
             })}
           </div>
         )}
-      </div>
+      </Container>
 
       {selectedWeapons.map((weapon) => (
-        <div key={weapon.id} className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
-          <h2>Attachments</h2>
+        <Container key={weapon.id}>
+            <h2>Attachments</h2>
 
           {attachmentTypes.length === 0 ? (
             <p className="text-[14px] text-[#8d898a]">No attachments configured for this game yet.</p>
@@ -614,7 +649,7 @@ export function LoadoutBuilder() {
               })}
             </div>
           )}
-        </div>
+        </Container>
       ))}
 
 

@@ -8,7 +8,7 @@ import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, ty
 import { SlidersHorizontal, ArrowUpDown, ChevronDown, X, Globe } from "lucide-react";
 import { SearchBar } from "./ui/searchbar";
 import { NavIcon } from "./ui/nav-icon-3d";
-import { FilterPill } from "./ui/filter-pill";
+import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { Loading } from "./ui/loading";
 
@@ -183,16 +183,17 @@ export function GameDashboard() {
 
       {/* Category filter pills */}
       {categories.length > 0 && (
-        <div className="flex items-center gap-1 flex-wrap">
-          {categories.map((cat) => {
-            const active = activeCategory === cat;
-            return (
-              <FilterPill key={cat} active={active} onClick={() => setActiveCategory(active ? null : cat)} size="sm">
-                {cat}
-              </FilterPill>
-            );
-          })}
-        </div>
+        <FilterPillGroup
+          type="single"
+          value={activeCategory ?? ""}
+          onValueChange={(v) => setActiveCategory(v || null)}
+        >
+          {categories.map((cat) => (
+            <FilterPill key={cat} value={cat} size="sm">
+              {cat}
+            </FilterPill>
+          ))}
+        </FilterPillGroup>
       )}
 
       {/* Loadout grid */}

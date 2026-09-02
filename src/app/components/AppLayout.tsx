@@ -134,7 +134,7 @@ export function AppLayout({
 
 
       {/* Body: Sidenav + content */}
-      <div className="max-w-[1440px] w-full mx-auto flex gap-6 px-6 pt-6 pb-20 sm:pb-6 flex-1">
+      <div className="max-w-[1440px] w-full mx-auto flex gap-6 p-2 sm:p-6  flex-1">
         {/* Sidenav */}
         <SideNav isHome={isHome} isExplore={isExplore} isMeta={isMeta} selectedGame={selectedGame} categories={categories} navigate={navigate} setShowAuthModal={setShowAuthModal} handleGameSelect={handleGameSelect} />
 

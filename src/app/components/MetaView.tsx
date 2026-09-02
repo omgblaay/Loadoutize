@@ -8,7 +8,7 @@ import { Tag } from "./ui/tag";
 import { WeaponCard } from "./ui/WeaponCard";
 import { Star, TrendingUp, Crown } from "lucide-react";
 import { NavIcon } from "./ui/nav-icon-3d";
-import { FilterPill } from "./ui/filter-pill";
+import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
 import { Loading } from "./ui/loading";
 
 interface Weapon {
@@ -196,20 +196,25 @@ export function MetaView() {
           <p className="text-[#8d898a] text-sm">Community-ranked weapon tiers for {gameName}</p>
         </div>
 
-        <div className="inline-flex rounded-xl border border-white/[0.12] p-1 shrink-0">
-          <FilterPill active={rankMode === "community"} onClick={() => setRankMode("community")}>
+        <FilterPillGroup
+          type="single"
+          value={rankMode}
+          onValueChange={(v) => v && setRankMode(v as RankMode)}
+          className="inline-flex rounded-xl border border-white/[0.12] p-1 shrink-0"
+        >
+          <FilterPill value="community">
             <Star className="w-4 h-4" />
             Community Rated
           </FilterPill>
-          <FilterPill active={rankMode === "popularity"} onClick={() => setRankMode("popularity")}>
+          <FilterPill value="popularity">
             <TrendingUp className="w-4 h-4" />
             Most Loadouts
           </FilterPill>
-        </div>
+        </FilterPillGroup>
       </div>
 
       {/* Scope tabs */}
-      <div className="flex items-center gap-1 flex-wrap">
+      <FilterPillGroup type="single" value={scope} onValueChange={(v) => v && selectScope(v as Scope)}>
         {(
           [
             { id: "all", label: "All" },
@@ -217,11 +222,11 @@ export function MetaView() {
             { id: "category", label: "By Category" },
           ] as const
         ).map((opt) => (
-          <FilterPill key={opt.id} active={scope === opt.id} onClick={() => selectScope(opt.id)}>
+          <FilterPill key={opt.id} value={opt.id}>
             {opt.label}
           </FilterPill>
         ))}
-      </div>
+      </FilterPillGroup>
 
       {/* Secondary pill row for the active scope */}
       {scope === "tag" && tags.length > 0 && (
@@ -239,13 +244,17 @@ export function MetaView() {
         </div>
       )}
       {scope === "category" && categories.length > 0 && (
-        <div className="flex items-center gap-1 flex-wrap">
+        <FilterPillGroup
+          type="single"
+          value={selectedCategory ?? ""}
+          onValueChange={(v) => v && setSelectedCategory(v)}
+        >
           {categories.map((cat) => (
-            <FilterPill key={cat} active={selectedCategory === cat} onClick={() => setSelectedCategory(cat)} size="sm">
+            <FilterPill key={cat} value={cat} size="sm">
               {cat}
             </FilterPill>
           ))}
-        </div>
+        </FilterPillGroup>
       )}
 
       {loadouts.length === 0 ? (

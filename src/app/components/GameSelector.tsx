@@ -205,7 +205,7 @@ export function GameSelector() {
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), 0 0 30px rgba(245,245,250,0.14)",
             }}
           >
-            <Sparkles className="w-8 h-8 text-white" />
+            <Sparkles className="w-8 h-8 text-[#fafafa]" />
           </div>
           <div className="text-center flex flex-col gap-2">
             <p className="text-[16px] text-[#f7f6f6] font-semibold">Quick add with AI</p>

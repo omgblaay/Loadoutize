@@ -1,4 +1,4 @@
-import{r as nt,a as Mx,g as wx,j as vi}from"./index-D2Hv0y0W.js";/**
+import{r as nt,a as Mx,g as wx,j as vi}from"./index-BwssYaoY.js";/**
  * @license
  * Copyright 2010-2024 Three.js Authors
  * SPDX-License-Identifier: MIT

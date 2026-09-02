@@ -5,15 +5,19 @@ interface User {
   id: string;
   email: string;
   name: string;
+  nickname: string | null;
+  avatarUrl: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
   accessToken: string | null;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, nickname: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
+  /** Re-fetches the profile fields (nickname/avatarUrl) onto the current user -- call after editing them in Settings. */
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,6 +30,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     checkSession();
   }, []);
+
+  // Profile fields (nickname/avatar) live in our own `profiles` table, not
+  // Supabase Auth's user_metadata -- fetched separately right after we know
+  // who's logged in, and merged onto the base auth user.
+  const fetchProfile = async (token: string) => {
+    try {
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/users/me`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!response.ok) return null;
+      const { profile } = await response.json();
+      return profile as { nickname: string; avatarUrl: string | null };
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      return null;
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (!accessToken) return;
+    const profile = await fetchProfile(accessToken);
+    if (profile) {
+      setUser((prev) => (prev ? { ...prev, nickname: profile.nickname, avatarUrl: profile.avatarUrl } : prev));
+    }
+  };
 
   const checkSession = async () => {
     try {
@@ -42,10 +72,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
         if (response.ok) {
           const userData = await response.json();
+          const profile = await fetchProfile(storedToken);
           setUser({
             id: userData.id,
             email: userData.email,
             name: userData.user_metadata?.name || userData.email.split("@")[0],
+            nickname: profile?.nickname ?? null,
+            avatarUrl: profile?.avatarUrl ?? null,
           });
           setAccessToken(storedToken);
         } else {
@@ -59,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signup = async (email: string, password: string, name: string) => {
+  const signup = async (email: string, password: string, name: string, nickname: string) => {
     const response = await fetch(
       `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/auth/signup`,
       {
@@ -68,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${publicAnonKey}`,
         },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ email, password, name, nickname }),
       }
     );
 
@@ -98,10 +131,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error_description || "Failed to log in");
     }
 
+    const profile = await fetchProfile(data.access_token);
     setUser({
       id: data.user.id,
       email: data.user.email,
       name: data.user.user_metadata?.name || data.user.email.split("@")[0],
+      nickname: profile?.nickname ?? null,
+      avatarUrl: profile?.avatarUrl ?? null,
     });
     setAccessToken(data.access_token);
     localStorage.setItem("access_token", data.access_token);
@@ -114,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, login, signup, logout, loading }}>
+    <AuthContext.Provider value={{ user, accessToken, login, signup, logout, loading, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

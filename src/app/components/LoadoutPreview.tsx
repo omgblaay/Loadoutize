@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, Link } from "react-router";
 import QRCode from "qrcode";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { getGameColor } from "../utils/gameColors";
@@ -7,6 +7,7 @@ import { gameMeta } from "../utils/games";
 import { useAuth } from "./AuthContext";
 import { AppLayout, useGameName } from "./AppLayout";
 import { Button } from "./ui/button";
+import { Container } from "./ui/container";
 import { WeaponImage } from "./ui/WeaponImage";
 import type { CardWeapon, CardTag, CardAttachment } from "./ui/LoadoutCard";
 import { Tag } from "./ui/tag";
@@ -15,16 +16,16 @@ import { ReactionButton } from "./ui/reaction-button";
 import { RatingRing } from "./ui/rating-ring";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { Loading } from "./ui/loading";
+import { VIDEO_PLATFORM_META, type LoadoutVideo } from "../utils/video";
+import { SOCIAL_LINK_FIELDS, formatCount, type SocialLinks, type SocialStats } from "../utils/social";
+import { ExternalLink } from "lucide-react";
 import {
   Edit,
   Trash2,
   ThumbsUp,
   ThumbsDown,
-  Heart,
   Download,
   Puzzle,
-  Crosshair,
-  Icon,
   Copy,
   Check,
 } from "lucide-react";
@@ -40,9 +41,14 @@ interface Loadout {
   gameId: string;
   userId: string;
   userName: string;
+  authorNickname?: string | null;
+  authorAvatarUrl?: string | null;
+  authorLinks?: SocialLinks | null;
+  authorSocialStats?: SocialStats | null;
   name: string;
   description?: string;
   gameLoadoutCode?: string | null;
+  video?: LoadoutVideo | null;
   weapons: Weapon[];
   perks?: string[];
   equipment?: string[];
@@ -275,45 +281,43 @@ export function LoadoutPreview() {
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Weapon build */}
-        <div className="bg-[#121011] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-4">
+        <Container>
           <div className="flex items-center gap-4">
-            
-              <RatingRing
-                percent={loadout.ratingPercent}
-                color="#01a059"
-                size={64}
-                className="border border-[#2a2829]"
-                labelClassName="text-[14px] text-white font-medium"
-              />
-            
-             <h1 className="text-xl wrap-anywhere">
 
-              <span style={{ color: catalogTags.find((t) => t.id === loadout.tagId)?.color }} className="font-handwritten py-4 font-light">{catalogTags.find((t) => t.id === loadout.tagId)?.name}</span>
+            <RatingRing
+              percent={loadout.ratingPercent}
+              color="#01a059"
+              size={64}
+              className="border border-[#2a2829]"
+              labelClassName="text-[14px] text-[#fafafa] font-medium"
+            />
+            <h1 className="text-sm sm:text-xl wrap-anywhere">
+
+              <span style={{ color: catalogTags.find((t) => t.id === loadout.tagId)?.color }} className="font-handwritten text-base py-4 font-light">{catalogTags.find((t) => t.id === loadout.tagId)?.name}</span>
               {" "}
               <Tag
-              color={""}
-              className="inline relative top-[-5px]"
-              link={
-                primaryWeaponCatalog?.type
-                  ? `/${gameId}/explore?category=${encodeURIComponent(primaryWeaponCatalog.type)}`
-                  : undefined
-              }
+                color={""}
+                className="inline relative top-[-5px]"
+                link={
+                  primaryWeaponCatalog?.type
+                    ? `/${gameId}/explore?category=${encodeURIComponent(primaryWeaponCatalog.type)}`
+                    : undefined
+                }
               >
-              {primaryWeaponCatalog?.typeShort || meta.short}
+                {primaryWeaponCatalog?.typeShort || meta.short}
               </Tag>
               <span className="font-base font-sans  text-teritary">{" "}{primaryWeaponCatalog?.name}</span>
               {" "}{loadout.name}
             </h1>
-          </div>                
-          <div className="flex flex-wrap items-center text-sm gap-1.5">
-                   <span className="text-teritary">by</span> <span className=""> {loadout.userName}</span>
-                </div>
+
+          </div>
+
 
           <div className="flex flex-col items-center gap-2 py-4">
             <div
               style={{ background: `radial-gradient(ellipse at center, ${accent}14, transparent 70%)` }}
             >
-              <WeaponImage imageUrl={primaryWeaponImage} />
+              <WeaponImage imageUrl={primaryWeaponImage} variant="small" />
             </div>
           </div>
 
@@ -331,7 +335,7 @@ export function LoadoutPreview() {
                       )}
                     </div>
                     <span className="font-medium">{value}</span>
-                   <span className="text-teritary">{"•"}</span>
+                    <span className="text-teritary">{"•"}</span>
                     <span className="text-teritary flex-1">{slot}</span>
                   </div>
                 );
@@ -352,52 +356,106 @@ export function LoadoutPreview() {
               <p className="text-[14px] text-[#8d898a] py-2">No build details published for this loadout.</p>
             )}
           </div>
-        </div>
+        </Container>
 
-        {/* Rating / share */}
-        <div className="flex relative flex-col overflow-hidden gap-6">
-                
-          <div className="bg-[#121111] border border-[#201e1f] rounded-3xl overflow-hidden flex flex-col gap-5">
-          <div className="p-6 flex flex-col gap-5">
-
-            {/*<Tag color={loadout.tagId ? catalogTags.find((t) => t.id === loadout.tagId)?.color : undefined} 
-              className="!font-handwritten py-4 font-light !text-lg">{catalogTags.find((t) => t.id === loadout.tagId)?.name}</Tag>
-*/}
+        <div className="flex flex-col gap-4">{/* Description / Rating */}
+          <Container>
+                    <span className="text-sm text-teritary uppercase font-medium">
+                      Description
+                    </span>
             {loadout.description && (
-              <p className="text-body text-base">{loadout.description}</p>
+              <p className="text-primary text-base">{loadout.description}</p>
             )}
+            <div className="flex items-center w-full">
+              <ReactionButton
+                icon={<ThumbsUp className="w-4 h-4" />}
+                label={loadout.liked ? "Liked" : "Like"}
+                count={loadout.likes}
+                active={loadout.liked}
+                accent="#01a059"
+                onClick={() => react("like")}
+                fillWidth
+                square
+                borderTopOnly
+                className="flex-1 "
+              />
+              <ReactionButton
+                icon={<ThumbsDown className="w-4 h-4" />}
+                label={loadout.disliked ? "Disliked" : "Dislike"}
+                count={loadout.dislikes}
+                active={loadout.disliked}
+                accent="#d00050"
+                onClick={() => react("dislike")}
+                fillWidth
+                square
+                borderTopOnly
+                className="flex-1"
+              />
+            </div>
+          </Container>
 
-          </div>
-          <div className="flex items-center w-full">
-            <ReactionButton
-              icon={<ThumbsUp className="w-4 h-4" />}
-              label={loadout.liked ? "Liked" : "Like"}
-              count={loadout.likes}
-              active={loadout.liked}
-              accent="#01a059"
-              onClick={() => react("like")}
-              fillWidth
-              square
-              borderTopOnly
-              className="flex-1 "
-            />
-            <ReactionButton
-              icon={<ThumbsDown className="w-4 h-4" />}
-              label={loadout.disliked ? "Disliked" : "Dislike"}
-              count={loadout.dislikes}
-              active={loadout.disliked}
-              accent="#d00050"
-              onClick={() => react("dislike")}
-              fillWidth
-              square
-              borderTopOnly
-              className="flex-1"
-            />
-          </div>
-          </div>
+          {/* Author */}
+          <Container>
+            <div className="flex flex-wrap items-center text-sm gap-4">
+              {(() => {
+                const avatar = (
+                  <div className="w-20 h-20 rounded-lg border border-white/10 overflow-hidden flex items-center justify-center  bg-white/[0.04]">
+                    {loadout.authorAvatarUrl ? (
+                      <img src={loadout.authorAvatarUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-[12px] font-semibold text-[#fafafa]">
+                        {loadout.userName?.[0]?.toUpperCase() ?? "U"}
+                      </span>
+                    )}
+                  </div>
+                );
+                return loadout.authorNickname ? (
+                  <Link to={`/u/${loadout.authorNickname}`}>{avatar}</Link>
+                ) : (
+                  avatar
+                );
+              })()}
+              <div className="flex flex-col gap-2 text-base">
+                {loadout.authorNickname ? (
+                  <Link to={`/u/${loadout.authorNickname}`} className="hover:underline">
+                    {loadout.userName}
+                  </Link>
+                ) : (
+                  <span>{loadout.userName}</span>
+                )}
+                {loadout.authorLinks && SOCIAL_LINK_FIELDS.some(({ key }) => loadout.authorLinks![key]) && (
+                  <div className="flex items-start gap-2 flex-wrap">
+                    {SOCIAL_LINK_FIELDS.filter(({ key }) => loadout.authorLinks![key]).map(
+                      ({ key, label, icon: Icon, url }) => {
+                        const count = formatCount(loadout.authorSocialStats?.[key]);
+                        return (
+                          <Button key={key} asChild variant="outline" size="sm">
+                            <a
+                              href={url(loadout.authorLinks![key]!)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={label}
+                            >
+                              <Icon className="w-3.5 h-3.5" />
+                              <span className="text-[10px] text-[#8d898a] font-mono">{count ?? "—"}</span>
+                            </a>
+                          </Button>
+                        );
+                      }
+                    )}
+                  </div>
+
+                )}</div>
+
+            </div>
+
+
+          </Container>
+
+    
 
           {loadout.gameLoadoutCode && (
-            <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-3">
+            <Container>
               <h3 className="text-[12px] tracking-[0.5px] uppercase text-[#fafafa] font-medium">
                 In-game loadout code
               </h3>
@@ -413,10 +471,46 @@ export function LoadoutPreview() {
                   )}
                 </Button>
               </div>
-            </div>
+            </Container>
           )}
 
-          <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex items-center gap-5 flex-wrap">
+          {loadout.video && (() => {
+            const platformMeta = VIDEO_PLATFORM_META[loadout.video.platform];
+            const PlatformIcon = platformMeta.icon;
+            return (
+              <Container>
+                {loadout.video.thumbnailUrl && (
+                  <img
+                    src={loadout.video.thumbnailUrl}
+                    alt={loadout.video.title ?? ""}
+                    className="w-full aspect-video object-cover"
+                  />
+                )}
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2 text-[#8d898a]">
+                    <PlatformIcon className="w-4 h-4" />
+                    <span className="text-[12px] tracking-[0.5px] uppercase font-medium">
+                      {platformMeta.label}
+                    </span>
+                  </div>
+                  {loadout.video.title && (
+                    <p className="text-[14px] text-[#fafafa] font-medium">{loadout.video.title}</p>
+                  )}
+                  {loadout.video.authorName && (
+                    <p className="text-[12px] text-[#8d898a]">by {loadout.video.authorName}</p>
+                  )}
+                  <a href={loadout.video.url} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="w-full">
+                      <ExternalLink className="w-4 h-4 text-[#fafafa]" />
+                      <span className="text-[14px] text-[#fafafa]">Watch on {platformMeta.label}</span>
+                    </Button>
+                  </a>
+                </div>
+              </Container>
+            );
+          })()}
+
+          <Container className="flex flex-row items-center gap-4">
             {qrDataUrl && <img src={qrDataUrl} alt="QR code linking to this loadout" className="w-[104px] h-[104px] shrink-0" />}
             <div className="flex-1 min-w-[200px] flex flex-col gap-3">
               <h3 className="text-[12px] tracking-[0.5px] uppercase text-[#fafafa] font-medium">Share loadout</h3>
@@ -424,13 +518,14 @@ export function LoadoutPreview() {
               <Button
                 onClick={downloadQr}
                 variant="outline"
+                className="w-fit"
               >
                 <Download className="w-4 h-4 text-[#fafafa]" />
                 <span className="text-[14px] text-[#fafafa]">Download QR</span>
                 <span className="text-[14px] text-[#bebcbc]">as PNG</span>
               </Button>
             </div>
-          </div>
+          </Container>
 
           {canEdit && (
             <div className="flex items-center gap-3">
