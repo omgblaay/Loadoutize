@@ -230,7 +230,7 @@ export function GameSelector() {
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
 
-              <img src="../src/assets/mw4_logo.png" alt="Modern Warfare 4" className="w-56 object-contain" />
+              <img src="src/assets/mw4_logo.png" alt="Modern Warfare 4" className="w-56 object-contain" />
           <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">
             Meta Vault
           </h1>

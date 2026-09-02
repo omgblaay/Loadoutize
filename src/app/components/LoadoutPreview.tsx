@@ -490,14 +490,14 @@ export function LoadoutPreview() {
                   </div>
                 );
                 return loadout.authorNickname ? (
-                  <Link to={`/u/${loadout.userName}`}>{avatar}</Link>
+                  <Link to={`/u/${loadout.authorNickname}`}>{avatar}</Link>
                 ) : (
                   avatar
                 );
               })()}
               <div className="flex flex-col gap-2 text-base">
                 {loadout.authorNickname ? (
-                  <Link to={`/u/${loadout.userName}`} className="font-medium hover:underline">
+                  <Link to={`/u/${loadout.authorNickname}`} className="font-medium hover:underline">
                     {loadout.userName} <span className="text-teritary">@{loadout.authorNickname}</span>
                   </Link>
                 ) : (

@@ -77,15 +77,15 @@ export function LoadoutCard({
     .filter((a): a is CardAttachment => Boolean(a))
     .slice(0, MAX_ATTACHMENT_ICONS);
   const tag = loadout.tagId != null ? tags.find((t) => t.id === loadout.tagId) : undefined;
-  const glowColor = tag?.color ?? accent;
+  const glowColor = tag?.color;
   const ratingColor =
     loadout.ratingPercent == null
-      ? accent
+      ? null
       : loadout.ratingPercent >= 90
         ? "#36D27A"
         : loadout.ratingPercent >= 70
-          ? accent
-          : "#FF4D63";
+          ? "#FF4D63"
+          : null;
 
   return (
     <div className="relative w-full">
@@ -105,7 +105,7 @@ export function LoadoutCard({
       <div className="relative flex p-4 items-start gap-[9px] w-full">
         <RatingRing
           percent={loadout.ratingPercent}
-          color={ratingColor}
+          color={ratingColor ?? accent}
           size={56}
           innerClassName="border border-white/5"
           labelClassName={
@@ -117,19 +117,19 @@ export function LoadoutCard({
           <p className="text-lg font-semibold">{loadout.name}</p>
           <p className="text-sm text-teritary truncate">{loadout.description}</p>
         </div>
-      </div>
-      <div className="h-full flex items-center justify-center relative" >
-        <WeaponImage imageUrl={primaryWeaponData?.imageUrl} variant="small" />
-        {loadout.video && (
+                {loadout.video && (
           <div
-            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/[0.12] flex items-center justify-center"
             title={`Video: ${VIDEO_PLATFORM_META[loadout.video.platform].label}`}
           >
             {React.createElement(VIDEO_PLATFORM_META[loadout.video.platform].icon, {
-              className: "w-4 h-4 text-[#fafafa]",
+              className: "size-5",
             })}
           </div>
         )}
+      </div>
+      <div className="h-full flex items-center justify-center relative" >
+        <WeaponImage imageUrl={primaryWeaponData?.imageUrl} variant="small" />
+
         </div>
       <div className="p-4 pt-0 flex flex-col items-center w-full">
 
@@ -139,9 +139,13 @@ export function LoadoutCard({
 
           <Tag color={""}>{primaryWeaponData?.typeShort || gameShort}</Tag>
           <p className="w-full font-mono text-body text-sm">{primaryWeapon}</p>
+
+          <p className="font-handwritten flex-0 aliasing" style={{ color: tag?.color ?? accent, fontSize: "1.1rem" }} >
+          {tag?.name}</p>
+          {/*}
           <Tag color={loadout.tagId ? tags.find((t) => t.id === loadout.tagId)?.color : undefined}>
           {tag?.name}
-          </Tag>
+          </Tag> */}
         </div>
 
       </div>
