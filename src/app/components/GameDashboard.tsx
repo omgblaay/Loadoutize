@@ -12,6 +12,7 @@ import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
+import { CompactPageHeader } from "./ui/compact-page-header";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -171,6 +172,14 @@ export function GameDashboard() {
         </h1>
         <SearchBar isExplore={false} value={searchQuery} onChange={setSearchQuery} />
       </div>
+      <CompactPageHeader
+        title={
+          <span className="flex items-center gap-2">
+            <NavIcon icon="explore" flat={<Globe className="w-4 h-4" />} active hovered={false} size={18} />
+            Explore
+          </span>
+        }
+      />
 
       {/* Filter / sort row */}
       <div className="flex items-center gap-3 w-full flex-wrap">

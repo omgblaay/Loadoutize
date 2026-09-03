@@ -17,6 +17,7 @@ import { RatingRing } from "./ui/rating-ring";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
+import { CompactPageHeader } from "./ui/compact-page-header";
 import { VIDEO_PLATFORM_META, type LoadoutVideo } from "../utils/video";
 import { SOCIAL_LINK_FIELDS, formatCount, type SocialLinks, type SocialStats } from "../utils/social";
 import { ExternalLink } from "lucide-react";
@@ -377,6 +378,36 @@ export function LoadoutPreview() {
 
           </div>
 
+          <CompactPageHeader
+            title={loadout.name}
+            actions={
+              <>
+                <Button variant="outline" size="sm" onClick={() => navigate(`/${gameId}/explore`)}>
+                  Back
+                </Button>
+                <ReactionButton
+                  icon={<ThumbsUp className="w-4 h-4" />}
+                  label={loadout.liked ? "Liked" : "Like"}
+                  count={loadout.likes}
+                  active={loadout.liked}
+                  accent="#01a059"
+                  onClick={() => react("like")}
+                  radius={12}
+                  tintIdle
+                />
+                <ReactionButton
+                  icon={<ThumbsDown className="w-4 h-4" />}
+                  label={loadout.disliked ? "Disliked" : "Dislike"}
+                  count={loadout.dislikes}
+                  active={loadout.disliked}
+                  accent="#d00050"
+                  onClick={() => react("dislike")}
+                  radius={12}
+                  tintIdle
+                />
+              </>
+            }
+          />
 
           <div className="flex flex-col items-center gap-2 py-4">
             <div

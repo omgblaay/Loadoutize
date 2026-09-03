@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router";
+import { useParams, useNavigate, useSearchParams, Link } from "react-router";
 import { getGameColor } from "../utils/gameColors";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout, useGameName } from "./AppLayout";
@@ -11,12 +11,15 @@ import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
 import { ROLE_TAG_META, ROLE_TAG_ORDER, type RoleTag } from "../utils/roles";
+import { CompactPageHeader } from "./ui/compact-page-header";
+import { SOCIAL_LINK_FIELDS, type SocialLinks, type SocialPlatform } from "../utils/social";
 
 interface LoadoutSummary {
   userId: string;
   authorNickname: string | null;
   authorAvatarUrl: string | null;
   authorRoleTag: RoleTag | null;
+  authorLinks: SocialLinks | null;
   userName: string;
   ratingPercent: number | null;
 }
@@ -27,8 +30,14 @@ interface Member {
   name: string;
   avatarUrl: string | null;
   roleTag: RoleTag;
+  links: SocialLinks | null;
   loadoutCount: number;
   avgRating: number | null;
+}
+
+const SOCIAL_PLATFORMS = SOCIAL_LINK_FIELDS.map((f) => f.key);
+function isSocialPlatform(value: string): value is SocialPlatform {
+  return (SOCIAL_PLATFORMS as string[]).includes(value);
 }
 
 // A loadout with <3 votes has a null ratingPercent (mapLoadout's own
@@ -69,12 +78,21 @@ function CommunityViewSkeleton() {
 export function CommunityView() {
   const { gameId: selectedGame = "mw4" } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { name: gameName } = useGameName(selectedGame);
   const accent = getGameColor(selectedGame).primary;
 
   const [loadouts, setLoadouts] = useState<LoadoutSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState<RoleTag | "all">("all");
+  // Seeded from ?social=<platform> (e.g. the streamer icons on the homepage
+  // link here) so landing on this page already shows only creators who have
+  // that platform linked -- not kept in sync with the URL afterward, same as
+  // roleFilter.
+  const [socialFilter, setSocialFilter] = useState<SocialPlatform | "all">(() => {
+    const param = searchParams.get("social");
+    return param && isSocialPlatform(param) ? param : "all";
+  });
 
   useEffect(() => {
     setLoading(true);
@@ -105,12 +123,15 @@ export function CommunityView() {
       name: first.userName,
       avatarUrl: first.authorAvatarUrl,
       roleTag: first.authorRoleTag ?? "player",
+      links: first.authorLinks ?? null,
       loadoutCount: userLoadouts.length,
       avgRating: rated.length > 0 ? Math.round(average(rated.map((l) => l.ratingPercent as number))) : null,
     };
   });
 
-  const filtered = roleFilter === "all" ? members : members.filter((m) => m.roleTag === roleFilter);
+  const filtered = members
+    .filter((m) => roleFilter === "all" || m.roleTag === roleFilter)
+    .filter((m) => socialFilter === "all" || !!m.links?.[socialFilter]);
   const sorted = [...filtered].sort((a, b) => {
     if (a.avgRating == null && b.avgRating == null) return b.loadoutCount - a.loadoutCount;
     if (a.avgRating == null) return 1;
@@ -137,6 +158,14 @@ export function CommunityView() {
           Loadout creators for {gameName}, filtered by who they are and ranked by their average rating.
         </p>
       </div>
+      <CompactPageHeader
+        title={
+          <span className="flex items-center gap-2">
+            <NavIcon icon="community" flat={<Users className="w-4 h-4" />} active hovered={false} size={18} />
+            Community
+          </span>
+        }
+      />
 
       <FilterPillGroup type="single" value={roleFilter} onValueChange={(v) => v && setRoleFilter(v as RoleTag | "all")}>
         <FilterPill value="all">All</FilterPill>
@@ -147,12 +176,26 @@ export function CommunityView() {
         ))}
       </FilterPillGroup>
 
+      <FilterPillGroup
+        type="single"
+        value={socialFilter}
+        onValueChange={(v) => v && setSocialFilter(v as SocialPlatform | "all")}
+      >
+        <FilterPill value="all">All platforms</FilterPill>
+        {SOCIAL_LINK_FIELDS.map(({ key, label, icon: Icon }) => (
+          <FilterPill key={key} value={key} className="gap-1.5">
+            <Icon size={14} />
+            {label}
+          </FilterPill>
+        ))}
+      </FilterPillGroup>
+
       {sorted.length === 0 ? (
         <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
           <p className="text-[#8d898a]">
             {members.length === 0
               ? `No loadout creators for ${gameName} yet.`
-              : "No one matches that tag yet."}
+              : "No one matches these filters yet."}
           </p>
         </div>
       ) : (

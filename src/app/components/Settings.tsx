@@ -12,6 +12,7 @@ import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
 import { ROLE_TAG_META, ROLE_TAG_ORDER, type RoleTag } from "../utils/roles";
 import { Button } from "./ui/button";
 import { InstagramIcon, TiktokIcon, TwitchIcon, YoutubeIcon, KickIcon } from "@/assets/icons/socials";
+import { CompactPageHeader } from "./ui/compact-page-header";
 
 const NICKNAME_PATTERN = /^[a-z0-9_-]{3,20}$/;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -259,8 +260,14 @@ export function Settings() {
         <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">Settings</h1>
         <p className="text-[14px] text-[#8d898a]">Manage your public profile and account.</p>
       </div>
-
-
+      <CompactPageHeader
+        title="Settings"
+        actions={
+          <Button size="sm" onClick={saveProfile} disabled={saving}>
+            {saving ? "Saving…" : "Save changes"}
+          </Button>
+        }
+      />
 
       <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
         <h2>Profile</h2>

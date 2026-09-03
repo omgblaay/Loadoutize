@@ -5,7 +5,8 @@ import { gameMeta, GAME_ORDER, LAST_SELECTED_GAME_KEY, GAME_SELECTOR_ENABLED, LO
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "./AppLayout";
 import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, type CardTag } from "./ui/LoadoutCard";
-import { ChevronRight, Crosshair, Flame, Sparkles, Youtube, Twitch, Video, Music2 } from "lucide-react";
+import { ChevronRight, Crosshair, Flame, Sparkles } from "lucide-react";
+import { YoutubeIcon, TwitchIcon, TiktokIcon, InstagramIcon } from "@/assets/icons/socials";
 import { WeaponCard } from "./ui/WeaponCard";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { Skeleton } from "./ui/skeleton";
@@ -232,7 +233,7 @@ export function GameSelector() {
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
 
-              <img src={gameLogo} alt="Modern Warfare 4" className="w-56 object-contain" />
+          <img src={gameLogo} alt="Modern Warfare 4" className="w-56 object-contain" />
           <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">
             Meta Vault
           </h1>
@@ -284,28 +285,56 @@ export function GameSelector() {
           </button>
         </div> */}
 
-        <Container className="flex-row">
+      <Container className="flex-row">
 
-          <div className="flex flex-col gap-2 flex-1">
-            <div className="flex items-center text-teritary gap-2">
-            <Youtube className="w-6 h-6" />
-            <Twitch className="w-6 h-6" />
-            <Video className="w-6 h-6" />
-            <Music2 className="w-6 h-6" />
+        <div className="flex flex-col gap-2 flex-1">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => navigate(`/${selectedGame}/community?social=youtube`)}
+              className="opacity-80 hover:opacity-100 transition-opacity"
+              aria-label="Find YouTube creators"
+            >
+              <YoutubeIcon size={24} />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(`/${selectedGame}/community?social=twitch`)}
+              className="opacity-80 hover:opacity-100 transition-opacity"
+              aria-label="Find Twitch creators"
+            >
+              <TwitchIcon size={24} />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(`/${selectedGame}/community?social=tiktok`)}
+              className="opacity-80 hover:opacity-100 transition-opacity"
+              aria-label="Find TikTok creators"
+            >
+              <TiktokIcon size={24} />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(`/${selectedGame}/community?social=instagram`)}
+              className="opacity-80 hover:opacity-100 transition-opacity"
+              aria-label="Find Instagram creators"
+            >
+              <InstagramIcon size={24} />
+            </button>
           </div>
-          From your favourite Streamers &amp; Content Creators 
+          From your favourite Streamers &amp; Content Creators
           <p className="text-[14px] text-[#bebcbc] w-[320px] max-w-full flex-1">
             Check what they are currently running in-game for the best outcome.
           </p>
-          </div>
-          <Button
-            onClick={() => navigate(`/${selectedGame}/explore`)}
-            variant="outline"
-            >
-            Explore setups
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </Container>
+        </div>
+        <Button
+          onClick={() => navigate(`/${selectedGame}/explore`)}
+          variant="outline"
+        >
+          Explore setups
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </Container>
 
 
       {/* Top weapons + popular loadouts */}
