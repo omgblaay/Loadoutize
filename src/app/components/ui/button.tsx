@@ -15,7 +15,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive hover:bg-destructive/90 focus-visible:ring-destructive/20",
         outline:
-            "rounded-xl border border-white/[0.18] text-teritary hover:border-white hover:text-[#efedf1]",
+            "rounded-xl border border-white/[0.18] text-secondary hover:border-white/70 hover:text-[#efedf1]",
         secondary:
           "bg-container-alt alt-foreground hover:bg-[#353132]",
         ghost:
@@ -25,8 +25,8 @@ const buttonVariants = cva(
         sidenavActive: "min-h-[52px] hover:bg-white/[0.05] bg-white/[0.08] rounded-xl px-4 flex gap-2 uppercase  hover:bg-white/[0.05]",
       },
       size: {
-        default: "h-10 px-6 has-[>svg]:px-4",
-        sm: "h-8 gap-1.5 px-3 has-[>svg]:px-2.5",
+        default: "h-12 px-6 has-[>svg]:px-4",
+        sm: "h-8 gap-1.5 px-3 text-sm has-[>svg]:px-2.5",
         icon: "h-10 aspect-square p-0",
         iconsm: "h-8 aspect-square p-0",
       },

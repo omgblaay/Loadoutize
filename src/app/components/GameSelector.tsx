@@ -11,8 +11,9 @@ import { usePageTitle } from "../hooks/usePageTitle";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
 import { Countdown } from "./ui/Countdown";
-import { Button } from "react-day-picker";
+import { Button } from "./ui/button";
 import gameLogo from "figma:asset/mw4_logo.png";
+import { Container } from "./ui/container";
 
 // Oct 23, 2026, 12:00 AM EDT (UTC-4)
 const MW4_RELEASE_DATE = new Date("2026-10-23T04:00:00Z");
@@ -247,7 +248,7 @@ export function GameSelector() {
       )}
 
       {/* Feature row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      {/*<div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div
           className="relative rounded-2xl border border-white/[0.1] h-[296px] overflow-hidden flex flex-col items-center justify-center gap-6 px-6 py-6"
           style={{
@@ -281,28 +282,31 @@ export function GameSelector() {
             <span>Try now</span>
             <span className="text-[#bebcbc]">For Free</span>
           </button>
-        </div>
+        </div> */}
 
-        <div className="relative bg-[#201e1f] rounded-2xl h-[296px] overflow-hidden p-6 flex flex-col gap-4">
-          <div className="flex gap-4 text-[#aea6a8]">
+        <Container className="flex-row">
+
+          <div className="flex flex-col gap-2 flex-1">
+            <div className="flex items-center text-teritary gap-2">
             <Youtube className="w-6 h-6" />
             <Twitch className="w-6 h-6" />
             <Video className="w-6 h-6" />
             <Music2 className="w-6 h-6" />
           </div>
-          <div className="text-[20px] text-[#fafafa]">From your favourite Streamers &amp; Content Creators</div>
+          From your favourite Streamers &amp; Content Creators 
           <p className="text-[14px] text-[#bebcbc] w-[320px] max-w-full flex-1">
             Check what they are currently running in-game for the best outcome.
           </p>
-          <Link
-            to={`/${selectedGame}/explore`}
-            className="bg-[#2a2829] border border-white/[0.08] rounded-xl h-[52px] px-4 self-start flex items-center gap-2.5 text-[#fafafa]"
-          >
-            <span>Explore setups</span>
+          </div>
+          <Button
+            onClick={() => navigate(`/${selectedGame}/explore`)}
+            variant="outline"
+            >
+            Explore setups
             <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </div>
+          </Button>
+        </Container>
+
 
       {/* Top weapons + popular loadouts */}
       <div className="flex flex-col gap-6">

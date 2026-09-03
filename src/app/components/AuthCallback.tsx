@@ -5,6 +5,8 @@ import { projectId } from "../../../utils/supabase/info";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { Loading } from "./ui/loading";
 import { Loader2, Check, X as XIcon, Upload, UserPlus } from "lucide-react";
+import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
+import { ROLE_TAG_META, ROLE_TAG_ORDER, type RoleTag } from "../utils/roles";
 
 const NICKNAME_PATTERN = /^[a-z0-9_-]{3,20}$/;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -27,6 +29,7 @@ export function AuthCallback() {
 
   const [nickname, setNickname] = useState("");
   const [nicknameStatus, setNicknameStatus] = useState<NicknameStatus>("idle");
+  const [roleTag, setRoleTag] = useState<RoleTag>("player");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState("");
@@ -144,7 +147,7 @@ export function AuthCallback() {
 
     setSubmitting(true);
     try {
-      await completeProfile(nickname, avatarFile);
+      await completeProfile(nickname, avatarFile, roleTag);
       navigate("/", { replace: true });
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Failed to finish registration");
@@ -258,6 +261,19 @@ export function AuthCallback() {
             )}
             {nicknameStatus === "error" && <span className="text-[#ef9696]">Couldn't check availability</span>}
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+            You are a...
+          </label>
+          <FilterPillGroup type="single" value={roleTag} onValueChange={(v) => v && setRoleTag(v as RoleTag)}>
+            {ROLE_TAG_ORDER.map((tag) => (
+              <FilterPill key={tag} value={tag} size="sm">
+                {ROLE_TAG_META[tag].label}
+              </FilterPill>
+            ))}
+          </FilterPillGroup>
         </div>
 
         {submitError && (

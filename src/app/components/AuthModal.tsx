@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useAuth } from "./AuthContext";
 import { X, LogIn, UserPlus } from "lucide-react";
 import { projectId } from "../../../utils/supabase/info";
+import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
+import { ROLE_TAG_META, ROLE_TAG_ORDER, type RoleTag } from "../utils/roles";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -42,6 +44,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");
+  const [roleTag, setRoleTag] = useState<RoleTag>("player");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login, signup } = useAuth();
@@ -60,7 +63,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setLoading(true);
     try {
       if (mode === "signup") {
-        await signup(email, password, name, nickname);
+        await signup(email, password, name, nickname, roleTag);
       } else {
         await login(email, password);
       }
@@ -69,6 +72,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       setPassword("");
       setName("");
       setNickname("");
+      setRoleTag("player");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -149,6 +153,25 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <p className="mt-1.5 text-xs text-neutral-500">
                   Your public profile URL: /u/{nickname || "your-public-handle"}
                 </p>
+              </div>
+            )}
+
+            {mode === "signup" && (
+              <div>
+                <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                  You are a...
+                </label>
+                <FilterPillGroup
+                  type="single"
+                  value={roleTag}
+                  onValueChange={(v) => v && setRoleTag(v as RoleTag)}
+                >
+                  {ROLE_TAG_ORDER.map((tag) => (
+                    <FilterPill key={tag} value={tag} size="sm">
+                      {ROLE_TAG_META[tag].label}
+                    </FilterPill>
+                  ))}
+                </FilterPillGroup>
               </div>
             )}
 

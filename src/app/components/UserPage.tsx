@@ -12,6 +12,9 @@ import { cn } from "./ui/utils";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { Settings as SettingsIcon } from "lucide-react";
 import { SOCIAL_LINK_FIELDS, formatCount, type SocialLinks, type SocialStats } from "../utils/social";
+import { Tag } from "./ui/tag";
+import { ROLE_TAG_META, type RoleTag } from "../utils/roles";
+import { Container } from "./ui/container";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -24,6 +27,7 @@ interface Profile {
   nickname: string;
   name: string;
   avatarUrl: string | null;
+  roleTag: RoleTag;
   links: SocialLinks;
   socialStats?: SocialStats | null;
 }
@@ -183,7 +187,7 @@ export function UserPage() {
     >
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,320px)_1fr] gap-6 items-start">
         {/* Profile hero */}
-        <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
+        <Container className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
           <div className="flex flex-col items-center text-center gap-3">
             <div className="w-24 h-24 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
               {profile.avatarUrl ? (
@@ -194,28 +198,34 @@ export function UserPage() {
                 </span>
               )}
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col items-center gap-1">
               <h1 className="text-xl font-semibold text-[#efedf1]">{profile.name}</h1>
               <p className="text-[14px] text-[#8d898a]">@{profile.nickname}</p>
+              <Tag>{ROLE_TAG_META[profile.roleTag]?.label ?? "Player"}</Tag>
             </div>
           </div>
 
           {SOCIAL_LINK_FIELDS.some(({ key }) => profile.links[key]) && (
-            <div className="flex items-start justify-center gap-2 flex-wrap">
+            <div className="flex items-start justify-center gap-1 flex-wrap">
               {SOCIAL_LINK_FIELDS.filter(({ key }) => profile.links[key]).map(({ key, label, icon: Icon, url }) => {
                 const count = formatCount(profile.socialStats?.[key]);
                 return (
-                  <a
+                  <Button
                     key={key}
-                    href={url(profile.links[key]!)}
-                    target="_blank"
+                    onClick={() => window.open(url(profile.links[key]!), "_blank")}
+                    variant="ghost"
                     rel="noopener noreferrer"
                     aria-label={label}
-                    className="flex flex-col items-center gap-1 w-14 py-2 rounded-xl border border-white/[0.18] text-[#fafafa] hover:bg-white/[0.05] transition-colors"
+                    tooltip={
+                      <>
+                        {label}: <span className="text-teritary">@{profile.links[key]}</span>
+                      </>
+                    }
+                    className="flex-col gap-1 px-1 !max-w-10"
                   >
                     <Icon className="w-4 h-4" />
                     <span className="text-[10px] text-[#8d898a] font-mono">{count ?? "—"}</span>
-                  </a>
+                  </Button>
                 );
               })}
             </div>
@@ -226,13 +236,13 @@ export function UserPage() {
 
 
           {isOwnProfile && (
-            <Button onClick={() => navigate("/settings")} variant="outline">
+            <Button onClick={() => navigate("/settings")} size="sm" variant="outline">
               <SettingsIcon className="w-4 h-4" />
               Edit profile
             </Button>
           )}
           </div>
-        </div>
+        </Container>
 
         {/* Loadouts */}
         <div className="flex flex-col gap-4">

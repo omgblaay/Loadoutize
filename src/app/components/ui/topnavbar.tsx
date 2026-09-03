@@ -14,6 +14,7 @@ import {
 } from "./dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./dialog";
 import { Button } from "./button";
+import { cn } from "./utils";
 
 export function TopNavBar({
   activeLogoUrl,
@@ -22,6 +23,7 @@ export function TopNavBar({
   orderedGames,
   handleGameSelect,
   setShowAuthModal,
+  sticky = false,
 }: {
   activeLogoUrl: string | null;
   user: any;
@@ -29,6 +31,8 @@ export function TopNavBar({
   orderedGames: { id: string; name: string; slug: string; logoUrl: string | null }[];
   handleGameSelect: (id: string) => void;
   setShowAuthModal: (show: boolean) => void;
+  /** Only the homepage keeps the navbar pinned while scrolling. */
+  sticky?: boolean;
 }) {
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -40,7 +44,7 @@ export function TopNavBar({
   const activeMeta = gameMeta[selectedGame];
   const activeName = orderedGames.find((g) => g.id === selectedGame)?.name ?? activeMeta?.name ?? selectedGame;
   const ActiveIcon = activeMeta?.icon ?? Globe;
-    return (<div className="w-full backdrop-blur-md bg-[rgba(6,5,9,0.6)] border-b border-white/[0.16] sticky top-0 z-40">
+    return (<div className={cn("w-full backdrop-blur-md bg-[rgba(6,5,9,0.6)] border-b border-white/[0.16] z-40", sticky && "sticky top-0")}>
         <div className="max-w-[1440px] mx-auto p-2 sm:p-6  h-[72px] flex items-center gap-5">
           <div className="flex items-center gap-3 shrink-0">
             <a href="/" className="flex items-center gap-1.5">
@@ -94,24 +98,15 @@ export function TopNavBar({
           <div className="flex-1" />
 
           <div className="flex items-center gap-4 shrink-0">
-            {user && (
-              <button
-                className="h-[52px] px-4 rounded-xl border border-white/[0.18] flex items-center gap-2 text-[#efedf1]"
-                onMouseEnter={() => setFavouritesHovered(true)}
-                onMouseLeave={() => setFavouritesHovered(false)}
-              >
-                <NavIcon icon="favourites" flat={<Heart className="w-4 h-4" />} active={false} hovered={favouritesHovered} size={16} />
-                <span className="sm:block hidden">Favourites</span>
-              </button>
-            )}
-            <button
+
+
+            {user ? (
+              <>            <Button
               onClick={() => (user ? navigate(`/${selectedGame}/create`) : setShowAuthModal(true))}
-              className="h-[52px] px-4 rounded-xl border border-white/[0.08] bg-[#2a2829] flex items-center gap-2 text-[#efedf1]"
+              size="default"
             >
               <span>Create</span>
-            </button>
-            {user ? (
-              <>
+            </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
@@ -131,7 +126,6 @@ export function TopNavBar({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-52 rounded-xl border-white/10 bg-[#161415] text-[#efedf1] p-1.5"
                   >
                     <DropdownMenuItem
                       onClick={() => navigate(`/u/${user.nickname ?? user.name}`)}
@@ -190,12 +184,11 @@ export function TopNavBar({
                 </Dialog>
               </>
             ) : (
-              <button
+              <Button
                 onClick={() => setShowAuthModal(true)}
-                className="h-[52px] px-5 rounded-xl bg-[#efedf1] text-[#161414] font-medium flex items-center gap-2"
               >
                 <span>Join</span>
-              </button>
+              </Button>
             )}
           </div>
         </div>

@@ -4,6 +4,7 @@ import { AuthProvider } from "./components/AuthContext";
 import { GameSelector } from "./components/GameSelector";
 import { GameDashboard } from "./components/GameDashboard";
 import { MetaView } from "./components/MetaView";
+import { CommunityView } from "./components/CommunityView";
 import { LoadoutBuilder } from "./components/LoadoutBuilder";
 import { LoadoutPreview } from "./components/LoadoutPreview";
 import { WeaponConfigPreview } from "./components/WeaponConfigPreview";
@@ -65,6 +66,14 @@ export default function App() {
             element={
               <GameLock>
                 <MetaView />
+              </GameLock>
+            }
+          />
+          <Route
+            path="/:gameId/community"
+            element={
+              <GameLock>
+                <CommunityView />
               </GameLock>
             }
           />

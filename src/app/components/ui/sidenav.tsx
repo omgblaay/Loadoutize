@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HomeIcon, Globe, Flame, Crown, Zap, Menu, X } from "lucide-react";
+import { HomeIcon, Globe, Flame, Crown, Users, Zap, Menu, X } from "lucide-react";
 import { SideNavButton } from "./sidenav-button";
 import { AppTooltip } from "./tooltip";
 import { NavIcon, type NavIconKey } from "./nav-icon-3d";
@@ -15,6 +15,7 @@ export function SideNav({
   isHome,
   isExplore,
   isMeta,
+  isCommunity,
   selectedGame,
   categories,
   navigate,
@@ -24,6 +25,7 @@ export function SideNav({
   isHome: boolean;
   isExplore: boolean;
   isMeta: boolean;
+  isCommunity: boolean;
   selectedGame: string;
   categories: SideNavCategory[];
   navigate: (path: string) => void;
@@ -74,6 +76,14 @@ export function SideNav({
         <SideNavButton state={isMeta ? "active" : "default"} onClick={() => go(`/${selectedGame}/meta`)} {...hoverHandlers("meta")}>
           <NavIcon icon="meta" flat={<Crown className="w-5 h-5" />} active={isMeta} hovered={hoveredIcon === "meta"} />
           Meta
+        </SideNavButton>
+        <SideNavButton
+          state={isCommunity ? "active" : "default"}
+          onClick={() => go(`/${selectedGame}/community`)}
+          {...hoverHandlers("community")}
+        >
+          <NavIcon icon="community" flat={<Users className="w-5 h-5" />} active={isCommunity} hovered={hoveredIcon === "community"} />
+          Community
         </SideNavButton>
       </div>
 
@@ -169,6 +179,16 @@ export function SideNav({
           >
             <NavIcon icon="meta" flat={<Crown className="w-5 h-5" />} active={isMeta} hovered={hoveredIcon === "meta"} />
           </SideNavButton>
+          <SideNavButton
+            state={isCommunity ? "active" : "default"}
+            onClick={() => go(`/${selectedGame}/community`)}
+            className="justify-center px-0 w-11"
+            tooltip="Community"
+            aria-label="Community"
+            {...hoverHandlers("community")}
+          >
+            <NavIcon icon="community" flat={<Users className="w-5 h-5" />} active={isCommunity} hovered={hoveredIcon === "community"} />
+          </SideNavButton>
         </div>
 
         {categories.length > 0 && (
@@ -193,7 +213,7 @@ export function SideNav({
         className="sm:hidden fixed inset-x-0 bottom-0 z-40 bg-[#0a0909] border-t border-white/[0.08] pb-[env(safe-area-inset-bottom)]"
         aria-label="Primary"
       >
-        <div className="grid grid-cols-5 h-14">
+        <div className="grid grid-cols-6 h-14">
           <SideNavButton
             onClick={() => go("/")}
             aria-label="Home"
@@ -231,6 +251,16 @@ export function SideNav({
           >
             <NavIcon icon="meta" flat={<Crown className="w-5 h-5" />} active={isMeta} hovered={hoveredIcon === "meta"} />
             <span className="text-[9px] uppercase tracking-[0.3px] font-medium">Meta</span>
+          </SideNavButton>
+          <SideNavButton
+            onClick={() => go(`/${selectedGame}/community`)}
+            aria-label="Community"
+            aria-current={isCommunity ? "page" : undefined}
+            className={`flex flex-col items-center justify-center gap-0.5 ${isCommunity ? "text-[#fafafa]" : "text-[#8d898a]"}`}
+            {...hoverHandlers("community")}
+          >
+            <NavIcon icon="community" flat={<Users className="w-5 h-5" />} active={isCommunity} hovered={hoveredIcon === "community"} />
+            <span className="text-[9px] uppercase tracking-[0.3px] font-medium">Community</span>
           </SideNavButton>
           <SideNavButton
             onClick={() => setExpanded(true)}

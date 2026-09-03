@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { projectId, publicAnonKey } from "/utils/supabase/info";
+import type { RoleTag } from "../utils/roles";
 
 interface User {
   id: string;
@@ -7,6 +8,7 @@ interface User {
   name: string;
   nickname: string | null;
   avatarUrl: string | null;
+  roleTag: RoleTag;
 }
 
 interface AuthContextType {
@@ -15,14 +17,14 @@ interface AuthContextType {
   /** Google's profile picture URL while the user is mid-onboarding (no profile yet); null otherwise. */
   pendingOAuthAvatarUrl: string | null;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string, nickname: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, nickname: string, roleTag?: RoleTag) => Promise<void>;
   /** Adopts an already-issued Supabase access token (e.g. from an OAuth redirect) without a password grant. Resolves to whether the user already has a profile. */
   loginWithAccessToken: (token: string) => Promise<boolean>;
   /** Creates the `profiles` row for a user who authenticated but doesn't have one yet (Google onboarding). */
-  completeProfile: (nickname: string, avatarFile: File | null) => Promise<void>;
+  completeProfile: (nickname: string, avatarFile: File | null, roleTag?: RoleTag) => Promise<void>;
   logout: () => void;
   loading: boolean;
-  /** Re-fetches the profile fields (nickname/avatarUrl) onto the current user -- call after editing them in Settings. */
+  /** Re-fetches the profile fields (nickname/avatarUrl/roleTag) onto the current user -- call after editing them in Settings. */
   refreshProfile: () => Promise<void>;
 }
 
@@ -60,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
       if (!response.ok) return null;
       const { profile } = await response.json();
-      return profile as { nickname: string; avatarUrl: string | null };
+      return profile as { nickname: string; avatarUrl: string | null; roleTag: RoleTag };
     } catch (error) {
       console.error("Error fetching profile:", error);
       return null;
@@ -71,7 +73,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!accessToken) return;
     const profile = await fetchProfile(accessToken);
     if (profile) {
-      setUser((prev) => (prev ? { ...prev, nickname: profile.nickname, avatarUrl: profile.avatarUrl } : prev));
+      setUser((prev) =>
+        prev ? { ...prev, nickname: profile.nickname, avatarUrl: profile.avatarUrl, roleTag: profile.roleTag } : prev
+      );
     }
   };
 
@@ -97,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             name: userData.user_metadata?.name || userData.email.split("@")[0],
             nickname: profile?.nickname ?? null,
             avatarUrl: profile?.avatarUrl ?? null,
+            roleTag: profile?.roleTag ?? "player",
           });
           setAccessToken(storedToken);
         } else {
@@ -110,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signup = async (email: string, password: string, name: string, nickname: string) => {
+  const signup = async (email: string, password: string, name: string, nickname: string, roleTag?: RoleTag) => {
     const response = await fetch(
       `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/auth/signup`,
       {
@@ -119,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${publicAnonKey}`,
         },
-        body: JSON.stringify({ email, password, name, nickname }),
+        body: JSON.stringify({ email, password, name, nickname, roleTag }),
       }
     );
 
@@ -156,6 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       name: data.user.user_metadata?.name || data.user.email.split("@")[0],
       nickname: profile?.nickname ?? null,
       avatarUrl: profile?.avatarUrl ?? null,
+      roleTag: profile?.roleTag ?? "player",
     });
     setAccessToken(data.access_token);
     localStorage.setItem("access_token", data.access_token);
@@ -189,6 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       name: userData.user_metadata?.name || userData.email.split("@")[0],
       nickname: profile?.nickname ?? null,
       avatarUrl: profile?.avatarUrl ?? null,
+      roleTag: profile?.roleTag ?? "player",
     });
     setPendingOAuthAvatarUrl(
       profile ? null : userData.user_metadata?.avatar_url || userData.user_metadata?.picture || null
@@ -198,12 +205,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return !!profile;
   };
 
-  const completeProfile = async (nickname: string, avatarFile: File | null) => {
+  const completeProfile = async (nickname: string, avatarFile: File | null, roleTag?: RoleTag) => {
     if (!accessToken) throw new Error("Not signed in");
 
     const form = new FormData();
     form.append("nickname", nickname);
     if (avatarFile) form.append("file", avatarFile);
+    if (roleTag) form.append("roleTag", roleTag);
 
     const response = await fetch(
       `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/auth/complete-profile`,
@@ -214,7 +222,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error || "Failed to complete profile");
     }
 
-    setUser((prev) => (prev ? { ...prev, nickname: data.profile.nickname, avatarUrl: data.profile.avatarUrl } : prev));
+    setUser((prev) =>
+      prev
+        ? { ...prev, nickname: data.profile.nickname, avatarUrl: data.profile.avatarUrl, roleTag: data.profile.roleTag }
+        : prev
+    );
     setPendingOAuthAvatarUrl(null);
   };
 

@@ -102,6 +102,7 @@ export function AppLayout({
   const isHome = location.pathname === "/";
   const isExplore = location.pathname.endsWith("/explore");
   const isMeta = location.pathname.endsWith("/meta");
+  const isCommunity = location.pathname.endsWith("/community");
 
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -129,6 +130,7 @@ export function AppLayout({
         orderedGames={orderedGames}
         handleGameSelect={handleGameSelect}
         setShowAuthModal={setShowAuthModal}
+        sticky={isHome}
       />
 
 
@@ -136,7 +138,7 @@ export function AppLayout({
       {/* Body: Sidenav + content */}
       <div className="max-w-[1440px] w-full mx-auto flex gap-6 p-2 sm:p-6  flex-1">
         {/* Sidenav */}
-        <SideNav isHome={isHome} isExplore={isExplore} isMeta={isMeta} selectedGame={selectedGame} categories={categories} navigate={navigate} setShowAuthModal={setShowAuthModal} handleGameSelect={handleGameSelect} />
+        <SideNav isHome={isHome} isExplore={isExplore} isMeta={isMeta} isCommunity={isCommunity} selectedGame={selectedGame} categories={categories} navigate={navigate} setShowAuthModal={setShowAuthModal} handleGameSelect={handleGameSelect} />
 
         {/* Page content */}
         <main className="flex-1 min-w-0 flex flex-col gap-4">

@@ -1,4 +1,4 @@
-import { Instagram, Youtube, Twitch, Video, Gamepad2 } from "lucide-react";
+import { InstagramIcon, TiktokIcon, TwitchIcon, YoutubeIcon, KickIcon } from "@/assets/icons/socials";
 
 export type SocialPlatform = "tiktok" | "instagram" | "youtube" | "twitch" | "kick";
 
@@ -19,18 +19,17 @@ export interface SocialStats {
   fetchedAt?: string | null;
 }
 
-// Lucide has no TikTok mark -- Video stands in for it.
 export const SOCIAL_LINK_FIELDS: {
   key: SocialPlatform;
   label: string;
-  icon: typeof Instagram;
+  icon: typeof InstagramIcon;
   url: (handle: string) => string;
 }[] = [
-  { key: "tiktok", label: "TikTok", icon: Video, url: (h) => `https://tiktok.com/@${h}` },
-  { key: "instagram", label: "Instagram", icon: Instagram, url: (h) => `https://instagram.com/${h}` },
-  { key: "youtube", label: "YouTube", icon: Youtube, url: (h) => `https://youtube.com/@${h}` },
-  { key: "twitch", label: "Twitch", icon: Twitch, url: (h) => `https://twitch.tv/${h}` },
-  { key: "kick", label: "Kick", icon: Gamepad2, url: (h) => `https://kick.com/${h}` },
+  { key: "tiktok", label: "TikTok", icon: TiktokIcon, url: (h) => `https://tiktok.com/@${h}` },
+  { key: "instagram", label: "Instagram", icon: InstagramIcon, url: (h) => `https://instagram.com/${h}` },
+  { key: "youtube", label: "YouTube", icon: YoutubeIcon, url: (h) => `https://youtube.com/@${h}` },
+  { key: "twitch", label: "Twitch", icon: TwitchIcon, url: (h) => `https://twitch.tv/${h}` },
+  { key: "kick", label: "Kick", icon: KickIcon, url: (h) => `https://kick.com/${h}` },
 ];
 
 /** Compact follower/subscriber count, e.g. 1234567 -> "1.2M". */

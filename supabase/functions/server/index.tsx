@@ -45,6 +45,17 @@ async function getUserFromRequest(c: any) {
 const AVATARS_BUCKET = "avatars";
 const NICKNAME_PATTERN = /^[a-z0-9_-]{3,20}$/;
 
+// Distinct from `tags`/`tag_weapon_categories` (loadout playstyle tags, e.g.
+// "Run'n'Gun") -- this classifies the *user*, not a loadout. Named `role_tag`
+// rather than `role` to avoid colliding with Postgres/Supabase's own reserved
+// `role` concept (JWT claims, `SET ROLE`). Validated in application code only,
+// no DB CHECK constraint -- same convention as REACTION_TYPES below.
+const ROLE_TAGS = ["player", "pro_player", "streamer", "content_creator", "sweat"] as const;
+type RoleTag = (typeof ROLE_TAGS)[number];
+function normalizeRoleTag(value: unknown): RoleTag {
+  return ROLE_TAGS.includes(value as RoleTag) ? (value as RoleTag) : "player";
+}
+
 function avatarUrl(path: string | null): string | null {
   return path ? `${SUPABASE_URL}/storage/v1/object/public/${AVATARS_BUCKET}/${path}` : null;
 }
@@ -55,6 +66,7 @@ function mapProfile(p: any) {
     nickname: p.nickname,
     name: p.name,
     avatarUrl: avatarUrl(p.avatar_path),
+    roleTag: p.role_tag ?? "player",
     links: {
       tiktok: p.tiktok ?? null,
       instagram: p.instagram ?? null,
@@ -279,7 +291,7 @@ app.post("/make-server-6db475c7/auth/signup", async (c) => {
 
     const { error: profileError } = await supabase
       .from('profiles')
-      .insert({ id: data.user.id, nickname, name: body.name });
+      .insert({ id: data.user.id, nickname, name: body.name, role_tag: normalizeRoleTag(body.roleTag) });
     if (profileError) {
       // Nickname race lost, or some other insert failure -- don't leave an
       // auth user with no profile behind.
@@ -383,7 +395,7 @@ app.post("/make-server-6db475c7/auth/complete-profile", async (c) => {
 
     const { data, error } = await supabase
       .from('profiles')
-      .insert({ id: user.id, nickname, name, avatar_path: avatarPath })
+      .insert({ id: user.id, nickname, name, avatar_path: avatarPath, role_tag: normalizeRoleTag(form.get('roleTag')) })
       .select()
       .single();
     if (error) throw error;
@@ -447,6 +459,10 @@ app.put("/make-server-6db475c7/users/me", async (c) => {
       if (existingError) throw existingError;
       if (existing) return c.json({ error: "That nickname is already taken" }, 400);
       update.nickname = nickname;
+    }
+
+    if (body.roleTag != null) {
+      update.role_tag = normalizeRoleTag(body.roleTag);
     }
 
     for (const platform of ['tiktok', 'instagram', 'youtube', 'twitch', 'kick']) {
@@ -1019,7 +1035,9 @@ async function resolveVideo(videoUrl: string | null | undefined): Promise<{ vide
 
 interface AuthorProfile {
   nickname: string;
+  name: string;
   avatar_path: string | null;
+  role_tag: string | null;
   tiktok: string | null;
   instagram: string | null;
   youtube: string | null;
@@ -1038,7 +1056,7 @@ async function fetchAuthorProfiles(loadouts: any[]): Promise<Map<string, AuthorP
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, nickname, avatar_path, tiktok, instagram, youtube, twitch, kick, social_stats')
+    .select('id, nickname, name, avatar_path, role_tag, tiktok, instagram, youtube, twitch, kick, social_stats')
     .in('id', userIds);
   if (error) {
     console.log(`Could not resolve author profiles: ${error.message}`);
@@ -1047,7 +1065,9 @@ async function fetchAuthorProfiles(loadouts: any[]): Promise<Map<string, AuthorP
   for (const p of data ?? []) {
     byId.set(p.id, {
       nickname: p.nickname,
+      name: p.name,
       avatar_path: p.avatar_path,
+      role_tag: p.role_tag,
       tiktok: p.tiktok,
       instagram: p.instagram,
       youtube: p.youtube,
@@ -1099,9 +1119,14 @@ function mapLoadout(l: any, viewerId?: string | null, authorProfiles?: Map<strin
     id: l.id,
     gameId: l.game_id,
     userId: l.user_id,
-    userName: l.user_name,
+    // Prefer the live profile name -- l.user_name is a one-time snapshot from
+    // whenever the loadout was created and goes stale the moment the author
+    // renames themselves in Settings. Only loadouts predating profiles (no
+    // author row yet) fall back to that snapshot.
+    userName: author?.name ?? l.user_name,
     authorNickname: author?.nickname ?? null,
     authorAvatarUrl: avatarUrl(author?.avatar_path ?? null),
+    authorRoleTag: author?.role_tag ?? null,
     authorLinks: author
       ? {
           tiktok: author.tiktok,
