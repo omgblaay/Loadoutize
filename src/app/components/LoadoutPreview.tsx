@@ -8,7 +8,7 @@ import { useAuth } from "./AuthContext";
 import { AppLayout, useGameName } from "./AppLayout";
 import { Button } from "./ui/button";
 import { Container } from "./ui/container";
-import { WeaponImage } from "./ui/WeaponImage";
+import { WeaponImage, type WeaponImageBadge } from "./ui/WeaponImage";
 import type { CardWeapon, CardTag, CardAttachment } from "./ui/LoadoutCard";
 import { Tag } from "./ui/tag";
 import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
@@ -292,10 +292,9 @@ export function LoadoutPreview() {
   if (!loadout) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0a0909] flex-col gap-4">
-        <p className="text-[#efedf1] text-xl">Loadout not found.</p>
+        <p className="text-xl">Loadout not found.</p>
         <Button
           onClick={() => navigate(`/${gameId}/explore`)}
-          className="h-11 px-5 rounded-xl bg-[#fafafa] text-[#161414] font-medium"
         >
           Back to Explore
         </Button>
@@ -307,6 +306,18 @@ export function LoadoutPreview() {
   const primaryWeapon = loadout.weapons?.[0];
   const primaryWeaponCatalog = catalogWeapons.find((w) => w.id === primaryWeapon?.id);
   const primaryWeaponImage = primaryWeaponCatalog?.imageUrl ?? null;
+  const primaryWeaponBadges = Object.entries(primaryWeapon?.attachments ?? {})
+    .map(([slot, value]) => {
+      const attachment = catalogAttachments.find((a) => a.type === slot && a.name === value);
+      if (!attachment) return null;
+      return {
+        key: attachment.id,
+        typeSlug: attachment.typeSlug || slot,
+        label: attachment.name,
+        iconUrl: attachment.imageUrl,
+      } satisfies WeaponImageBadge;
+    })
+    .filter((b) => b !== null);
   const shareUrl = window.location.href;
 
   return (
@@ -355,7 +366,6 @@ export function LoadoutPreview() {
               color="#01a059"
               size={64}
               className="border border-[#2a2829]"
-              labelClassName="font-mono font-medium"
             />
             <h1 className="text-sm antialiased sm:text-xl wrap-anywhere">
 
@@ -392,7 +402,6 @@ export function LoadoutPreview() {
                   active={loadout.liked}
                   accent="#01a059"
                   onClick={() => react("like")}
-                  radius={12}
                   tintIdle
                 />
                 <ReactionButton
@@ -402,7 +411,6 @@ export function LoadoutPreview() {
                   active={loadout.disliked}
                   accent="#d00050"
                   onClick={() => react("dislike")}
-                  radius={12}
                   tintIdle
                 />
               </>
@@ -411,37 +419,42 @@ export function LoadoutPreview() {
 
           <div className="flex flex-col items-center gap-2 py-4">
             <div
-              style={{ background: `radial-gradient(ellipse at center, ${accent}14, transparent 70%)` }}
+              style={{ background: `radial-gradient(ellipse at center, ${catalogTags.find((t) => t.id === loadout.tagId)?.color || null}14, transparent 70%)` }}
             >
-              <WeaponImage imageUrl={primaryWeaponImage} variant="small" />
+              <WeaponImage
+                imageUrl={primaryWeaponImage}
+                variant="large"
+                weaponId={primaryWeapon?.id}
+                badges={primaryWeaponBadges}
+              />
             </div>
           </div>
-                        <div className="flex items-center w-full gap-2">
-                <ReactionButton
-                  icon={<ThumbsUp className="w-4 h-4" />}
-                  label={loadout.liked ? "Liked" : "Like"}
-                  count={loadout.likes}
-                  active={loadout.liked}
-                  accent="#01a059"
-                  onClick={() => react("like")}
-                  fillWidth
-                  radius={12}
-                  tintIdle
-                  className="flex-1"
-                />
-                <ReactionButton
-                  icon={<ThumbsDown className="w-4 h-4" />}
-                  label={loadout.disliked ? "Disliked" : "Dislike"}
-                  count={loadout.dislikes}
-                  active={loadout.disliked}
-                  accent="#d00050"
-                  onClick={() => react("dislike")}
-                  fillWidth
-                  radius={12}
-                  tintIdle
-                  className="flex-1"
-                />
-              </div>
+          <div className="flex items-center w-full gap-2">
+            <ReactionButton
+              icon={<ThumbsUp className="w-4 h-4" />}
+              label={loadout.liked ? "Liked" : "Like"}
+              count={loadout.likes}
+              active={loadout.liked}
+              accent="#01a059"
+              onClick={() => react("like")}
+              fillWidth
+              radius={12}
+              tintIdle
+              className="flex-1"
+            />
+            <ReactionButton
+              icon={<ThumbsDown className="w-4 h-4" />}
+              label={loadout.disliked ? "Disliked" : "Dislike"}
+              count={loadout.dislikes}
+              active={loadout.disliked}
+              accent="#d00050"
+              onClick={() => react("dislike")}
+              fillWidth
+              radius={12}
+              tintIdle
+              className="flex-1"
+            />
+          </div>
 
           <div className="divide-y-1 divide-solid divide-white/5 w-full">
             {primaryWeapon?.attachments &&
@@ -478,9 +491,9 @@ export function LoadoutPreview() {
               <p className="text-[14px] text-[#8d898a] py-2">No build details published for this loadout.</p>
             )}
 
-                        {loadout.gameLoadoutCode && (
+            {loadout.gameLoadoutCode && (
               <div className="flex flex-row bg-white/[0.03] h-10 rounded-lg items-center mt-4 gap-4 justify-center w-full">
-                              <span className="text-sm text-teritary/50">
+                <span className="text-sm text-teritary/50">
                   In-game code:
                 </span>
                 <div className="flex items-center gap-2">
@@ -506,70 +519,63 @@ export function LoadoutPreview() {
               the hairline between sections (none above the first). */}
           <Container className="gap-0">
             <div className="flex flex-col gap-3 pb-5">
-               {/* Author */}
-            <div className="flex flex-wrap items-center text-sm gap-2">
-              {(() => {
-                const avatar = (
-                  <div className="w-10 h-10 rounded-lg border border-white/10 overflow-hidden flex items-center justify-center  bg-white/[0.04]">
-                    {loadout.authorAvatarUrl ? (
-                      <img src={loadout.authorAvatarUrl} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-[12px] font-semibold text-[#fafafa]">
-                        {loadout.userName?.[0]?.toUpperCase() ?? "U"}
-                      </span>
-                    )}
-                  </div>
-                );
-                return loadout.authorNickname ? (
-                  <Link to={`/u/${loadout.authorNickname}`}>{avatar}</Link>
-                ) : (
-                  avatar
-                );
-              })()}
-              <div className="flex flex-col gap-2 text-base">
-                {loadout.authorNickname ? (
-                  <Link to={`/u/${loadout.authorNickname}`} className="font-medium hover:underline">
-                    {loadout.userName} <span className="text-teritary">@{loadout.authorNickname}</span>
-                  </Link>
-                ) : (
-                  <span>{loadout.userName}</span>
-                )}
-                {loadout.authorLinks && SOCIAL_LINK_FIELDS.some(({ key }) => loadout.authorLinks![key]) && (
-                  <div className="flex items-start gap-2 flex-wrap">
-                    {SOCIAL_LINK_FIELDS.filter(({ key }) => loadout.authorLinks![key]).map(
-                      ({ key, label, icon: Icon, url }) => {
-                        const count = formatCount(loadout.authorSocialStats?.[key]);
-                        return (
-                          <Button key={key} asChild variant="outline" size="sm">
-                            <a
-                              href={url(loadout.authorLinks![key]!)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={label}
-                            >
-                              <Icon className="w-3.5 h-3.5" />
-                              <span className="text-[10px] text-teritary font-mono">{count ?? "—"}</span>
-                            </a>
-                          </Button>
-                        );
-                      }
-                    )}
-                  </div>
-                )}
+              {/* Author */}
+              <div className="flex flex-wrap items-center text-sm gap-2">
+                {(() => {
+                  const avatar = (
+                    <div className="w-16 h-16 rounded-lg border border-white/10 overflow-hidden flex items-center justify-center  bg-white/[0.04]">
+                      {loadout.authorAvatarUrl ? (
+                        <img src={loadout.authorAvatarUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[12px] font-semibold text-[#fafafa]">
+                          {loadout.userName?.[0]?.toUpperCase() ?? "U"}
+                        </span>
+                      )}
+                    </div>
+                  );
+                  return loadout.authorNickname ? (
+                    <Link to={`/u/${loadout.authorNickname}`}>{avatar}</Link>
+                  ) : (
+                    avatar
+                  );
+                })()}
+                <div className="flex flex-col gap-2 text-base">
+                  {loadout.authorNickname ? (
+                    <Link to={`/u/${loadout.authorNickname}`} className="hover:underline">
+                      {loadout.userName} <span className="text-teritary">@{loadout.authorNickname}</span>
+                    </Link>
+                  ) : (
+                    <span>{loadout.userName}</span>
+                  )}
+                  {loadout.authorLinks && SOCIAL_LINK_FIELDS.some(({ key }) => loadout.authorLinks![key]) && (
+                    <div className="flex items-start gap-1 flex-wrap">
+                      {SOCIAL_LINK_FIELDS.filter(({ key }) => loadout.authorLinks![key]).map(
+                        ({ key, label, icon: Icon, url }) => {
+                          const count = formatCount(loadout.authorSocialStats?.[key]);
+                          return (
+                            <Button key={key} asChild variant="ghost" size="sm">
+                              <a
+                                href={url(loadout.authorLinks![key]!)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={label}
+                              >
+                                <Icon className="w-3.5 h-3.5" />
+                                <span className="text-[10px] text-teritary font-mono">{count ?? "—"}</span>
+                              </a>
+                            </Button>
+                          );
+                        }
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-             {/* Description */}
-              {loadout.description && <p className="text-secondary text-base">{loadout.description}</p>}
-
-
-
+              {/* Description */}
+              {loadout.description && <blockquote className="text-secondary text-base">{loadout.description}</blockquote>}
 
             </div>
-
-           
-
-
 
             {loadout.video && (() => {
               const platformMeta = VIDEO_PLATFORM_META[loadout.video.platform];
@@ -578,11 +584,13 @@ export function LoadoutPreview() {
               const isPortrait = loadout.video.platform !== "youtube";
               const thumbClass = cn("shrink-0 rounded-lg object-cover bg-white/[0.04]", isPortrait ? "h-full aspect-[9/16]" : "h-24 aspect-[16/9]");
               return (<>
-              <div className="flex items-center gap-2 text-teritary mb-4">
-                      <PlatformIcon className="size-5" />
-                      <span className="text-xs tracking-[0.5px] uppercase font-medium">{platformMeta.label} video attached</span>
-                    </div>
-                <div className="flex bg-white/5 gap-4 p-4 rounded-lg items-center">
+
+                <div className="flex flex-col bg-white/5 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 text-teritary mb-2">
+                    <PlatformIcon className="size-5" />
+                    <span className="text-xs tracking-[0.5px] uppercase font-medium">{platformMeta.label} video attached</span>
+                  </div>
+                  <div className="flex flex-row gap-2 min-w-0 flex-1">
                   {loadout.video.thumbnailUrl ? (
                     <img src={loadout.video.thumbnailUrl} alt={loadout.video.title ?? ""} className={thumbClass} />
                   ) : (
@@ -590,7 +598,7 @@ export function LoadoutPreview() {
                     </div>
                   )}
                   <div className="flex flex-col gap-1.5 min-w-0 flex-1 justify-center">
-  
+
                     {loadout.video.title && (
                       <p className="text-[14px] text-[#fafafa] font-medium line-clamp-2">{loadout.video.title}</p>
                     )}
@@ -604,8 +612,9 @@ export function LoadoutPreview() {
                       </Button>
                     </a>
                   </div>
+                  </div>
                 </div>
-             </>);
+              </>);
             })()}
           </Container>
 

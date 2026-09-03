@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { ChevronDown, Globe, Heart, LogOut, Settings as SettingsIcon, Star, UserRound } from "lucide-react";
+import {  Globe, Heart, LogOut, Settings as SettingsIcon, UserRound } from "lucide-react";
 import { useAuth } from "../AuthContext";
 import { gameMeta } from "@/app/utils/games";
 import { Logo } from "./logo";
-import { NavIcon } from "./nav-icon-3d";
 import {
   DropdownMenu,
   DropdownMenuContent,

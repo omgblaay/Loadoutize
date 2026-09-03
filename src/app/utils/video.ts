@@ -1,4 +1,4 @@
-import { Instagram, Youtube, Video as VideoIcon } from "lucide-react";
+import { InstagramIcon, TiktokIcon, YoutubeIcon } from "@/assets/icons/socials";
 
 export type VideoPlatform = "tiktok" | "instagram" | "youtube";
 
@@ -25,9 +25,9 @@ export function detectVideoPlatform(url: string): VideoPlatform | null {
   }
 }
 
-// Lucide has no TikTok mark -- Video stands in for it, same as the Settings/UserPage social links.
-export const VIDEO_PLATFORM_META: Record<VideoPlatform, { label: string; icon: typeof Instagram }> = {
-  tiktok: { label: "TikTok", icon: VideoIcon },
-  instagram: { label: "Instagram", icon: Instagram },
-  youtube: { label: "YouTube", icon: Youtube },
+// Same brand-mark icons used for the Settings/UserPage social links, not lucide's generic stand-ins.
+export const VIDEO_PLATFORM_META: Record<VideoPlatform, { label: string; icon: typeof InstagramIcon }> = {
+  tiktok: { label: "TikTok", icon: TiktokIcon },
+  instagram: { label: "Instagram", icon: InstagramIcon },
+  youtube: { label: "YouTube", icon: YoutubeIcon },
 };

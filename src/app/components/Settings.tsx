@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { LOCKED_GAME_ID } from "../utils/games";
@@ -94,6 +95,8 @@ export function Settings() {
   const navigate = useNavigate();
   const { user, accessToken, loading: authLoading, refreshProfile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const nicknameInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -104,13 +107,12 @@ export function Settings() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [nicknameError, setNicknameError] = useState("");
 
   const [newPassword, setNewPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -175,15 +177,17 @@ export function Settings() {
 
   const saveProfile = async () => {
     if (!accessToken) return;
-    setError("");
-    setSuccess("");
+    setNameError("");
+    setNicknameError("");
 
-    if (!NICKNAME_PATTERN.test(nickname)) {
-      setError("Nickname must be 3-20 characters: lowercase letters, numbers, - or _");
+    if (!name.trim()) {
+      setNameError("Name is required");
+      nameInputRef.current?.focus();
       return;
     }
-    if (!name.trim()) {
-      setError("Name is required");
+    if (!NICKNAME_PATTERN.test(nickname)) {
+      setNicknameError("Nickname must be 3-20 characters: lowercase letters, numbers, - or _");
+      nicknameInputRef.current?.focus();
       return;
     }
 
@@ -198,11 +202,28 @@ export function Settings() {
         }
       );
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to save profile");
+      if (!response.ok) {
+        const message = data.error || "Failed to save profile";
+        // The server reports validation failures as plain messages, not a
+        // field code -- both known messages ("Nickname must be 3-20...",
+        // "That nickname is already taken") mention the field by name, so
+        // route the message (and focus) to the input it's actually about
+        // instead of a generic banner the user has to go hunting from.
+        if (/nickname/i.test(message)) {
+          setNicknameError(message);
+          nicknameInputRef.current?.focus();
+        } else if (/name/i.test(message)) {
+          setNameError(message);
+          nameInputRef.current?.focus();
+        } else {
+          toast.error(message);
+        }
+        return;
+      }
       await refreshProfile();
-      setSuccess("Profile saved");
+      toast.success("Profile saved");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save profile");
+      toast.error(err instanceof Error ? err.message : "Failed to save profile");
     } finally {
       setSaving(false);
     }
@@ -211,7 +232,6 @@ export function Settings() {
   const savePassword = async () => {
     if (!accessToken) return;
     setPasswordError("");
-    setPasswordSuccess("");
 
     if (newPassword.length < 6) {
       setPasswordError("Password must be at least 6 characters");
@@ -232,7 +252,7 @@ export function Settings() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error_description || data.msg || "Failed to change password");
       setNewPassword("");
-      setPasswordSuccess("Password updated");
+      toast.success("Password updated");
     } catch (err) {
       setPasswordError(err instanceof Error ? err.message : "Failed to change password");
     } finally {
@@ -305,22 +325,47 @@ export function Settings() {
           <div className="flex flex-col gap-2">
             <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">Name</label>
             <input
+              ref={nameInputRef}
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
+              onChange={(e) => {
+                setName(e.target.value);
+                if (nameError) setNameError("");
+              }}
+              aria-invalid={!!nameError}
+              className={cn(
+                "h-12 rounded-xl border px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none transition-colors",
+                nameError
+                  ? "bg-[#241214] border-[#d4183d] focus:border-[#d4183d]"
+                  : "bg-white/[0.04] border-white/[0.07] focus:border-white/30"
+              )}
             />
+            {nameError && <p className="text-[12px] text-[#ef9696]">{nameError}</p>}
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">Nickname</label>
             <input
+              ref={nicknameInputRef}
               type="text"
               value={nickname}
-              onChange={(e) => setNickname(e.target.value.toLowerCase())}
+              onChange={(e) => {
+                setNickname(e.target.value.toLowerCase());
+                if (nicknameError) setNicknameError("");
+              }}
               pattern="[a-z0-9_-]{3,20}"
-              className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] font-mono text-[#fafafa] placeholder:text-[#8d898a] placeholder:font-sans outline-none focus:border-white/30 transition-colors"
+              aria-invalid={!!nicknameError}
+              className={cn(
+                "h-12 rounded-xl border px-4 text-[14px] font-mono text-[#fafafa] placeholder:text-[#8d898a] placeholder:font-sans outline-none transition-colors",
+                nicknameError
+                  ? "bg-[#241214] border-[#d4183d] focus:border-[#d4183d]"
+                  : "bg-white/[0.04] border-white/[0.07] focus:border-white/30"
+              )}
             />
-            <p className="text-[12px] text-[#8d898a]">Your public profile: /u/{nickname || "…"}</p>
+            {nicknameError ? (
+              <p className="text-[12px] text-[#ef9696]">{nicknameError}</p>
+            ) : (
+              <p className="text-[12px] text-[#8d898a]">Your public profile: /u/{nickname || "…"}</p>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -352,9 +397,6 @@ export function Settings() {
             </div>
           ))}
 
-          {error && <p className="text-[14px] text-[#ef9696]">{error}</p>}
-          {success && <p className="text-[14px] text-[#01a059]">{success}</p>}
-
           <Button
             onClick={saveProfile}
             disabled={saving}
@@ -374,15 +416,23 @@ export function Settings() {
             <input
               type="password"
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={(e) => {
+                setNewPassword(e.target.value);
+                if (passwordError) setPasswordError("");
+              }}
               minLength={6}
               placeholder="Minimum 6 characters"
-              className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
+              aria-invalid={!!passwordError}
+              className={cn(
+                "h-12 rounded-xl border px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none transition-colors",
+                passwordError
+                  ? "bg-[#241214] border-[#d4183d] focus:border-[#d4183d]"
+                  : "bg-white/[0.04] border-white/[0.07] focus:border-white/30"
+              )}
             />
           </div>
 
           {passwordError && <p className="text-[14px] text-[#ef9696]">{passwordError}</p>}
-          {passwordSuccess && <p className="text-[14px] text-[#01a059]">{passwordSuccess}</p>}
 
           <Button
             onClick={savePassword}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Clock } from "lucide-react";
 import { NavIcon } from "./nav-icon-3d";
 import { Container } from "./container";
+import { Alert } from "./alert";
 
 interface CountdownProps {
   targetDate: Date;
@@ -48,7 +49,7 @@ export function Countdown({ targetDate, label, accent }: CountdownProps) {
   const done = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
 
   return (
-    <Container className="flex flex-col sm:flex-row gap-2.5 justify-center not-smitems-center">
+    <Alert className="flex flex-col sm:flex-row gap-2.5 justify-center items-center">
       <div className="flex flex-1 items-center gap-2.5">
         <NavIcon
           icon="clock"
@@ -69,6 +70,6 @@ export function Countdown({ targetDate, label, accent }: CountdownProps) {
           <Unit value={timeLeft.seconds} label="Sec" />
         </div>
       )}
-    </Container>
+    </Alert>
   );
 }

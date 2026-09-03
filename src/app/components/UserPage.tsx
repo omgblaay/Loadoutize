@@ -44,9 +44,9 @@ function UserPageSkeleton() {
   const block = "bg-white/[0.06]";
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,320px)_1fr] gap-6 items-start">
+    <div className="flex flex-col">
       {/* Profile hero */}
-      <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
+      <Container>
         <div className="flex flex-col items-center text-center gap-3">
           <Skeleton className={cn("w-24 h-24 rounded-2xl", block)} />
           <div className="flex flex-col items-center gap-2">
@@ -63,7 +63,7 @@ function UserPageSkeleton() {
         <div className="flex justify-center w-full">
           <Skeleton className={cn("h-9 w-32 rounded-md", block)} />
         </div>
-      </div>
+      </Container>
 
       {/* Loadouts */}
       <div className="flex flex-col gap-4">
@@ -173,7 +173,7 @@ export function UserPage() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0a0909] flex-col gap-4">
         <p className="text-[#efedf1] text-xl">User not found.</p>
-        <Button onClick={() => navigate("/")} className="h-11 px-5 rounded-xl bg-[#fafafa] text-[#161414] font-medium">
+        <Button onClick={() => navigate("/")}>
           Back to Home
         </Button>
       </div>
@@ -185,68 +185,70 @@ export function UserPage() {
       selectedGame={LOCKED_GAME_ID}
       onGameSelect={(id) => navigate(`/${id}/explore`)}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,320px)_1fr] gap-6 items-start">
+      <div className="flex flex-col gap-6">
         {/* Profile hero */}
-        <Container className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="w-24 h-24 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
+        <Container className="border-0">
+          <div className="flex gap-5">
+            <div className="w-32 h-32 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
               {profile.avatarUrl ? (
                 <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-3xl font-semibold text-[#fafafa]">
+                <span className="text-2xl">
                   {profile.name?.[0]?.toUpperCase() ?? "U"}
                 </span>
               )}
             </div>
-            <div className="flex flex-col items-center gap-1">
-              <h1 className="text-xl font-semibold text-[#efedf1]">{profile.name}</h1>
-              <p className="text-[14px] text-[#8d898a]">@{profile.nickname}</p>
-              <Tag>{ROLE_TAG_META[profile.roleTag]?.label ?? "Player"}</Tag>
+            <div className="flex flex-col space-between flex-1 justify-center h-full gap-2">
+
+                <h1 className="text-3xl">{profile.name}</h1>
+              <div className="flex items-center gap-3">
+                <p className="text-md text-secondary">@{profile.nickname}</p>
+                <Tag>{ROLE_TAG_META[profile.roleTag]?.label ?? "Player"}</Tag>
+              </div>
+
+              {SOCIAL_LINK_FIELDS.some(({ key }) => profile.links[key]) && (
+                <div className="flex items-start sgap-2 flex-wrap">
+                  {SOCIAL_LINK_FIELDS.filter(({ key }) => profile.links[key]).map(({ key, label, icon: Icon, url }) => {
+                    const count = formatCount(profile.socialStats?.[key]);
+                    return (
+                      <Button
+                        key={key}
+                        onClick={() => window.open(url(profile.links[key]!), "_blank")}
+                        variant="ghost"
+                        rel="noopener noreferrer"
+                        aria-label={label}
+                        tooltip={
+                          <>
+                            {label}: <span className="text-teritary">@{profile.links[key]}</span>
+                          </>
+                        }
+                        className="gap-2 px-1 !max-w-20"
+                      >
+                        <Icon className="size-6" />
+                        <span className="text-xs text-teritary font-mono">{count ?? "—"}</span>
+                      </Button>
+                    );
+                  })}
+
+                </div>
+              )}
+
             </div>
+            {isOwnProfile && (
+              <Button onClick={() => navigate("/settings")} size="sm" variant="outline">
+                <SettingsIcon className="w-4 h-4" />
+                Edit profile
+              </Button>
+            )}
           </div>
 
-          {SOCIAL_LINK_FIELDS.some(({ key }) => profile.links[key]) && (
-            <div className="flex items-start justify-center gap-1 flex-wrap">
-              {SOCIAL_LINK_FIELDS.filter(({ key }) => profile.links[key]).map(({ key, label, icon: Icon, url }) => {
-                const count = formatCount(profile.socialStats?.[key]);
-                return (
-                  <Button
-                    key={key}
-                    onClick={() => window.open(url(profile.links[key]!), "_blank")}
-                    variant="ghost"
-                    rel="noopener noreferrer"
-                    aria-label={label}
-                    tooltip={
-                      <>
-                        {label}: <span className="text-teritary">@{profile.links[key]}</span>
-                      </>
-                    }
-                    className="flex-col gap-1 px-1 !max-w-10"
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="text-[10px] text-[#8d898a] font-mono">{count ?? "—"}</span>
-                  </Button>
-                );
-              })}
-            </div>
-          )}
-
-          <div className="h-px w-full bg-white/[0.07]" />
-          <div className="flex justify-center  w-full ">
 
 
-          {isOwnProfile && (
-            <Button onClick={() => navigate("/settings")} size="sm" variant="outline">
-              <SettingsIcon className="w-4 h-4" />
-              Edit profile
-            </Button>
-          )}
-          </div>
         </Container>
 
         {/* Loadouts */}
         <div className="flex flex-col gap-4">
-          <h2 className="text-[16px] text-[#fafafa] font-semibold">loadout{loadouts.length !== 1 ? "s" : ""}        
+          <h2 className="text-[16px] text-[#fafafa] font-semibold">loadout{loadouts.length !== 1 ? "s" : ""}
             <span className="text-sm ml-2 inline-flex font-mono h-8 w-8 items-center rounded-full justify-center bg-[#171417] text-teritary ">{loadouts.length} </span></h2>
           {loadouts.length === 0 ? (
             <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">

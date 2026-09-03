@@ -128,6 +128,8 @@
   --font-heading: 'BBH Bartle', 'Aspekta', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   --font-handwritten: 'Kabur', cursive;
+  /* Semi-Bold (600) only -- used solely by RatingRing's percentage label. */
+  --font-rating: 'Science Gothic', ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {

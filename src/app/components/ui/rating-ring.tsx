@@ -39,9 +39,9 @@ export function RatingRing({
       }}
     >
       <div
-        className={cn("absolute inset-[3px] rounded-full bg-[#201e1f] flex items-center justify-center", innerClassName)}
+        className={cn("absolute inset-[8px] rounded-full bg-[#201e1f] flex items-center font-rating font-semibold justify-center", innerClassName)}
       >
-        <span className={cn("font-semibold tracking-[-0.3px]", labelClassName)}>
+        <span className={cn("tracking-[-0.3px]", labelClassName)}>
           {percent != null ? `${percent}%` : fallbackLabel}
         </span>
       </div>

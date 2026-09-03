@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { WeaponCard } from "./ui/WeaponCard";
+import { WeaponImage, type WeaponImageBadge } from "./ui/WeaponImage";
 import { Tag } from "./ui/tag";
 import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
 import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
@@ -43,6 +44,7 @@ interface Attachment {
   type: string;
   typeSlug: string;
   typeImageUrl: string | null;
+  imageUrl?: string | null;
 }
 
 interface Perk {
@@ -661,8 +663,31 @@ export function LoadoutBuilder() {
         )}
       </Container>
 
-      {selectedWeapons.map((weapon) => (
+      {selectedWeapons.map((weapon) => {
+        const weaponBadges = Object.entries(weapon.attachments)
+          .map(([type, name]): WeaponImageBadge | null => {
+            const attachment = attachmentsByType[type]?.find((a) => a.name === name);
+            if (!attachment) return null;
+            return {
+              key: attachment.id,
+              typeSlug: attachment.typeSlug || type,
+              label: attachment.name,
+              iconUrl: attachment.imageUrl,
+            };
+          })
+          .filter((badge): badge is WeaponImageBadge => badge !== null);
+
+        return (
         <Container key={weapon.id}>
+          <div className="flex flex-col items-center gap-2 pb-2">
+            <WeaponImage
+              imageUrl={weapon.imageUrl}
+              variant="small"
+              alt={weapon.name}
+              weaponId={weapon.id}
+              badges={weaponBadges}
+            />
+          </div>
             <h2>Attachments</h2>
 
           {attachmentTypes.length === 0 ? (
@@ -701,7 +726,8 @@ export function LoadoutBuilder() {
             </div>
           )}
         </Container>
-      ))}
+        );
+      })}
 
 
       { /* Perks and Equipment sections 

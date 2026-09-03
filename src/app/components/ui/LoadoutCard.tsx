@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link } from "react-router";
-import { WeaponImage } from "./WeaponImage";
+import { WeaponImage, type WeaponImageBadge } from "./WeaponImage";
 import { Tag } from "./tag";
 import { RatingRing } from "./rating-ring";
 import { FireCardEffect } from "./FireCardEffect";
@@ -33,6 +33,7 @@ export interface CardAttachment {
   id: string;
   name: string;
   type: string | null;
+  typeSlug?: string | null;
   imageUrl?: string | null;
 }
 
@@ -117,18 +118,30 @@ export function LoadoutCard({
           <p className="text-lg font-semibold">{loadout.name}</p>
           <p className="text-sm text-teritary truncate">{loadout.description}</p>
         </div>
-                {loadout.video && (
+        {loadout.video && (
           <div
             title={`Video: ${VIDEO_PLATFORM_META[loadout.video.platform].label}`}
           >
             {React.createElement(VIDEO_PLATFORM_META[loadout.video.platform].icon, {
-              className: "size-5",
+              className: "size-5 saturate-0 brightness-200",
             })}
           </div>
         )}
       </div>
       <div className="h-full flex items-center justify-center relative" >
-        <WeaponImage imageUrl={primaryWeaponData?.imageUrl} variant="small" />
+        <WeaponImage
+          imageUrl={primaryWeaponData?.imageUrl}
+          variant="small"
+          weaponId={primaryWeaponId}
+          badges={attachmentIcons.map(
+            (a): WeaponImageBadge => ({
+              key: a.id,
+              typeSlug: a.typeSlug || a.type || "",
+              label: a.name,
+              iconUrl: a.imageUrl,
+            }),
+          )}
+        />
 
         </div>
       <div className="p-4 pt-0 flex flex-col items-center w-full">
@@ -138,9 +151,9 @@ export function LoadoutCard({
         <div className="flex mt-2 items-center justify-center gap-2 w-full">
 
           <Tag color={""}>{primaryWeaponData?.typeShort || gameShort}</Tag>
-          <p className="w-full font-mono text-body text-sm">{primaryWeapon}</p>
+          <p className="flex-1 font-mono text-body text-sm">{primaryWeapon}</p>
 
-          <p className="font-handwritten flex-0 aliasing" style={{ color: tag?.color ?? accent, fontSize: "1.1rem" }} >
+          <p className="font-handwritten antialiased" style={{ color: tag?.color ?? accent, fontSize: "1.1rem" }} >
           {tag?.name}</p>
           {/*}
           <Tag color={loadout.tagId ? tags.find((t) => t.id === loadout.tagId)?.color : undefined}>

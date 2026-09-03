@@ -285,45 +285,50 @@ export function GameSelector() {
           </button>
         </div> */}
 
-      <Container className="flex-row">
+      <Container className="flex-row bg-[#221d21]">
 
-        <div className="flex flex-col gap-2 flex-1">
+        <div className="flex flex-col gap-2 flex-1"><h2 className="text-[14px]">
+          From your favourite Streamers &amp; Content Creators</h2>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate(`/${selectedGame}/community?social=youtube`)}
               className="opacity-80 hover:opacity-100 transition-opacity"
               aria-label="Find YouTube creators"
             >
               <YoutubeIcon size={24} />
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate(`/${selectedGame}/community?social=twitch`)}
               className="opacity-80 hover:opacity-100 transition-opacity"
               aria-label="Find Twitch creators"
             >
               <TwitchIcon size={24} />
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate(`/${selectedGame}/community?social=tiktok`)}
               className="opacity-80 hover:opacity-100 transition-opacity"
               aria-label="Find TikTok creators"
             >
               <TiktokIcon size={24} />
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate(`/${selectedGame}/community?social=instagram`)}
               className="opacity-80 hover:opacity-100 transition-opacity"
               aria-label="Find Instagram creators"
             >
               <InstagramIcon size={24} />
-            </button>
+            </Button>
           </div>
-          From your favourite Streamers &amp; Content Creators
-          <p className="text-[14px] text-[#bebcbc] w-[320px] max-w-full flex-1">
+          
+          <p className="text-[14px] text-teritary">
             Check what they are currently running in-game for the best outcome.
           </p>
         </div>
@@ -341,7 +346,7 @@ export function GameSelector() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="">
+            <h2 className="text-sm text-teritary">
               Top Weapons
             </h2>
             <Link
@@ -371,7 +376,7 @@ export function GameSelector() {
 
         <div className="flex flex-col gap-4">
           <div>
-            <h2>Recent Loadouts</h2>
+            <h2 className="text-sm text-teritary">Recent Loadouts</h2>
           </div>
           {metaLoadouts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -402,7 +407,7 @@ export function GameSelector() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <h2>Supported games</h2>
+          <h2 className="text-sm text-secondary">Supported games</h2>
           <p className="text-teritary text-sm max-w-2xl">
             Modern Warfare 4 is live now. Loadouts for these titles are coming soon.
           </p>
