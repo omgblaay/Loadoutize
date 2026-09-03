@@ -423,7 +423,6 @@ export function LoadoutPreview() {
             >
               <WeaponImage
                 imageUrl={primaryWeaponImage}
-                variant="large"
                 weaponId={primaryWeapon?.id}
                 badges={primaryWeaponBadges}
               />
