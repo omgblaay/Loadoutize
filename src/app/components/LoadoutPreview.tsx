@@ -65,7 +65,10 @@ interface Loadout {
   views: number;
   createdAt: string;
   tagId?: number | null;
+  
 }
+
+
 
 type ReactionType = "like" | "dislike" | "favorite";
 
@@ -340,7 +343,7 @@ export function LoadoutPreview() {
                 <BreadcrumbLink
                   to={`/${gameId}/explore?category=${encodeURIComponent(primaryWeaponCatalog.type)}`}
                 >
-                  {primaryWeaponCatalog.typeShort || meta.short}
+                  {primaryWeaponCatalog.type || meta.short}
                 </BreadcrumbLink>
               ) : (
                 null
@@ -361,12 +364,15 @@ export function LoadoutPreview() {
         <Container>
           <div className="flex items-center gap-4">
 
-            <RatingRing
-              percent={loadout.ratingPercent}
-              color="#01a059"
-              size={64}
-              className="border border-[#2a2829]"
-            />
+        <RatingRing
+          percent={loadout.ratingPercent}
+          size={56}
+          innerClassName="border border-white/5"
+          labelClassName={
+            loadout.ratingPercent == null ? "text-[10px] text-teritary" : "text-[11px] text-[#fafafa]"
+          }
+          fallbackLabel="New"
+        />
             <h1 className="text-sm antialiased sm:text-xl wrap-anywhere">
 
               <span style={{ color: catalogTags.find((t) => t.id === loadout.tagId)?.color }} className="font-handwritten text-2xl py-4 font-light">{catalogTags.find((t) => t.id === loadout.tagId)?.name}</span>

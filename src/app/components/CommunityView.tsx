@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams, Link } from "react-router";
-import { getGameColor } from "../utils/gameColors";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout, useGameName } from "./AppLayout";
 import { Tag } from "./ui/tag";
@@ -80,7 +79,6 @@ export function CommunityView() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { name: gameName } = useGameName(selectedGame);
-  const accent = getGameColor(selectedGame).primary;
 
   const [loadouts, setLoadouts] = useState<LoadoutSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -224,7 +222,6 @@ export function CommunityView() {
               </div>
               <RatingRing
                 percent={member.avgRating}
-                color={accent}
                 size={48}
                 innerClassName="border border-white/5"
                 labelClassName={member.avgRating == null ? "text-[9px] text-teritary" : "text-[11px] text-[#fafafa]"}

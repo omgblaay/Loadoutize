@@ -79,14 +79,7 @@ export function LoadoutCard({
     .slice(0, MAX_ATTACHMENT_ICONS);
   const tag = loadout.tagId != null ? tags.find((t) => t.id === loadout.tagId) : undefined;
   const glowColor = tag?.color;
-  const ratingColor =
-    loadout.ratingPercent == null
-      ? null
-      : loadout.ratingPercent >= 90
-        ? "#36D27A"
-        : loadout.ratingPercent >= 70
-          ? "#FF4D63"
-          : null;
+
 
   return (
     <div className="relative w-full">
@@ -106,7 +99,6 @@ export function LoadoutCard({
       <div className="relative flex p-4 items-start gap-[9px] w-full">
         <RatingRing
           percent={loadout.ratingPercent}
-          color={ratingColor ?? accent}
           size={56}
           innerClassName="border border-white/5"
           labelClassName={
