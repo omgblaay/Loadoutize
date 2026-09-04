@@ -6,7 +6,7 @@ export function Footer({ selectedGame, orderedGames, gameMeta }: { selectedGame:
       <footer className="w-full border-t border-white/[0.18] mt-4">
         <div className="max-w-[1440px] mx-auto px-6 py-7 flex flex-wrap gap-6">
           <div className="flex-1 min-w-[260px] flex flex-col justify-between gap-6">
-            <div className="flex gap-6 items-start">
+            <div className="flex flex-col gap-6 items-start">
               <Logo />
               <div className="text-[14px] text-[#857d7f] flex flex-col gap-1">
                 <p>Loadoutize © 2027</p>
@@ -14,11 +14,11 @@ export function Footer({ selectedGame, orderedGames, gameMeta }: { selectedGame:
               </div>
             </div>
             <div className="flex gap-3 text-[14px] text-[#aea6a8]">
-              <span>Instagram</span>
+              <Link to="/">Instagram</Link>
               <span>·</span>
-              <span>TikTok</span>
+              <Link to="/">TikTok</Link>
               <span>·</span>
-              <span>YouTube</span>
+              <Link to="/">YouTube</Link>
             </div>
           </div>
 
@@ -32,11 +32,12 @@ export function Footer({ selectedGame, orderedGames, gameMeta }: { selectedGame:
           </div>
 
           <div className="flex-1 min-w-[140px] flex flex-col gap-3 text-[14px] text-[#aea6a8]">
-            {orderedGames.map((game) => (
-              <Link key={game.id} to={`/${game.id}/explore`} className="hover:text-[#efedf1]">
-                {gameMeta[game.id]?.name ?? game.name}
-              </Link>
-            ))}
+            <Link to="/privacy" className="hover:text-[#efedf1]">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="hover:text-[#efedf1]">
+              Terms of Service
+            </Link>
           </div>
         </div>
       </footer>

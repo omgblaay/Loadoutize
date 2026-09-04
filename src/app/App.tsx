@@ -11,7 +11,10 @@ import { WeaponConfigPreview } from "./components/WeaponConfigPreview";
 import { UserPage } from "./components/UserPage";
 import { LikedLoadouts } from "./components/LikedLoadouts";
 import { Settings } from "./components/Settings";
+import { Join } from "./components/Join";
 import { AuthCallback } from "./components/AuthCallback";
+import { PrivacyPolicy } from "./components/PrivacyPolicy";
+import { TermsOfService } from "./components/TermsOfService";
 import { NotFound } from "./components/NotFound";
 import { Toaster } from "./components/ui/sonner";
 import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "./utils/games";
@@ -62,7 +65,10 @@ export default function App() {
           <Route path="/u/:nickname" element={<UserPage />} />
           <Route path="/liked" element={<LikedLoadouts />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/join" element={<Join />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
           {ComponentTest && (
             <Route
               path="/component-test"

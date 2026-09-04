@@ -1,3 +1,20 @@
 node_modules
 .env
 src/app/components/ComponentTest.tsx
+
+# macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+
+# Editor/logs
+*.swp
+*.swo
+*~
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

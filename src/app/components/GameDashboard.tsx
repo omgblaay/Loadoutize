@@ -13,6 +13,7 @@ import { usePageTitle } from "../hooks/usePageTitle";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
 import { CompactPageHeader } from "./ui/compact-page-header";
+import { Button } from "./ui/button";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -184,14 +185,14 @@ export function GameDashboard() {
       {/* Filter / sort row */}
       <div className="flex items-center gap-3 w-full flex-wrap">
         <div className="flex-1 flex items-center gap-3 flex-wrap min-w-0">
-          <button className="h-10 px-3.5 rounded-xl border border-white/[0.18] flex items-center gap-2 text-[#fafafa]">
+          <Button >
             <SlidersHorizontal className="w-4 h-4" />
-            <span>Filters</span>
-          </button>
+            Filters
+          </Button>
           {hasActiveFilters && (
-            <button onClick={clearFilters} className="text-[14px] text-[#ef9696]">
+            <Button onClick={clearFilters} size="link" variant="destructive">
               Clear filters
-            </button>
+            </Button>
           )}
         </div>
         <div className="relative">

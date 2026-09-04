@@ -14,6 +14,8 @@ import { ROLE_TAG_META, ROLE_TAG_ORDER, type RoleTag } from "../utils/roles";
 import { Button } from "./ui/button";
 import { InstagramIcon, TiktokIcon, TwitchIcon, YoutubeIcon, KickIcon } from "@/assets/icons/socials";
 import { CompactPageHeader } from "./ui/compact-page-header";
+import { PasswordStrengthMeter } from "./ui/password-strength";
+import { PASSWORD_MIN_LENGTH, isPasswordStrong } from "../utils/password";
 
 const NICKNAME_PATTERN = /^[a-z0-9_-]{3,20}$/;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -111,6 +113,7 @@ export function Settings() {
   const [nicknameError, setNicknameError] = useState("");
 
   const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
@@ -233,8 +236,12 @@ export function Settings() {
     if (!accessToken) return;
     setPasswordError("");
 
-    if (newPassword.length < 6) {
-      setPasswordError("Password must be at least 6 characters");
+    if (!isPasswordStrong(newPassword)) {
+      setPasswordError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters and include a number and a special character`);
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError("Passwords do not match");
       return;
     }
 
@@ -252,6 +259,7 @@ export function Settings() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error_description || data.msg || "Failed to change password");
       setNewPassword("");
+      setConfirmNewPassword("");
       toast.success("Password updated");
     } catch (err) {
       setPasswordError(err instanceof Error ? err.message : "Failed to change password");
@@ -420,8 +428,8 @@ export function Settings() {
                 setNewPassword(e.target.value);
                 if (passwordError) setPasswordError("");
               }}
-              minLength={6}
-              placeholder="Minimum 6 characters"
+              minLength={PASSWORD_MIN_LENGTH}
+              placeholder={`Minimum ${PASSWORD_MIN_LENGTH} characters`}
               aria-invalid={!!passwordError}
               className={cn(
                 "h-12 rounded-xl border px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none transition-colors",
@@ -430,6 +438,27 @@ export function Settings() {
                   : "bg-white/[0.04] border-white/[0.07] focus:border-white/30"
               )}
             />
+            <PasswordStrengthMeter password={newPassword} />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+              Confirm new password
+            </label>
+            <input
+              type="password"
+              value={confirmNewPassword}
+              onChange={(e) => {
+                setConfirmNewPassword(e.target.value);
+                if (passwordError) setPasswordError("");
+              }}
+              minLength={PASSWORD_MIN_LENGTH}
+              placeholder="Re-enter new password"
+              className="h-12 rounded-xl border px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none transition-colors bg-white/[0.04] border-white/[0.07] focus:border-white/30"
+            />
+            {confirmNewPassword && confirmNewPassword !== newPassword && (
+              <p className="text-[14px] text-[#ef9696]">Passwords do not match</p>
+            )}
           </div>
 
           {passwordError && <p className="text-[14px] text-[#ef9696]">{passwordError}</p>}

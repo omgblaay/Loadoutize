@@ -46,7 +46,7 @@ export function WeaponCard({
         "relative rounded-xl border transition-all flex flex-col p-2 sm:p-4 w-full h-full",
         selected
           ? "border-white/60 bg-white/[0.05]"
-          : "border-white/[0.08] bg-[#121111] hover:border-white/20 hover:bg-[#1a161a]",
+          : "border-white/[0.08] bg-[#121111] hover:border-white/20 hover:bg-[#171417]",
         disabled && "opacity-40 cursor-not-allowed",
         className,
       )}
@@ -56,12 +56,12 @@ export function WeaponCard({
           <Check size={15} />
         </span>
       )}
-      <div className="mx-4">
+
         <WeaponImage imageUrl={weapon.imageUrl} variant="large" alt={weapon.name} />
-      </div>
+
       <div className="flex gap-2 items-center w-full">
-      {weapon.typeShort && <Tag>{weapon.typeShort}</Tag>}
-        <p className="font-mono text-left text-xs">{weapon.name}</p>
+
+        <p className="font-mono text-left text-xs"><span className="uppercase text-teritary">{weapon.typeShort} • </span>{weapon.name}</p>
       </div>
       {stat && <p className="text-xs font-teritary">{stat}</p>}
     </button>

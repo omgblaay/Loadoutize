@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import {  Globe, Heart, LogOut, Settings as SettingsIcon, UserRound } from "lucide-react";
 import { useAuth } from "../AuthContext";
 import { gameMeta } from "@/app/utils/games";
@@ -21,7 +21,6 @@ export function TopNavBar({
   selectedGame,
   orderedGames,
   handleGameSelect,
-  setShowAuthModal,
   sticky = false,
 }: {
   activeLogoUrl: string | null;
@@ -29,12 +28,13 @@ export function TopNavBar({
   selectedGame: string;
   orderedGames: { id: string; name: string; slug: string; logoUrl: string | null }[];
   handleGameSelect: (id: string) => void;
-  setShowAuthModal: (show: boolean) => void;
   /** Only the homepage keeps the navbar pinned while scrolling. */
   sticky?: boolean;
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
+  const goToJoin = () => navigate("/join", { state: { from: location.pathname + location.search } });
 
   const [gameMenuOpen, setGameMenuOpen] = useState(false);
   const [favouritesHovered, setFavouritesHovered] = useState(false);
@@ -101,7 +101,7 @@ export function TopNavBar({
 
             {user ? (
               <>            <Button
-              onClick={() => (user ? navigate(`/${selectedGame}/create`) : setShowAuthModal(true))}
+              onClick={() => (user ? navigate(`/${selectedGame}/create`) : goToJoin())}
               size="default"
             >
               <span>Create</span>
@@ -184,7 +184,7 @@ export function TopNavBar({
               </>
             ) : (
               <Button
-                onClick={() => setShowAuthModal(true)}
+                onClick={goToJoin}
               >
                 <span>Join</span>
               </Button>

@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "./AuthContext";
-import { AuthModal } from "./AuthModal";
 import { gameMeta, GAME_ORDER, LAST_SELECTED_GAME_KEY, GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "../utils/games";
 import { SideNav } from "./ui/sidenav";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
@@ -104,8 +103,6 @@ export function AppLayout({
   const isMeta = location.pathname.endsWith("/meta");
   const isCommunity = location.pathname.endsWith("/community");
 
-  const [showAuthModal, setShowAuthModal] = useState(false);
-
   const activeLogoUrl = activeGame?.logoUrl ?? null;
   // SideNav/Footer have no dropdown to close, so they just switch games directly.
   // Persisted here (the single funnel all game switches go through) so Home
@@ -129,7 +126,6 @@ export function AppLayout({
         selectedGame={selectedGame}
         orderedGames={orderedGames}
         handleGameSelect={handleGameSelect}
-        setShowAuthModal={setShowAuthModal}
         sticky={isHome}
       />
 
@@ -138,7 +134,7 @@ export function AppLayout({
       {/* Body: Sidenav + content */}
       <div className="max-w-[1440px] w-full mx-auto flex gap-6 p-2 sm:p-6  flex-1">
         {/* Sidenav */}
-        <SideNav isHome={isHome} isExplore={isExplore} isMeta={isMeta} isCommunity={isCommunity} selectedGame={selectedGame} categories={categories} navigate={navigate} setShowAuthModal={setShowAuthModal} handleGameSelect={handleGameSelect} />
+        <SideNav isHome={isHome} isExplore={isExplore} isMeta={isMeta} isCommunity={isCommunity} selectedGame={selectedGame} categories={categories} navigate={navigate} handleGameSelect={handleGameSelect} />
 
         {/* Page content */}
         <main className="flex-1 min-w-0 flex flex-col gap-4">
@@ -155,8 +151,6 @@ export function AppLayout({
 
       {/* Footer */}
       <Footer selectedGame={selectedGame} orderedGames={orderedGames} gameMeta={gameMeta} />
-
-      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} isOpen={showAuthModal} />}
     </div>
   );
 }

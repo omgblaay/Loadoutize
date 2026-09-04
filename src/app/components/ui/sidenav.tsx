@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router";
 import { HomeIcon, Globe, Flame, Crown, Users, Zap, Menu, X } from "lucide-react";
 import { SideNavButton } from "./sidenav-button";
 import { AppTooltip } from "./tooltip";
@@ -20,7 +21,6 @@ export function SideNav({
   categories,
   navigate,
   handleGameSelect,
-  setShowAuthModal,
 }: {
   isHome: boolean;
   isExplore: boolean;
@@ -28,10 +28,10 @@ export function SideNav({
   isCommunity: boolean;
   selectedGame: string;
   categories: SideNavCategory[];
-  navigate: (path: string) => void;
+  navigate: (path: string, options?: { state?: unknown }) => void;
   handleGameSelect: (id: string) => void;
-  setShowAuthModal: (show: boolean) => void;
 }) {
+  const location = useLocation();
   const [expanded, setExpanded] = useState(false);
   // Shared between the full menu and the icon rail -- only one of the two
   // layouts is ever hit-testable at a given viewport width (the other is
@@ -118,7 +118,7 @@ export function SideNav({
           Join the community now, and enjoy the best configs for your favourite games
         </p>
         <button
-          onClick={() => setShowAuthModal(true)}
+          onClick={() => navigate("/join", { state: { from: location.pathname + location.search } })}
           className="h-[52px] rounded-xl bg-[#fafafa] flex items-center justify-center gap-2 relative"
         >
           <span className="text-[#161414]">Join now</span>

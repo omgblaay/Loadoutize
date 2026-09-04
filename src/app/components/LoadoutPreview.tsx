@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router";
-import QRCode from "qrcode";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { getGameColor } from "../utils/gameColors";
 import { gameMeta } from "../utils/games";
@@ -8,6 +7,13 @@ import { useAuth } from "./AuthContext";
 import { AppLayout, useGameName } from "./AppLayout";
 import { Button } from "./ui/button";
 import { Container } from "./ui/container";
+import { QRCodeCanvas, generatePlainQRPng, generateBrandedQRPng } from "./ui/qr-code";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 import { WeaponImage, type WeaponImageBadge } from "./ui/WeaponImage";
 import type { CardWeapon, CardTag, CardAttachment } from "./ui/LoadoutCard";
 import { Tag } from "./ui/tag";
@@ -27,6 +33,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   Download,
+  ChevronDown,
   Puzzle,
   Copy,
   Check,
@@ -141,7 +148,6 @@ export function LoadoutPreview() {
   const [catalogAttachments, setCatalogAttachments] = useState<CardAttachment[]>([]);
   const [catalogTags, setCatalogTags] = useState<CardTag[]>([]);
   const [loading, setLoading] = useState(true);
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [codeCopied, setCodeCopied] = useState(false);
 
   useEffect(() => {
@@ -180,12 +186,6 @@ export function LoadoutPreview() {
       .then((data) => setCatalogTags(data.tags ?? []))
       .catch((error) => console.error("Error fetching tags:", error));
   }, [gameId]);
-
-  useEffect(() => {
-    QRCode.toDataURL(window.location.href, { margin: 1, width: 208, color: { dark: "#fafafa", light: "#00000000" } })
-      .then(setQrDataUrl)
-      .catch((error: unknown) => console.error("Error generating QR code:", error));
-  }, [gameId, loadoutId]);
 
   const fetchLoadout = async () => {
     try {
@@ -259,12 +259,19 @@ export function LoadoutPreview() {
     }
   };
 
-  const downloadQr = () => {
-    if (!qrDataUrl) return;
+  const triggerDownload = (dataUrl: string, suffix: string) => {
     const a = document.createElement("a");
-    a.href = qrDataUrl;
-    a.download = `${loadoutId}-qr.png`;
+    a.href = dataUrl;
+    a.download = `${loadoutId}-qr-${suffix}.png`;
     a.click();
+  };
+
+  const downloadBrandedQr = async () => {
+    triggerDownload(await generateBrandedQRPng(shareUrl), "branded");
+  };
+
+  const downloadPlainQr = async () => {
+    triggerDownload(await generatePlainQRPng(shareUrl, "#000000"), "black");
   };
 
   const copyGameLoadoutCode = () => {
@@ -624,19 +631,28 @@ export function LoadoutPreview() {
           </Container>
 
           <Container className="flex flex-row items-center gap-4">
-            {qrDataUrl && <img src={qrDataUrl} alt="QR code linking to this loadout" className="w-[104px] h-[104px] shrink-0" />}
+            <QRCodeCanvas value={shareUrl} size={104} className="w-[104px] h-[104px]" />
             <div className="flex-1 min-w-[200px] flex flex-col gap-3">
               <h3 className="text-[12px] tracking-[0.5px] uppercase text-[#fafafa] font-medium">Share loadout</h3>
               <p className="text-[12px] text-[#8d898a] break-all">{shareUrl}</p>
-              <Button
-                onClick={downloadQr}
-                variant="outline"
-                className="w-fit"
-              >
-                <Download className="w-4 h-4 text-[#fafafa]" />
-                <span className="text-[14px] text-[#fafafa]">Download QR</span>
-                <span className="text-[14px] text-[#bebcbc]">as PNG</span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-fit">
+                    <Download className="w-4 h-4 text-[#fafafa]" />
+                    <span className="text-[14px] text-[#fafafa]">Download QR</span>
+                    <span className="text-[14px] text-[#bebcbc]">as PNG</span>
+                    <ChevronDown className="w-4 h-4 text-[#bebcbc]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={downloadBrandedQr}>
+                    White QR, with background
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={downloadPlainQr}>
+                    Black QR, no background
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </Container>
 
