@@ -22,6 +22,7 @@ import { cn } from "./ui/utils";
 import { detectVideoPlatform, VIDEO_PLATFORM_META } from "../utils/video";
 import { Container } from "./ui/container";
 import { Button } from "./ui/button";
+import { getRecaptchaToken, RecaptchaNotice } from "./ui/recaptcha";
 
 interface Weapon {
   imageUrl: string | null | undefined;
@@ -316,19 +317,22 @@ export function LoadoutBuilder() {
     }
     setVideoError("");
 
-    const loadoutData = {
-      name: loadoutName,
-      description: loadoutDescription,
-      gameLoadoutCode: gameLoadoutCode.trim() || null,
-      videoUrl: trimmedVideoUrl || null,
-      weapons: selectedWeapons,
-      perks: selectedPerks,
-      equipment: selectedEquipment,
-      tagId: selectedTagId,
-    };
-
     setSaving(true);
     try {
+      const recaptchaToken = editId ? undefined : await getRecaptchaToken("create_loadout");
+
+      const loadoutData = {
+        name: loadoutName,
+        description: loadoutDescription,
+        gameLoadoutCode: gameLoadoutCode.trim() || null,
+        videoUrl: trimmedVideoUrl || null,
+        weapons: selectedWeapons,
+        perks: selectedPerks,
+        equipment: selectedEquipment,
+        tagId: selectedTagId,
+        recaptchaToken,
+      };
+
       const url = editId
         ? `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts/${editId}`
         : `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts`;
@@ -729,8 +733,9 @@ export function LoadoutBuilder() {
         );
       })}
 
+      {!editId && <RecaptchaNotice className="text-[12px] text-[#8d898a]" />}
 
-      { /* Perks and Equipment sections 
+      { /* Perks and Equipment sections
       <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <p className="text-[16px] text-[#fafafa] font-semibold">Perks</p>

@@ -231,3 +231,10 @@
     animation: none !important;
   }
 }
+
+/* reCAPTCHA v3's floating corner badge -- hidden since RecaptchaNotice (ui/recaptcha.tsx) shows
+   the required attribution text inline instead. Per Google's terms, hiding the badge requires
+   showing that notice wherever the action it protects is presented. */
+.grecaptcha-badge {
+  visibility: hidden;
+}

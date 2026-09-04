@@ -6,6 +6,7 @@ import { SideNav } from "./ui/sidenav";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { TopNavBar } from "./ui/topnavbar"
 import { Footer } from "./ui/footer";
+// import { SpeedInsights } from "@vercel/speed-insights/next"
 
 
 import {
@@ -119,6 +120,7 @@ export function AppLayout({
 
   return (
     <div className="min-h-screen bg-[#0a0909] text-[#efedf1] flex flex-col">
+      {/* <SpeedInsights/> */}
       {/* Navbar */}
       <TopNavBar
         activeLogoUrl={activeLogoUrl}

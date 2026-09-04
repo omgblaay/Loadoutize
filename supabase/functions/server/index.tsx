@@ -42,6 +42,33 @@ async function getUserFromRequest(c: any) {
   return user ?? null;
 }
 
+// Google reCAPTCHA v3 (invisible, score-based), guarding loadout creation from bot spam.
+// Secret lives only here (Deno.env.get) -- never in frontend code, which only carries the
+// public site key. v3 has no pass/fail checkbox: siteverify instead returns a 0-1 "score"
+// (higher = more human-like) and echoes back the `action` name so a token minted for one
+// action can't be replayed against another.
+const RECAPTCHA_SECRET_KEY = Deno.env.get("RECAPTCHA_SECRET_KEY");
+const RECAPTCHA_SCORE_THRESHOLD = 0.5;
+async function verifyRecaptcha(token: unknown, expectedAction: string): Promise<boolean> {
+  if (!RECAPTCHA_SECRET_KEY) {
+    console.log("RECAPTCHA_SECRET_KEY not set -- skipping verification");
+    return true;
+  }
+  if (typeof token !== "string" || !token) return false;
+  try {
+    const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ secret: RECAPTCHA_SECRET_KEY, response: token }),
+    });
+    const data = await response.json();
+    return data.success === true && data.action === expectedAction && (data.score ?? 0) >= RECAPTCHA_SCORE_THRESHOLD;
+  } catch (error) {
+    console.log(`Error verifying reCAPTCHA: ${error}`);
+    return false;
+  }
+}
+
 const AVATARS_BUCKET = "avatars";
 const NICKNAME_PATTERN = /^[a-z0-9_-]{3,20}$/;
 
@@ -1318,6 +1345,10 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
 
     const gameId = c.req.param("gameId");
     const body = await c.req.json();
+
+    if (!(await verifyRecaptcha(body.recaptchaToken, "create_loadout"))) {
+      return c.json({ error: "reCAPTCHA verification failed -- please try again" }, 400);
+    }
 
     let tagId = body.tagId ?? null;
     if (tagId != null && !(await isTagAllowedForWeapons(gameId, tagId, body.weapons ?? []))) {
