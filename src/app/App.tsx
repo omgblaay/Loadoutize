@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "react-router";
+import { toast } from "sonner";
 import { AuthProvider } from "./components/AuthContext";
 import { GameSelector } from "./components/GameSelector";
 import { GameDashboard } from "./components/GameDashboard";
@@ -42,6 +43,20 @@ function LegacyLoadoutRedirect() {
   return <Navigate to={`/${gameId}/l/${loadoutId}`} replace />;
 }
 
+// Fires once per full page load (App only mounts once -- route changes don't
+// remount it), so a refresh shows it again but navigating around the app
+// doesn't spam it.
+function BetaNotice() {
+  useEffect(() => {
+    toast.error("Loadoutize is in beta — expect rough edges.", {
+      description: "The design is still changing too — spacing, sizes, and layout will keep shifting.",
+      duration: Infinity,
+      closeButton: true,
+    });
+  }, []);
+  return null;
+}
+
 // Client-side navigation keeps the browser's scroll position by default, so
 // without this, following a link while scrolled down lands on the new page
 // at the same scroll offset instead of at the top.
@@ -69,7 +84,8 @@ function GameLock({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <AuthProvider>
-      <Toaster position="bottom-right" />
+      <Toaster position="top-center" />
+      <BetaNotice />
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
