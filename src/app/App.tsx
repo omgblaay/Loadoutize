@@ -48,8 +48,8 @@ function LegacyLoadoutRedirect() {
 // doesn't spam it.
 function BetaNotice() {
   useEffect(() => {
-    toast.error("Loadoutize is in beta — expect rough edges.", {
-      description: "The design is still changing too — spacing, sizes, and layout will keep shifting.",
+    toast.error("Loadoutize is in beta. Expect rough edges.", {
+      description: "The design is still changing too — spacing, sizes, UX choices and layout will keep shifting.",
       duration: Infinity,
       closeButton: true,
     });
