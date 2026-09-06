@@ -139,7 +139,7 @@ export function AppLayout({
         <SideNav isHome={isHome} isExplore={isExplore} isMeta={isMeta} isCommunity={isCommunity} selectedGame={selectedGame} categories={categories} navigate={navigate} handleGameSelect={handleGameSelect} />
 
         {/* Page content */}
-        <main className="flex-1 min-w-0 flex flex-col gap-4">
+        <main className="flex-1 min-w-0 flex flex-col gap-4 sm:gap-6">
           {breadcrumb && (
             <div className="w-full">
               <div className="flex items-center gap-2 flex-wrap text-[14px] text-[#bebcbc]">

@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ComponentType, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "react-router";
 import { AuthProvider } from "./components/AuthContext";
 import { GameSelector } from "./components/GameSelector";
@@ -42,6 +42,17 @@ function LegacyLoadoutRedirect() {
   return <Navigate to={`/${gameId}/l/${loadoutId}`} replace />;
 }
 
+// Client-side navigation keeps the browser's scroll position by default, so
+// without this, following a link while scrolled down lands on the new page
+// at the same scroll offset instead of at the top.
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 // While the game selector is disabled, any /:gameId/* route for a game other
 // than LOCKED_GAME_ID redirects to its Modern Warfare 4 equivalent instead of
 // rendering — so switching is off everywhere, not just hidden from the UI.
@@ -60,6 +71,7 @@ export default function App() {
     <AuthProvider>
       <Toaster position="bottom-right" />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<GameSelector />} />
           <Route path="/u/:nickname" element={<UserPage />} />

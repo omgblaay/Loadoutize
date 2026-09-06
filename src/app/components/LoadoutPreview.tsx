@@ -149,6 +149,7 @@ export function LoadoutPreview() {
   const [catalogTags, setCatalogTags] = useState<CardTag[]>([]);
   const [loading, setLoading] = useState(true);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [activeKey, setActiveKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (gameId && loadoutId) {
@@ -285,11 +286,31 @@ export function LoadoutPreview() {
   const { game: activeGame } = useGameName(gameId);
   const accent = getGameColor(gameId).primary;
 
-  const titleWeapon = catalogWeapons.find((w) => w.id === loadout?.weapons?.[0]?.id);
+  const primaryWeapon = loadout?.weapons?.[0];
+  const titleWeapon = catalogWeapons.find((w) => w.id === primaryWeapon?.id);
   const titleTag = loadout?.tagId != null ? catalogTags.find((t) => t.id === loadout.tagId) : undefined;
   usePageTitle(
     loadout ? [titleTag?.name, titleWeapon?.name, loadout.name].filter(Boolean).join(" • ") : undefined
   );
+
+  const attachmentIndex = React.useMemo(
+    () => new Map(catalogAttachments.map((a) => [`${a.type}:${a.name}`, a])),
+    [catalogAttachments]
+  );
+
+  const primaryAttachments = React.useMemo(() => {
+    if (!primaryWeapon?.attachments) return [];
+
+    return Object.entries(primaryWeapon.attachments).map(([slot, value]) => {
+      const attachment = attachmentIndex.get(`${slot}:${value}`);
+      return {
+        key: slot,
+        typeSlug: attachment?.typeSlug || slot,
+        label: value,
+        iconUrl: attachment?.imageUrl ?? null,
+      } satisfies WeaponImageBadge;
+    });
+  }, [primaryWeapon, attachmentIndex]);
 
   if (loading) {
     return (
@@ -313,7 +334,6 @@ export function LoadoutPreview() {
   }
 
   const canEdit = user?.id === loadout.userId;
-  const primaryWeapon = loadout.weapons?.[0];
   const primaryWeaponCatalog = catalogWeapons.find((w) => w.id === primaryWeapon?.id);
   const primaryWeaponImage = primaryWeaponCatalog?.imageUrl ?? null;
   const primaryWeaponBadges = Object.entries(primaryWeapon?.attachments ?? {})
@@ -321,7 +341,7 @@ export function LoadoutPreview() {
       const attachment = catalogAttachments.find((a) => a.type === slot && a.name === value);
       if (!attachment) return null;
       return {
-        key: attachment.id,
+        key: slot,
         typeSlug: attachment.typeSlug || slot,
         label: attachment.name,
         iconUrl: attachment.imageUrl,
@@ -438,6 +458,8 @@ export function LoadoutPreview() {
                 imageUrl={primaryWeaponImage}
                 weaponId={primaryWeapon?.id}
                 badges={primaryWeaponBadges}
+                activeBadgeKey={activeKey}
+                onBadgeHover={setActiveKey}
               />
             </div>
           </div>
@@ -469,26 +491,39 @@ export function LoadoutPreview() {
           </div>
 
           <div className="divide-y-1 divide-solid divide-white/5 w-full">
-            {primaryWeapon?.attachments &&
-              Object.entries(primaryWeapon.attachments).map(([slot, value]) => {
-                const attachment = catalogAttachments.find((a) => a.type === slot && a.name === value);
-                return (
-                  <div key={slot} className="flex items-center gap-4 py-3 w-full">
-                    <div className="w-6 h-6 flex items-center justify-center shrink-0 overflow-hidden">
-                      {attachment?.imageUrl ? (
-                        <img src={attachment.imageUrl} alt={value} className="w-full opacity-50 h-full object-contain" />
-                      ) : (
-                        null
-                      )}
-                    </div>
-                    <span className="font-medium">{value}</span>
-                    <span className="text-white/20">{"•"}</span>
-                    <span className="text-teritary flex-1">{slot}</span>
-                  </div>
-                );
-              })}
+          {primaryAttachments.map((att) => {
+  const isActive = activeKey === att.key;
 
-            {!primaryWeapon?.attachments &&
+  return (
+    <button
+      key={att.key}
+      type="button"
+      onPointerEnter={() => setActiveKey(att.key)}
+      onPointerLeave={() => setActiveKey(null)}
+      onFocus={() => setActiveKey(att.key)}
+      onBlur={() => setActiveKey(null)}
+      className={`flex items-center gap-4 py-3 px-2 -mx-2 w-full rounded-md text-left
+        transition-colors duration-150
+        ${isActive ? "bg-white/[0.06]" : "hover:bg-white/[0.03]"}`}
+    >
+      <div className="w-6 h-6 flex items-center justify-center shrink-0 overflow-hidden">
+        {att.iconUrl && (
+          <img
+            src={att.iconUrl}
+            alt=""
+            className={`w-full h-full object-contain transition-opacity duration-150
+              ${isActive ? "opacity-100" : "opacity-50"}`}
+          />
+        )}
+      </div>
+      <span className="font-medium">{att.label}</span>
+      <span className="text-white/20">•</span>
+      <span className="text-teritary flex-1">{att.typeSlug}</span>
+    </button>
+  );
+})}
+
+            {/* {!primaryWeapon?.attachments &&
               (loadout.equipment ?? []).map((item, i) => (
                 <div key={i} className="divide-y-4 divide-solid divide-white w-full">
                   <div className="w-6 h-6 rounded-md bg-white/[0.02] border border-white/[0.18] flex items-center justify-center shrink-0">
@@ -497,7 +532,7 @@ export function LoadoutPreview() {
                   <span className="text-[14px] text-[#8d898a] flex-1">Gear</span>
                   <span className="text-[14px] text-[#fafafa] font-medium">{item}</span>
                 </div>
-              ))}
+              ))} */}
 
             {!primaryWeapon?.attachments && !(loadout.equipment ?? []).length && (
               <p className="text-[14px] text-[#8d898a] py-2">No build details published for this loadout.</p>

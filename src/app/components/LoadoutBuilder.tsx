@@ -690,6 +690,7 @@ export function LoadoutBuilder() {
               alt={weapon.name}
               weaponId={weapon.id}
               badges={weaponBadges}
+              highlightSlugs={weaponBadges.map((badge) => badge.typeSlug)}
             />
           </div>
             <h2>Attachments</h2>
