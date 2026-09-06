@@ -14,7 +14,7 @@ import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
 import { CompactPageHeader } from "./ui/compact-page-header";
 import { Button } from "./ui/button";
-
+import { Link } from "react-router";
 interface Loadout extends CardLoadout {
   gameId: string;
   createdAt: string;
@@ -190,9 +190,9 @@ export function GameDashboard() {
             Filters
           </Button>
           {hasActiveFilters && (
-            <Button onClick={clearFilters} size="link" variant="destructive">
+            <button type="button" onClick={clearFilters} className="text-destructive hover:text-red-500">
               Clear filters
-            </Button>
+            </button>
           )}
         </div>
         <div className="relative">
