@@ -56,7 +56,8 @@ export function WeaponImage({
       <img
         src={imageUrl ?? undefined}
         alt={alt}
-        className="flex h-full w-full items-center brightness-200 saturate-0 justify-center object-contain"
+        className="flex h-full w-full items-center  justify-center object-contain"
+        // brightness-200 saturate-0
       />
       {highlightSlugs && highlightSlugs.length > 0 && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
