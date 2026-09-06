@@ -49,7 +49,20 @@ function LegacyLoadoutRedirect() {
 function BetaNotice() {
   useEffect(() => {
     toast.error("Loadoutize is in beta. Expect rough edges.", {
-      description: "The design is still changing too — spacing, sizes, UX choices and layout will keep shifting.",
+      description: (
+        <span>
+          The design is still changing too — spacing, sizes, UX choices and layout will keep shifting.
+          <br />
+          <a
+            href="https://blaay.framer.website/projects/loadoutize"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2"
+          >
+            Read the case study
+          </a>
+        </span>
+      ),
       duration: Infinity,
       closeButton: true,
     });

@@ -18,7 +18,7 @@ import { cn } from "./ui/utils";
 import { PASSWORD_MIN_LENGTH, isPasswordStrong } from "../utils/password";
 import { PasswordStrengthMeter } from "./ui/password-strength";
 
-const SLIDES = [
+export const SLIDES = [
   {
     title: "Build your perfect loadout",
     body: "Fine-tune every attachment and perk to match your playstyle.",
@@ -109,7 +109,7 @@ function MarqueeColumn({
   );
 }
 
-function LoadoutWall() {
+export function LoadoutWall() {
   const [items, setItems] = useState<ShowcaseLoadout[]>([]);
 
   useEffect(() => {
