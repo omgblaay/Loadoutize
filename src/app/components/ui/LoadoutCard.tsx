@@ -86,17 +86,17 @@ export function LoadoutCard({
       {fire && <FireCardEffect radius={12} />}
     <Link
       to={to}
-      className="relative bg-card rounded-xl border border-white/[0.08] hover:bg-[#1a161a] hover:border-white/20 hover:-translate-y-1 transition-all duration-100 flex flex-col text-left overflow-hidden w-full h-full"
-      style={{
-        boxShadow: "0px 30px 70px -36px rgba(0,0,0,0.85)",
-      }}
+      className="relative bg-card rounded-2xl border border-white/[0.08] hover:bg-[#1a161a] hover:border-white/20 hover:-translate-y-1 transition-all duration-100 flex flex-col text-left overflow-hidden w-full h-full"
+      // style={{
+      //   boxShadow: "0px 30px 70px -36px rgba(0,0,0,0.85)",
+      // }}
     >
       <div
-        className="absolute bottom-[-50%] right-[-50%] top-0 left-0 pointer-events-none"
-        style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 50%)`, opacity: 0.16 }}
+        className="absolute bottom-[-50%] right-[-50%] w-[320px] h-[320px] blur-[160px] opacity-[32%] pointer-events-none"
+        style={{ background: glowColor}}
       />
 
-      <div className="relative flex p-4 items-start gap-[9px] w-full">
+      <div className="relative flex p-4 items-start gap-4 w-full">
         <RatingRing
           percent={loadout.ratingPercent}
           size={56}
@@ -136,8 +136,6 @@ export function LoadoutCard({
 
         </div>
       <div className="p-4 pt-0 flex flex-col items-center w-full">
-
-
         
         <div className="flex mt-2 items-center justify-center gap-2 w-full">
 
