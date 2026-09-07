@@ -218,6 +218,7 @@ export function GameSelector() {
     .slice(0, 6);
 
   const topWeapons = weapons.slice(0, 3);
+  const TOP_WEAPON_MEDALS = ["🥇", "🥈", "🥉"];
 
   if (loading) {
     return (
@@ -346,7 +347,7 @@ export function GameSelector() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-sans text-teritary">
+            <h2 className="font-sans text-secondary">
               Top Weapons
             </h2>
             <Link
@@ -359,12 +360,21 @@ export function GameSelector() {
           </div>
           {topWeapons.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-              {topWeapons.map((w) => (
-                <WeaponCard
-                  key={w.id}
-                  weapon={w}
-                  onSelect={() => navigate(`/${selectedGame}/explore?weapon=${encodeURIComponent(w.name)}`)}
-                />
+              {topWeapons.map((w, i) => (
+                <div key={w.id} className="relative">
+                  {TOP_WEAPON_MEDALS[i] && (
+                    <span
+                      className="absolute -right-[-0.6rem] -bottom-[-1rem] z-10 text-xl leading-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+                      aria-hidden="true"
+                    >
+                      {TOP_WEAPON_MEDALS[i]}
+                    </span>
+                  )}
+                  <WeaponCard
+                    weapon={w}
+                    onSelect={() => navigate(`/${selectedGame}/explore?weapon=${encodeURIComponent(w.name)}`)}
+                  />
+                </div>
               ))}
             </div>
           ) : (
@@ -375,8 +385,18 @@ export function GameSelector() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <h2 className="font-sans text-teritary">
+
+          <div className="flex items-center justify-between gap-3">
+          <h2 className="font-sans text-secondary">
             Recent Loadouts</h2>
+                        <Link
+              to={`/${selectedGame}/explore`}
+              className="font-medium text-teritary hover:text-[#fafafa] flex items-center gap-1 shrink-0"
+            >
+              Explore loadouts
+              <ChevronRight className="size-4" />
+            </Link>
+            </div>
           {metaLoadouts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
               {metaLoadouts.map((l, i) => (

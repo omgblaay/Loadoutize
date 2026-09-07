@@ -14,7 +14,7 @@ import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
 import { CompactPageHeader } from "./ui/compact-page-header";
 import { Button } from "./ui/button";
-import { Link } from "react-router";
+
 interface Loadout extends CardLoadout {
   gameId: string;
   createdAt: string;

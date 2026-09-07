@@ -657,7 +657,8 @@ app.get("/make-server-6db475c7/games/:gameId/weapons", async (c) => {
     const { data, error } = await supabase
       .from('weapons')
       .select('id, name, image, weapon_category')
-      .eq('game_id', gameId);
+      .eq('game_id', gameId)
+      .order('name', { ascending: true });
     if (error) throw error;
 
     // weapon_category is a Directus many-to-any pointer (`{ key, collection }`)
