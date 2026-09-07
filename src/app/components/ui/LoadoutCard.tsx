@@ -92,7 +92,7 @@ export function LoadoutCard({
       // }}
     >
       <div
-        className="absolute bottom-[-50%] right-[-50%] w-[320px] h-[320px] blur-[160px] opacity-[32%] pointer-events-none"
+        className="absolute bottom-[-50%] right-[-50%] w-[200px] h-[200px] blur-[80px] opacity-[50%] pointer-events-none"
         style={{ background: glowColor}}
       />
 
