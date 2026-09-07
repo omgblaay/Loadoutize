@@ -134,8 +134,12 @@ export async function generatePlainQRPng(value: string, color = "#000000", size 
 }
 
 /** A shareable branded card (Container-styled: dark bg, border, rounded, p-4-equivalent padding) with the
- * Loadoutize wordmark on top, the QR code, and a "scan to see the loadout" caption underneath. */
-export async function generateBrandedQRPng(value: string, qrSize = 240): Promise<string> {
+ * Loadoutize wordmark on top, the QR code, and a caption underneath (defaults to a loadout-share caption). */
+export async function generateBrandedQRPng(
+  value: string,
+  qrSize = 240,
+  caption = "Scan QR code to see the loadout"
+): Promise<string> {
   const padding = 32;
   const wordmarkHeight = 28;
   const gap = 24;
@@ -176,7 +180,7 @@ export async function generateBrandedQRPng(value: string, qrSize = 240): Promise
   ctx.font = "600 14px Aspekta, ui-sans-serif, system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("Scan QR code to see the loadout", width / 2, qrY + qrSize + gap + captionHeight / 2);
+  ctx.fillText(caption, width / 2, qrY + qrSize + gap + captionHeight / 2);
 
   return canvas.toDataURL("image/png");
 }
