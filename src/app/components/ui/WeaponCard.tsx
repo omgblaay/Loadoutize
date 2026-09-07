@@ -43,7 +43,7 @@ export function WeaponCard({
       onClick={onSelect}
       disabled={disabled}
       className={cn(
-        "relative rounded-xl border transition-all flex flex-col p-2 sm:p-4 w-full h-full",
+        "transition-all relative rounded-xl hover:-translate-y-1 border flex flex-col p-2 sm:p-4 w-full h-full",
         selected
           ? "border-white/60 bg-white/[0.05]"
           : "border-white/[0.08] bg-[#121111] hover:border-white/20 hover:bg-[#171417]",
@@ -56,8 +56,8 @@ export function WeaponCard({
           <Check size={15} />
         </span>
       )}
-
-        <WeaponImage imageUrl={weapon.imageUrl} variant="large" alt={weapon.name} />
+  <div className="m-4">
+ <WeaponImage imageUrl={weapon.imageUrl} variant="large" alt={weapon.name} />      </div> 
 
       <div className="flex gap-2 items-center w-full">
 

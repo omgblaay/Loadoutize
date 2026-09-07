@@ -10,7 +10,8 @@ import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
 import { usePageTitle } from "../hooks/usePageTitle";
-import { Settings as SettingsIcon } from "lucide-react";
+import { Settings as SettingsIcon, Download } from "lucide-react";
+import { QRCodeCanvas, generateBrandedQRPng } from "./ui/qr-code";
 import { SOCIAL_LINK_FIELDS, formatCount, type SocialLinks, type SocialStats } from "../utils/social";
 import { Tag } from "./ui/tag";
 import { ROLE_TAG_META, type RoleTag } from "../utils/roles";
@@ -160,6 +161,15 @@ export function UserPage() {
   usePageTitle(profile ? `${profile.name} (@${profile.nickname}) • Loadoutize` : "Loadoutize • Profile");
 
   const isOwnProfile = user?.id === profile?.id;
+  const profileUrl = profile ? `${window.location.origin}/u/${profile.nickname}` : "";
+
+  const downloadBrandedQr = async () => {
+    const dataUrl = await generateBrandedQRPng(profileUrl, 240, "Scan the QR to see all my loadouts");
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = `${profile?.nickname ?? "profile"}-qr.png`;
+    a.click();
+  };
 
   if (loading) {
     return (
@@ -244,6 +254,24 @@ export function UserPage() {
 
 
 
+        </Container>
+
+        {/* Share profile */}
+        <Container className="flex flex-row items-center gap-4">
+          <QRCodeCanvas value={profileUrl} size={104} className="w-[104px] h-[104px]" />
+          <div className="flex-1 min-w-[200px] flex flex-col gap-3">
+            <h3 className="text-[12px] tracking-[0.5px] uppercase text-[#fafafa] font-medium">
+              Scan the QR to see all my loadouts
+            </h3>
+            <p className="text-[12px] text-[#8d898a] break-all">{profileUrl}</p>
+            {isOwnProfile && (
+              <Button variant="outline" className="w-fit" onClick={downloadBrandedQr}>
+                <Download className="w-4 h-4 text-[#fafafa]" />
+                <span className="text-[14px] text-[#fafafa]">Download QR</span>
+                <span className="text-[14px] text-[#bebcbc]">as PNG</span>
+              </Button>
+            )}
+          </div>
         </Container>
 
         {/* Loadouts */}

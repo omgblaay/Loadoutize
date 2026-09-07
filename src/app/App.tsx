@@ -50,14 +50,14 @@ function BetaNotice() {
   useEffect(() => {
     toast.error("Loadoutize is in beta. Expect rough edges.", {
       description: (
-        <span>
+        <span className="text-secondary">
           The design is still changing too — spacing, sizes, UX choices and layout will keep shifting.
           <br />
           <a
             href="https://blaay.framer.website/projects/loadoutize"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2"
+            className="underline text-primary underline-offset-2"
           >
             Read the case study
           </a>

@@ -7,9 +7,10 @@ import { AppLayout } from "./AppLayout";
 import {
   ArrowLeft,
   Save,
-  Puzzle,
+  Plus,
   Search,
-  SlidersHorizontal,
+  ChevronRight,
+  Check,
   X,
 } from "lucide-react";
 import { WeaponCard } from "./ui/WeaponCard";
@@ -17,6 +18,8 @@ import { WeaponImage, type WeaponImageBadge } from "./ui/WeaponImage";
 import { Tag } from "./ui/tag";
 import { BreadcrumbLink, BreadcrumbSpacer } from "./ui/breadcrumb";
 import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
+import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { ResponsiveDialog } from "./ui/responsive-dialog";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
 import { detectVideoPlatform, VIDEO_PLATFORM_META } from "../utils/video";
@@ -73,27 +76,74 @@ interface LoadoutWeaponRef {
   attachments: Record<string, string>;
 }
 
-export function Pill({
-  label,
-  isSelected,
-  onClick,
+/** Searchable list shown inside the attachment ResponsiveDialog -- a fresh instance mounts each
+ * time the dialog opens (the caller only renders it while a type is open), so its search query
+ * resets for free instead of needing to be cleared manually. */
+function AttachmentPickerList({
+  options,
+  selected,
+  onSelect,
+  onDeselect,
 }: {
-  label: string;
-  isSelected: boolean;
-  onClick: () => void;
+  options: Attachment[];
+  selected: string | undefined;
+  onSelect: (name: string) => void;
+  onDeselect: () => void;
 }) {
+  const [query, setQuery] = useState("");
+  const filtered = options.filter((att) => att.name.toLowerCase().includes(query.trim().toLowerCase()));
+
   return (
-    <button
-      onClick={onClick}
-      className="h-11 px-4 rounded-xl border text-[14px] font-medium transition-colors text-left"
-      style={
-        isSelected
-          ? { background: "#fafafa", borderColor: "#fafafa", color: "#161414" }
-          : { borderColor: "rgba(255,255,255,0.18)", color: "#fafafa" }
-      }
-    >
-      {label}
-    </button>
+    <div className="flex flex-col gap-3">
+      <input
+        type="text"
+        autoFocus
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search attachments..."
+        className="h-11 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
+      />
+
+      {selected && (
+        <button
+          type="button"
+          onClick={onDeselect}
+          className="h-11 px-4 rounded-xl border border-[#d4183d]/30 flex items-center justify-between text-[14px] text-[#ef9696] hover:border-[#d4183d]/60 transition-colors"
+        >
+          Deselect {selected}
+          <X className="w-4 h-4" />
+        </button>
+      )}
+
+      <div className="flex flex-col gap-1 max-h-[min(60vh,420px)] overflow-y-auto -mx-1 px-1">
+        {filtered.length === 0 ? (
+          <p className="text-[14px] text-[#8d898a] py-4 text-center">No attachments match your search.</p>
+        ) : (
+          filtered.map((att) => {
+            const isSelected = selected === att.name;
+            return (
+              <button
+                key={att.id}
+                type="button"
+                onClick={() => onSelect(att.name)}
+                className={cn(
+                  "flex items-center gap-3 h-12 px-3 rounded-lg text-left text-[14px] transition-colors shrink-0",
+                  isSelected ? "bg-[#fafafa] text-[#161414]" : "text-[#fafafa] hover:bg-white/[0.05]"
+                )}
+              >
+                {att.imageUrl ? (
+                  <img src={att.imageUrl} alt="" className="w-6 h-6 object-contain shrink-0" />
+                ) : (
+                  <div className="w-6 h-6 shrink-0" />
+                )}
+                <span className="flex-1">{att.name}</span>
+                {isSelected && <Check className="w-4 h-4 shrink-0" />}
+              </button>
+            );
+          })
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -101,24 +151,22 @@ function TagOption({
   tag,
   isSelected,
   disabled,
-  onClick,
 }: {
   tag: LoadoutTag;
   isSelected: boolean;
   disabled: boolean;
-  onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <ToggleGroupItem
+      value={String(tag.id)}
       disabled={disabled}
       title={disabled ? "Not available for the weapon category(ies) in this loadout" : undefined}
-      className="transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
-      style={isSelected ? { outline: `2px solid ${tag.color}`, outlineOffset: 2, borderRadius: 6 } : undefined}
+      className="h-auto min-w-0 py-2 px-4 bg-transparent hover:bg-transparent hover:text-inherit data-[state=on]:bg-transparent data-[state=on]:text-inherit data-[state=on]:hover:bg-transparent transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+      style={isSelected ? { background: `${tag.color}`, color: "#f1f1f1", outlineOffset: 2, borderRadius: 20, } : undefined}
     >
-      <Tag color={tag.color}>{tag.name}</Tag>
-    </button>
+      {/* <div className="w-2 h-2 rounded-full" style={!isSelected ? { background: `${tag.color}`} : undefined}/> */}
+      <p className="font-handwritten text-xl flex" style={{ color: isSelected ? "#ffffff" : tag.color }}>{tag.name}</p>
+    </ToggleGroupItem>
   );
 }
 
@@ -181,6 +229,8 @@ export function LoadoutBuilder() {
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
   const [pendingWeaponRefs, setPendingWeaponRefs] = useState<LoadoutWeaponRef[] | null>(null);
   const [weaponTypeFilter, setWeaponTypeFilter] = useState<string | null>(null);
+  const [pickingWeapon, setPickingWeapon] = useState(false);
+  const [openAttachmentType, setOpenAttachmentType] = useState<string | null>(null);
   const [weaponSearchOpen, setWeaponSearchOpen] = useState(false);
   const [weaponSearchQuery, setWeaponSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -371,12 +421,14 @@ export function LoadoutBuilder() {
     });
   };
 
+  // attachmentName is "" when the ToggleGroup reports its active item was clicked again
+  // (Radix's single-select deselect) -- clear the slot instead of setting an empty value.
   const setWeaponAttachment = (weaponId: string, slot: string, attachmentName: string) => {
     setSelectedWeapons((prev) =>
       prev.map((w) => {
         if (w.id !== weaponId) return w;
         const next = { ...w.attachments };
-        if (next[slot] === attachmentName) {
+        if (!attachmentName) {
           delete next[slot];
         } else {
           next[slot] = attachmentName;
@@ -407,10 +459,6 @@ export function LoadoutBuilder() {
     return selectedWeapons.every(
       (w) => w.categoryId != null && tag.allowedWeaponCategoryIds.includes(w.categoryId)
     );
-  };
-
-  const toggleTag = (tag: LoadoutTag) => {
-    setSelectedTagId((prev) => (prev === tag.id ? null : tag.id));
   };
 
   useEffect(() => {
@@ -466,6 +514,25 @@ export function LoadoutBuilder() {
   const attachmentTypes = Object.keys(attachmentsByType);
 
   const weaponTypes = Array.from(new Set(weapons.map((w) => w.typeShort || w.type).filter((t): t is string => Boolean(t))));
+
+  // Only one weapon is ever selected at once (toggleWeapon always replaces the array
+  // rather than appending), so the builder's preview/attachments UI just uses the first.
+  const primaryWeapon = selectedWeapons[0];
+  const primaryWeaponBadges: WeaponImageBadge[] = primaryWeapon
+    ? Object.entries(primaryWeapon.attachments)
+      .map(([type, name]): WeaponImageBadge | null => {
+        const attachment = attachmentsByType[type]?.find((a) => a.name === name);
+        if (!attachment) return null;
+        return {
+          key: attachment.id,
+          typeSlug: attachment.typeSlug || type,
+          label: attachment.name,
+          iconUrl: attachment.imageUrl,
+        };
+      })
+      .filter((badge): badge is WeaponImageBadge => badge !== null)
+    : [];
+
   const filteredWeapons = weapons.filter((weapon) => {
     if (weaponTypeFilter && weapon.typeShort !== weaponTypeFilter && weapon.type !== weaponTypeFilter) {
       return false;
@@ -488,14 +555,14 @@ export function LoadoutBuilder() {
         </>
       }
     >
-      <div className="flex items-center justify-between gap-4 flex-wrap">          
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <Button
-            onClick={() => navigate(`/${gameId}/explore`)}
-            variant="ghost"
-            className="*:h-14 w-14"
-          >
-            <ArrowLeft className="size-5" />
-          </Button>
+          onClick={() => navigate(`/${gameId}/explore`)}
+          variant="ghost"
+          className="*:h-14 w-14"
+        >
+          <ArrowLeft className="size-5" />
+        </Button>
         <div className="flex flex-col flex-1 gap-1">
           <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">
             {editId ? "Edit Loadout" : "New Loadout"}
@@ -532,6 +599,31 @@ export function LoadoutBuilder() {
               className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
             />
           </div>
+                    {tags.length > 0 && (
+            <div>
+              <label className="text-[12px] pb-2 tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+                Tag
+              </label>
+              <ToggleGroup
+                type="single"
+                value={selectedTagId != null ? String(selectedTagId) : ""}
+                onValueChange={(value) => {
+                  const tag = tags.find((t) => String(t.id) === value);
+                  setSelectedTagId(tag ? tag.id : null);
+                }}
+                className="flex flex-wrap gap-2"
+              >
+                {tags.map((tag) => (
+                  <TagOption
+                    key={tag.id}
+                    tag={tag}
+                    isSelected={selectedTagId === tag.id}
+                    disabled={selectedTagId !== tag.id && !isTagAllowed(tag)}
+                  />
+                ))}
+              </ToggleGroup>
+            </div>
+          )}
           <div className="flex flex-col gap-2">
             <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
               Description (optional)
@@ -579,160 +671,186 @@ export function LoadoutBuilder() {
             </div>
             {videoError && <p className="text-[12px] text-[#ef9696]">{videoError}</p>}
           </div>
-                  {tags.length > 0 && (
-          <div>
-            <label className="text-[12px] pb-2 tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
-              Tag
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <TagOption
-                  key={tag.id}
-                  tag={tag}
-                  isSelected={selectedTagId === tag.id}
-                  disabled={selectedTagId !== tag.id && !isTagAllowed(tag)}
-                  onClick={() => toggleTag(tag)}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+
         </div>
       </Container>
 
       <Container>
-          <h2 className="text-[16px] text-[#fafafa] font-semibold">Select weapon</h2>
+        <h2 className="text-[16px] text-[#fafafa] font-semibold">Select weapon</h2>
 
-        {weaponSearchOpen && (
-          <input
-            type="text"
-            autoFocus
-            value={weaponSearchQuery}
-            onChange={(e) => setWeaponSearchQuery(e.target.value)}
-            placeholder="Search weapons by name..."
-            className="h-11 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
-          />
-        )}
-
-        {weaponTypes.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setWeaponSearchOpen((v) => !v);
-                  if (weaponSearchOpen) setWeaponSearchQuery("");
-                }}
-                className="w-9 h-9 rounded-xl border border-white/[0.18] flex items-center justify-center text-[#fafafa] hover:bg-white/[0.05] transition-colors"
-                aria-label={weaponSearchOpen ? "Close search" : "Search weapons"}
-              >
-                {weaponSearchOpen ? <X className="w-4 h-4" /> : <Search className="size-4.5" />}
-              </button>
+        {primaryWeapon && !pickingWeapon ? (
+          <>
+            <div className="flex flex-col items-center gap-3 pb-2">
+              <WeaponImage
+                imageUrl={primaryWeapon.imageUrl}
+                variant="small"
+                alt={primaryWeapon.name}
+                weaponId={primaryWeapon.id}
+                badges={primaryWeaponBadges}
+                highlightSlugs={primaryWeaponBadges.map((badge) => badge.typeSlug)}
+              />
+              <Button variant="outline" onClick={() => setPickingWeapon(true)}>
+                Change weapon
+              </Button>
             </div>
-            <FilterPillGroup
-              type="single"
-              value={weaponTypeFilter ?? ""}
-              onValueChange={(v) => setWeaponTypeFilter(v || null)}
-            >
-              <FilterPill value="" size="sm">
-                All
-              </FilterPill>
-              {weaponTypes.map((type) => (
-                <FilterPill key={type} value={type} size="sm">
-                  {type}
-                </FilterPill>
-              ))}
-            </FilterPillGroup>
-          </div>
-        )}
 
-        {weapons.length === 0 ? (
-          <p className="text-[14px] text-[#8d898a]">No weapons available for this game yet.</p>
-        ) : filteredWeapons.length === 0 ? (
-          <p className="text-[14px] text-[#8d898a]">No weapons match your filters.</p>
+            <h2 className="text-lg font-semibold">Attachments</h2>
+
+            {attachmentTypes.length === 0 ? (
+              <p className="text-[14px] text-teritary">No attachments configured for this game yet.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {attachmentTypes.map((type) => {
+                  const typeImageUrl = attachmentsByType[type][0]?.typeImageUrl;
+                  const selectedName = primaryWeapon.attachments[type];
+                  return (
+                    <div key={type} className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        {/* <div>
+                          {typeImageUrl ? (
+                            <img src={typeImageUrl} alt="" className="size-5 opacity-80 object-contain" />
+                          ) : (
+                            null
+                          )}
+                        </div>
+                        <p className="uppercase text-secondary text-xs font-semibold">
+                          {type}
+                        </p> */}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setOpenAttachmentType(type)}
+                        className="h-12 px-4 rounded-xl border border-white/[0.18] flex items-center gap-2 text-left transition-colors hover:border-white/40"
+                      >
+                        <div className="flex gap-2 flex-1 flex-row">
+                        {selectedName ? (
+                          null
+                        ) :
+                          <>
+                            <Plus className="size-5 opacity-50" />
+                          </>
+                        }
+
+
+                        {typeImageUrl ? (
+                          <img src={typeImageUrl} alt="" className="size-5 opacity-80 object-contain" />
+                        ) : (
+                          null
+                        )}
+
+
+                        {selectedName ? (
+                          <>
+                            {selectedName}
+                            <span className="text-teritary">{type}</span>
+                          </>
+                        ) : 
+                        <span className="text-secondary">
+                          Add {type}
+                        </span>}
+
+</div>
+                        <ChevronRight className="w-4 h-4 text-[#8d898a] shrink-0" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredWeapons.map((weapon) => {
-              const isSelected = selectedWeapons.some((w) => w.id === weapon.id);
-              return (
-                <WeaponCard
-                  key={weapon.id}
-                  weapon={weapon}
-                  selected={isSelected}
-                  onSelect={() => toggleWeapon(weapon)}
-                />
-              );
-            })}
-          </div>
+          <>
+            {weaponSearchOpen && (
+              <input
+                type="text"
+                autoFocus
+                value={weaponSearchQuery}
+                onChange={(e) => setWeaponSearchQuery(e.target.value)}
+                placeholder="Search weapons by name..."
+                className="h-11 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
+              />
+            )}
+
+            {weaponTypes.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWeaponSearchOpen((v) => !v);
+                      if (weaponSearchOpen) setWeaponSearchQuery("");
+                    }}
+                    className="w-9 h-9 rounded-xl border border-white/[0.18] flex items-center justify-center text-[#fafafa] hover:bg-white/[0.05] transition-colors"
+                    aria-label={weaponSearchOpen ? "Close search" : "Search weapons"}
+                  >
+                    {weaponSearchOpen ? <X className="w-4 h-4" /> : <Search className="size-4.5" />}
+                  </button>
+                </div>
+                <FilterPillGroup
+                  type="single"
+                  value={weaponTypeFilter ?? ""}
+                  onValueChange={(v) => setWeaponTypeFilter(v || null)}
+                >
+                  <FilterPill value="">
+                    All
+                  </FilterPill>
+                  {weaponTypes.map((type) => (
+                    <FilterPill key={type} value={type} className="uppercase">
+                      {type}
+                    </FilterPill>
+                  ))}
+                </FilterPillGroup>
+              </div>
+            )}
+
+            {weapons.length === 0 ? (
+              <p className="text-[14px] text-[#8d898a]">No weapons available for this game yet.</p>
+            ) : filteredWeapons.length === 0 ? (
+              <p className="text-[14px] text-[#8d898a]">No weapons match your filters.</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredWeapons.map((weapon) => {
+                  const isSelected = selectedWeapons.some((w) => w.id === weapon.id);
+                  return (
+                    <WeaponCard
+                      key={weapon.id}
+                      weapon={weapon}
+                      selected={isSelected}
+                      onSelect={() => {
+                        toggleWeapon(weapon);
+                        setPickingWeapon(false);
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </Container>
 
-      {selectedWeapons.map((weapon) => {
-        const weaponBadges = Object.entries(weapon.attachments)
-          .map(([type, name]): WeaponImageBadge | null => {
-            const attachment = attachmentsByType[type]?.find((a) => a.name === name);
-            if (!attachment) return null;
-            return {
-              key: attachment.id,
-              typeSlug: attachment.typeSlug || type,
-              label: attachment.name,
-              iconUrl: attachment.imageUrl,
-            };
-          })
-          .filter((badge): badge is WeaponImageBadge => badge !== null);
-
-        return (
-        <Container key={weapon.id}>
-          <div className="flex flex-col items-center gap-2 pb-2">
-            <WeaponImage
-              imageUrl={weapon.imageUrl}
-              variant="small"
-              alt={weapon.name}
-              weaponId={weapon.id}
-              badges={weaponBadges}
-              highlightSlugs={weaponBadges.map((badge) => badge.typeSlug)}
-            />
-          </div>
-            <h2>Attachments</h2>
-
-          {attachmentTypes.length === 0 ? (
-            <p className="text-[14px] text-[#8d898a]">No attachments configured for this game yet.</p>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {attachmentTypes.map((type) => {
-                const typeImageUrl = attachmentsByType[type][0]?.typeImageUrl;
-                return (
-                <div key={type} className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <div>
-                      {typeImageUrl ? (
-                        <img src={typeImageUrl} alt="" className="size-5 opacity-50 object-contain" />
-                      ) : (
-                        null
-                      )}
-                    </div>
-                    <p className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
-                      {type}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {attachmentsByType[type].map((att) => (
-                      <Pill
-                        key={att.id}
-                        label={att.name}
-                        isSelected={weapon.attachments[type] === att.name}
-                        onClick={() => setWeaponAttachment(weapon.id, type, att.name)}
-                      />
-                    ))}
-                  </div>
-                </div>
-                );
-              })}
-            </div>
-          )}
-        </Container>
-        );
-      })}
+      {primaryWeapon && openAttachmentType && (
+        <ResponsiveDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setOpenAttachmentType(null);
+          }}
+          title={openAttachmentType}
+        >
+          <AttachmentPickerList
+            options={attachmentsByType[openAttachmentType]}
+            selected={primaryWeapon.attachments[openAttachmentType]}
+            onSelect={(name) => {
+              setWeaponAttachment(primaryWeapon.id, openAttachmentType, name);
+              setOpenAttachmentType(null);
+            }}
+            onDeselect={() => {
+              setWeaponAttachment(primaryWeapon.id, openAttachmentType, "");
+              setOpenAttachmentType(null);
+            }}
+          />
+        </ResponsiveDialog>
+      )}
 
       {!editId && <RecaptchaNotice className="text-[12px] text-[#8d898a]" />}
 
