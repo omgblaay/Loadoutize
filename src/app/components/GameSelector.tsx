@@ -285,14 +285,18 @@ export function GameSelector() {
           </button>
         </div> */}
 
-      <Container className="flex-row bg-[#221d21]">
+      <Container className="flex-row bg-[#1f1b1e]">
 
-        <div className="flex flex-col gap-2 flex-1"><h2 className="text-[14px]">
+        <div className="flex flex-col gap-4 flex-1">
+          <h2 className="text-[14px]">
           From your favourite Streamers &amp; Content Creators</h2>
+          <p className="text-secondary">
+            Check what they are currently running in-game for the best outcome.
+          </p>
+          <div className="flex w-full gap-2 justify-between">
           <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
-              size="sm"
+              variant="outline"
               onClick={() => navigate(`/${selectedGame}/community?social=youtube`)}
               className="opacity-80 hover:opacity-100 transition-opacity"
               aria-label="Find YouTube creators"
@@ -300,8 +304,7 @@ export function GameSelector() {
               <YoutubeIcon size={24} />
             </Button>
             <Button
-              variant="ghost"
-              size="sm"
+              variant="outline"
               onClick={() => navigate(`/${selectedGame}/community?social=twitch`)}
               className="opacity-80 hover:opacity-100 transition-opacity"
               aria-label="Find Twitch creators"
@@ -309,8 +312,7 @@ export function GameSelector() {
               <TwitchIcon size={24} />
             </Button>
             <Button
-              variant="ghost"
-              size="sm"
+              variant="outline"
               onClick={() => navigate(`/${selectedGame}/community?social=tiktok`)}
               className="opacity-80 hover:opacity-100 transition-opacity"
               aria-label="Find TikTok creators"
@@ -318,27 +320,25 @@ export function GameSelector() {
               <TiktokIcon size={24} />
             </Button>
             <Button
-              variant="ghost"
-              size="sm"
+              variant="outline"
               onClick={() => navigate(`/${selectedGame}/community?social=instagram`)}
               className="opacity-80 hover:opacity-100 transition-opacity"
               aria-label="Find Instagram creators"
             >
               <InstagramIcon size={24} />
             </Button>
-          </div>
-          
-          <p className="text-[14px] text-teritary">
-            Check what they are currently running in-game for the best outcome.
-          </p>
+ 
+          </div>           <Button
+              onClick={() => navigate(`/${selectedGame}/explore`)}
+              variant="outline"
+            >
+              Explore all weapon builds
+              <ChevronRight className="w-4 h-4" />
+            </Button>
         </div>
-        <Button
-          onClick={() => navigate(`/${selectedGame}/explore`)}
-          variant="outline"
-        >
-          Explore setups
-          <ChevronRight className="w-4 h-4" />
-        </Button>
+
+        </div>
+
       </Container>
 
 

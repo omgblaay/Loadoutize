@@ -185,7 +185,7 @@ export function GameDashboard() {
       {/* Filter / sort row */}
       <div className="flex items-center gap-3 w-full flex-wrap">
         <div className="flex-1 flex items-center gap-3 flex-wrap min-w-0">
-          <Button variant="secondary">
+          <Button variant="outline">
             <SlidersHorizontal className="w-4 h-4" />
             Filters
           </Button>

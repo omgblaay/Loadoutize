@@ -94,6 +94,7 @@ export function SideNav({
             <SideNavButton
               key={cat.name}
               onClick={() => go(`/${selectedGame}/explore?category=${encodeURIComponent(cat.name)}`)}
+              className="text-secondary"
             >
               <Tag>{cat.typeShort ?? cat.name.slice(0, 3)}</Tag>
               {cat.name}
@@ -102,7 +103,7 @@ export function SideNav({
         </div>
       )}
 
-      <div
+       {/* <div
         className="relative rounded-xl p-6 flex flex-col gap-5 overflow-hidden"
         style={{ backgroundImage: "linear-gradient(to bottom, #1a181a 34%, #212126)" }}
       >
@@ -110,10 +111,8 @@ export function SideNav({
           className="absolute inset-0 pointer-events-none rounded-[inherit]"
           style={{ boxShadow: "inset 0px -40px 120px 0px rgba(255,255,255,0.04)" }}
         />
-        <div className="flex gap-4 items-start relative">
-          <Zap className="w-[18px] h-6 text-[#efedf1] shrink-0" />
-          <p className="flex-1 text-[20px] text-[#fafafa]">Join the battlefield with the best setups</p>
-        </div>
+          {/* <Zap className="w-[18px] h-6 text-[#efedf1] shrink-0" />
+          <h2 className="text-sm">Join the battlefield with the best setups</h2>
         <p className="text-[14px] leading-[1.4] text-[#bebcbc] relative">
           Join the community now, and enjoy the best configs for your favourite games
         </p>
@@ -124,7 +123,7 @@ export function SideNav({
           <span className="text-[#161414]">Join now</span>
           <span className="text-[#8d898a]">For free</span>
         </button>
-      </div>
+      </div> */}
     </>
   );
 
