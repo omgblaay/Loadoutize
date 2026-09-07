@@ -130,7 +130,7 @@ export function SideNav({
   return (
     <>
       {/* Full menu, shown in-flow at xl (1280px) and up */}
-      <aside className="hidden xl:flex flex-col gap-6 w-[320px] shrink-0">{fullMenu}</aside>
+      <aside className="hidden xl:flex flex-col gap-6 w-[240px] shrink-0">{fullMenu}</aside>
 
       {/* Icon-only rail, sm-xl: nav links as icons, "Best of" as typeShort, no search. Below sm, the bottom bar takes over instead. */}
       <aside className="hidden sm:flex xl:hidden flex-col items-center gap-4 w-[72px] shrink-0">
