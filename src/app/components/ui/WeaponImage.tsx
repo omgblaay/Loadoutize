@@ -1,5 +1,6 @@
 import { getAttachmentBadgePosition } from "../../utils/weaponAttachmentBadgePositions";
 import { getAttachmentHighlightRegion } from "../../utils/weaponAttachmentHighlightRegions";
+import { AppTooltip } from "./tooltip";
 
 export interface WeaponImageBadge {
   key: string;
@@ -88,30 +89,30 @@ export function WeaponImage({
   const isDimmed = activeBadgeKey != null && !isActive;
 
   return (
-    <div
-      key={badge.key}
-      title={badge.label}
-      onPointerEnter={() => onBadgeHover?.(badge.key)}
-      onPointerLeave={() => onBadgeHover?.(null)}
-      className={[
-        "absolute -translate-x-1/2 -translate-y-1/2 rounded-sm flex items-center justify-center overflow-hidden border pointer-events-auto",
-        "transition-[opacity,transform,border-color,box-shadow] duration-200 ease-out",
-        badgeSizeClass,
-        isActive
-          ? "z-10 scale-125 bg-black border-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]"
-          : "bg-black/80 border-white/25",
-        isDimmed ? "opacity-30" : "opacity-100",
-      ].join(" ")}
-      style={{ left: `${position.x}%`, top: `${position.y}%` }}
-    >
-      {badge.iconUrl ? (
-        <img src={badge.iconUrl} alt={badge.label} className="w-full h-full object-contain p-1" />
-      ) : (
-        <span className="text-[9px] font-semibold text-white/70 leading-none">
-          {badge.label.slice(0, 2).toUpperCase()}
-        </span>
-      )}
-    </div>
+    <AppTooltip key={badge.key} content={badge.label}>
+      <div
+        onPointerEnter={() => onBadgeHover?.(badge.key)}
+        onPointerLeave={() => onBadgeHover?.(null)}
+        className={[
+          "absolute -translate-x-1/2 -translate-y-1/2 rounded-sm flex items-center justify-center overflow-hidden border pointer-events-auto",
+          "transition-[opacity,transform,border-color,box-shadow] duration-200 ease-out",
+          badgeSizeClass,
+          isActive
+            ? "z-10 scale-125 bg-black border-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]"
+            : "bg-black/80 border-white/25",
+          isDimmed ? "opacity-30" : "opacity-100",
+        ].join(" ")}
+        style={{ left: `${position.x}%`, top: `${position.y}%` }}
+      >
+        {badge.iconUrl ? (
+          <img src={badge.iconUrl} alt={badge.label} className="w-full h-full object-contain p-1" />
+        ) : (
+          <span className="text-[9px] font-semibold text-white/70 leading-none">
+            {badge.label.slice(0, 2).toUpperCase()}
+          </span>
+        )}
+      </div>
+    </AppTooltip>
   );
 })}
         </div>

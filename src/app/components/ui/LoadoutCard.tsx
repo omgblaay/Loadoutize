@@ -92,7 +92,7 @@ export function LoadoutCard({
       // }}
     >
       <div
-        className="absolute bottom-[-50%] right-[-50%] w-[200px] h-[200px] blur-[80px] opacity-[50%] pointer-events-none"
+        className="absolute bottom-[-100px] right-[-100px] w-[200px] h-[200px] blur-[80px] opacity-[20%] pointer-events-none"
         style={{ background: glowColor}}
       />
 
@@ -142,7 +142,7 @@ export function LoadoutCard({
           <Tag color={""}>{primaryWeaponData?.typeShort || gameShort}</Tag>
           <p className="flex-1 font-mono text-body text-sm">{primaryWeapon}</p>
 
-          <p className="font-handwritten antialiased" style={{ color: tag?.color ?? accent, fontSize: "1.1rem" }} >
+          <p className="font-handwritten antialiased text-shadow-lg" style={{ color: tag?.color ?? accent, fontSize: "1.1rem" }} >
           {tag?.name}</p>
           {/*}
           <Tag color={loadout.tagId ? tags.find((t) => t.id === loadout.tagId)?.color : undefined}>
@@ -165,7 +165,7 @@ export function LoadoutCard({
         </div>
       )} */}
 
-      <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[inset_0px_0px_0px_1px_rgba(255,255,255,0.07)]" />
+      {/* <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[inset_0px_0px_0px_1px_rgba(255,255,255,0.07)]" /> */}
     </Link>
     </div>
   );
