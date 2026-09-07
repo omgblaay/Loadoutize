@@ -120,7 +120,7 @@ export function LoadoutCard({
           </div>
         )}
       </div>
-      <div className="h-full flex items-center justify-center relative" >
+      <div className="h-full flex items-center my-6 justify-center relative" >
         <WeaponImage
           imageUrl={primaryWeaponData?.imageUrl}
           variant="small"

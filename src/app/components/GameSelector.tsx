@@ -217,7 +217,7 @@ export function GameSelector() {
     .sort((a, b) => b.score - a.score)
     .slice(0, 6);
 
-  const topWeapons = weapons.slice(0, 4);
+  const topWeapons = weapons.slice(0, 3);
 
   if (loading) {
     return (
@@ -289,53 +289,53 @@ export function GameSelector() {
 
         <div className="flex flex-col gap-4 flex-1">
           <h2 className="text-[14px]">
-          From your favourite Streamers &amp; Content Creators</h2>
+            From your favourite Streamers &amp; Content Creators</h2>
           <p className="text-secondary">
             Check what they are currently running in-game for the best outcome.
           </p>
           <div className="flex w-full gap-2 justify-between">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/${selectedGame}/community?social=youtube`)}
-              className="opacity-80 hover:opacity-100 transition-opacity"
-              aria-label="Find YouTube creators"
-            >
-              <YoutubeIcon size={24} />
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/${selectedGame}/community?social=twitch`)}
-              className="opacity-80 hover:opacity-100 transition-opacity"
-              aria-label="Find Twitch creators"
-            >
-              <TwitchIcon size={24} />
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/${selectedGame}/community?social=tiktok`)}
-              className="opacity-80 hover:opacity-100 transition-opacity"
-              aria-label="Find TikTok creators"
-            >
-              <TiktokIcon size={24} />
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/${selectedGame}/community?social=instagram`)}
-              className="opacity-80 hover:opacity-100 transition-opacity"
-              aria-label="Find Instagram creators"
-            >
-              <InstagramIcon size={24} />
-            </Button>
- 
-          </div>           <Button
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/${selectedGame}/community?social=youtube`)}
+                className="opacity-80 hover:opacity-100 transition-opacity"
+                aria-label="Find YouTube creators"
+              >
+                <YoutubeIcon size={24} />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/${selectedGame}/community?social=twitch`)}
+                className="opacity-80 hover:opacity-100 transition-opacity"
+                aria-label="Find Twitch creators"
+              >
+                <TwitchIcon size={24} />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/${selectedGame}/community?social=tiktok`)}
+                className="opacity-80 hover:opacity-100 transition-opacity"
+                aria-label="Find TikTok creators"
+              >
+                <TiktokIcon size={24} />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/${selectedGame}/community?social=instagram`)}
+                className="opacity-80 hover:opacity-100 transition-opacity"
+                aria-label="Find Instagram creators"
+              >
+                <InstagramIcon size={24} />
+              </Button>
+
+            </div>           <Button
               onClick={() => navigate(`/${selectedGame}/explore`)}
               variant="outline"
             >
               Explore all weapon builds
               <ChevronRight className="w-4 h-4" />
             </Button>
-        </div>
+          </div>
 
         </div>
 
@@ -346,19 +346,19 @@ export function GameSelector() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-sm text-teritary">
+            <h2 className="font-sans text-teritary">
               Top Weapons
             </h2>
             <Link
               to={`/${selectedGame}/meta`}
-              className="text-[14px] text-teritary hover:text-[#fafafa] flex items-center gap-1 shrink-0"
+              className="font-medium text-teritary hover:text-[#fafafa] flex items-center gap-1 shrink-0"
             >
               View full Meta
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="size-4" />
             </Link>
           </div>
           {topWeapons.length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               {topWeapons.map((w) => (
                 <WeaponCard
                   key={w.id}
@@ -375,9 +375,8 @@ export function GameSelector() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <div>
-            <h2 className="text-sm text-teritary">Recent Loadouts</h2>
-          </div>
+          <h2 className="font-sans text-teritary">
+            Recent Loadouts</h2>
           {metaLoadouts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
               {metaLoadouts.map((l, i) => (
