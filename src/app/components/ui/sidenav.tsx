@@ -94,7 +94,7 @@ export function SideNav({
             <SideNavButton
               key={cat.name}
               onClick={() => go(`/${selectedGame}/explore?category=${encodeURIComponent(cat.name)}`)}
-              className="text-secondary"
+              className="text-secondary text-xs"
             >
               <Tag>{cat.typeShort ?? cat.name.slice(0, 3)}</Tag>
               {cat.name}
