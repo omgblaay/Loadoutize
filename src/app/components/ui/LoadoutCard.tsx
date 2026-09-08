@@ -5,6 +5,7 @@ import { Tag } from "./tag";
 import { RatingRing } from "./rating-ring";
 import { FireCardEffect } from "./FireCardEffect";
 import { VIDEO_PLATFORM_META, type LoadoutVideo } from "../../utils/video";
+import { explorePath } from "../../utils/routes";
 
 export interface CardLoadout {
   id: string;
@@ -105,12 +106,32 @@ export function LoadoutCard({
             loadout.ratingPercent == null ? "text-[10px] text-teritary" : "text-[11px] text-[#fafafa]"
           }
           fallbackLabel="New"
-        />
-        <div className="flex-1 min-w-0 flex flex-col gap-0 justify-center">
+        />            
+        <h3 className="text-base antialiased wrap-anywhere">
+          <span
+            style={{ color: tag?.color }}
+            className="font-handwritten text-xl py-4 font-light"
+          >
+            {tag?.name}
+          </span>{" "}
+          <Tag
+            color={""}
+            className="inline relative top-[-5px]"
+            link={
+              primaryWeaponData?.type
+                ? explorePath(loadout.gameId, { category: primaryWeaponData.type })
+                : undefined
+            }
+          >
+            {primaryWeaponData?.typeShort || gameShort}
+          </Tag>
+          <span className="text-se font-sans text-teritary">{" "}{primaryWeapon}</span>
+          {" "}{loadout.name}
+        </h3>
+        {/* <div className="flex-1 min-w-0 flex flex-col gap-0 justify-center">
           <p className="text-lg font-semibold">{loadout.name}</p>
-          <p className="text-sm text-teritary truncate">{loadout.description}</p>
-        </div>
-        {loadout.video && (
+          <p className="text-sm text-teritary truncate">        
+            {loadout.video && (
           <div
             title={`Video: ${VIDEO_PLATFORM_META[loadout.video.platform].label}`}
           >
@@ -118,9 +139,11 @@ export function LoadoutCard({
               className: "size-5 saturate-0 brightness-200",
             })}
           </div>
-        )}
+        )}{loadout.description}</p>
+        </div> */}
+
       </div>
-      <div className="h-full flex items-center my-6 mx-6 justify-center relative" >
+      <div className="h-full flex items-center mt-4 mb-6 mx-10 justify-center relative" >
         <WeaponImage
           imageUrl={primaryWeaponData?.imageUrl}
           weaponId={primaryWeaponId}
@@ -135,22 +158,22 @@ export function LoadoutCard({
         />
 
         </div>
-      <div className="p-4 pt-0 flex flex-col items-center w-full">
+      {/* <div className="p-4 pt-0 flex flex-col items-center w-full">
         
         <div className="flex mt-2 items-center justify-center gap-2 w-full">
 
           <Tag color={""}>{primaryWeaponData?.typeShort || gameShort}</Tag>
-          <p className="flex-1 font-mono text-body text-sm">{primaryWeapon}</p>
+          <p className="flex-1 font-mono text-body uppercase text-sm">{primaryWeapon}</p>
 
           <p className="font-handwritten antialiased text-shadow-lg" style={{ color: tag?.color ?? accent, fontSize: "1.1rem" }} >
           {tag?.name}</p>
-          {/*}
+    
           <Tag color={loadout.tagId ? tags.find((t) => t.id === loadout.tagId)?.color : undefined}>
           {tag?.name}
-          </Tag> */}
+          </Tag> 
         </div>
 
-      </div>
+      </div> */}
 
       {/* {attachmentIcons.length > 0 && (
         <div className="relative flex items-center w-full">
