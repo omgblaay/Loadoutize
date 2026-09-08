@@ -10,7 +10,7 @@ node_modules/
 !.env.example
 .vercel/
 .claude/settings.local.json
-src/app/components/ComponentTest.tsx
+src/components/pages/ComponentTest.tsx
 
 # macOS
 .DS_Store

@@ -1,34 +1,34 @@
 import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "react-router";
 import { toast } from "sonner";
-import { AuthProvider } from "./components/AuthContext";
-import { Home } from "./components/Home";
-import { Explore } from "./components/Explore";
-import { MetaView } from "./components/MetaView";
-import { CommunityView } from "./components/CommunityView";
-import { LoadoutBuilder } from "./components/LoadoutBuilder";
-import { LoadoutPreview } from "./components/LoadoutPreview";
-import { WeaponConfigPreview } from "./components/WeaponConfigPreview";
-import { UserPage } from "./components/UserPage";
-import { LikedLoadouts } from "./components/LikedLoadouts";
-import { Settings } from "./components/Settings";
-import { Join } from "./components/Join";
-import { AuthCallback } from "./components/AuthCallback";
-import { PrivacyPolicy } from "./components/PrivacyPolicy";
-import { TermsOfService } from "./components/TermsOfService";
-import { NotFound } from "./components/NotFound";
-import { CookieConsent } from "./components/CookieConsent";
-import { Toaster } from "./components/ui/sonner";
-import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "./utils/games";
-import { explorePath } from "./utils/routes";
+import { AuthProvider } from "@/providers/AuthProvider";
+import { Home } from "@/components/pages/Home";
+import { Explore } from "@/components/pages/Explore";
+import { MetaView } from "@/components/pages/MetaView";
+import { CommunityView } from "@/components/pages/CommunityView";
+import { LoadoutBuilder } from "@/components/pages/LoadoutBuilder";
+import { LoadoutPreview } from "@/components/pages/LoadoutPreview";
+import { WeaponConfigPreview } from "@/components/pages/WeaponConfigPreview";
+import { UserPage } from "@/components/pages/UserPage";
+import { LikedLoadouts } from "@/components/pages/LikedLoadouts";
+import { Settings } from "@/components/pages/Settings";
+import { Join } from "@/components/pages/Join";
+import { AuthCallback } from "@/components/pages/AuthCallback";
+import { PrivacyPolicy } from "@/components/pages/PrivacyPolicy";
+import { TermsOfService } from "@/components/pages/TermsOfService";
+import { NotFound } from "@/components/pages/NotFound";
+import { CookieConsent } from "@/components/organisms/CookieConsent";
+import { Toaster } from "@/components/molecules/Toaster";
+import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "@/lib/games";
+import { explorePath } from "@/lib/routes";
 
 // ComponentTest.tsx is gitignored (a local-only scratch/preview page) -- a
 // normal static import of it breaks the build anywhere the file doesn't
 // exist on disk, e.g. Vercel, which builds from the git checkout and never
 // has it. import.meta.glob resolves it when present (local dev) and simply
 // returns no match when absent, so the build never fails either way.
-const componentTestModules = import.meta.glob<{ ComponentTest: ComponentType }>("./components/ComponentTest.tsx");
-const loadComponentTest = componentTestModules["./components/ComponentTest.tsx"];
+const componentTestModules = import.meta.glob<{ ComponentTest: ComponentType }>("../components/pages/ComponentTest.tsx");
+const loadComponentTest = componentTestModules["../components/pages/ComponentTest.tsx"];
 const ComponentTest = loadComponentTest ? lazy(() => loadComponentTest().then((m) => ({ default: m.ComponentTest }))) : null;
 
 function GameRedirect() {
