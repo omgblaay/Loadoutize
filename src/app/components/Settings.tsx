@@ -16,6 +16,7 @@ import { InstagramIcon, TiktokIcon, TwitchIcon, YoutubeIcon, KickIcon } from "@/
 import { CompactPageHeader } from "./ui/compact-page-header";
 import { PasswordStrengthMeter } from "./ui/password-strength";
 import { PASSWORD_MIN_LENGTH, isPasswordStrong } from "../utils/password";
+import { explorePath } from "../utils/routes";
 
 const NICKNAME_PATTERN = /^[a-z0-9_-]{3,20}$/;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -119,7 +120,7 @@ export function Settings() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate("/");
+      navigate("/home");
     }
   }, [user, authLoading, navigate]);
 
@@ -272,7 +273,7 @@ export function Settings() {
     return (
       <AppLayout
         selectedGame={LOCKED_GAME_ID}
-        onGameSelect={(id) => navigate(`/${id}/explore`)}
+        onGameSelect={(id) => navigate(explorePath(id))}
       >
         <SettingsSkeleton />
       </AppLayout>
@@ -282,7 +283,7 @@ export function Settings() {
   return (
     <AppLayout
       selectedGame={LOCKED_GAME_ID}
-      onGameSelect={(id) => navigate(`/${id}/explore`)}
+      onGameSelect={(id) => navigate(explorePath(id))}
     >
       <div className="flex flex-col gap-1">
         <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">Settings</h1>

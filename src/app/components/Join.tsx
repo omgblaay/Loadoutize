@@ -298,7 +298,7 @@ export function Join() {
     <div className="h-screen w-full flex bg-[#0a0909]">
       <div className="w-full lg:w-1/2 flex flex-col overflow-y-auto">
         <div className="p-6 sm:p-10">
-          <Link to="/" className="inline-flex items-center gap-1.5">
+          <Link to="/home" className="inline-flex items-center gap-1.5">
             <Logo />
           </Link>
         </div>

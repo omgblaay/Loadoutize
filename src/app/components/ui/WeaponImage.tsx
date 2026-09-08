@@ -8,7 +8,7 @@ export interface WeaponImageBadge {
   typeSlug: string;
   label: string;
   iconUrl?: string | null;
-  
+
 }
 
 const BADGE_SIZE_CLASSES: Record<"small" | "large" | "default", string> = {
@@ -46,19 +46,20 @@ export function WeaponImage({
       case "large":
         return "w-[100%] max-w-[32rem]";
       default:
-        return "!w-[320px] max-w-[100rem]";
+        return "max-w-[100rem]";
     }
   };
 
   const badgeSizeClass = BADGE_SIZE_CLASSES[variant ?? "default"];
 
   return (
-    <div className={`relative ${getVariantClasses()}`}>
+    <div className={`relative w-full ${getVariantClasses()} ` }>
       <img
         src={imageUrl ?? undefined}
         alt={alt}
-        className="flex h-full w-full items-center  justify-center object-contain"
-        // brightness-200 saturate-0
+        className="w-full"
+        
+      // brightness-200 saturate-0
       />
       {highlightSlugs && highlightSlugs.length > 0 && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -84,37 +85,37 @@ export function WeaponImage({
       {badges && badges.length > 0 && (
         <div className="absolute inset-0 pointer-events-none">
           {badges.map((badge, index) => {
-  const position = getAttachmentBadgePosition(weaponId, badge.typeSlug, index, badges.length);
-  const isActive = activeBadgeKey === badge.key;
-  const isDimmed = activeBadgeKey != null && !isActive;
+            const position = getAttachmentBadgePosition(weaponId, badge.typeSlug, index, badges.length);
+            const isActive = activeBadgeKey === badge.key;
+            const isDimmed = activeBadgeKey != null && !isActive;
 
-  return (
-    <AppTooltip key={badge.key} content={badge.label}>
-      <div
-        onPointerEnter={() => onBadgeHover?.(badge.key)}
-        onPointerLeave={() => onBadgeHover?.(null)}
-        className={[
-          "absolute -translate-x-1/2 -translate-y-1/2 rounded-sm flex items-center justify-center overflow-hidden border pointer-events-auto",
-          "transition-[opacity,transform,border-color,box-shadow] duration-200 ease-out",
-          badgeSizeClass,
-          isActive
-            ? "z-10 scale-125 bg-black border-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]"
-            : "bg-black/80 border-white/25",
-          isDimmed ? "opacity-30" : "opacity-100",
-        ].join(" ")}
-        style={{ left: `${position.x}%`, top: `${position.y}%` }}
-      >
-        {badge.iconUrl ? (
-          <img src={badge.iconUrl} alt={badge.label} className="w-full h-full object-contain p-1" />
-        ) : (
-          <span className="text-[9px] font-semibold text-white/70 leading-none">
-            {badge.label.slice(0, 2).toUpperCase()}
-          </span>
-        )}
-      </div>
-    </AppTooltip>
-  );
-})}
+            return (
+              <AppTooltip key={badge.key} content={badge.label}>
+                <div
+                  onPointerEnter={() => onBadgeHover?.(badge.key)}
+                  onPointerLeave={() => onBadgeHover?.(null)}
+                  className={[
+                    "absolute -translate-x-1/2 -translate-y-1/2 rounded-sm flex items-center justify-center overflow-hidden  pointer-events-auto",
+                    "transition-[opacity,transform,border-color,box-shadow] duration-200 ease-out",
+                    badgeSizeClass,
+                    isActive
+                      ? "z-10 scale-125 bg-black border-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]"
+                      : "bg-black/80 border-white/25",
+                    isDimmed ? "opacity-30" : "opacity-100",
+                  ].join(" ")}
+                  style={{ left: `${position.x}%`, top: `${position.y}%` }}
+                >
+                  {badge.iconUrl ? (
+                    <img src={badge.iconUrl} alt={badge.label} className="w-full h-full object-contain p-1" />
+                  ) : (
+                    <span className="text-[9px] font-semibold text-white/70 leading-none">
+                      {badge.label.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+              </AppTooltip>
+            );
+          })}
         </div>
       )}
     </div>

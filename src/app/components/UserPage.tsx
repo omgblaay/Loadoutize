@@ -16,6 +16,7 @@ import { SOCIAL_LINK_FIELDS, formatCount, type SocialLinks, type SocialStats } f
 import { Tag } from "./ui/tag";
 import { ROLE_TAG_META, type RoleTag } from "../utils/roles";
 import { Container } from "./ui/container";
+import { explorePath } from "../utils/routes";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -173,7 +174,7 @@ export function UserPage() {
 
   if (loading) {
     return (
-      <AppLayout selectedGame={LOCKED_GAME_ID} onGameSelect={(id) => navigate(`/${id}/explore`)}>
+      <AppLayout selectedGame={LOCKED_GAME_ID} onGameSelect={(id) => navigate(explorePath(id))}>
         <UserPageSkeleton />
       </AppLayout>
     );
@@ -183,7 +184,7 @@ export function UserPage() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0a0909] flex-col gap-4">
         <p className="text-[#efedf1] text-xl">User not found.</p>
-        <Button onClick={() => navigate("/")}>
+        <Button onClick={() => navigate("/home")}>
           Back to Home
         </Button>
       </div>
@@ -193,7 +194,7 @@ export function UserPage() {
   return (
     <AppLayout
       selectedGame={LOCKED_GAME_ID}
-      onGameSelect={(id) => navigate(`/${id}/explore`)}
+      onGameSelect={(id) => navigate(explorePath(id))}
     >
       <div className="flex flex-col gap-6">
         {/* Profile hero */}

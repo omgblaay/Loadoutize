@@ -21,7 +21,7 @@ export function TermsOfService() {
     <div className="min-h-screen bg-[#0a0909]">
       <div className="max-w-[720px] mx-auto px-6 py-12 flex flex-col gap-10">
         <div className="flex flex-col gap-6">
-          <Link to="/" className="inline-flex items-center gap-1.5 w-fit">
+          <Link to="/home" className="inline-flex items-center gap-1.5 w-fit">
             <Logo />
           </Link>
           <div>
@@ -152,7 +152,7 @@ export function TermsOfService() {
           <Link to="/privacy" className="hover:text-[#efedf1]">
             Privacy Policy
           </Link>
-          <Link to="/" className="hover:text-[#efedf1]">
+          <Link to="/home" className="hover:text-[#efedf1]">
             Home
           </Link>
         </div>

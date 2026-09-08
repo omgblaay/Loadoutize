@@ -26,6 +26,7 @@ import { detectVideoPlatform, VIDEO_PLATFORM_META } from "../utils/video";
 import { Container } from "./ui/container";
 import { Button } from "./ui/button";
 import { getRecaptchaToken, RecaptchaNotice } from "./ui/recaptcha";
+import { explorePath } from "../utils/routes";
 
 interface Weapon {
   imageUrl: string | null | undefined;
@@ -238,7 +239,7 @@ export function LoadoutBuilder() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate(`/${gameId}/explore`);
+      navigate(explorePath(gameId));
     }
   }, [user, authLoading, gameId, navigate]);
 
@@ -496,7 +497,7 @@ export function LoadoutBuilder() {
         onGameSelect={(id) => navigate(`/${id}/create`)}
         breadcrumb={
           <>
-            <BreadcrumbLink to={`/${gameId}/explore`}>{meta.short}</BreadcrumbLink>
+            <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>
             <BreadcrumbSpacer />
             <span className="text-[#fafafa]">{editId ? "Edit Loadout" : "New Loadout"}</span>
           </>
@@ -549,7 +550,7 @@ export function LoadoutBuilder() {
       onGameSelect={(id) => navigate(`/${id}/create`)}
       breadcrumb={
         <>
-          <BreadcrumbLink to={`/${gameId}/explore`}>{meta.short}</BreadcrumbLink>
+          <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>
           <BreadcrumbSpacer />
           <span className="text-[#fafafa]">{editId ? "Edit Loadout" : "New Loadout"}</span>
         </>
@@ -557,7 +558,7 @@ export function LoadoutBuilder() {
     >
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <Button
-          onClick={() => navigate(`/${gameId}/explore`)}
+          onClick={() => navigate(explorePath(gameId))}
           variant="ghost"
           className="*:h-14 w-14"
         >
@@ -599,7 +600,7 @@ export function LoadoutBuilder() {
               className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
             />
           </div>
-                    {tags.length > 0 && (
+          {tags.length > 0 && (
             <div>
               <label className="text-[12px] pb-2 tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
                 Tag
@@ -676,7 +677,7 @@ export function LoadoutBuilder() {
       </Container>
 
       <Container>
-        <h2 className="text-[16px] text-[#fafafa] font-semibold">Select weapon</h2>
+        <h2 className="text-base">Weapon</h2>
 
         {primaryWeapon && !pickingWeapon ? (
           <>
@@ -689,24 +690,25 @@ export function LoadoutBuilder() {
                 badges={primaryWeaponBadges}
                 highlightSlugs={primaryWeaponBadges.map((badge) => badge.typeSlug)}
               />
+              {primaryWeapon.name}
               <Button variant="outline" onClick={() => setPickingWeapon(true)}>
                 Change weapon
               </Button>
             </div>
 
-            <h2 className="text-lg font-semibold">Attachments</h2>
+            <h2 className="text-xs">Attachments</h2>
 
             {attachmentTypes.length === 0 ? (
-              <p className="text-[14px] text-teritary">No attachments configured for this game yet.</p>
+              <p className="text-teritary">No attachments configured for this game yet.</p>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 {attachmentTypes.map((type) => {
                   const typeImageUrl = attachmentsByType[type][0]?.typeImageUrl;
                   const selectedName = primaryWeapon.attachments[type];
                   return (
-                    <div key={type} className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
-                        {/* <div>
+                    <div key={type} className="flex flex-col">
+                      {/* <div className="flex items-center gap-1">
+                        <div>
                           {typeImageUrl ? (
                             <img src={typeImageUrl} alt="" className="size-5 opacity-80 object-contain" />
                           ) : (
@@ -715,42 +717,43 @@ export function LoadoutBuilder() {
                         </div>
                         <p className="uppercase text-secondary text-xs font-semibold">
                           {type}
-                        </p> */}
-                      </div>
+                        </p>
+                      </div> */}
                       <button
                         type="button"
                         onClick={() => setOpenAttachmentType(type)}
-                        className="h-12 px-4 rounded-xl border border-white/[0.18] flex items-center gap-2 text-left transition-colors hover:border-white/40"
+                        className={cn(
+                          "h-12 px-4 rounded-xl border border-white/[0.12] flex items-center gap-2 text-left transition-colors hover:border-white/40",
+                          selectedName && "bg-white/5"
+                        )}
                       >
                         <div className="flex gap-2 flex-1 flex-row">
-                        {selectedName ? (
-                          null
-                        ) :
-                          <>
-                            <Plus className="size-5 opacity-50" />
-                          </>
-                        }
+                          {selectedName ? (
+                            null
+                          ) :
+                            <>
+                              <Plus className="size-5 opacity-50" />
+                            </>
+                          }
 
+                          {typeImageUrl ? (
+                            <img src={typeImageUrl} alt="" className="size-5 opacity-80 object-contain" />
+                          ) : (
+                            null
+                          )}
 
-                        {typeImageUrl ? (
-                          <img src={typeImageUrl} alt="" className="size-5 opacity-80 object-contain" />
-                        ) : (
-                          null
-                        )}
+                          {selectedName ? (
+                            <>
+                              {selectedName}
+                              <span className="text-teritary font-normal">{type}</span>
+                            </>
+                          ) :
+                            <span className="text-teritary">
+                              Add {type}
+                            </span>}
 
-
-                        {selectedName ? (
-                          <>
-                            {selectedName}
-                            <span className="text-teritary">{type}</span>
-                          </>
-                        ) : 
-                        <span className="text-secondary">
-                          Add {type}
-                        </span>}
-
-</div>
-                        <ChevronRight className="w-4 h-4 text-[#8d898a] shrink-0" />
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-teritary shrink-0" />
                       </button>
                     </div>
                   );

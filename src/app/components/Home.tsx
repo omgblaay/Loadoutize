@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { getGameColor } from "../utils/gameColors";
 import { gameMeta, GAME_ORDER, LAST_SELECTED_GAME_KEY, GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "../utils/games";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "./AppLayout";
-import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, type CardTag } from "./ui/LoadoutCard";
-import { ChevronRight, Crosshair, Flame, Sparkles } from "lucide-react";
+import { type CardLoadout, type CardWeapon, type CardAttachment, type CardTag } from "./ui/LoadoutCard";
+import { ChevronRight, Crosshair } from "lucide-react";
 import { YoutubeIcon, TwitchIcon, TiktokIcon, InstagramIcon } from "@/assets/icons/socials";
-import { WeaponCard } from "./ui/WeaponCard";
+import { HomeExplorePreview } from "./HomeExplorePreview";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
@@ -15,11 +15,12 @@ import { Countdown } from "./ui/Countdown";
 import { Button } from "./ui/button";
 import gameLogo from "figma:asset/mw4_logo.png";
 import { Container } from "./ui/container";
+import { explorePath } from "../utils/routes";
 
 // Oct 23, 2026, 12:00 AM EDT (UTC-4)
 const MW4_RELEASE_DATE = new Date("2026-10-23T04:00:00Z");
 
-interface Loadout extends CardLoadout {
+export interface Loadout extends CardLoadout {
   gameId: string;
   createdAt: string;
 }
@@ -31,7 +32,7 @@ interface Game {
   logoUrl: string | null;
 }
 
-function GameSelectorSkeleton() {
+function HomeSkeleton() {
   const block = "bg-white/[0.06]";
 
   return (
@@ -78,7 +79,7 @@ function GameSelectorSkeleton() {
   );
 }
 
-export function GameSelector() {
+export function Home() {
   usePageTitle("Loadoutize • Build, Rate, and Share Elite Loadouts");
 
   const [games, setGames] = useState<Game[]>([]);
@@ -212,18 +213,10 @@ export function GameSelector() {
   const activeLogoUrl = activeGame?.logoUrl;
   const accent = getGameColor(selectedGame).primary;
 
-  const metaLoadouts = loadouts
-    .filter((l) => l.gameId === selectedGame)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 6);
-
-  const topWeapons = weapons.slice(0, 3);
-  const TOP_WEAPON_MEDALS = ["🥇", "🥈", "🥉"];
-
   if (loading) {
     return (
       <AppLayout selectedGame={selectedGame} onGameSelect={setSelectedGame}>
-        <GameSelectorSkeleton />
+        <HomeSkeleton />
       </AppLayout>
     );
   }
@@ -330,7 +323,7 @@ export function GameSelector() {
               </Button>
 
             </div>           <Button
-              onClick={() => navigate(`/${selectedGame}/explore`)}
+              onClick={() => navigate(explorePath(selectedGame))}
               variant="outline"
             >
               Explore all weapon builds
@@ -343,112 +336,16 @@ export function GameSelector() {
       </Container>
 
 
-      {/* Top weapons + popular loadouts */}
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-sans text-secondary">
-              Top Weapons
-            </h2>
-            <Link
-              to={`/${selectedGame}/meta`}
-              className="font-medium text-teritary hover:text-[#fafafa] flex items-center gap-1 shrink-0"
-            >
-              View full Meta
-              <ChevronRight className="size-4" />
-            </Link>
-          </div>
-          {topWeapons.length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-              {topWeapons.map((w, i) => (
-                <div key={w.id} className="relative">
-                  {TOP_WEAPON_MEDALS[i] && (
-                    <span
-                      className="absolute -right-[-0.6rem] -bottom-[-1rem] z-10 text-2xl leading-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
-                      aria-hidden="true"
-                    >
-                      {TOP_WEAPON_MEDALS[i]}
-                    </span>
-                  )}
-                  <WeaponCard
-                    weapon={w}
-                    onSelect={() => navigate(`/${selectedGame}/explore?weapon=${encodeURIComponent(w.name)}`)}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-8 text-center">
-              <p className="text-teritary">No weapon data for {activeName} yet.</p>
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-4">
-
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-sans text-secondary">
-              Recent Loadouts</h2>
-            <Link
-              to={`/${selectedGame}/explore`}
-              className="font-medium text-teritary hover:text-[#fafafa] flex items-center gap-1 shrink-0"
-            >
-              Explore loadouts
-              <ChevronRight className="size-4" />
-            </Link>
-          </div>
-          {metaLoadouts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-              {metaLoadouts.map((l, i) => (
-                <LoadoutCard
-                  key={l.id}
-                  loadout={l}
-                  weapons={weapons}
-                  attachments={attachments}
-                  tags={tags}
-                  accent={accent}
-                  gameShort={activeShort}
-                  index={i}
-                  to={`/${l.gameId}/l/${l.id}`}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 flex gap-8 text-center">
-              <p className="text-teritary">
-                No loadouts published yet. Be the first to create one!
-              </p>
-              <Button>
-                Create new loadout
-              </Button>
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <h2 className="text-sm text-secondary">Supported games</h2>
-          <p className="text-teritary text-sm max-w-2xl">
-            Modern Warfare 4 is live now. Loadouts for these titles are coming soon.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {GAME_ORDER.filter((id) => id !== "mw4").map((gameId) => {
-              const meta = gameMeta[gameId];
-              const Icon = meta?.icon ?? Crosshair;
-              return (
-                <Link
-                  key={gameId}
-                  to={`/${gameId}/explore`}
-                  className="relative rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 flex flex-col items-center gap-2 text-center hover:border-white/20 transition-colors"
-                >
-                  <Icon className="w-6 h-6" style={{ color: getGameColor(gameId).primary }} />
-                  <span className="text-sm text-[#efedf1]">{meta?.name ?? gameId}</span>
-                  <span className="text-xs text-teritary">Coming soon</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      <HomeExplorePreview
+        selectedGame={selectedGame}
+        loadouts={loadouts}
+        weapons={weapons}
+        attachments={attachments}
+        tags={tags}
+        accent={accent}
+        gameShort={activeShort}
+        gameName={activeName}
+      />
     </AppLayout>
   );
 }

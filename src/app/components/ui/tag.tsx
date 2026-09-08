@@ -34,7 +34,7 @@ export interface TagProps extends React.HTMLAttributes<HTMLSpanElement> {
   color?: string;
   icon?: React.ReactNode;
   children: React.ReactNode;
-  /** Internal route path (e.g. `/mw4/explore?category=SMG`). When set, the tag becomes clickable and navigates there. */
+  /** Internal route path (e.g. `/explore?category=SMG`). When set, the tag becomes clickable and navigates there. */
   link?: string;
   /** Text shown in the shared black tooltip on hover. */
   tooltip?: React.ReactNode;

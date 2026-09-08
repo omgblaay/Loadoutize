@@ -6,6 +6,7 @@ import { ArrowLeft, Heart, Eye, User, Share2, Edit } from "lucide-react";
 import { useAuth } from "./AuthContext";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
+import { explorePath } from "../utils/routes";
 
 interface WeaponConfig {
   id: string;
@@ -162,7 +163,7 @@ export function WeaponConfigPreview() {
         <div className="text-center">
           <h1 className="text-2xl font-black text-[#fafafa] mb-4">Weapon Config Not Found</h1>
           <button
-            onClick={() => navigate(`/${gameId}/explore`)}
+            onClick={() => navigate(explorePath(gameId))}
             className="bg-[#fafafa] text-neutral-900 font-bold py-3 px-6"
           >
             Back to Game
@@ -181,7 +182,7 @@ export function WeaponConfigPreview() {
         <div className="max-w-5xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => navigate(`/${gameId}/explore`)}
+              onClick={() => navigate(explorePath(gameId))}
               className="flex items-center gap-2 text-neutral-400 hover:text-[#fafafa] transition-colors font-medium"
             >
               <ArrowLeft className="w-5 h-5" />

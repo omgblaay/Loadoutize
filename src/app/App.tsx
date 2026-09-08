@@ -2,8 +2,8 @@ import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from "r
 import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "react-router";
 import { toast } from "sonner";
 import { AuthProvider } from "./components/AuthContext";
-import { GameSelector } from "./components/GameSelector";
-import { GameDashboard } from "./components/GameDashboard";
+import { Home } from "./components/Home";
+import { Explore } from "./components/Explore";
 import { MetaView } from "./components/MetaView";
 import { CommunityView } from "./components/CommunityView";
 import { LoadoutBuilder } from "./components/LoadoutBuilder";
@@ -17,8 +17,10 @@ import { AuthCallback } from "./components/AuthCallback";
 import { PrivacyPolicy } from "./components/PrivacyPolicy";
 import { TermsOfService } from "./components/TermsOfService";
 import { NotFound } from "./components/NotFound";
+import { CookieConsent } from "./components/CookieConsent";
 import { Toaster } from "./components/ui/sonner";
 import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "./utils/games";
+import { explorePath } from "./utils/routes";
 
 // ComponentTest.tsx is gitignored (a local-only scratch/preview page) -- a
 // normal static import of it breaks the build anywhere the file doesn't
@@ -31,8 +33,17 @@ const ComponentTest = loadComponentTest ? lazy(() => loadComponentTest().then((m
 
 function GameRedirect() {
   const { gameId } = useParams();
-  const target = !GAME_SELECTOR_ENABLED ? LOCKED_GAME_ID : gameId;
-  return <Navigate to={`/${target}/explore`} replace />;
+  const target = !GAME_SELECTOR_ENABLED ? LOCKED_GAME_ID : gameId ?? LOCKED_GAME_ID;
+  return <Navigate to={explorePath(target)} replace />;
+}
+
+function LegacyExploreRedirect() {
+  const { gameId } = useParams();
+  const location = useLocation();
+  const target = !GAME_SELECTOR_ENABLED ? LOCKED_GAME_ID : gameId ?? LOCKED_GAME_ID;
+  const params = Object.fromEntries(new URLSearchParams(location.search));
+  delete params.game;
+  return <Navigate to={explorePath(target, params)} replace />;
 }
 
 // Loadout links moved from /:gameId/loadout/:id to the shorter /:gameId/l/:id
@@ -101,8 +112,11 @@ export default function App() {
       <BetaNotice />
       <BrowserRouter>
         <ScrollToTop />
+        <CookieConsent />
         <Routes>
-          <Route path="/" element={<GameSelector />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/explore" element={<Explore />} />
           <Route path="/u/:nickname" element={<UserPage />} />
           <Route path="/liked" element={<LikedLoadouts />} />
           <Route path="/settings" element={<Settings />} />
@@ -121,14 +135,7 @@ export default function App() {
             />
           )}
           <Route path="/:gameId" element={<GameRedirect />} />
-          <Route
-            path="/:gameId/explore"
-            element={
-              <GameLock>
-                <GameDashboard />
-              </GameLock>
-            }
-          />
+          <Route path="/:gameId/explore" element={<LegacyExploreRedirect />} />
           <Route
             path="/:gameId/meta"
             element={

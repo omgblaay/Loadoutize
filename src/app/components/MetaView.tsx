@@ -11,6 +11,7 @@ import { NavIcon } from "./ui/nav-icon-3d";
 import { FilterPill, FilterPillGroup } from "./ui/filter-pill";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
+import { explorePath } from "../utils/routes";
 
 interface Weapon {
   id: string;
@@ -216,7 +217,7 @@ export function MetaView() {
     (scope === "tag" && selectedTagId == null) || (scope === "category" && selectedCategory == null);
 
   const weaponHref = (weapon: Weapon) =>
-    `/${selectedGame}/explore${weapon.type ? `?category=${encodeURIComponent(weapon.type)}` : ""}`;
+    explorePath(selectedGame, weapon.type ? { category: weapon.type } : {});
 
   if (loading) {
     return (
@@ -305,7 +306,7 @@ export function MetaView() {
         </div>
       ) : scopeNeedsSelection ? (
         <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
-          <p className="text-[#8d898a]">Pick a {scope === "tag" ? "tag" : "category"} above to see its tier list.</p>
+          <p className="text-secondary">Pick a {scope === "tag" ? "tag" : "category"} above to see its tier list.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-4 w-full">
@@ -323,14 +324,13 @@ export function MetaView() {
                 >
                   {tier}
                 </div>
-                <div className="flex-1 flex flex-wrap gap-3 p-4">
+                <div className="grid grid-cols-5 gap-3 p-4">
                   {list.map(({ weapon, count, avgRating }) => (
                     <WeaponCard
                       key={weapon.id}
                       weapon={weapon}
                       onSelect={() => navigate(weaponHref(weapon))}
                       stat={rankMode === "community" ? `${avgRating}%` : `${count} loadout${count === 1 ? "" : "s"}`}
-                      className="w-[132px] shrink-0"
                     />
                   ))}
                 </div>

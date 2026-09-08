@@ -62,7 +62,7 @@ export function AuthCallback() {
     loginWithAccessToken(token)
       .then((hasProfile) => {
         if (hasProfile) {
-          navigate("/", { replace: true });
+          navigate("/home", { replace: true });
         } else {
           setPhase("onboarding");
         }
@@ -148,7 +148,7 @@ export function AuthCallback() {
     setSubmitting(true);
     try {
       await completeProfile(nickname, avatarFile, roleTag);
-      navigate("/", { replace: true });
+      navigate("/home", { replace: true });
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Failed to finish registration");
     } finally {
@@ -167,7 +167,7 @@ export function AuthCallback() {
           <h1 className="text-xl font-bold text-[#fafafa]">Sign-in failed</h1>
           <p className="text-neutral-400 text-sm">{errorMessage}</p>
           <button
-            onClick={() => navigate("/", { replace: true })}
+            onClick={() => navigate("/home", { replace: true })}
             className="mt-2 self-center h-11 px-5 rounded-md bg-[#fafafa] text-black font-semibold text-sm"
           >
             Back to Loadoutize

@@ -57,11 +57,11 @@ export function WeaponCard({
         </span>
       )}
   <div className="m-4">
- <WeaponImage imageUrl={weapon.imageUrl} variant="large" alt={weapon.name} />      </div> 
+ <WeaponImage imageUrl={weapon.imageUrl} alt={weapon.name} />      </div> 
 
       <div className="flex gap-2 items-center w-full">
-
-        <p className="font-mono text-left text-xs"><span className="uppercase text-teritary">{weapon.typeShort} • </span>{weapon.name}</p>
+      <Tag>{weapon.typeShort}</Tag>
+        <p className="font-mono text-left uppercase">{weapon.name}</p>
       </div>
       {stat && <p className="text-xs font-teritary">{stat}</p>}
     </button>

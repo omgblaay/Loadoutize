@@ -28,6 +28,7 @@ import { cn } from "./ui/utils";
 import { CompactPageHeader } from "./ui/compact-page-header";
 import { VIDEO_PLATFORM_META, type LoadoutVideo } from "../utils/video";
 import { SOCIAL_LINK_FIELDS, formatCount, type SocialLinks, type SocialStats } from "../utils/social";
+import { explorePath } from "../utils/routes";
 import { ExternalLink } from "lucide-react";
 import {
   Edit,
@@ -254,7 +255,7 @@ export function LoadoutPreview() {
         { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } }
       );
       if (response.ok) {
-        navigate(`/${gameId}/explore`);
+        navigate(explorePath(gameId));
       } else {
         const error = await response.json();
         alert(error.error || "Failed to delete loadout");
@@ -318,7 +319,7 @@ export function LoadoutPreview() {
 
   if (loading) {
     return (
-      <AppLayout selectedGame={gameId} onGameSelect={(id) => navigate(`/${id}/explore`)}>
+      <AppLayout selectedGame={gameId} onGameSelect={(id) => navigate(explorePath(id))}>
         <LoadoutPreviewSkeleton />
       </AppLayout>
     );
@@ -329,7 +330,7 @@ export function LoadoutPreview() {
       <div className="flex items-center justify-center min-h-screen bg-[#0a0909] flex-col gap-4">
         <p className="text-xl">Loadout not found.</p>
         <Button
-          onClick={() => navigate(`/${gameId}/explore`)}
+          onClick={() => navigate(explorePath(gameId))}
         >
           Back to Explore
         </Button>
@@ -357,10 +358,10 @@ export function LoadoutPreview() {
   return (
     <AppLayout
       selectedGame={gameId}
-      onGameSelect={(id) => navigate(`/${id}/explore`)}
+      onGameSelect={(id) => navigate(explorePath(id))}
       breadcrumb={
         <>
-          <BreadcrumbLink to={`/${gameId}/explore`}>
+          <BreadcrumbLink to={explorePath(gameId)}>
             {activeGame?.logoUrl ? (
               <img src={activeGame.logoUrl} alt="" className="w-10 h-10 object-contain shrink-0" />
             ) : (
@@ -372,7 +373,7 @@ export function LoadoutPreview() {
               <BreadcrumbSpacer />
               {primaryWeaponCatalog.type ? (
                 <BreadcrumbLink
-                  to={`/${gameId}/explore?category=${encodeURIComponent(primaryWeaponCatalog.type)}`}
+                  to={explorePath(gameId, { category: primaryWeaponCatalog.type })}
                 >
                   {primaryWeaponCatalog.type || meta.short}
                 </BreadcrumbLink>
@@ -380,7 +381,7 @@ export function LoadoutPreview() {
                 null
               )}
               <BreadcrumbSpacer />
-              <BreadcrumbLink to={`/${gameId}/explore?category=${encodeURIComponent(primaryWeaponCatalog.name)}`}>
+              <BreadcrumbLink to={explorePath(gameId, { category: primaryWeaponCatalog.name })}>
                 {primaryWeaponCatalog.name}
               </BreadcrumbLink>
             </>
@@ -413,7 +414,7 @@ export function LoadoutPreview() {
                 className="inline relative top-[-5px]"
                 link={
                   primaryWeaponCatalog?.type
-                    ? `/${gameId}/explore?category=${encodeURIComponent(primaryWeaponCatalog.type)}`
+                    ? explorePath(gameId, { category: primaryWeaponCatalog.type })
                     : undefined
                 }
               >
@@ -429,7 +430,7 @@ export function LoadoutPreview() {
             title={loadout.name}
             actions={
               <>
-                <Button variant="outline" size="sm" onClick={() => navigate(`/${gameId}/explore`)}>
+                <Button variant="outline" size="sm" onClick={() => navigate(explorePath(gameId))}>
                   Back
                 </Button>
                 <ReactionButton

@@ -27,7 +27,7 @@ interface Weapon {
   typeShort: string | null;
 }
 
-// Shared with GameDashboard so the "no loadouts yet" empty state (and anywhere
+// Shared with Explore so the "no loadouts yet" empty state (and anywhere
 // else outside AppLayout) shows the same resolved name AppLayout uses in the
 // navbar/dropdown, rather than falling back to the static gameMeta list only.
 export function useGameName(selectedGame: string) {
@@ -99,8 +99,8 @@ export function AppLayout({
     ).values()
   ).slice(0, 6);
 
-  const isHome = location.pathname === "/";
-  const isExplore = location.pathname.endsWith("/explore");
+  const isHome = location.pathname === "/home";
+  const isExplore = location.pathname === "/explore";
   const isMeta = location.pathname.endsWith("/meta");
   const isCommunity = location.pathname.endsWith("/community");
 

@@ -9,6 +9,7 @@ import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, ty
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "./ui/utils";
 import { usePageTitle } from "../hooks/usePageTitle";
+import { explorePath } from "../utils/routes";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -50,7 +51,7 @@ export function LikedLoadouts() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate("/");
+      navigate("/home");
     }
   }, [user, authLoading, navigate]);
 
@@ -105,14 +106,14 @@ export function LikedLoadouts() {
 
   if (loading) {
     return (
-      <AppLayout selectedGame={LOCKED_GAME_ID} onGameSelect={(id) => navigate(`/${id}/explore`)}>
+      <AppLayout selectedGame={LOCKED_GAME_ID} onGameSelect={(id) => navigate(explorePath(id))}>
         <LikedLoadoutsSkeleton />
       </AppLayout>
     );
   }
 
   return (
-    <AppLayout selectedGame={LOCKED_GAME_ID} onGameSelect={(id) => navigate(`/${id}/explore`)}>
+    <AppLayout selectedGame={LOCKED_GAME_ID} onGameSelect={(id) => navigate(explorePath(id))}>
       <div className="flex flex-col gap-4">
         <h1 className="text-[24px] leading-[32px] text-[#efedf1] font-semibold">Liked Loadouts</h1>
         {loadouts.length === 0 ? (

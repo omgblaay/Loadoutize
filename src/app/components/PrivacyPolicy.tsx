@@ -21,7 +21,7 @@ export function PrivacyPolicy() {
     <div className="min-h-screen bg-[#0a0909]">
       <div className="max-w-[720px] mx-auto px-6 py-12 flex flex-col gap-10">
         <div className="flex flex-col gap-6">
-          <Link to="/" className="inline-flex items-center gap-1.5 w-fit">
+          <Link to="/home" className="inline-flex items-center gap-1.5 w-fit">
             <Logo />
           </Link>
             <h1 className="text-2xl font-bold text-[#fafafa] mb-2">Privacy Policy</h1>
@@ -168,7 +168,7 @@ export function PrivacyPolicy() {
           <Link to="/terms" className="hover:text-white">
             Terms of Service
           </Link>
-          <Link to="/" className="hover:text-white">
+          <Link to="/home" className="hover:text-white">
             Home
           </Link>
         </div>

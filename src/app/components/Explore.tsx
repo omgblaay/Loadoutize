@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { getGameColor } from "../utils/gameColors";
-import { gameMeta } from "../utils/games";
+import { gameMeta, GAME_SELECTOR_ENABLED, LAST_SELECTED_GAME_KEY, LOCKED_GAME_ID } from "../utils/games";
+import { explorePath } from "../utils/routes";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout, useGameName } from "./AppLayout";
 import { LoadoutCard, type CardLoadout, type CardWeapon, type CardAttachment, type CardTag } from "./ui/LoadoutCard";
@@ -22,7 +23,7 @@ interface Loadout extends CardLoadout {
 
 type SortMode = "likes" | "newest";
 
-function GameDashboardSkeleton() {
+function ExploreSkeleton() {
   const block = "bg-white/[0.06]";
 
   return (
@@ -56,10 +57,19 @@ function GameDashboardSkeleton() {
   );
 }
 
-export function GameDashboard() {
-  const { gameId: selectedGame = "blackops7" } = useParams<{ gameId: string }>();
+export function Explore() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const selectedGame = (() => {
+    if (!GAME_SELECTOR_ENABLED) return LOCKED_GAME_ID;
+    const requestedGame = searchParams.get("game");
+    if (requestedGame) return requestedGame;
+    try {
+      return localStorage.getItem(LAST_SELECTED_GAME_KEY) || LOCKED_GAME_ID;
+    } catch {
+      return LOCKED_GAME_ID;
+    }
+  })();
 
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
   const [weapons, setWeapons] = useState<CardWeapon[]>([]);
@@ -73,8 +83,17 @@ export function GameDashboard() {
 
   useEffect(() => {
     const categoryParam = searchParams.get("category");
-    if (categoryParam) setActiveCategory(categoryParam);
+    setActiveCategory(categoryParam);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!GAME_SELECTOR_ENABLED) return;
+    try {
+      localStorage.setItem(LAST_SELECTED_GAME_KEY, selectedGame);
+    } catch {
+      // localStorage may be unavailable (e.g. private browsing).
+    }
+  }, [selectedGame]);
 
   useEffect(() => {
     setLoading(true);
@@ -155,14 +174,14 @@ export function GameDashboard() {
 
   if (loading) {
     return (
-      <AppLayout selectedGame={selectedGame} onGameSelect={(id) => navigate(`/${id}/explore`)}>
-        <GameDashboardSkeleton />
+      <AppLayout selectedGame={selectedGame} onGameSelect={(id) => navigate(explorePath(id))}>
+        <ExploreSkeleton />
       </AppLayout>
     );
   }
 
   return (
-    <AppLayout selectedGame={selectedGame} onGameSelect={(id) => navigate(`/${id}/explore`)}>
+    <AppLayout selectedGame={selectedGame} onGameSelect={(id) => navigate(explorePath(id))}>
       {/* Header: title + search */}
       <div className="flex items-center gap-5 w-full flex-wrap">
         <h1
@@ -219,7 +238,7 @@ export function GameDashboard() {
                     setSortMenuOpen(false);
                   }}
                   className={`w-full px-3.5 py-2.5 text-left hover:bg-white/5 ${
-                    sortMode === opt.id ? "text-[#f8f7f9]" : "text-[#aea6a8]"
+                    sortMode === opt.id ? "text-primary" : "text-secondary"
                   }`}
                 >
                   {opt.label}
@@ -260,7 +279,7 @@ export function GameDashboard() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5">
           {sorted.map((l, i) => (
             <LoadoutCard
               key={l.id}

@@ -6,6 +6,7 @@ import { AppTooltip } from "./tooltip";
 import { NavIcon, type NavIconKey } from "./nav-icon-3d";
 import { Button } from "./button";
 import { Tag } from "./tag";
+import { explorePath } from "../../utils/routes";
 
 export interface SideNavCategory {
   name: string;
@@ -57,13 +58,13 @@ export function SideNav({
 
       <div className="flex flex-col gap-1 w-full">
         <p className="text-[10px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold mb-2">Menu</p>
-        <SideNavButton state={isHome ? "active" : "default"} onClick={() => go("/")} {...hoverHandlers("home")}>
+        <SideNavButton state={isHome ? "active" : "default"} onClick={() => go("/home")} {...hoverHandlers("home")}>
           <NavIcon icon="home" flat={<HomeIcon className="w-5 h-5" />} active={isHome} hovered={hoveredIcon === "home"} />
           Home
         </SideNavButton>
         <SideNavButton
           state={isExplore ? "active" : "default"}
-          onClick={() => go(`/${selectedGame}/explore`)}
+          onClick={() => go(explorePath(selectedGame))}
           {...hoverHandlers("explore")}
         >
           <NavIcon icon="explore" flat={<Globe className="w-5 h-5" />} active={isExplore} hovered={hoveredIcon === "explore"} />
@@ -93,7 +94,7 @@ export function SideNav({
           {categories.map((cat) => (
             <SideNavButton
               key={cat.name}
-              onClick={() => go(`/${selectedGame}/explore?category=${encodeURIComponent(cat.name)}`)}
+              onClick={() => go(explorePath(selectedGame, { category: cat.name }))}
               className="text-secondary text-xs"
             >
               <Tag>{cat.typeShort ?? cat.name.slice(0, 3)}</Tag>
@@ -147,7 +148,7 @@ export function SideNav({
         <div className="flex flex-col items-center gap-1 w-full">
           <SideNavButton
             state={isHome ? "active" : "default"}
-            onClick={() => go("/")}
+            onClick={() => go("/home")}
             className="justify-center px-0 w-11"
             tooltip="Home"
             aria-label="Home"
@@ -157,7 +158,7 @@ export function SideNav({
           </SideNavButton>
           <SideNavButton
             state={isExplore ? "active" : "default"}
-            onClick={() => go(`/${selectedGame}/explore`)}
+            onClick={() => go(explorePath(selectedGame))}
             className="justify-center px-0 w-11"
             tooltip="Explore"
             aria-label="Explore"
@@ -195,7 +196,7 @@ export function SideNav({
             {categories.map((cat) => (
               <AppTooltip key={cat.name} content={cat.name} side="right">
                 <SideNavButton
-                  onClick={() => go(`/${selectedGame}/explore?category=${encodeURIComponent(cat.name)}`)}
+                  onClick={() => go(explorePath(selectedGame, { category: cat.name }))}
                   aria-label={cat.name}
                   className="hover:bg-white/[0.05] !h-max-[20px]"
                 >
@@ -214,7 +215,7 @@ export function SideNav({
       >
         <div className="grid grid-cols-6 h-14">
           <SideNavButton
-            onClick={() => go("/")}
+            onClick={() => go("/home")}
             aria-label="Home"
             aria-current={isHome ? "page" : undefined}
             className={`flex flex-col items-center justify-center gap-0.5 ${isHome ? "text-[#fafafa]" : "text-[#8d898a]"}`}
@@ -224,7 +225,7 @@ export function SideNav({
             <span className="text-[9px] uppercase tracking-[0.3px] font-medium">Home</span>
           </SideNavButton>
           <SideNavButton    
-            onClick={() => go(`/${selectedGame}/explore`)}
+            onClick={() => go(explorePath(selectedGame))}
             aria-label="Explore"
             aria-current={isExplore ? "page" : undefined}
             className={`flex flex-col items-center justify-center gap-0.5 ${isExplore ? "text-[#fafafa]" : "text-[#8d898a]"}`}

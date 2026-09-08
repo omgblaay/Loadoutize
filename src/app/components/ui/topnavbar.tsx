@@ -46,7 +46,7 @@ export function TopNavBar({
     return (<div className={cn("w-full backdrop-blur-md bg-[rgba(6,5,9,0.6)] border-b border-white/[0.16] z-40", sticky && "sticky top-0")}>
         <div className="max-w-[1440px] mx-auto p-2 sm:p-6  h-[72px] flex items-center gap-5">
           <div className="flex items-center gap-3 shrink-0">
-            <a href="/" className="flex items-center gap-1.5">
+            <a href="/home" className="flex items-center gap-1.5">
               <Logo />
             </a>
             {/*<span className="text-[#5D5658] px-1">/</span>

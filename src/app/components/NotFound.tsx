@@ -16,7 +16,7 @@ export function NotFound() {
           The page you're looking for doesn't exist or may have been moved.
         </p>
       </div>
-      <Button onClick={() => navigate("/")} className="h-11 px-5 rounded-xl bg-[#fafafa] text-[#161414] font-medium">
+      <Button onClick={() => navigate("/home")} className="h-11 px-5 rounded-xl bg-[#fafafa] text-[#161414] font-medium">
         Back to Home
       </Button>
     </div>

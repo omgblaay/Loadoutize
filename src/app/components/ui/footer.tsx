@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Logo } from "./logo";
+import { explorePath } from "../../utils/routes";
 
 export function Footer({ selectedGame, orderedGames, gameMeta }: { selectedGame: string; orderedGames: { id: string; name: string }[]; gameMeta: Record<string, { name: string }> }) {
   return (
@@ -23,10 +24,10 @@ export function Footer({ selectedGame, orderedGames, gameMeta }: { selectedGame:
           </div>
 
           <div className="flex-1 min-w-[140px] flex flex-col gap-3 text-[14px] text-[#aea6a8]">
-            <Link to="/" className="hover:text-[#efedf1]">
+            <Link to="/home" className="hover:text-[#efedf1]">
               Home
             </Link>
-            <Link to={`/${selectedGame}/explore`} className="hover:text-[#efedf1]">
+            <Link to={explorePath(selectedGame)} className="hover:text-[#efedf1]">
               Explore
             </Link>
           </div>
