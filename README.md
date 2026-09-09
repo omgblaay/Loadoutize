@@ -2,7 +2,7 @@
 
 A web app for building, discovering, and sharing game loadouts. Create weapon builds with attachments, perks, and equipment; explore community setups; and share your favorites through links or downloadable QR codes.
 
-**Status:** Beta. The interface and features are still evolving. The current configuration focuses on Modern Warfare 4; additional games are modeled in the app but gated by `GAME_SELECTOR_ENABLED` in [`src/app/utils/games.ts`](src/app/utils/games.ts).
+**Status:** Beta. The interface and features are still evolving. The current configuration focuses on Modern Warfare 4; additional games are modeled in the app but gated by `GAME_SELECTOR_ENABLED` in [`src/lib/games.ts`](src/lib/games.ts).
 
 ## Features
 
@@ -82,18 +82,26 @@ The dashboard is exposed at `http://localhost:8055`. See [`DATABASE_SCHEMA.md`](
 
 ```text
 src/
-  main.tsx                  React entry point
-  app/App.tsx               Routing and global providers
-  app/components/           Screens and shared components
-  app/components/ui/        UI primitives, cards, navigation, and 3D effects
-  app/hooks/                Application hooks
-  app/utils/                Game metadata, routes, and helpers
+  app/App.tsx               Routing and global application setup
+  components/
+    atoms/                  Primitive controls, typography, icons, and effects
+    molecules/              Small composed controls and interaction patterns
+    organisms/              Navigation, cards, and reusable page sections
+    templates/              Page layout shells
+    pages/                  Route-level screens
+  hooks/                    Shared React hooks
+  providers/                Application context and providers
+  lib/                      Utilities, metadata, and shared content
+  types/                    Shared domain types
   assets/                   Images, icons, and fonts
   styles/                   Styles and design tokens
+  main.tsx                  React entry point
 supabase/functions/server/  Backend Edge Function
-utils/supabase/             Frontend Supabase configuration
+utils/supabase/             Generated frontend Supabase configuration
 public/                     Static icons and site metadata
 ```
+
+Components follow atomic design with PascalCase filenames. Hooks use `useCamelCase`; utilities and domain types use descriptive camelCase names. See [Architecture](docs/ARCHITECTURE.md) for layer responsibilities and dependency rules.
 
 The `@` import alias points to `src/`. The Vite configuration also resolves `figma:asset/` imports to `src/assets/`.
 

@@ -29,7 +29,7 @@ No test suite is configured.
 - All routes are wrapped in `AuthProvider`.
 - `@` path alias maps to `src/`. Figma assets use the `figma:asset/` virtual import prefix (resolved to `src/assets/`).
 
-### Auth (`src/app/components/AuthContext.tsx`)
+### Auth (`src/providers/AuthProvider.tsx`)
 
 Auth hits the Supabase REST API directly (no supabase-js on the frontend). The access token is stored in `localStorage` under `access_token`. Public routes pass `publicAnonKey` as the Bearer token; authenticated routes pass the user's `access_token`.
 
@@ -45,8 +45,12 @@ Loadouts (user-generated) live in a single `loadouts` table with a `weapons` JSO
 
 ### UI Components
 
-`src/app/components/ui/` contains shadcn/ui-style wrappers around Radix UI primitives. Prefer these over raw Radix or MUI imports.
+`src/components/atoms/` and `src/components/molecules/` contain shadcn/ui-style wrappers around Radix UI primitives. Prefer these over raw Radix or MUI imports.
 
 ### Game Color Theming
 
-`src/app/utils/gameColors.ts` exports `getGameColor(gameId)` which returns `{ primary, light, dark, bg }` for each game. Use this consistently for per-game accent colors rather than hardcoding values.
+`src/lib/gameColors.ts` exports `getGameColor(gameId)` which returns `{ primary, light, dark, bg }` for each game. Use this consistently for per-game accent colors rather than hardcoding values.
+
+### Atomic design structure
+
+Follow [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Reusable sections belong in `organisms`, page shells in `templates`, and route screens in `pages`. Keep hooks, providers, helpers, and shared types outside the component layers. Use PascalCase component filenames and explicit `@/` imports. Lower layers must not import higher layers.

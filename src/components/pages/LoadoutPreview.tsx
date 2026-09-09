@@ -19,7 +19,7 @@ import { WeaponImage, type WeaponImageBadge } from "@/components/molecules/Weapo
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/molecules/Dialog";
 import { SHOWCASE_SLIDES } from "@/lib/showcaseSlides";
 import { LoadoutWall } from "@/components/organisms/LoadoutWall";
-import type { CardWeapon, CardTag, CardAttachment } from "@/components/organisms/LoadoutCard";
+import type { CardWeapon, CardTag, CardAttachment } from "@/types/loadout";
 import { Tag } from "@/components/atoms/Tag";
 import { BreadcrumbLink, BreadcrumbSpacer } from "@/components/molecules/Breadcrumb";
 import { ReactionButton } from "@/components/molecules/ReactionButton";

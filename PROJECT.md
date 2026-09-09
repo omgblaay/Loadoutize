@@ -24,7 +24,7 @@ Originally generated from a Figma Make design ([source file](https://www.figma.c
 | Framework | React 18 (SPA), Vite build |
 | Routing | React Router 7 (`BrowserRouter`) |
 | Styling | Tailwind CSS v4 (`@theme inline` tokens), CSS custom properties for theming |
-| Component primitives | Radix UI, wrapped as shadcn/ui-style components in `src/app/components/ui/` |
+| Component primitives | Radix UI, wrapped as shadcn/ui-style components in `src/components/atoms/` and `src/components/molecules/` |
 | 3D / motion | `@react-three/fiber` + `@react-three/drei` + `three` (a WebGL flame shader effect for standout cards), `motion` for micro-interactions |
 | Forms | `react-hook-form` |
 | Drag & drop | `react-dnd` |
@@ -41,18 +41,24 @@ No test suite is configured. Build with `npm run build`, dev with `npm run dev`.
 
 ### Frontend structure
 
-```
+```text
 src/
-  main.tsx              → mounts App
-  app/
-    App.tsx             → BrowserRouter, route table, ScrollToTop, game-lock redirects
-    components/         → one file per route/screen, plus shared pieces (AuthContext, AppLayout)
-    components/ui/      → design-system primitives (buttons, cards, badges, nav, etc.)
-    utils/               → gameColors, games (metadata/flags), social, video, password,
-                           weaponAttachmentBadgePositions, weaponAttachmentHighlightRegions
-    hooks/               → usePageTitle, use-mobile
-  styles/theme.css       → design tokens, base typography, keyframes
+  main.tsx                 → mounts App
+  app/App.tsx              → routing, global providers, redirects
+  components/
+    atoms/                 → primitive controls, icons, effects
+    molecules/             → composed controls and interaction patterns
+    organisms/             → navigation, cards, reusable page sections
+    templates/             → AppLayout page shell
+    pages/                 → route screens
+  hooks/                   → usePageTitle, useIsMobile, useGameName
+  providers/               → AuthProvider and useAuth
+  lib/                     → game metadata, routes, shared helpers and content
+  types/                   → shared game and loadout types
+  styles/                  → design tokens, typography, keyframes
 ```
+
+See [Architecture](docs/ARCHITECTURE.md) for naming and dependency conventions.
 
 `@` resolves to `src/`. Figma-exported assets are imported via the `figma:asset/` virtual prefix (mapped to `src/assets/`).
 
@@ -78,7 +84,7 @@ src/
 
 ### Auth
 
-`AuthContext.tsx` talks to the Supabase REST API directly — there's no `supabase-js` on the frontend. The access token lives in `localStorage` (`access_token`); public routes use the anon key, authenticated ones use the user's token. Profile fields (nickname, avatar, role tag) live in the app's own `profiles` table, separate from Supabase's `auth.users`.
+`AuthProvider.tsx` talks to the Supabase REST API directly — there's no `supabase-js` on the frontend. The access token lives in `localStorage` (`access_token`); public routes use the anon key, authenticated ones use the user's token. Profile fields (nickname, avatar, role tag) live in the app's own `profiles` table, separate from Supabase's `auth.users`.
 
 ### Backend
 
@@ -97,7 +103,7 @@ Catalog content — games, weapon categories, weapons, attachment types/attachme
 Dark-first, near-black UI (`#0a0909` / `#100D10` backgrounds) with a grayscale, high-contrast base and a single accent color that shifts **per game** — every weapon photo is desaturated (`saturate-0`) and brightened, so the accent color (and the yellow attachment highlight, see below) is the only chromatic thing on screen.
 
 ```ts
-// src/app/utils/gameColors.ts
+// src/lib/gameColors.ts
 mw4:       #FF6B35 (orange)
 warzone:   #00D9FF (cyan)
 bf6:       #00FF85 (green)
@@ -125,7 +131,7 @@ Tokens are defined as CSS custom properties in `src/styles/theme.css` under `:ro
 ### Layout & components
 
 - `Container` — the base card/panel wrapper used throughout (rounded corners, hairline border, `#121111`-ish surface).
-- `AppLayout` — the shared shell: side nav (`sidenav.tsx`, icon-only rail with per-item 3D icons via `nav-icon-3d.tsx`), sticky top nav (`topnavbar.tsx`), breadcrumb slot, footer.
+- `AppLayout` — the shared shell: side nav (`SideNav.tsx`, icon-only rail with per-item 3D icons via `NavIcon.tsx`), sticky top nav (`TopNavBar.tsx`), breadcrumb slot, footer.
 - `WeaponCard` — compact weapon tile (image, name, type tag) reused across Meta lists, homepage, and the builder's weapon picker; supports a `selected`/`disabled` picker mode and an optional single-instance WebGL flame effect (`FireCardEffect`) for a standout card (e.g. #1 meta weapon).
 - `RatingRing` — circular percentage indicator (loadout score, weapon meta score).
 - `ReactionButton` — like/dislike/favorite control with a tinted-idle state and success animation.
@@ -136,7 +142,7 @@ Tokens are defined as CSS custom properties in `src/styles/theme.css` under `:ro
 
 ### Weapon image annotations
 
-`WeaponImage` (`src/app/components/ui/WeaponImage.tsx`) renders a weapon photo with two independent overlay systems, both keyed by `attachment_types.slug`:
+`WeaponImage` (`src/components/molecules/WeaponImage.tsx`) renders a weapon photo with two independent overlay systems, both keyed by `attachment_types.slug`:
 
 1. **Badges** — small icon chips for each equipped attachment, arranged around a **fixed oval layout**, not the actual location of that part on the gun. Each slug has its own hand-set angle (`OVAL_ANGLE_PERCENT` in `weaponAttachmentBadgePositions.ts`, 0–100% clockwise from 12 o'clock — e.g. `optic: 0`, `stock: 22`, `muzzle: 78`), so positions can be tuned per-slot independent of how many attachments happen to be equipped. Hovering a badge and hovering the corresponding row in the loadout's attachment list are wired together bidirectionally (shared `activeKey` state, matched by slot) — hovering either one enlarges/highlights the badge and highlights the row.
 2. **Highlight regions** — an optional yellow tint over the part of the *actual* weapon photo an attachment occupies (anatomically positioned in `weaponAttachmentHighlightRegions.ts`, front/muzzle on the left through stock on the right — the opposite design intent from the badges above). Rendered as a `mix-blend-mode: color` rectangle over the grayscale image, so the region reads as "this part turned yellow" while keeping the photo's original shading and highlights. Currently wired into `LoadoutBuilder` only, so the weapon preview lights up the relevant square in real time as you add/remove attachments.
