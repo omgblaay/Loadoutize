@@ -12,7 +12,7 @@ import { explorePath } from "@/lib/routes";
 const TOP_WEAPON_MEDALS = ["🥇", "🥈", "🥉"];
 
 /**
- * Home page's preview of the Explore feed -- top weapons, recent loadouts, and a
+ * Home page's preview of the Explore feed -- topweapons, recent loadouts, and a
  * "more games coming" teaser. Each section links out to the full Explore/Meta
  * pages rather than duplicating their filtering UI.
  */
@@ -37,18 +37,51 @@ export function HomeExplorePreview({
 }) {
   const navigate = useNavigate();
 
-  const topWeapons = weapons.slice(0, 3);
+  const listOfTypes = [
+    {
+      name:"Assault Rifles",
+      short:"ar"
+    },
+    {
+      name:"SMG",
+      short:"smg"
+    },
+    {
+      name:"Sniper Rifles",
+      short:"snp"
+    }];
+  const topWeapons = (type:string) => { return (
+    weapons
+    .filter((weapon) => weapon.typeShort?.toUpperCase() === type.toUpperCase())
+    .map((weapon, index) => {
+      const ratings = loadouts
+        .filter((loadout) => loadout.weapons?.[0]?.id === weapon.id && loadout.ratingPercent != null)
+        .map((loadout) => loadout.ratingPercent as number);
+
+      return {
+        weapon,
+        rating: ratings.length > 0 ? ratings.reduce((sum, value) => sum + value, 0) / ratings.length : null,
+        index,
+      };
+    })
+    .filter((entry) => entry.rating != null)
+    .sort((a, b) => (b.rating as number) - (a.rating as number) || a.index - b.index)
+    .slice(0, 3)
+    .map((entry) => entry.weapon)  );}
+
   const recentLoadouts = loadouts
     .filter((l) => l.gameId === selectedGame)
     .sort((a, b) => b.score - a.score)
     .slice(0, 6);
 
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4">
+      {listOfTypes.map((key) => (      
+        <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="font-sans text-secondary">
-            Top Weapons
+            Top {key.name.toWellFormed()}
           </h2>
           <Link
             to={`/${selectedGame}/meta`}
@@ -58,9 +91,9 @@ export function HomeExplorePreview({
             <ChevronRight className="size-4" />
           </Link>
         </div>
-        {topWeapons.length > 0 ? (
+        
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-            {topWeapons.map((w, i) => (
+            {topWeapons(key.short).map((w, i) => (
               <div key={w.id} className="relative">
                 {TOP_WEAPON_MEDALS[i] && (
                   <span
@@ -77,12 +110,9 @@ export function HomeExplorePreview({
               </div>
             ))}
           </div>
-        ) : (
-          <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-8 text-center">
-            <p className="text-teritary">No weapon data for {gameName} yet.</p>
-          </div>
-        )}
+
       </div>
+))}
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
