@@ -6,14 +6,14 @@ import { cn } from "@/lib/utils";
 import { AppTooltip } from "@/components/atoms/Tooltip";
 
 const buttonVariants = cva(
-  "h-14 items-center !min-w-14 rounded-xl px-3 transition-all flex flex-row gap-3 uppercase font-medium hover:bg-white/5",
+  "h-14 items-center !min-w-14 rounded-xl px-3 transition-all flex flex-row gap-3  font-medium hover:bg-white/5",
   {
-  variants: {
-    state: {
+    variants: {
+      state: {
         active: "bg-white/[0.08]",
-        default: "",
+        default: "text-teritary hover:text-primary",
+      },
     },
-},
   },
 );
 
@@ -26,24 +26,36 @@ const SideNavButton = React.forwardRef<
       tooltip?: React.ReactNode;
       tooltipSide?: "top" | "right" | "bottom" | "left";
     }
->(({ className, state, asChild = false, tooltip, tooltipSide = "right", ...props }, ref) => {
-  const Comp = asChild ? Slot : "button";
+>(
+  (
+    {
+      className,
+      state,
+      asChild = false,
+      tooltip,
+      tooltipSide = "right",
+      ...props
+    },
+    ref,
+  ) => {
+    const Comp = asChild ? Slot : "button";
 
-  const button = (
-    <Comp
-      ref={ref}
-      data-slot="button"
-      className={cn(buttonVariants({ state, className }))}
-      {...props}
-    />
-  );
+    const button = (
+      <Comp
+        ref={ref}
+        data-slot="button"
+        className={cn(buttonVariants({ state, className }))}
+        {...props}
+      />
+    );
 
-  return (
-    <AppTooltip content={tooltip} side={tooltipSide}>
-      {button}
-    </AppTooltip>
-  );
-});
+    return (
+      <AppTooltip content={tooltip} side={tooltipSide}>
+        {button}
+      </AppTooltip>
+    );
+  },
+);
 SideNavButton.displayName = "SideNavButton";
 
 export { SideNavButton, buttonVariants };

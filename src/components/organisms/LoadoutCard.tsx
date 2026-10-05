@@ -1,15 +1,23 @@
-import type { CardLoadout, CardWeapon, CardAttachment, CardTag } from "@/types/loadout";
+import type {
+  CardLoadout,
+  CardWeapon,
+  CardAttachment,
+  CardTag,
+} from "@/types/loadout";
 import * as React from "react";
 import { Link } from "react-router";
-import { WeaponImage, type WeaponImageBadge } from "@/components/molecules/WeaponImage";
+import {
+  WeaponImage,
+  type WeaponImageBadge,
+} from "@/components/molecules/WeaponImage";
 import { Tag } from "@/components/atoms/Tag";
 import { RatingRing } from "@/components/atoms/RatingRing";
 import { FireCardEffect } from "@/components/atoms/FireCardEffect";
+import { BorderBeam } from "@/components/ui/border-beam";
 import { VIDEO_PLATFORM_META } from "@/lib/video";
 import { explorePath } from "@/lib/routes";
 
 const MAX_ATTACHMENT_ICONS = 10;
-
 
 export function LoadoutCard({
   loadout,
@@ -37,18 +45,26 @@ export function LoadoutCard({
   const primaryWeaponId = loadout.weapons?.[0]?.id;
   const primaryWeaponData = weapons.find((w) => w.id === primaryWeaponId);
   const primaryWeapon = primaryWeaponData?.name || "SGX 124";
-  const primaryAttachments: Record<string, string> = loadout.weapons?.[0]?.attachments || {};
+  const primaryAttachments: Record<string, string> =
+    loadout.weapons?.[0]?.attachments || {};
   const attachmentIcons = Object.entries(primaryAttachments)
-    .map(([type, name]) => attachments.find((a) => a.type === type && a.name === name))
+    .map(([type, name]) =>
+      attachments.find((a) => a.type === type && a.name === name),
+    )
     .filter((a): a is CardAttachment => Boolean(a))
     .slice(0, MAX_ATTACHMENT_ICONS);
-  const tag = loadout.tagId != null ? tags.find((t) => t.id === loadout.tagId) : undefined;
+  const tag =
+    loadout.tagId != null
+      ? tags.find((t) => t.id === loadout.tagId)
+      : undefined;
   const glowColor = tag?.color;
+  const voteCount = loadout.likes + loadout.dislikes;
+  const isTopLoadout =
+    voteCount >= 5 &&
+    loadout.ratingPercent != null &&
+    loadout.ratingPercent >= 90;
 
-
-  return (
-    <div className="relative w-full">
-      {fire && <FireCardEffect radius={12} />}
+  const card = (
     <Link
       to={to}
       className="relative bg-card rounded-2xl border border-white/[0.08] hover:bg-[#1a161a] hover:border-white/20 hover:-translate-y-1 transition-all duration-100 flex flex-col text-left overflow-hidden w-full h-full"
@@ -58,19 +74,17 @@ export function LoadoutCard({
     >
       <div
         className="absolute bottom-[-100px] right-[-100px] w-[200px] h-[200px] blur-[80px] opacity-[20%] pointer-events-none"
-        style={{ background: glowColor}}
+        style={{ background: glowColor }}
       />
 
       <div className="relative flex p-4 items-start gap-4 w-full">
         <RatingRing
           percent={loadout.ratingPercent}
+          votes={voteCount}
           size={56}
           innerClassName="border border-white/5"
-          labelClassName={
-            loadout.ratingPercent == null ? "text-[10px] text-teritary" : "text-[11px] text-[#fafafa]"
-          }
           fallbackLabel="New"
-        />            
+        />
         {/* <h3 className="text-base antialiased wrap-anywhere">
           <span
             style={{ color: tag?.color }}
@@ -94,23 +108,34 @@ export function LoadoutCard({
         </h3> */}
         <div className="flex-1 min-w-0 flex flex-col gap-0 justify-center">
           <h3 className="text-lg font-sans font-semibold">{loadout.name}</h3>
-          <p className="text-sm text-teritary truncate">        
+          <p className="text-sm text-teritary truncate">
             {loadout.video && (
-          <div
-            title={`Video: ${VIDEO_PLATFORM_META[loadout.video.platform].label}`}
-          >
-            {React.createElement(VIDEO_PLATFORM_META[loadout.video.platform].icon, {
-              className: "size-5 saturate-0 brightness-200",
-            })}
-          </div>
-        )}{loadout.description}</p>
+              <div
+                className="absolute right-4 top-4"
+                title={`Video: ${VIDEO_PLATFORM_META[loadout.video.platform].label}`}
+              >
+                {React.createElement(
+                  VIDEO_PLATFORM_META[loadout.video.platform].icon,
+                  {
+                    className: "size-5 saturate-0 brightness-200",
+                  },
+                )}
+              </div>
+            )}
+            {loadout.description}
+          </p>
         </div>
-
       </div>
-      <div className="h-full flex items-center mt-4 mb-6 mx-10 justify-center relative" >
+      <div className="h-full flex items-center mt-4 mb-6 mx-10 justify-center relative">
         <WeaponImage
           imageUrl={primaryWeaponData?.imageUrl}
+          loading={
+            !primaryWeaponData &&
+            Boolean(primaryWeaponId) &&
+            weapons.length === 0
+          }
           weaponId={primaryWeaponId}
+          showSkeleton
           badges={attachmentIcons.map(
             (a): WeaponImageBadge => ({
               key: a.id,
@@ -120,20 +145,21 @@ export function LoadoutCard({
             }),
           )}
         />
-
-        </div>
+      </div>
       <div className="p-4 pt-0 flex flex-col items-center w-full">
-        
         <div className="flex mt-2 items-center justify-center gap-2 w-full">
-
           <Tag color={""}>{primaryWeaponData?.typeShort || gameShort}</Tag>
-          <p className="flex-1 font-mono text-body uppercase text-sm">{primaryWeapon}</p>
+          <p className="flex-1 font-mono text-body uppercase text-sm">
+            {primaryWeapon}
+          </p>
 
-          <p className="font-handwritten antialiased text-shadow-lg" style={{ color: tag?.color ?? accent, fontSize: "1.1rem" }} >
-          {tag?.name}</p>
-    
+          <p
+            className="font-handwritten antialiased text-shadow-lg"
+            style={{ color: tag?.color ?? accent, fontSize: "1.1rem" }}
+          >
+            {tag?.name}
+          </p>
         </div>
-
       </div>
 
       {/* {attachmentIcons.length > 0 && (
@@ -151,6 +177,25 @@ export function LoadoutCard({
 
       {/* <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[inset_0px_0px_0px_1px_rgba(255,255,255,0.07)]" /> */}
     </Link>
+  );
+
+  return (
+    <div className="relative h-full w-full">
+      {fire && <FireCardEffect radius={12} />}
+      {isTopLoadout ? (
+        <BorderBeam
+          size="md"
+          colorVariant="colorful"
+          borderRadius={16}
+          strength={0.55}
+          duration={3.2}
+          className="h-full"
+        >
+          {card}
+        </BorderBeam>
+      ) : (
+        card
+      )}
     </div>
   );
 }

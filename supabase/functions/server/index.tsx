@@ -939,13 +939,11 @@ async function saveLoadoutEquipment(loadoutId: string, gameId: string, equipment
   if (insertError) throw insertError;
 }
 
-// Minimum total reactions before showing a computed rating percentage --
-// below this, a percentage is more misleading than informative (e.g. 1
-// like/0 dislikes reading as a false "100%").
-const MIN_VOTES_FOR_RATING = 3;
-// Favorites are a stronger signal (intent to reuse) than a low-effort like,
-// so they're weighted higher in both the displayed rating and the sort score.
-const FAVORITE_RATING_WEIGHT = 1.5;
+// A public rating needs five explicit Like/Dislike votes. Favorites express
+// intent to save a build, not an opinion on its quality, so they do not
+// qualify or influence the rating.
+const MIN_VOTES_FOR_RATING = 5;
+// Favorites remain a stronger signal in the popularity sort score.
 const FAVORITE_SCORE_WEIGHT = 2;
 
 // ---------------------------------------------------------------------------
@@ -1133,11 +1131,10 @@ function mapLoadout(l: any, viewerId?: string | null, authorProfiles?: Map<strin
   const likes = reactions.filter((r: any) => r.type === 'like').length;
   const dislikes = reactions.filter((r: any) => r.type === 'dislike').length;
   const favorites = reactions.filter((r: any) => r.type === 'favorite').length;
-  const totalVotes = likes + dislikes + favorites;
-  const weightedPositive = likes + favorites * FAVORITE_RATING_WEIGHT;
+  const totalVotes = likes + dislikes;
   const ratingPercent =
     totalVotes >= MIN_VOTES_FOR_RATING
-      ? Math.round((weightedPositive / (weightedPositive + dislikes)) * 100)
+      ? Math.round((likes / totalVotes) * 100)
       : null;
   const score = likes + favorites * FAVORITE_SCORE_WEIGHT - dislikes;
   const mine = viewerId ? reactions.filter((r: any) => r.user_id === viewerId).map((r: any) => r.type) : [];

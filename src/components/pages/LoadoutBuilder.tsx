@@ -6,27 +6,43 @@ import { gameMeta } from "@/lib/games";
 import { AppLayout } from "@/components/templates/AppLayout";
 import {
   ArrowLeft,
-  Save,
   Plus,
   Search,
   ChevronRight,
   Check,
   X,
+  Download,
 } from "lucide-react";
 import { WeaponCard } from "@/components/organisms/WeaponCard";
-import { WeaponImage, type WeaponImageBadge } from "@/components/molecules/WeaponImage";
+import {
+  WeaponImage,
+  type WeaponImageBadge,
+} from "@/components/molecules/WeaponImage";
 import { Tag } from "@/components/atoms/Tag";
-import { BreadcrumbLink, BreadcrumbSpacer } from "@/components/molecules/Breadcrumb";
+import {
+  BreadcrumbLink,
+  BreadcrumbSpacer,
+} from "@/components/molecules/Breadcrumb";
 import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
-import { ToggleGroup, ToggleGroupItem } from "@/components/molecules/ToggleGroup";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/molecules/ToggleGroup";
 import { ResponsiveDialog } from "@/components/molecules/ResponsiveDialog";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
 import { detectVideoPlatform, VIDEO_PLATFORM_META } from "@/lib/video";
 import { Container } from "@/components/atoms/Container";
 import { Button } from "@/components/atoms/Button";
-import { getRecaptchaToken, RecaptchaNotice } from "@/components/molecules/Recaptcha";
+import {
+  getRecaptchaToken,
+  RecaptchaNotice,
+} from "@/components/molecules/Recaptcha";
 import { explorePath } from "@/lib/routes";
+import {
+  QRCodeCanvas,
+  generateBrandedQRPng,
+} from "@/components/molecules/QRCode";
 
 interface Weapon {
   imageUrl: string | null | undefined;
@@ -77,6 +93,29 @@ interface LoadoutWeaponRef {
   attachments: Record<string, string>;
 }
 
+function FinishActionLabel({
+  saving,
+  editing,
+}: {
+  saving: boolean;
+  editing: boolean;
+}) {
+  return (
+    <>
+      <span className="flex size-6 items-center justify-center rounded-full bg-black/10 transition-transform duration-300 group-hover/finish:scale-110 group-active/finish:scale-90">
+        <Check
+          className={cn(
+            "size-4 transition-transform duration-300 group-hover/finish:-rotate-6 group-hover/finish:scale-110",
+            saving && "animate-pulse",
+          )}
+          strokeWidth={2.5}
+        />
+      </span>
+      {saving ? "Finishing…" : editing ? "Finish editing" : "Finish creating"}
+    </>
+  );
+}
+
 /** Searchable list shown inside the attachment ResponsiveDialog -- a fresh instance mounts each
  * time the dialog opens (the caller only renders it while a type is open), so its search query
  * resets for free instead of needing to be cleared manually. */
@@ -92,7 +131,9 @@ function AttachmentPickerList({
   onDeselect: () => void;
 }) {
   const [query, setQuery] = useState("");
-  const filtered = options.filter((att) => att.name.toLowerCase().includes(query.trim().toLowerCase()));
+  const filtered = options.filter((att) =>
+    att.name.toLowerCase().includes(query.trim().toLowerCase()),
+  );
 
   return (
     <div className="flex flex-col gap-3">
@@ -118,7 +159,9 @@ function AttachmentPickerList({
 
       <div className="flex flex-col gap-1 max-h-[min(60vh,420px)] overflow-y-auto -mx-1 px-1">
         {filtered.length === 0 ? (
-          <p className="text-[14px] text-[#8d898a] py-4 text-center">No attachments match your search.</p>
+          <p className="text-[14px] text-[#8d898a] py-4 text-center">
+            No attachments match your search.
+          </p>
         ) : (
           filtered.map((att) => {
             const isSelected = selected === att.name;
@@ -129,11 +172,17 @@ function AttachmentPickerList({
                 onClick={() => onSelect(att.name)}
                 className={cn(
                   "flex items-center gap-3 h-12 px-3 rounded-lg text-left text-[14px] transition-colors shrink-0",
-                  isSelected ? "bg-[#fafafa] text-[#161414]" : "text-[#fafafa] hover:bg-white/[0.05]"
+                  isSelected
+                    ? "bg-[#fafafa] text-[#161414]"
+                    : "text-[#fafafa] hover:bg-white/[0.05]",
                 )}
               >
                 {att.imageUrl ? (
-                  <img src={att.imageUrl} alt="" className="w-6 h-6 object-contain shrink-0" />
+                  <img
+                    src={att.imageUrl}
+                    alt=""
+                    className="w-6 h-6 object-contain shrink-0"
+                  />
                 ) : (
                   <div className="w-6 h-6 shrink-0" />
                 )}
@@ -161,12 +210,30 @@ function TagOption({
     <ToggleGroupItem
       value={String(tag.id)}
       disabled={disabled}
-      title={disabled ? "Not available for the weapon category(ies) in this loadout" : undefined}
+      title={
+        disabled
+          ? "Not available for the weapon category(ies) in this loadout"
+          : undefined
+      }
       className="h-auto min-w-0 py-2 px-4 bg-transparent hover:bg-transparent hover:text-inherit data-[state=on]:bg-transparent data-[state=on]:text-inherit data-[state=on]:hover:bg-transparent transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
-      style={isSelected ? { background: `${tag.color}`, color: "#f1f1f1", outlineOffset: 2, borderRadius: 20, } : undefined}
+      style={
+        isSelected
+          ? {
+              background: `${tag.color}`,
+              color: "#f1f1f1",
+              outlineOffset: 2,
+              borderRadius: 20,
+            }
+          : undefined
+      }
     >
       {/* <div className="w-2 h-2 rounded-full" style={!isSelected ? { background: `${tag.color}`} : undefined}/> */}
-      <p className="font-handwritten text-xl flex" style={{ color: isSelected ? "#ffffff" : tag.color }}>{tag.name}</p>
+      <p
+        className="font-handwritten text-xl flex"
+        style={{ color: isSelected ? "#ffffff" : tag.color }}
+      >
+        {tag.name}
+      </p>
     </ToggleGroupItem>
   );
 }
@@ -199,7 +266,10 @@ function LoadoutBuilderSkeleton() {
         <Skeleton className={cn("h-5 w-32", block)} />
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className={cn("rounded-2xl aspect-square", block)} />
+            <Skeleton
+              key={i}
+              className={cn("rounded-2xl aspect-square", block)}
+            />
           ))}
         </div>
       </Container>
@@ -228,14 +298,20 @@ export function LoadoutBuilder() {
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
   const [tags, setTags] = useState<LoadoutTag[]>([]);
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
-  const [pendingWeaponRefs, setPendingWeaponRefs] = useState<LoadoutWeaponRef[] | null>(null);
+  const [pendingWeaponRefs, setPendingWeaponRefs] = useState<
+    LoadoutWeaponRef[] | null
+  >(null);
   const [weaponTypeFilter, setWeaponTypeFilter] = useState<string | null>(null);
   const [pickingWeapon, setPickingWeapon] = useState(false);
-  const [openAttachmentType, setOpenAttachmentType] = useState<string | null>(null);
+  const [openAttachmentType, setOpenAttachmentType] = useState<string | null>(
+    null,
+  );
   const [weaponSearchOpen, setWeaponSearchOpen] = useState(false);
   const [weaponSearchQuery, setWeaponSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [createdLoadoutId, setCreatedLoadoutId] = useState<string | null>(null);
+  const [downloadingQr, setDownloadingQr] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -260,7 +336,7 @@ export function LoadoutBuilder() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/weapons`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } },
       );
       const data = await response.json();
       if (data.weapons) setWeapons(data.weapons);
@@ -275,7 +351,7 @@ export function LoadoutBuilder() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/attachments`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } },
       );
       const data = await response.json();
       if (data.attachments) setAttachments(data.attachments);
@@ -288,7 +364,7 @@ export function LoadoutBuilder() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/perks`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } },
       );
       const data = await response.json();
       if (data.perks) setAvailablePerks(data.perks);
@@ -301,7 +377,7 @@ export function LoadoutBuilder() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/equipment`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } },
       );
       const data = await response.json();
       if (data.equipment) setAvailableEquipment(data.equipment);
@@ -314,7 +390,7 @@ export function LoadoutBuilder() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/tags`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } },
       );
       const data = await response.json();
       if (data.tags) setTags(data.tags);
@@ -329,7 +405,7 @@ export function LoadoutBuilder() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/my-loadouts`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } },
       );
       const data = await response.json();
       const loadout = data.loadouts?.find((l: any) => l.id === editId);
@@ -339,7 +415,10 @@ export function LoadoutBuilder() {
         setGameLoadoutCode(loadout.gameLoadoutCode || "");
         setVideoUrl(loadout.video?.url || "");
         setPendingWeaponRefs(
-          (loadout.weapons || []).map((w: any) => ({ id: w.id, attachments: w.attachments ?? {} }))
+          (loadout.weapons || []).map((w: any) => ({
+            id: w.id,
+            attachments: w.attachments ?? {},
+          })),
         );
         setSelectedPerks(loadout.perks || []);
         setSelectedEquipment(loadout.equipment || []);
@@ -370,7 +449,9 @@ export function LoadoutBuilder() {
 
     setSaving(true);
     try {
-      const recaptchaToken = editId ? undefined : await getRecaptchaToken("create_loadout");
+      const recaptchaToken = editId
+        ? undefined
+        : await getRecaptchaToken("create_loadout");
 
       const loadoutData = {
         name: loadoutName,
@@ -399,7 +480,11 @@ export function LoadoutBuilder() {
 
       if (response.ok) {
         const { loadout } = await response.json();
-        navigate(`/${gameId}/l/${loadout.id}`);
+        if (editId) {
+          navigate(`/${gameId}/l/${loadout.id}`);
+        } else {
+          setCreatedLoadoutId(loadout.id);
+        }
       } else {
         const error = await response.json();
         console.error("Error saving loadout:", error);
@@ -413,6 +498,49 @@ export function LoadoutBuilder() {
     }
   };
 
+  const createdLoadoutPath = createdLoadoutId
+    ? `/${gameId}/l/${createdLoadoutId}`
+    : "";
+  const createdLoadoutUrl = createdLoadoutPath
+    ? new URL(createdLoadoutPath, window.location.origin).toString()
+    : "";
+
+  const downloadCreatedLoadoutQr = async () => {
+    if (!createdLoadoutId || !createdLoadoutUrl) return;
+    setDownloadingQr(true);
+    try {
+      const dataUrl = await generateBrandedQRPng(createdLoadoutUrl);
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `${createdLoadoutId}-loadout-qr.png`;
+      link.click();
+    } catch (error) {
+      console.error("Error generating loadout QR code:", error);
+      alert("Could not download the QR code. Please try again.");
+    } finally {
+      setDownloadingQr(false);
+    }
+  };
+
+  const createAnotherLoadout = () => {
+    setCreatedLoadoutId(null);
+    setLoadoutName("");
+    setLoadoutDescription("");
+    setGameLoadoutCode("");
+    setVideoUrl("");
+    setVideoError("");
+    setSelectedWeapons([]);
+    setSelectedPerks([]);
+    setSelectedEquipment([]);
+    setSelectedTagId(null);
+    setWeaponTypeFilter(null);
+    setPickingWeapon(false);
+    setOpenAttachmentType(null);
+    setWeaponSearchOpen(false);
+    setWeaponSearchQuery("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const toggleWeapon = (weapon: Weapon) => {
     setSelectedWeapons((prev) => {
       if (prev.some((w) => w.id === weapon.id)) {
@@ -424,7 +552,11 @@ export function LoadoutBuilder() {
 
   // attachmentName is "" when the ToggleGroup reports its active item was clicked again
   // (Radix's single-select deselect) -- clear the slot instead of setting an empty value.
-  const setWeaponAttachment = (weaponId: string, slot: string, attachmentName: string) => {
+  const setWeaponAttachment = (
+    weaponId: string,
+    slot: string,
+    attachmentName: string,
+  ) => {
     setSelectedWeapons((prev) =>
       prev.map((w) => {
         if (w.id !== weaponId) return w;
@@ -435,7 +567,7 @@ export function LoadoutBuilder() {
           next[slot] = attachmentName;
         }
         return { ...w, attachments: next };
-      })
+      }),
     );
   };
 
@@ -458,7 +590,9 @@ export function LoadoutBuilder() {
   const isTagAllowed = (tag: LoadoutTag) => {
     if (tag.allowedWeaponCategoryIds.length === 0) return true;
     return selectedWeapons.every(
-      (w) => w.categoryId != null && tag.allowedWeaponCategoryIds.includes(w.categoryId)
+      (w) =>
+        w.categoryId != null &&
+        tag.allowedWeaponCategoryIds.includes(w.categoryId),
     );
   };
 
@@ -481,9 +615,11 @@ export function LoadoutBuilder() {
       pendingWeaponRefs
         .map((ref) => {
           const catalogWeapon = weapons.find((w) => w.id === ref.id);
-          return catalogWeapon ? { ...catalogWeapon, attachments: ref.attachments } : null;
+          return catalogWeapon
+            ? { ...catalogWeapon, attachments: ref.attachments }
+            : null;
         })
-        .filter((w): w is SelectedWeapon => w !== null)
+        .filter((w): w is SelectedWeapon => w !== null),
     );
     setPendingWeaponRefs(null);
   }, [weapons, pendingWeaponRefs]);
@@ -497,9 +633,13 @@ export function LoadoutBuilder() {
         onGameSelect={(id) => navigate(`/${id}/create`)}
         breadcrumb={
           <>
-            <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>
+            <BreadcrumbLink to={explorePath(gameId)}>
+              {meta.short}
+            </BreadcrumbLink>
             <BreadcrumbSpacer />
-            <span className="text-[#fafafa]">{editId ? "Edit Loadout" : "New Loadout"}</span>
+            <span className="text-[#fafafa]">
+              {editId ? "Edit Loadout" : "New Loadout"}
+            </span>
           </>
         }
       >
@@ -508,37 +648,57 @@ export function LoadoutBuilder() {
     );
   }
 
-  const attachmentsByType = attachments.reduce<Record<string, Attachment[]>>((acc, a) => {
-    (acc[a.type] ??= []).push(a);
-    return acc;
-  }, {});
+  const attachmentsByType = attachments.reduce<Record<string, Attachment[]>>(
+    (acc, a) => {
+      (acc[a.type] ??= []).push(a);
+      return acc;
+    },
+    {},
+  );
   const attachmentTypes = Object.keys(attachmentsByType);
 
-  const weaponTypes = Array.from(new Set(weapons.map((w) => w.typeShort || w.type).filter((t): t is string => Boolean(t))));
+  const weaponTypes = Array.from(
+    new Set(
+      weapons
+        .map((w) => w.typeShort || w.type)
+        .filter((t): t is string => Boolean(t)),
+    ),
+  );
 
   // Only one weapon is ever selected at once (toggleWeapon always replaces the array
   // rather than appending), so the builder's preview/attachments UI just uses the first.
   const primaryWeapon = selectedWeapons[0];
   const primaryWeaponBadges: WeaponImageBadge[] = primaryWeapon
     ? Object.entries(primaryWeapon.attachments)
-      .map(([type, name]): WeaponImageBadge | null => {
-        const attachment = attachmentsByType[type]?.find((a) => a.name === name);
-        if (!attachment) return null;
-        return {
-          key: attachment.id,
-          typeSlug: attachment.typeSlug || type,
-          label: attachment.name,
-          iconUrl: attachment.imageUrl,
-        };
-      })
-      .filter((badge): badge is WeaponImageBadge => badge !== null)
+        .map(([type, name]): WeaponImageBadge | null => {
+          const attachment = attachmentsByType[type]?.find(
+            (a) => a.name === name,
+          );
+          if (!attachment) return null;
+          return {
+            key: attachment.id,
+            typeSlug: attachment.typeSlug || type,
+            label: attachment.name,
+            iconUrl: attachment.imageUrl,
+          };
+        })
+        .filter((badge): badge is WeaponImageBadge => badge !== null)
     : [];
 
   const filteredWeapons = weapons.filter((weapon) => {
-    if (weaponTypeFilter && weapon.typeShort !== weaponTypeFilter && weapon.type !== weaponTypeFilter) {
+    if (
+      weaponTypeFilter &&
+      weapon.typeShort !== weaponTypeFilter &&
+      weapon.type !== weaponTypeFilter
+    ) {
       return false;
     }
-    if (weaponSearchQuery.trim() && !weapon.name.toLowerCase().includes(weaponSearchQuery.trim().toLowerCase())) {
+    if (
+      weaponSearchQuery.trim() &&
+      !weapon.name
+        .toLowerCase()
+        .includes(weaponSearchQuery.trim().toLowerCase())
+    ) {
       return false;
     }
     return true;
@@ -552,7 +712,9 @@ export function LoadoutBuilder() {
         <>
           <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>
           <BreadcrumbSpacer />
-          <span className="text-[#fafafa]">{editId ? "Edit Loadout" : "New Loadout"}</span>
+          <span className="text-[#fafafa]">
+            {editId ? "Edit Loadout" : "New Loadout"}
+          </span>
         </>
       }
     >
@@ -569,24 +731,25 @@ export function LoadoutBuilder() {
             {editId ? "Edit Loadout" : "New Loadout"}
           </h1>
           <p className="text-[14px] text-[#8d898a]">
-            Pick your weapons, tune each build, then publish it for the community.
+            Pick your weapons, tune each build, then publish it for the
+            community.
           </p>
         </div>
         <div className="flex items-center gap-3">
-
           <Button
             onClick={saveLoadout}
             disabled={saving}
-            className="h-[52px] px-5 rounded-xl flex items-center gap-2 text-[#161414] font-medium disabled:opacity-60 bg-[#fafafa]"
+            className="group/finish h-[52px] rounded-xl bg-[#fafafa] px-5 font-medium text-[#161414] disabled:opacity-60"
           >
-            <Save className="w-4 h-4" />
-            {saving ? "Saving…" : editId ? "Update" : "Publish"}
+            <FinishActionLabel saving={saving} editing={Boolean(editId)} />
           </Button>
         </div>
       </div>
 
       <Container>
-        <h2 className="text-[16px] text-[#fafafa] font-semibold">Loadout details</h2>
+        <h2 className="text-[16px] text-[#fafafa] font-semibold">
+          Loadout details
+        </h2>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
@@ -655,9 +818,15 @@ export function LoadoutBuilder() {
             </label>
             <div className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 flex items-center gap-2 focus-within:border-white/30 transition-colors">
               {(() => {
-                const platform = videoUrl.trim() ? detectVideoPlatform(videoUrl.trim()) : null;
-                const Icon = platform ? VIDEO_PLATFORM_META[platform].icon : null;
-                return Icon ? <Icon className="w-4 h-4 text-[#8d898a] shrink-0" /> : null;
+                const platform = videoUrl.trim()
+                  ? detectVideoPlatform(videoUrl.trim())
+                  : null;
+                const Icon = platform
+                  ? VIDEO_PLATFORM_META[platform].icon
+                  : null;
+                return Icon ? (
+                  <Icon className="w-4 h-4 text-[#8d898a] shrink-0" />
+                ) : null;
               })()}
               <input
                 type="url"
@@ -670,9 +839,10 @@ export function LoadoutBuilder() {
                 className="flex-1 bg-transparent text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none"
               />
             </div>
-            {videoError && <p className="text-[12px] text-[#ef9696]">{videoError}</p>}
+            {videoError && (
+              <p className="text-[12px] text-[#ef9696]">{videoError}</p>
+            )}
           </div>
-
         </div>
       </Container>
 
@@ -688,7 +858,9 @@ export function LoadoutBuilder() {
                 alt={primaryWeapon.name}
                 weaponId={primaryWeapon.id}
                 badges={primaryWeaponBadges}
-                highlightSlugs={primaryWeaponBadges.map((badge) => badge.typeSlug)}
+                highlightSlugs={primaryWeaponBadges.map(
+                  (badge) => badge.typeSlug,
+                )}
               />
               {primaryWeapon.name}
               <Button variant="outline" onClick={() => setPickingWeapon(true)}>
@@ -699,7 +871,9 @@ export function LoadoutBuilder() {
             <h2 className="text-xs">Attachments</h2>
 
             {attachmentTypes.length === 0 ? (
-              <p className="text-teritary">No attachments configured for this game yet.</p>
+              <p className="text-teritary">
+                No attachments configured for this game yet.
+              </p>
             ) : (
               <div className="flex flex-col gap-1.5">
                 {attachmentTypes.map((type) => {
@@ -724,34 +898,34 @@ export function LoadoutBuilder() {
                         onClick={() => setOpenAttachmentType(type)}
                         className={cn(
                           "h-12 px-4 rounded-xl border border-white/[0.12] flex items-center gap-2 text-left transition-colors hover:border-white/40",
-                          selectedName && "bg-white/5"
+                          selectedName && "bg-white/5",
                         )}
                       >
                         <div className="flex gap-2 flex-1 flex-row">
-                          {selectedName ? (
-                            null
-                          ) :
+                          {selectedName ? null : (
                             <>
                               <Plus className="size-5 opacity-50" />
                             </>
-                          }
+                          )}
 
                           {typeImageUrl ? (
-                            <img src={typeImageUrl} alt="" className="size-5 opacity-80 object-contain" />
-                          ) : (
-                            null
-                          )}
+                            <img
+                              src={typeImageUrl}
+                              alt=""
+                              className="size-5 opacity-80 object-contain"
+                            />
+                          ) : null}
 
                           {selectedName ? (
                             <>
                               {selectedName}
-                              <span className="text-teritary font-normal">{type}</span>
+                              <span className="text-teritary font-normal">
+                                {type}
+                              </span>
                             </>
-                          ) :
-                            <span className="text-teritary">
-                              Add {type}
-                            </span>}
-
+                          ) : (
+                            <span className="text-teritary">Add {type}</span>
+                          )}
                         </div>
                         <ChevronRight className="w-4 h-4 text-teritary shrink-0" />
                       </button>
@@ -784,9 +958,15 @@ export function LoadoutBuilder() {
                       if (weaponSearchOpen) setWeaponSearchQuery("");
                     }}
                     className="w-9 h-9 rounded-xl border border-white/[0.18] flex items-center justify-center text-[#fafafa] hover:bg-white/[0.05] transition-colors"
-                    aria-label={weaponSearchOpen ? "Close search" : "Search weapons"}
+                    aria-label={
+                      weaponSearchOpen ? "Close search" : "Search weapons"
+                    }
                   >
-                    {weaponSearchOpen ? <X className="w-4 h-4" /> : <Search className="size-4.5" />}
+                    {weaponSearchOpen ? (
+                      <X className="w-4 h-4" />
+                    ) : (
+                      <Search className="size-4.5" />
+                    )}
                   </button>
                 </div>
                 <FilterPillGroup
@@ -794,9 +974,7 @@ export function LoadoutBuilder() {
                   value={weaponTypeFilter ?? ""}
                   onValueChange={(v) => setWeaponTypeFilter(v || null)}
                 >
-                  <FilterPill value="">
-                    All
-                  </FilterPill>
+                  <FilterPill value="">All</FilterPill>
                   {weaponTypes.map((type) => (
                     <FilterPill key={type} value={type} className="uppercase">
                       {type}
@@ -807,13 +985,19 @@ export function LoadoutBuilder() {
             )}
 
             {weapons.length === 0 ? (
-              <p className="text-[14px] text-[#8d898a]">No weapons available for this game yet.</p>
+              <p className="text-[14px] text-[#8d898a]">
+                No weapons available for this game yet.
+              </p>
             ) : filteredWeapons.length === 0 ? (
-              <p className="text-[14px] text-[#8d898a]">No weapons match your filters.</p>
+              <p className="text-[14px] text-[#8d898a]">
+                No weapons match your filters.
+              </p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredWeapons.map((weapon) => {
-                  const isSelected = selectedWeapons.some((w) => w.id === weapon.id);
+                  const isSelected = selectedWeapons.some(
+                    (w) => w.id === weapon.id,
+                  );
                   return (
                     <WeaponCard
                       key={weapon.id}
@@ -855,9 +1039,92 @@ export function LoadoutBuilder() {
         </ResponsiveDialog>
       )}
 
+      <ResponsiveDialog
+        open={Boolean(createdLoadoutId)}
+        title=""
+        onOpenChange={(open) => {
+          if (!open && createdLoadoutPath) navigate(createdLoadoutPath);
+        }}
+      >
+        {createdLoadoutId && (
+          <div className="flex flex-col items-center gap-5 text-center">
+            <div className="flex size-14 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-400/10 text-emerald-300 motion-safe:animate-[pulse_1.2s_ease-in-out_2]">
+              <Check className="size-7" strokeWidth={2.5} />
+            </div>
+
+            <div>
+              <h3 className="text-xl font-semibold text-[#fafafa]">
+                Your loadout was created successfully
+              </h3>
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-teritary">
+                Download its QR code to share the build anywhere, or jump
+                straight to your published loadout.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/[0.08] bg-black/20 p-4">
+              <QRCodeCanvas
+                value={createdLoadoutUrl}
+                size={176}
+                className="size-44"
+              />
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={downloadCreatedLoadoutQr}
+              disabled={downloadingQr}
+              className="w-full"
+            >
+              <Download className="size-4" />
+              {downloadingQr ? "Preparing QR…" : "Download QR code"}
+            </Button>
+
+            <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
+              <Button
+                type="button"
+                onClick={() => navigate(createdLoadoutPath)}
+              >
+                View loadout
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={createAnotherLoadout}
+              >
+                Create another
+              </Button>
+            </div>
+          </div>
+        )}
+      </ResponsiveDialog>
+
       {!editId && <RecaptchaNotice className="text-[12px] text-[#8d898a]" />}
 
-      { /* Perks and Equipment sections
+      <div className="flex flex-col gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div>
+          <p className="font-semibold text-[#fafafa]">
+            {editId
+              ? "Ready to save your changes?"
+              : "Ready to share your loadout?"}
+          </p>
+          <p className="mt-1 text-sm text-teritary">
+            {editId
+              ? "Update the published loadout with your latest setup."
+              : "Publish it so other players can find, rate, and save it."}
+          </p>
+        </div>
+        <Button
+          onClick={saveLoadout}
+          disabled={saving}
+          className="group/finish h-[52px] w-full shrink-0 rounded-xl bg-[#fafafa] px-6 font-medium text-[#161414] disabled:opacity-60 sm:w-auto"
+        >
+          <FinishActionLabel saving={saving} editing={Boolean(editId)} />
+        </Button>
+      </div>
+
+      {/* Perks and Equipment sections
       <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <p className="text-[16px] text-[#fafafa] font-semibold">Perks</p>
@@ -902,7 +1169,7 @@ export function LoadoutBuilder() {
             ))}
           </div>
         )}
-      </div>*/ }
+      </div>*/}
     </AppLayout>
   );
 }

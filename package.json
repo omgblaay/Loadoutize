@@ -44,6 +44,7 @@
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
     "@vercel/speed-insights": "^2.0.0",
+    "border-beam": "^1.4.1",
     "canvas-confetti": "1.9.4",
     "class-variance-authority": "0.7.1",
     "claude": "^0.1.1",

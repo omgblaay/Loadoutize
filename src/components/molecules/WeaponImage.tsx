@@ -1,6 +1,8 @@
 import { getAttachmentBadgePosition } from "@/lib/weaponAttachmentBadgePositions";
 import { getAttachmentHighlightRegion } from "@/lib/weaponAttachmentHighlightRegions";
 import { AppTooltip } from "@/components/atoms/Tooltip";
+import { Skeleton } from "@/components/atoms/Skeleton";
+import { useState } from "react";
 
 export interface WeaponImageBadge {
   key: string;
@@ -26,9 +28,15 @@ export function WeaponImage({
   highlightSlugs,
   activeBadgeKey,
   onBadgeHover,
+  showSkeleton = true,
+  loading = false,
 }: {
   imageUrl?: string | null;
   variant?: "small" | "large";
+  /** Shows the shared loading placeholder while the weapon asset is downloading. Enabled by default. */
+  showSkeleton?: boolean;
+  /** Keeps the skeleton visible while the parent is still resolving the image URL. */
+  loading?: boolean;
   alt?: string;
   /** weapons.id, used to look up per-weapon badge position overrides. */
   weaponId?: string;
@@ -39,6 +47,15 @@ export function WeaponImage({
   activeBadgeKey?: string | null;
   onBadgeHover?: (key: string | null) => void;
 }) {
+  const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
+  const isLoading =
+    showSkeleton &&
+    (loading ||
+      (Boolean(imageUrl) &&
+        loadedImageUrl !== imageUrl &&
+        failedImageUrl !== imageUrl));
+
   const getVariantClasses = () => {
     switch (variant) {
       case "small":
@@ -53,12 +70,19 @@ export function WeaponImage({
   const badgeSizeClass = BADGE_SIZE_CLASSES[variant ?? "default"];
 
   return (
-    <div className={`relative w-full ${getVariantClasses()} ` }>
+    <div
+      className={`relative w-full ${getVariantClasses()} `}
+      aria-busy={isLoading || undefined}
+    >
+      {isLoading && (
+        <Skeleton className="absolute inset-0 z-20 aspect-2/1 rounded-md !bg-[#171417]" />
+      )}
       <img
         src={imageUrl ?? undefined}
         alt={alt}
-        className="w-full aspect-2/1"
-        
+        className={`w-full aspect-2/1 transition-opacity duration-200 ${isLoading ? "opacity-0" : "opacity-100"}`}
+        onLoad={() => imageUrl && setLoadedImageUrl(imageUrl)}
+        onError={() => imageUrl && setFailedImageUrl(imageUrl)}
       // brightness-200 saturate-0
       />
       {highlightSlugs && highlightSlugs.length > 0 && (

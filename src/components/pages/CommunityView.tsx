@@ -22,6 +22,8 @@ interface LoadoutSummary {
   authorLinks: SocialLinks | null;
   userName: string;
   ratingPercent: number | null;
+  likes: number;
+  dislikes: number;
 }
 
 interface Member {
@@ -40,7 +42,7 @@ function isSocialPlatform(value: string): value is SocialPlatform {
   return (SOCIAL_PLATFORMS as string[]).includes(value);
 }
 
-// A loadout with <3 votes has a null ratingPercent (mapLoadout's own
+// A loadout with <5 Like/Dislike votes has a null ratingPercent (mapLoadout's own
 // "not enough data" sentinel) -- excluded here rather than counted as 0, same
 // rule MetaView already applies when averaging weapon ratings.
 function average(nums: number[]) {
@@ -115,7 +117,9 @@ export function CommunityView() {
 
   const members: Member[] = [...byUser.entries()].map(([userId, userLoadouts]) => {
     const first = userLoadouts[0];
-    const rated = userLoadouts.filter((l) => l.ratingPercent != null);
+    const rated = userLoadouts.filter(
+      (l) => l.ratingPercent != null && l.likes + l.dislikes >= 5,
+    );
     return {
       userId,
       nickname: first.authorNickname ?? first.userName,

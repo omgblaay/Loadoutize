@@ -8,6 +8,7 @@ export interface CardLoadout {
   weapons: any[];
   userName: string;
   likes: number;
+  dislikes: number;
   score: number;
   ratingPercent: number | null;
   views: number;

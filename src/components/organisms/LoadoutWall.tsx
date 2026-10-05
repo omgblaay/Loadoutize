@@ -10,6 +10,7 @@ interface ShowcaseLoadout {
   typeShort: string | null;
   imageUrl: string;
   rating: number | null;
+  votes: number;
 }
 
 const SHOWCASE_COLUMN_COUNT = 3;
@@ -33,7 +34,7 @@ function ShowcaseCard({ item, scale }: { item: ShowcaseLoadout; scale: number })
       style={{ transform: `scale(${scale})` }}
     >
       <div className="flex items-center gap-2">
-        <RatingRing percent={item.rating} size={22} innerClassName="border border-white/5" labelClassName="text-[8px] text-[#fafafa]" fallbackLabel="—" />
+        <RatingRing percent={item.rating} votes={item.votes} size={22} innerClassName="border border-white/5" labelClassName="text-[8px] text-[#fafafa]" fallbackLabel="—" />
         <p className="text-xs font-semibold text-[#fafafa] truncate flex-1">{item.name}</p>
       </div>
       <div className="h-14 flex items-center justify-center">
@@ -101,6 +102,7 @@ export function LoadoutWall() {
               typeShort: weapon.typeShort ?? null,
               imageUrl: weapon.imageUrl,
               rating: l.ratingPercent ?? null,
+              votes: (l.likes ?? 0) + (l.dislikes ?? 0),
             };
           })
           .filter((item: ShowcaseLoadout | null): item is ShowcaseLoadout => item !== null);
@@ -134,4 +136,3 @@ export function LoadoutWall() {
     </div>
   );
 }
-
