@@ -57,7 +57,7 @@ export function WeaponImage({
       <img
         src={imageUrl ?? undefined}
         alt={alt}
-        className="w-full"
+        className="w-full aspect-2/1"
         
       // brightness-200 saturate-0
       />

@@ -8,6 +8,7 @@ import { Button } from "@/components/atoms/Button";
 import { ChevronRight, Crosshair } from "lucide-react";
 import type { Loadout } from "@/types/loadout";
 import { explorePath } from "@/lib/routes";
+import { Tag } from "../atoms/Tag";
 
 const TOP_WEAPON_MEDALS = ["🥇", "🥈", "🥉"];
 
@@ -39,35 +40,38 @@ export function HomeExplorePreview({
 
   const listOfTypes = [
     {
-      name:"Assault Rifles",
-      short:"ar"
+      name: "Assault Rifles",
+      short: "ar"
     },
     {
-      name:"SMG",
-      short:"smg"
+      name: "SMG",
+      short: "smg"
     },
     {
-      name:"Sniper Rifles",
-      short:"snp"
+      name: "Sniper Rifles",
+      short: "snp"
     }];
-  const topWeapons = (type:string) => { return (
-    weapons
-    .filter((weapon) => weapon.typeShort?.toUpperCase() === type.toUpperCase())
-    .map((weapon, index) => {
-      const ratings = loadouts
-        .filter((loadout) => loadout.weapons?.[0]?.id === weapon.id && loadout.ratingPercent != null)
-        .map((loadout) => loadout.ratingPercent as number);
+  const topWeapons = (type: string) => {
+    return (
+      weapons
+        .filter((weapon) => weapon.typeShort?.toUpperCase() === type.toUpperCase())
+        .map((weapon, index) => {
+          const ratings = loadouts
+            .filter((loadout) => loadout.weapons?.[0]?.id === weapon.id && loadout.ratingPercent != null)
+            .map((loadout) => loadout.ratingPercent as number);
 
-      return {
-        weapon,
-        rating: ratings.length > 0 ? ratings.reduce((sum, value) => sum + value, 0) / ratings.length : null,
-        index,
-      };
-    })
-    .filter((entry) => entry.rating != null)
-    .sort((a, b) => (b.rating as number) - (a.rating as number) || a.index - b.index)
-    .slice(0, 3)
-    .map((entry) => entry.weapon)  );}
+          return {
+            weapon,
+            rating: ratings.length > 0 ? ratings.reduce((sum, value) => sum + value, 0) / ratings.length : null,
+            index,
+          };
+        })
+        .filter((entry) => entry.rating != null)
+        .sort((a, b) => (b.rating as number) - (a.rating as number) || a.index - b.index)
+        .slice(0, 4)
+        .map((entry) => entry.weapon)
+    );
+  }
 
   const recentLoadouts = loadouts
     .filter((l) => l.gameId === selectedGame)
@@ -77,22 +81,22 @@ export function HomeExplorePreview({
 
   return (
     <div className="flex flex-col gap-6">
-      {listOfTypes.map((key) => (      
-        <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-sans text-secondary">
-            Top {key.name.toWellFormed()}
-          </h2>
-          <Link
-            to={`/${selectedGame}/meta`}
-            className="font-medium text-teritary hover:text-[#fafafa] flex items-center gap-1 shrink-0"
-          >
-            View full Meta
-            <ChevronRight className="size-4" />
-          </Link>
-        </div>
-        
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      {listOfTypes.map((key) => (
+        <div key={key.short} className="flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-sans text-secondary">
+              Top <Tag>{key.short}</Tag> {key.name.toWellFormed()}
+            </h2>
+            <Link
+              to={`/${selectedGame}/meta`}
+              className="font-medium text-teritary hover:text-[#fafafa] flex items-center gap-1 shrink-0"
+            >
+              View full Meta
+              <ChevronRight className="size-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {topWeapons(key.short).map((w, i) => (
               <div key={w.id} className="relative">
                 {TOP_WEAPON_MEDALS[i] && (
@@ -111,8 +115,8 @@ export function HomeExplorePreview({
             ))}
           </div>
 
-      </div>
-))}
+        </div>
+      ))}
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">

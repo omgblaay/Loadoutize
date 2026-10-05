@@ -71,7 +71,7 @@ export function LoadoutCard({
           }
           fallbackLabel="New"
         />            
-        <h3 className="text-base antialiased wrap-anywhere">
+        {/* <h3 className="text-base antialiased wrap-anywhere">
           <span
             style={{ color: tag?.color }}
             className="font-handwritten text-xl py-4 font-light"
@@ -91,9 +91,9 @@ export function LoadoutCard({
           </Tag>
           <span className="text-se font-sans text-teritary">{" "}{primaryWeapon}</span>
           {" "}{loadout.name}
-        </h3>
-        {/* <div className="flex-1 min-w-0 flex flex-col gap-0 justify-center">
-          <p className="text-lg font-semibold">{loadout.name}</p>
+        </h3> */}
+        <div className="flex-1 min-w-0 flex flex-col gap-0 justify-center">
+          <h3 className="text-lg font-sans font-semibold">{loadout.name}</h3>
           <p className="text-sm text-teritary truncate">        
             {loadout.video && (
           <div
@@ -104,7 +104,7 @@ export function LoadoutCard({
             })}
           </div>
         )}{loadout.description}</p>
-        </div> */}
+        </div>
 
       </div>
       <div className="h-full flex items-center mt-4 mb-6 mx-10 justify-center relative" >
@@ -122,7 +122,7 @@ export function LoadoutCard({
         />
 
         </div>
-      {/* <div className="p-4 pt-0 flex flex-col items-center w-full">
+      <div className="p-4 pt-0 flex flex-col items-center w-full">
         
         <div className="flex mt-2 items-center justify-center gap-2 w-full">
 
@@ -132,12 +132,9 @@ export function LoadoutCard({
           <p className="font-handwritten antialiased text-shadow-lg" style={{ color: tag?.color ?? accent, fontSize: "1.1rem" }} >
           {tag?.name}</p>
     
-          <Tag color={loadout.tagId ? tags.find((t) => t.id === loadout.tagId)?.color : undefined}>
-          {tag?.name}
-          </Tag> 
         </div>
 
-      </div> */}
+      </div>
 
       {/* {attachmentIcons.length > 0 && (
         <div className="relative flex items-center w-full">
