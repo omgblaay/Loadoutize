@@ -9,7 +9,7 @@ import { Button } from "@/components/atoms/Button";
 import { MetaTrendCharts } from "@/components/organisms/MetaTrendCharts";
 import { cn } from "@/lib/utils";
 import { attachmentMetaPath, weaponGroupMetaPath } from "@/lib/routes";
-import { buildWeaponMetrics } from "@/lib/metaMetrics";
+import { buildWeaponMetrics, ratingTier } from "@/lib/metaMetrics";
 import {
   useMetaData,
   type MetaAttachment,
@@ -277,29 +277,73 @@ export function WeaponMetaView() {
           Meta dashboard
         </Button>
       </div>
-      <header className="relative">
-        <div className="relative flex items-center gap-6">
-          <div className="flex flex-row items-center gap-3">
-            <RatingRing percent={avgRating} size={54} fallbackLabel="—" />
-            <WeaponImage
-              imageUrl={weapon.imageUrl}
-              variant="small"
-              alt={weapon.name}
-            />
-            <div className="min-w-0">
-              <h1 className="mt-3 text-3xl uppercase sm:text-4xl">
+      <header className="relative overflow-hidden py-3 sm:py-7">
+        <div className="grid items-center gap-5 md:grid-cols-[minmax(0,1fr)_minmax(300px,0.82fr)] md:gap-10">
+          <div className="order-2 min-w-0 md:order-1">
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-teritary">
+              Weapon performance profile
+            </p>
+            <div className="mt-3 min-w-0">
+              <h1 className="text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.9] uppercase tracking-[-0.04em] text-[#fafafa]">
                 {weapon.name}
               </h1>
               {weapon.type && weaponGroupRank != null && (
                 <Link
                   to={weaponGroupMetaPath(gameId, weapon.type)}
-                  className="group mt-1 inline-flex items-center gap-1.5 text-sm text-teritary transition-colors hover:text-[#fafafa]"
+                  className="group mt-3 inline-flex items-center gap-1.5 text-sm text-secondary transition-colors hover:text-[#fafafa]"
                 >
                   Top {weaponGroupRank} in {weapon.type}
                   <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               )}
             </div>
+
+            <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-4">
+              <div className="flex items-center gap-3">
+                <RatingRing percent={avgRating} size={54} fallbackLabel="—" />
+                <div>
+                  <p className="font-rating text-lg text-[#fafafa]">
+                    {ratingTier(avgRating) ?? "Unrated"}
+                  </p>
+                  <p className="text-xs text-teritary">community tier</p>
+                </div>
+              </div>
+              <div>
+                <p className="font-mono text-lg text-[#fafafa]">
+                  {weaponLoadouts.length}
+                </p>
+                <p className="text-xs text-teritary">published loadouts</p>
+              </div>
+              <div>
+                <p className="font-mono text-lg text-[#fafafa]">
+                  {ratedLoadouts.length}
+                </p>
+                <p className="text-xs text-teritary">qualified ratings</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative order-1 flex min-h-44 items-center justify-center md:order-2 md:min-h-56">
+            {weaponGroupRank != null && (
+              <span
+                className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 select-none font-rating text-[clamp(7rem,15vw,12rem)] font-semibold leading-none tracking-[-0.08em] text-white/[0.055]"
+                aria-hidden="true"
+              >
+                {String(weaponGroupRank).padStart(2, "0")}
+              </span>
+            )}
+            <div className="relative z-10 w-full max-w-lg">
+              <WeaponImage
+                imageUrl={weapon.imageUrl}
+                variant="large"
+                alt={weapon.name}
+              />
+            </div>
+            {weapon.type && (
+              <p className="absolute bottom-0 right-0 font-mono text-[10px] uppercase tracking-[0.16em] text-white/25">
+                {weapon.type} rank
+              </p>
+            )}
           </div>
         </div>
       </header>
