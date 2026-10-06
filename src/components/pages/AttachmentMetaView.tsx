@@ -212,9 +212,7 @@ export function AttachmentMetaView() {
 
       <section className="flex flex-col gap-4">
         <div>
-          <h2 className="text-base font-semibold font-sans">
-            Most used on weapons
-          </h2>
+          <h2 className="text-base font-semibold">Most used on weapons</h2>
           <p className="mt-1 text-sm text-teritary">
             Ranked by the number of community loadouts using this attachment.
           </p>

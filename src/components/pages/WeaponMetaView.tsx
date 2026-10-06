@@ -1,12 +1,13 @@
 import { useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { ArrowLeft, ChevronRight, Paperclip } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { AppLayout } from "@/components/templates/AppLayout";
 import { WeaponImage } from "@/components/molecules/WeaponImage";
 import { RatingRing } from "@/components/atoms/RatingRing";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { Button } from "@/components/atoms/Button";
 import { MetaTrendCharts } from "@/components/organisms/MetaTrendCharts";
+import { AttachmentSlotCard } from "@/components/organisms/AttachmentSlotCard";
 import { cn } from "@/lib/utils";
 import { attachmentMetaPath, weaponGroupMetaPath } from "@/lib/routes";
 import { buildWeaponMetrics, ratingTier } from "@/lib/metaMetrics";
@@ -17,7 +18,6 @@ import {
 } from "@/hooks/useMetaData";
 
 const MIN_RATING_VOTES = 5;
-const META_ACCENT = "#f4f1ea";
 
 interface AttachmentUsage {
   attachment: MetaAttachment;
@@ -59,72 +59,6 @@ function WeaponMetaSkeleton() {
   );
 }
 
-function AttachmentSlotCard({
-  slot,
-  accent,
-  onSelect,
-}: {
-  slot: AttachmentSlot;
-  accent: string;
-  onSelect: (attachment: MetaAttachment) => void;
-}) {
-  return (
-    <section className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-      <div className="flex items-center gap-3 border-b border-white/[0.07] px-4 py-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.05]">
-          {slot.typeImageUrl ? (
-            <img
-              src={slot.typeImageUrl}
-              alt=""
-              className="size-5 object-contain opacity-80"
-            />
-          ) : (
-            <Paperclip className="size-4 text-teritary" />
-          )}
-        </span>
-        <div className="min-w-0">
-          <h3 className="font-sans">{slot.type}</h3>
-        </div>
-      </div>
-      <ol className="divide-y divide-white/[0.06]">
-        {slot.items.slice(0, 3).map(({ attachment, percent }, index) => (
-          <li key={attachment.id}>
-            <button
-              type="button"
-              onClick={() => onSelect(attachment)}
-              className="group relative flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.035]"
-            >
-              <span
-                className="pointer-events-none absolute inset-y-0 left-0 opacity-[0.07]"
-                style={{ width: `${percent}%`, backgroundColor: accent }}
-              />
-              <span className="relative w-7 shrink-0 font-mono text-xs text-teritary">
-                #{index + 1}
-              </span>
-              {attachment.imageUrl ? (
-                <img
-                  src={attachment.imageUrl}
-                  alt=""
-                  className="relative size-8 shrink-0 object-contain"
-                />
-              ) : (
-                <span className="relative size-8 shrink-0" />
-              )}
-              <span className="relative min-w-0 flex-1 truncate text-sm text-secondary">
-                {attachment.name}
-              </span>
-              <span className="relative shrink-0 font-mono text-xs text-[#fafafa]">
-                {Math.round(percent)}%
-              </span>
-              <ChevronRight className="relative size-4 shrink-0 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70" />
-            </button>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-
 export function WeaponMetaView() {
   const { gameId = "mw4", weaponId = "" } = useParams<{
     gameId: string;
@@ -133,7 +67,6 @@ export function WeaponMetaView() {
   const navigate = useNavigate();
   const { loadouts, weapons, attachments, loading, error } =
     useMetaData(gameId);
-  const accent = META_ACCENT;
   const weapon = weapons.find((candidate) => String(candidate.id) === weaponId);
   const weaponGroupRank = useMemo(() => {
     if (!weapon?.type) return null;
@@ -354,16 +287,13 @@ export function WeaponMetaView() {
         popularityTitle="Weapon popularity"
         popularityDescription={`New ${weapon.name} loadouts created in this period`}
       />
-      <h2 className="mt-1 text-2xl font-semibold font-sans">
-        Top attachments by slot
-      </h2>
+      <h2 className="mt-1 text-base font-semibold">Top attachments by slot</h2>
       {attachmentSlots.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {attachmentSlots.map((slot) => (
             <AttachmentSlotCard
               key={slot.type}
               slot={slot}
-              accent={accent}
               onSelect={(attachment) =>
                 navigate(attachmentMetaPath(gameId, String(attachment.id)))
               }
@@ -376,16 +306,14 @@ export function WeaponMetaView() {
         </div>
       )}
       {topLoadouts.length > 0 && (
-        <section className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-          <div className="border-b border-white/[0.07] px-4 py-4 sm:px-5">
-            <h2 className="font-semibold text-[#fafafa]">
-              Top {weapon.name} loadouts
-            </h2>
-            <p className="mt-1 text-xs text-teritary">
+        <section className="">
+          <div>
+            <h2 className="mt-4 text-base ">Top {weapon.name} loadouts</h2>
+            <p className="mb-4 text-base text-teritary">
               Highest-rated community builds using this weapon.
             </p>
           </div>
-          <div className="divide-y divide-white/[0.06]">
+          <div className="divide-y divide-white/[0.06] overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02]">
             {topLoadouts.map((loadout: MetaLoadout, index) => (
               <button
                 key={loadout.id}

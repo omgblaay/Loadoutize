@@ -9,7 +9,6 @@ import {
   Paperclip,
   Target,
   Trophy,
-  X,
 } from "lucide-react";
 import { AppLayout } from "@/components/templates/AppLayout";
 import { NavIcon } from "@/components/atoms/NavIcon";
@@ -18,6 +17,7 @@ import { Skeleton } from "@/components/atoms/Skeleton";
 import { Tag } from "@/components/atoms/Tag";
 import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
 import { WeaponImage } from "@/components/molecules/WeaponImage";
+import { AttachmentSlotCard } from "@/components/organisms/AttachmentSlotCard";
 import { cn } from "@/lib/utils";
 import {
   attachmentMetaPath,
@@ -27,7 +27,6 @@ import {
 import {
   buildWeaponMetrics,
   MIN_RATING_VOTES,
-  ratingTier,
   type WeaponMetric,
 } from "@/lib/metaMetrics";
 import { useGameName } from "@/hooks/useGameName";
@@ -50,7 +49,6 @@ interface AttachmentGroup {
 }
 
 const META_ACCENT = "#f4f1ea";
-const RANK_MEDALS = ["🥇", "🥈", "🥉"];
 
 function average(values: number[]) {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
@@ -121,72 +119,6 @@ function StatCard({
         </span>
       </div>
     </div>
-  );
-}
-
-function AttachmentTrendCard({
-  group,
-  onSelect,
-}: {
-  group: AttachmentGroup;
-  onSelect: (attachment: MetaAttachment) => void;
-}) {
-  return (
-    <section className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-      <div className="flex items-center gap-3 border-b border-white/[0.07] px-4 py-3">
-        <span className="flex items-center justify-center opacity-20">
-          {group.typeImageUrl ? (
-            <img src={group.typeImageUrl} alt="" />
-          ) : (
-            <X className="size-4 text-teritary" />
-          )}
-        </span>
-        <h3 className="text-sm font-sans">{group.type}</h3>
-      </div>
-      <ol className="divide-y divide-white/[0.06]">
-        {group.items
-          .slice(0, 3)
-          .map(({ attachment, percent, avgRating }, index) => (
-            <li key={attachment.id}>
-              <button
-                type="button"
-                onClick={() => onSelect(attachment)}
-                className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.035]"
-              >
-                <span
-                  className="w-6 shrink-0 text-center text-base"
-                  aria-label={`Rank ${index + 1}`}
-                >
-                  {RANK_MEDALS[index]}
-                </span>
-                {attachment.imageUrl ? (
-                  <img
-                    src={attachment.imageUrl}
-                    alt=""
-                    className="size-7 shrink-0 object-contain"
-                  />
-                ) : (
-                  <span className="size-7 shrink-0" />
-                )}
-                <span className="min-w-0 flex-1 truncate text-sm text-secondary">
-                  {attachment.name}
-                </span>
-                <span className="shrink-0 text-right">
-                  <span className="block font-mono text-xs text-[#fafafa]">
-                    {Math.round(percent)}% used
-                  </span>
-                  <span className="mt-0.5 block text-[11px] text-teritary">
-                    {avgRating == null
-                      ? "New rating"
-                      : `${ratingTier(avgRating)} avg. tier`}
-                  </span>
-                </span>
-                <ChevronRight className="size-4 shrink-0 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70" />
-              </button>
-            </li>
-          ))}
-      </ol>
-    </section>
   );
 }
 
@@ -622,9 +554,9 @@ export function MetaView() {
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {attachmentGroups.map((group) => (
-                  <AttachmentTrendCard
+                  <AttachmentSlotCard
                     key={group.type}
-                    group={group}
+                    slot={group}
                     onSelect={(attachment) =>
                       navigate(
                         attachmentMetaPath(selectedGame, String(attachment.id)),
