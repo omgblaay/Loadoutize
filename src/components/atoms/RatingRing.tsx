@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export interface RatingRingProps {
   /** Internal 0-100 rating score used to derive the visible tier grade. */
-  percent: number | null;
+  percent?: number | null;
   /** Number of explicit Like/Dislike votes. When supplied, color is withheld until `minimumVotes`. */
   votes?: number;
   minimumVotes?: number;
@@ -81,7 +81,7 @@ export function RatingRing({
     >
       <div
         className={cn(
-          "absolute inset-[8px] rounded-full bg-[#201e1f] flex items-center font-rating font-semibold justify-center",
+          "absolute inset-[8px] rounded-full bg-[#201e1f] flex items-center font-heading text-sm justify-center",
           innerClassName,
         )}
       >
@@ -90,7 +90,7 @@ export function RatingRing({
             "tracking-[-0.3px] text-sm",
             votes < minimumVotes
               ? "text-[12px] font-sans text-teritary"
-              : "text-lg",
+              : "text-sm",
           )}
         >
           {label}

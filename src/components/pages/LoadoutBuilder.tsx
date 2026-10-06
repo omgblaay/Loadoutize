@@ -93,6 +93,12 @@ interface LoadoutWeaponRef {
   attachments: Record<string, string>;
 }
 
+const allowsAnyAttachment = (type: string) =>
+  type.trim().toLowerCase() !== "apex";
+
+const MIN_REQUIRED_ATTACHMENTS = 5;
+const ANY_ATTACHMENT_VALUE = "__any__";
+
 function FinishActionLabel({
   saving,
   editing,
@@ -122,11 +128,13 @@ function FinishActionLabel({
 function AttachmentPickerList({
   options,
   selected,
+  allowAny,
   onSelect,
   onDeselect,
 }: {
   options: Attachment[];
   selected: string | undefined;
+  allowAny: boolean;
   onSelect: (name: string) => void;
   onDeselect: () => void;
 }) {
@@ -146,13 +154,46 @@ function AttachmentPickerList({
         className="h-11 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
       />
 
+      {allowAny && (
+        <button
+          type="button"
+          onClick={() => onSelect(ANY_ATTACHMENT_VALUE)}
+          className={cn(
+            "flex h-12 shrink-0 items-center gap-3 rounded-lg px-3 text-left text-sm transition-colors",
+            selected === ANY_ATTACHMENT_VALUE
+              ? "bg-[#fafafa] text-[#161414]"
+              : "text-[#fafafa] hover:bg-white/[0.05]",
+          )}
+        >
+          <div className="flex size-6 shrink-0 items-center justify-center rounded-md border border-current/20 font-mono text-[10px] font-semibold">
+            ∞
+          </div>
+          <span className="min-w-0 flex-1">
+            <span className="block font-medium">Any</span>
+            <span
+              className={cn(
+                "block truncate text-xs",
+                selected === ANY_ATTACHMENT_VALUE
+                  ? "text-black/55"
+                  : "text-teritary",
+              )}
+            >
+              No specific attachment required
+            </span>
+          </span>
+          {selected === ANY_ATTACHMENT_VALUE && (
+            <Check className="size-4 shrink-0" />
+          )}
+        </button>
+      )}
+
       {selected && (
         <button
           type="button"
           onClick={onDeselect}
           className="h-11 px-4 rounded-xl border border-[#d4183d]/30 flex items-center justify-between text-[14px] text-[#ef9696] hover:border-[#d4183d]/60 transition-colors"
         >
-          Deselect {selected}
+          Clear {selected === ANY_ATTACHMENT_VALUE ? "Any" : selected}
           <X className="w-4 h-4" />
         </button>
       )}
@@ -312,6 +353,16 @@ export function LoadoutBuilder() {
   const [saving, setSaving] = useState(false);
   const [createdLoadoutId, setCreatedLoadoutId] = useState<string | null>(null);
   const [downloadingQr, setDownloadingQr] = useState(false);
+  const [attachmentRequirementOpen, setAttachmentRequirementOpen] =
+    useState(false);
+
+  const selectedAttachmentCount = selectedWeapons.reduce(
+    (total, weapon) =>
+      total +
+      Object.values(weapon.attachments ?? {}).filter((name) => Boolean(name))
+        .length,
+    0,
+  );
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -435,6 +486,11 @@ export function LoadoutBuilder() {
       return;
     }
 
+    if (selectedAttachmentCount < MIN_REQUIRED_ATTACHMENTS) {
+      setAttachmentRequirementOpen(true);
+      return;
+    }
+
     if (!accessToken) {
       alert("You must be logged in to save loadouts");
       return;
@@ -458,7 +514,14 @@ export function LoadoutBuilder() {
         description: loadoutDescription,
         gameLoadoutCode: gameLoadoutCode.trim() || null,
         videoUrl: trimmedVideoUrl || null,
-        weapons: selectedWeapons,
+        weapons: selectedWeapons.map((weapon) => ({
+          ...weapon,
+          attachments: Object.fromEntries(
+            Object.entries(weapon.attachments).filter(
+              ([, name]) => name !== ANY_ATTACHMENT_VALUE,
+            ),
+          ),
+        })),
         perks: selectedPerks,
         equipment: selectedEquipment,
         tagId: selectedTagId,
@@ -879,6 +942,7 @@ export function LoadoutBuilder() {
                 {attachmentTypes.map((type) => {
                   const typeImageUrl = attachmentsByType[type][0]?.typeImageUrl;
                   const selectedName = primaryWeapon.attachments[type];
+                  const isAnySelected = selectedName === ANY_ATTACHMENT_VALUE;
                   return (
                     <div key={type} className="flex flex-col">
                       {/* <div className="flex items-center gap-1">
@@ -902,11 +966,13 @@ export function LoadoutBuilder() {
                         )}
                       >
                         <div className="flex gap-2 flex-1 flex-row">
-                          {selectedName ? null : (
-                            <>
-                              <Plus className="size-5 opacity-50" />
-                            </>
-                          )}
+                          {isAnySelected ? (
+                            <span className="flex size-5 items-center justify-center font-mono text-xs text-teritary">
+                              ∞
+                            </span>
+                          ) : !selectedName ? (
+                            <Plus className="size-5 opacity-50" />
+                          ) : null}
 
                           {typeImageUrl ? (
                             <img
@@ -916,7 +982,14 @@ export function LoadoutBuilder() {
                             />
                           ) : null}
 
-                          {selectedName ? (
+                          {isAnySelected ? (
+                            <>
+                              Any
+                              <span className="text-teritary font-normal">
+                                {type}
+                              </span>
+                            </>
+                          ) : selectedName ? (
                             <>
                               {selectedName}
                               <span className="text-teritary font-normal">
@@ -1027,6 +1100,7 @@ export function LoadoutBuilder() {
           <AttachmentPickerList
             options={attachmentsByType[openAttachmentType]}
             selected={primaryWeapon.attachments[openAttachmentType]}
+            allowAny={allowsAnyAttachment(openAttachmentType)}
             onSelect={(name) => {
               setWeaponAttachment(primaryWeapon.id, openAttachmentType, name);
               setOpenAttachmentType(null);
@@ -1038,6 +1112,53 @@ export function LoadoutBuilder() {
           />
         </ResponsiveDialog>
       )}
+
+      <ResponsiveDialog
+        open={attachmentRequirementOpen}
+        onOpenChange={setAttachmentRequirementOpen}
+        title="Add more attachments"
+      >
+        <div className="flex flex-col gap-5">
+          <div>
+            <p className="text-base leading-6 text-[#fafafa]">
+              Choose at least {MIN_REQUIRED_ATTACHMENTS} specific attachments
+              before finishing your loadout.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-teritary">
+              A specific attachment or an explicit “Any” choice both count
+              toward the required total.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
+            <div className="mb-3 flex items-center justify-between gap-4">
+              <span className="text-sm text-secondary">Attachments selected</span>
+              <span className="font-mono text-sm text-[#fafafa]">
+                {selectedAttachmentCount}/{MIN_REQUIRED_ATTACHMENTS}
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-white/[0.08]">
+              <div
+                className="h-full rounded-full bg-[#fafafa] transition-[width] duration-300"
+                style={{
+                  width: `${Math.min(
+                    100,
+                    (selectedAttachmentCount / MIN_REQUIRED_ATTACHMENTS) * 100,
+                  )}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            onClick={() => setAttachmentRequirementOpen(false)}
+            className="w-full"
+          >
+            Continue building
+          </Button>
+        </div>
+      </ResponsiveDialog>
 
       <ResponsiveDialog
         open={Boolean(createdLoadoutId)}

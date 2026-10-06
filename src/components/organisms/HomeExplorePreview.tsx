@@ -207,22 +207,12 @@ export function HomeExplorePreview({
         )}
       </div>
 
-      <section className="relative overflow-hidden rounded-2xl border border-white/[0.09] bg-gradient-to-br from-white/[0.055] to-white/[0.015] p-6 sm:p-8">
-        <div
-          className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full opacity-15 blur-[90px]"
-          style={{ backgroundColor: accent }}
-        />
+      <section className="relative overflow-hidden rounded-2xl border border-white/[0.09] p-6 sm:p-8">
+        <div className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full opacity-15 blur-[90px]" />
 
-        <div className="relative grid gap-8 md:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] md:items-center">
+        <div className="relative flex gap-8">
           <div>
-            <div className="mb-4 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-teritary">
-              <span
-                className="size-2 rounded-full shadow-[0_0_12px_currentColor]"
-                style={{ color: accent, backgroundColor: accent }}
-              />
-              Independently built
-            </div>
-            <h2 className="max-w-xl font-sans text-2xl leading-tight text-[#fafafa] sm:text-3xl">
+            <h2 className="text-lg leading-tight text-[#fafafa]">
               Why I made Loadoutize
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-secondary sm:text-base sm:leading-7">
@@ -236,17 +226,16 @@ export function HomeExplorePreview({
             </p>
           </div>
 
-          <div className="grid gap-2">
+          <div className="flex gap-2 flex-1 h-full flex-col">
             {[
-              { icon: Wrench, label: "Built by one person" },
               { icon: MessageCircle, label: "Guided by your feedback" },
               { icon: Heart, label: "Made for the community" },
             ].map(({ icon: Icon, label }) => (
               <div
                 key={label}
-                className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-black/15 px-4 py-3"
+                className="flex items-center flex-1 gap-3 rounded-xl border border-white/[0.07] bg-black/15 px-4 py-3"
               >
-                <Icon className="size-4 shrink-0" style={{ color: accent }} />
+                <Icon className="size-4 shrink-0 text-secondary" />
                 <span className="text-sm text-secondary">{label}</span>
               </div>
             ))}

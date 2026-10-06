@@ -4,6 +4,14 @@
 @import '@fontsource/science-gothic/600.css';
 
 @font-face {
+  font-family: 'Moderniz';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/Moderniz.otf') format('opentype');
+}
+
+@font-face {
   font-family: 'BBH Bartle';
   font-style: normal;
   font-weight: 400;

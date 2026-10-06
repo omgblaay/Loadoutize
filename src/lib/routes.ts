@@ -19,3 +19,19 @@ export function explorePath(gameId: string = LOCKED_GAME_ID, params: Record<stri
   const search = searchParams.toString();
   return `/explore${search ? `?${search}` : ""}`;
 }
+
+export function weaponMetaPath(gameId: string, weaponId: string) {
+  return `/${gameId}/meta/weapons/${encodeURIComponent(weaponId)}`;
+}
+
+export function weaponMetaListPath(gameId: string) {
+  return `/${gameId}/meta/weapons`;
+}
+
+export function weaponGroupMetaPath(gameId: string, weaponGroup: string) {
+  return `/${gameId}/meta/weapongroup/${encodeURIComponent(weaponGroup)}`;
+}
+
+export function attachmentMetaPath(gameId: string, attachmentId: string) {
+  return `/${gameId}/meta/attachments/${encodeURIComponent(attachmentId)}`;
+}

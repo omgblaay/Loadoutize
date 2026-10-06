@@ -2,17 +2,20 @@ import { useGameName } from "@/hooks/useGameName";
 import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "@/providers/AuthProvider";
-import { gameMeta, GAME_ORDER, LAST_SELECTED_GAME_KEY, GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "@/lib/games";
+import {
+  gameMeta,
+  GAME_ORDER,
+  LAST_SELECTED_GAME_KEY,
+  GAME_SELECTOR_ENABLED,
+  LOCKED_GAME_ID,
+} from "@/lib/games";
 import { SideNav } from "@/components/organisms/SideNav";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
-import { TopNavBar } from "@/components/organisms/TopNavBar"
+import { TopNavBar } from "@/components/organisms/TopNavBar";
 import { Footer } from "@/components/organisms/Footer";
 // import { SpeedInsights } from "@vercel/speed-insights/next"
 
-
-import {
-  Globe,
-} from "lucide-react";
+import { Globe } from "lucide-react";
 
 interface Weapon {
   id: string;
@@ -38,12 +41,19 @@ export function AppLayout({
   const location = useLocation();
   const { user, logout } = useAuth();
 
-  const { games, game: activeGame, name: activeName } = useGameName(selectedGame);
+  const {
+    games,
+    game: activeGame,
+    name: activeName,
+  } = useGameName(selectedGame);
 
   useEffect(() => {
-    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/weapons`, {
-      headers: { Authorization: `Bearer ${publicAnonKey}` },
-    })
+    fetch(
+      `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/weapons`,
+      {
+        headers: { Authorization: `Bearer ${publicAnonKey}` },
+      },
+    )
       .then((r) => r.json())
       .then((data) => data.weapons && setWeapons(data.weapons))
       .catch((error) => console.error("Error fetching weapons:", error));
@@ -68,13 +78,15 @@ export function AppLayout({
     new Map(
       weapons
         .filter((w): w is Weapon & { type: string } => Boolean(w.type))
-        .map((w) => [w.type, { name: w.type, typeShort: w.typeShort }] as const)
-    ).values()
+        .map(
+          (w) => [w.type, { name: w.type, typeShort: w.typeShort }] as const,
+        ),
+    ).values(),
   ).slice(0, 6);
 
   const isHome = location.pathname === "/home";
   const isExplore = location.pathname === "/explore";
-  const isMeta = location.pathname.endsWith("/meta");
+  const isMeta = /^\/[^/]+\/meta(?:\/|$)/.test(location.pathname);
   const isCommunity = location.pathname.endsWith("/community");
 
   const activeLogoUrl = activeGame?.logoUrl ?? null;
@@ -104,15 +116,22 @@ export function AppLayout({
         sticky={isHome}
       />
 
-
-
       {/* Body: Sidenav + content */}
       <div className="max-w-[1440px] w-full mx-auto flex gap-6 p-2 sm:p-6  flex-1">
         {/* Sidenav */}
-        <SideNav isHome={isHome} isExplore={isExplore} isMeta={isMeta} isCommunity={isCommunity} selectedGame={selectedGame} categories={categories} navigate={navigate} handleGameSelect={handleGameSelect} />
+        <SideNav
+          isHome={isHome}
+          isExplore={isExplore}
+          isMeta={isMeta}
+          isCommunity={isCommunity}
+          selectedGame={selectedGame}
+          categories={categories}
+          navigate={navigate}
+          handleGameSelect={handleGameSelect}
+        />
 
         {/* Page content */}
-        <main className="flex-1 min-w-0 flex flex-col gap-4 sm:gap-6">
+        <main className="flex-1 min-w-0 flex flex-col gap-2 sm:gap-4">
           {breadcrumb && (
             <div className="w-full">
               <div className="flex items-center gap-2 flex-wrap text-[14px] text-[#bebcbc]">
@@ -120,12 +139,16 @@ export function AppLayout({
               </div>
             </div>
           )}
-          {children}</main>
+          {children}
+        </main>
       </div>
 
-
       {/* Footer */}
-      <Footer selectedGame={selectedGame} orderedGames={orderedGames} gameMeta={gameMeta} />
+      <Footer
+        selectedGame={selectedGame}
+        orderedGames={orderedGames}
+        gameMeta={gameMeta}
+      />
     </div>
   );
 }

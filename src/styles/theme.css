@@ -125,7 +125,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: 'Aspekta', ui-sans-serif, system-ui, sans-serif;
-  --font-heading: 'BBH Bartle', 'Aspekta', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Moderniz', 'Aspekta', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   --font-handwritten: 'Kabur', cursive;
   /* Semi-Bold (600) only -- used solely by RatingRing's percentage label. */

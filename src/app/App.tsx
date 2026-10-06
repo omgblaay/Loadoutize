@@ -30,6 +30,21 @@ import { explorePath } from "@/lib/routes";
 const componentTestModules = import.meta.glob<{ ComponentTest: ComponentType }>("../components/pages/ComponentTest.tsx");
 const loadComponentTest = componentTestModules["../components/pages/ComponentTest.tsx"];
 const ComponentTest = loadComponentTest ? lazy(() => loadComponentTest().then((m) => ({ default: m.ComponentTest }))) : null;
+const WeaponMetaView = lazy(() =>
+  import("@/components/pages/WeaponMetaView").then((module) => ({
+    default: module.WeaponMetaView,
+  })),
+);
+const WeaponMetaListView = lazy(() =>
+  import("@/components/pages/WeaponMetaListView").then((module) => ({
+    default: module.WeaponMetaListView,
+  })),
+);
+const AttachmentMetaView = lazy(() =>
+  import("@/components/pages/AttachmentMetaView").then((module) => ({
+    default: module.AttachmentMetaView,
+  })),
+);
 
 function GameRedirect() {
   const { gameId } = useParams();
@@ -141,6 +156,46 @@ export default function App() {
             element={
               <GameLock>
                 <MetaView />
+              </GameLock>
+            }
+          />
+          <Route
+            path="/:gameId/meta/weapons"
+            element={
+              <GameLock>
+                <Suspense fallback={null}>
+                  <WeaponMetaListView />
+                </Suspense>
+              </GameLock>
+            }
+          />
+          <Route
+            path="/:gameId/meta/weapongroup/:weaponGroup"
+            element={
+              <GameLock>
+                <Suspense fallback={null}>
+                  <WeaponMetaListView />
+                </Suspense>
+              </GameLock>
+            }
+          />
+          <Route
+            path="/:gameId/meta/weapons/:weaponId"
+            element={
+              <GameLock>
+                <Suspense fallback={null}>
+                  <WeaponMetaView />
+                </Suspense>
+              </GameLock>
+            }
+          />
+          <Route
+            path="/:gameId/meta/attachments/:attachmentId"
+            element={
+              <GameLock>
+                <Suspense fallback={null}>
+                  <AttachmentMetaView />
+                </Suspense>
               </GameLock>
             }
           />

@@ -1,421 +1,341 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
-import { getGameColor } from "@/lib/gameColors";
-import { gameMeta } from "@/lib/games";
-import { projectId, publicAnonKey } from "../../../utils/supabase/info";
+import { useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import {
+  Activity,
+  BarChart3,
+  ChevronRight,
+  Crown,
+  Layers3,
+  Paperclip,
+  Target,
+  Trophy,
+  X,
+} from "lucide-react";
 import { AppLayout } from "@/components/templates/AppLayout";
-import { useGameName } from "@/hooks/useGameName";
-import { Tag } from "@/components/atoms/Tag";
-import { WeaponCard } from "@/components/organisms/WeaponCard";
-import { Star, TrendingUp, Crown, Paperclip } from "lucide-react";
 import { NavIcon } from "@/components/atoms/NavIcon";
-import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
+import { RatingRing } from "@/components/atoms/RatingRing";
 import { Skeleton } from "@/components/atoms/Skeleton";
+import { Tag } from "@/components/atoms/Tag";
+import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
+import { WeaponImage } from "@/components/molecules/WeaponImage";
 import { cn } from "@/lib/utils";
-import { explorePath } from "@/lib/routes";
-
-interface Weapon {
-  id: string;
-  name: string;
-  type: string | null;
-  typeShort: string | null;
-  imageUrl: string | null;
-}
-
-interface LoadoutSummary {
-  id: string;
-  weapons: { id: string; attachments?: Record<string, string> }[];
-  tagId: number | null;
-  ratingPercent: number | null;
-  likes: number;
-  dislikes: number;
-}
-
-interface CatalogTag {
-  id: number;
-  name: string;
-  color: string;
-}
-
-interface Attachment {
-  id: string;
-  name: string;
-  type: string;
-  typeSlug: string;
-  typeImageUrl: string | null;
-  imageUrl: string | null;
-}
+import {
+  attachmentMetaPath,
+  weaponMetaListPath,
+  weaponMetaPath,
+} from "@/lib/routes";
+import {
+  buildWeaponMetrics,
+  MIN_RATING_VOTES,
+  ratingTier,
+  type WeaponMetric,
+} from "@/lib/metaMetrics";
+import { useGameName } from "@/hooks/useGameName";
+import { useMetaData, type MetaAttachment } from "@/hooks/useMetaData";
+import { Button } from "@/components/atoms/Button";
 
 type Scope = "all" | "tag" | "category";
-type RankMode = "community" | "popularity";
-type MetaSection = "weapons" | "attachments";
-type TierLabel = "S" | "A" | "B" | "C" | "D";
 
-const TIER_ORDER: TierLabel[] = ["S", "A", "B", "C", "D"];
-
-// A weapon needs at least one loadout that itself cleared the vote minimum
-// (mapLoadout's MIN_VOTES_FOR_RATING) to be tiered under Community Rated --
-// otherwise it sits in the "not enough data" bucket instead of a fabricated tier.
-const MIN_RATED_LOADOUTS = 1;
-
-const COMMUNITY_BANDS: { tier: TierLabel; min: number }[] = [
-  { tier: "S", min: 90 },
-  { tier: "A", min: 75 },
-  { tier: "B", min: 60 },
-  { tier: "C", min: 40 },
-  { tier: "D", min: 0 },
-];
-
-// Most Loadouts ranks relative to the current scope's max count rather than
-// fixed numbers, since raw volume varies wildly by game maturity.
-const POPULARITY_BANDS: { tier: TierLabel; frac: number }[] = [
-  { tier: "S", frac: 0.1 },
-  { tier: "A", frac: 0.3 },
-  { tier: "B", frac: 0.6 },
-  { tier: "C", frac: 0.85 },
-  { tier: "D", frac: 1 },
-];
-
-function average(nums: number[]) {
-  return nums.reduce((a, b) => a + b, 0) / nums.length;
-}
-
-interface WeaponAgg {
-  weapon: Weapon;
+interface AttachmentMetric {
+  attachment: MetaAttachment;
   count: number;
+  percent: number;
   avgRating: number | null;
 }
 
-interface AttachmentUsage {
-  attachment: Attachment;
-  count: number;
-  percent: number;
-}
-
-interface AttachmentUsageGroup {
+interface AttachmentGroup {
   type: string;
   typeImageUrl: string | null;
-  items: AttachmentUsage[];
+  items: AttachmentMetric[];
 }
 
-function formatUsagePercent(percent: number) {
-  if (percent > 0 && percent < 1) return "<1%";
-  return `${Math.round(percent)}%`;
+const META_ACCENT = "#f4f1ea";
+const RANK_MEDALS = ["🥇", "🥈", "🥉"];
+
+function average(values: number[]) {
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-function AttachmentUsageCard({
-  group,
-  accent,
-}: {
-  group: AttachmentUsageGroup;
-  accent: string;
-}) {
-  const [showAll, setShowAll] = useState(false);
-  const visibleItems = showAll ? group.items : group.items.slice(0, 5);
-  const hasMore = group.items.length > 5;
+function isConcreteAttachment(name: string) {
+  const normalized = name.trim().toLowerCase();
+  return normalized !== "any" && normalized !== "__any__";
+}
 
+function DashboardSkeleton() {
+  const block = "bg-white/[0.06]";
   return (
-    <section className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-      <div className="flex items-center gap-3 border-b border-white/[0.07] px-4 py-3">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.05]">
-          {group.typeImageUrl ? (
-            <img
-              src={group.typeImageUrl}
-              alt=""
-              className="size-5 object-contain opacity-80"
-            />
-          ) : (
-            <Paperclip className="size-4 text-teritary" />
-          )}
+    <>
+      <div className="flex items-center gap-4">
+        <Skeleton className={cn("size-12 rounded-xl", block)} />
+        <div className="flex flex-col gap-2">
+          <Skeleton className={cn("h-8 w-52", block)} />
+          <Skeleton className={cn("h-4 w-72 max-w-full", block)} />
         </div>
-        <h3 className="min-w-0 flex-1 truncate text-sm text-[#fafafa]">
-          {group.type}
-        </h3>
       </div>
-
-      <ol className="divide-y divide-white/[0.06]">
-        {visibleItems.map(({ attachment, percent }, index) => (
-          <li
-            key={attachment.id}
-            className="relative flex items-center gap-3 px-4 py-3"
-          >
-            <div
-              className="absolute inset-y-0 left-0 opacity-[0.07]"
-              style={{ width: `${percent}%`, backgroundColor: accent }}
-              aria-hidden="true"
-            />
-            <span className="relative w-7 shrink-0 font-mono text-xs text-teritary">
-              #{index + 1}
-            </span>
-            {attachment.imageUrl ? (
-              <img
-                src={attachment.imageUrl}
-                alt=""
-                className="relative size-7 shrink-0 object-contain"
-              />
-            ) : (
-              <div className="relative size-7 shrink-0" />
-            )}
-            <span className="relative min-w-0 flex-1 truncate text-sm text-secondary">
-              {attachment.name}
-            </span>
-            <span className="relative shrink-0 font-mono text-sm text-[#fafafa]">
-              {formatUsagePercent(percent)}
-            </span>
-          </li>
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton key={index} className={cn("h-28 rounded-2xl", block)} />
         ))}
-      </ol>
-
-      {hasMore && (
-        <button
-          type="button"
-          onClick={() => setShowAll((current) => !current)}
-          className="w-full border-t border-white/[0.07] px-4 py-3 text-sm font-medium text-teritary transition-colors hover:bg-white/[0.03] hover:text-[#fafafa]"
-        >
-          {showAll ? "Show top 5" : `Show all ${group.items.length}`}
-        </button>
-      )}
-    </section>
+      </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <Skeleton key={index} className={cn("h-52 rounded-2xl", block)} />
+        ))}
+      </div>
+      <Skeleton className={cn("h-80 rounded-2xl", block)} />
+    </>
   );
 }
 
-function MetaViewSkeleton() {
-  const block = "bg-white/[0.06]";
-
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  detail,
+  accent,
+}: {
+  icon: typeof Activity;
+  label: string;
+  value: string | number;
+  detail?: string;
+  accent: string;
+}) {
   return (
-    <>
-      {/* Header */}
-      <div className="flex items-center justify-between gap-5 w-full flex-wrap">
-        <div className="flex flex-col gap-2">
-          <Skeleton className={cn("h-9 w-40", block)} />
-          <Skeleton className={cn("h-4 w-64 max-w-full", block)} />
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4 sm:p-5">
+      <div
+        className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full opacity-10 blur-3xl"
+        style={{ backgroundColor: accent }}
+      />
+      <div className="relative flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.08em] text-teritary">
+            {label}
+          </p>
+          <p className="mt-2 text-2xl font-semibold text-[#fafafa] sm:text-3xl">
+            {value}
+          </p>
+          {/* <p className="mt-1 text-xs text-teritary">{detail}</p> */}
         </div>
-        <Skeleton className={cn("h-10 w-64 rounded-xl", block)} />
+        <span className="flex items-center justify-center">
+          <Icon className="size-4" style={{ color: accent }} />
+        </span>
       </div>
+    </div>
+  );
+}
 
-      {/* Scope tabs */}
-      <Skeleton className={cn("h-9 w-72 rounded-xl", block)} />
-
-      {/* Tier rows */}
-      <div className="flex flex-col gap-4 w-full">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex items-stretch rounded-2xl border border-white/[0.07] overflow-hidden h-[164px]"
-          >
-            <Skeleton className={cn("w-16 shrink-0 rounded-none", block)} />
-            <div className="flex-1 flex flex-wrap gap-3 p-4">
-              {Array.from({ length: 4 }).map((_, j) => (
-                <Skeleton
-                  key={j}
-                  className={cn("w-[132px] h-[132px] rounded-xl", block)}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+function AttachmentTrendCard({
+  group,
+  onSelect,
+}: {
+  group: AttachmentGroup;
+  onSelect: (attachment: MetaAttachment) => void;
+}) {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+      <div className="flex items-center gap-3 border-b border-white/[0.07] px-4 py-3">
+        <span className="flex items-center justify-center opacity-20">
+          {group.typeImageUrl ? (
+            <img src={group.typeImageUrl} alt="" />
+          ) : (
+            <X className="size-4 text-teritary" />
+          )}
+        </span>
+        <h3 className="text-sm font-sans">{group.type}</h3>
       </div>
-    </>
+      <ol className="divide-y divide-white/[0.06]">
+        {group.items
+          .slice(0, 3)
+          .map(({ attachment, percent, avgRating }, index) => (
+            <li key={attachment.id}>
+              <button
+                type="button"
+                onClick={() => onSelect(attachment)}
+                className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.035]"
+              >
+                <span
+                  className="w-6 shrink-0 text-center text-base"
+                  aria-label={`Rank ${index + 1}`}
+                >
+                  {RANK_MEDALS[index]}
+                </span>
+                {attachment.imageUrl ? (
+                  <img
+                    src={attachment.imageUrl}
+                    alt=""
+                    className="size-7 shrink-0 object-contain"
+                  />
+                ) : (
+                  <span className="size-7 shrink-0" />
+                )}
+                <span className="min-w-0 flex-1 truncate text-sm text-secondary">
+                  {attachment.name}
+                </span>
+                <span className="shrink-0 text-right">
+                  <span className="block font-mono text-xs text-[#fafafa]">
+                    {Math.round(percent)}% used
+                  </span>
+                  <span className="mt-0.5 block text-[11px] text-teritary">
+                    {avgRating == null
+                      ? "New rating"
+                      : `${ratingTier(avgRating)} avg. tier`}
+                  </span>
+                </span>
+                <ChevronRight className="size-4 shrink-0 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70" />
+              </button>
+            </li>
+          ))}
+      </ol>
+    </section>
   );
 }
 
 export function MetaView() {
   const { gameId: selectedGame = "mw4" } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
+  const { name: gameName } = useGameName(selectedGame);
+  const { loadouts, weapons, attachments, tags, loading, error } =
+    useMetaData(selectedGame);
+  const accent = META_ACCENT;
 
-  const [loadouts, setLoadouts] = useState<LoadoutSummary[]>([]);
-  const [weapons, setWeapons] = useState<Weapon[]>([]);
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [tags, setTags] = useState<CatalogTag[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [section, setSection] = useState<MetaSection>("weapons");
   const [scope, setScope] = useState<Scope>("all");
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [rankMode, setRankMode] = useState<RankMode>("community");
 
-  useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/loadouts`,
-        {
-          headers: { Authorization: `Bearer ${publicAnonKey}` },
-        },
-      ).then((r) => r.json()),
-      fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/weapons`,
-        {
-          headers: { Authorization: `Bearer ${publicAnonKey}` },
-        },
-      ).then((r) => r.json()),
-      fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/attachments`,
-        {
-          headers: { Authorization: `Bearer ${publicAnonKey}` },
-        },
-      ).then((r) => r.json()),
-      fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/tags`,
-        {
-          headers: { Authorization: `Bearer ${publicAnonKey}` },
-        },
-      ).then((r) => r.json()),
-    ])
-      .then(([loadoutsData, weaponsData, attachmentsData, tagsData]) => {
-        setLoadouts(loadoutsData.loadouts ?? []);
-        setWeapons(weaponsData.weapons ?? []);
-        setAttachments(attachmentsData.attachments ?? []);
-        setTags(tagsData.tags ?? []);
-      })
-      .catch((error) => console.error("Error fetching meta data:", error))
-      .finally(() => setLoading(false));
-  }, [selectedGame]);
-
-  const accent = getGameColor(selectedGame).primary;
-  const meta = gameMeta[selectedGame] ?? gameMeta.mw4;
-  const { name: gameName } = useGameName(selectedGame);
-
-  const TIER_COLOR: Record<TierLabel, string> = {
-    S: "#FFC400",
-    A: "#36D27A",
-    B: accent,
-    C: "#8d898a",
-    D: "#FF4D63",
-  };
-
-  const categories = Array.from(
-    new Set(weapons.map((w) => w.type).filter((t): t is string => Boolean(t))),
+  const categories = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          weapons
+            .map((weapon) => weapon.type)
+            .filter((type): type is string => Boolean(type)),
+        ),
+      ),
+    [weapons],
+  );
+  const weaponById = useMemo(
+    () => new Map(weapons.map((weapon) => [weapon.id, weapon])),
+    [weapons],
   );
 
-  const selectScope = (next: Scope) => {
-    setScope(next);
-    if (next === "tag" && selectedTagId == null && tags.length > 0)
+  const selectScope = (nextScope: Scope) => {
+    setScope(nextScope);
+    if (nextScope === "tag" && selectedTagId == null && tags.length > 0)
       setSelectedTagId(tags[0].id);
     if (
-      next === "category" &&
+      nextScope === "category" &&
       selectedCategory == null &&
       categories.length > 0
     )
       setSelectedCategory(categories[0]);
   };
 
-  const weaponById = new Map(weapons.map((w) => [w.id, w]));
+  const scopedLoadouts = useMemo(
+    () =>
+      loadouts.filter((loadout) => {
+        if (scope === "tag")
+          return selectedTagId != null && loadout.tagId === selectedTagId;
+        if (scope === "category") {
+          const primaryWeapon = weaponById.get(loadout.weapons?.[0]?.id ?? "");
+          return (
+            selectedCategory != null && primaryWeapon?.type === selectedCategory
+          );
+        }
+        return true;
+      }),
+    [loadouts, scope, selectedTagId, selectedCategory, weaponById],
+  );
 
-  const scopedLoadouts = loadouts.filter((l) => {
-    if (scope === "tag")
-      return selectedTagId != null && l.tagId === selectedTagId;
-    if (scope === "category") {
-      const primary = weaponById.get(l.weapons?.[0]?.id ?? "");
-      return selectedCategory != null && primary?.type === selectedCategory;
-    }
-    return true;
-  });
+  const weaponMetrics = useMemo<WeaponMetric[]>(() => {
+    const candidates =
+      scope === "category" && selectedCategory
+        ? weapons.filter((weapon) => weapon.type === selectedCategory)
+        : weapons;
+    return buildWeaponMetrics(candidates, scopedLoadouts);
+  }, [weapons, scopedLoadouts, scope, selectedCategory]);
 
-  const attachmentUsageCounts = new Map<string, number>();
-  for (const loadout of scopedLoadouts) {
-    const usedInLoadout = new Set<string>();
-    for (const weapon of loadout.weapons ?? []) {
-      for (const [type, name] of Object.entries(weapon.attachments ?? {})) {
-        usedInLoadout.add(`${type}\u0000${name}`);
+  const attachmentGroups = useMemo<AttachmentGroup[]>(() => {
+    const usage = new Map<string, number>();
+    const ratings = new Map<string, number[]>();
+    for (const loadout of scopedLoadouts) {
+      const usedInLoadout = new Set<string>();
+      for (const weapon of loadout.weapons ?? []) {
+        for (const [type, name] of Object.entries(weapon.attachments ?? {})) {
+          if (isConcreteAttachment(name))
+            usedInLoadout.add(`${type}\u0000${name}`);
+        }
+      }
+      for (const key of usedInLoadout) {
+        usage.set(key, (usage.get(key) ?? 0) + 1);
+        if (
+          loadout.ratingPercent != null &&
+          loadout.likes + loadout.dislikes >= MIN_RATING_VOTES
+        ) {
+          const values = ratings.get(key) ?? [];
+          values.push(loadout.ratingPercent);
+          ratings.set(key, values);
+        }
       }
     }
-    for (const key of usedInLoadout) {
-      attachmentUsageCounts.set(key, (attachmentUsageCounts.get(key) ?? 0) + 1);
+
+    const groups = new Map<string, AttachmentGroup>();
+    for (const attachment of attachments) {
+      if (!isConcreteAttachment(attachment.name)) continue;
+      const count =
+        usage.get(`${attachment.type}\u0000${attachment.name}`) ?? 0;
+      if (count === 0) continue;
+      const group = groups.get(attachment.type) ?? {
+        type: attachment.type,
+        typeImageUrl: attachment.typeImageUrl,
+        items: [],
+      };
+      group.items.push({
+        attachment,
+        count,
+        percent:
+          scopedLoadouts.length > 0 ? (count / scopedLoadouts.length) * 100 : 0,
+        avgRating: (() => {
+          const values =
+            ratings.get(`${attachment.type}\u0000${attachment.name}`) ?? [];
+          return values.length > 0 ? Math.round(average(values)) : null;
+        })(),
+      });
+      groups.set(attachment.type, group);
     }
-  }
 
-  const attachmentGroupsByType = new Map<string, AttachmentUsageGroup>();
-  for (const attachment of attachments) {
-    const count =
-      attachmentUsageCounts.get(`${attachment.type}\u0000${attachment.name}`) ??
-      0;
-    if (count === 0) continue;
+    return Array.from(groups.values())
+      .map((group) => ({
+        ...group,
+        items: group.items.sort(
+          (a, b) =>
+            b.count - a.count ||
+            a.attachment.name.localeCompare(b.attachment.name),
+        ),
+      }))
+      .sort((a, b) => b.items[0].count - a.items[0].count);
+  }, [attachments, scopedLoadouts]);
 
-    const current = attachmentGroupsByType.get(attachment.type) ?? {
-      type: attachment.type,
-      typeImageUrl: attachment.typeImageUrl,
-      items: [],
-    };
-    current.items.push({
-      attachment,
-      count,
-      percent:
-        scopedLoadouts.length > 0 ? (count / scopedLoadouts.length) * 100 : 0,
-    });
-    attachmentGroupsByType.set(attachment.type, current);
-  }
-
-  const attachmentGroups = Array.from(attachmentGroupsByType.values())
-    .map((group) => ({
-      ...group,
-      items: group.items.sort(
-        (a, b) =>
-          b.count - a.count ||
-          a.attachment.name.localeCompare(b.attachment.name),
+  const ratedBuilds = scopedLoadouts.filter(
+    (loadout) =>
+      loadout.ratingPercent != null &&
+      loadout.likes + loadout.dislikes >= MIN_RATING_VOTES,
+  ).length;
+  const attachmentSelections = scopedLoadouts.reduce(
+    (total, loadout) =>
+      total +
+      (loadout.weapons ?? []).reduce(
+        (weaponTotal, weapon) =>
+          weaponTotal +
+          Object.values(weapon.attachments ?? {}).filter(isConcreteAttachment)
+            .length,
+        0,
       ),
-    }))
-    .sort((a, b) => a.type.localeCompare(b.type));
-
-  const candidateWeapons =
-    scope === "category" && selectedCategory
-      ? weapons.filter((w) => w.type === selectedCategory)
-      : weapons;
-
-  const aggs: WeaponAgg[] = candidateWeapons.map((weapon) => {
-    const forWeapon = scopedLoadouts.filter(
-      (l) => l.weapons?.[0]?.id === weapon.id,
-    );
-    const rated = forWeapon.filter(
-      (l) => l.ratingPercent != null && l.likes + l.dislikes >= 5,
-    );
-    return {
-      weapon,
-      count: forWeapon.length,
-      avgRating:
-        rated.length >= MIN_RATED_LOADOUTS
-          ? Math.round(average(rated.map((l) => l.ratingPercent as number)))
-          : null,
-    };
-  });
-
-  const eligible =
-    rankMode === "community"
-      ? aggs.filter((a) => a.avgRating != null)
-      : aggs.filter((a) => a.count > 0);
-  const noData =
-    rankMode === "community"
-      ? aggs.filter((a) => a.avgRating == null)
-      : aggs.filter((a) => a.count === 0);
-
-  const tiers = new Map<TierLabel, WeaponAgg[]>(TIER_ORDER.map((t) => [t, []]));
-
-  if (rankMode === "community") {
-    for (const agg of eligible) {
-      const band = COMMUNITY_BANDS.find(
-        (b) => (agg.avgRating as number) >= b.min,
-      )!;
-      tiers.get(band.tier)!.push(agg);
-    }
-    for (const list of tiers.values())
-      list.sort((a, b) => (b.avgRating as number) - (a.avgRating as number));
-  } else {
-    const sorted = [...eligible].sort((a, b) => b.count - a.count);
-    const total = sorted.length;
-    sorted.forEach((agg, i) => {
-      const frac = (i + 1) / total;
-      const band = POPULARITY_BANDS.find((b) => frac <= b.frac)!;
-      tiers.get(band.tier)!.push(agg);
-    });
-  }
+    0,
+  );
 
   const scopeNeedsSelection =
     (scope === "tag" && selectedTagId == null) ||
     (scope === "category" && selectedCategory == null);
-
-  const weaponHref = (weapon: Weapon) =>
-    explorePath(selectedGame, weapon.type ? { category: weapon.type } : {});
 
   if (loading) {
     return (
@@ -423,7 +343,7 @@ export function MetaView() {
         selectedGame={selectedGame}
         onGameSelect={(id) => navigate(`/${id}/meta`)}
       >
-        <MetaViewSkeleton />
+        <DashboardSkeleton />
       </AppLayout>
     );
   }
@@ -433,193 +353,289 @@ export function MetaView() {
       selectedGame={selectedGame}
       onGameSelect={(id) => navigate(`/${id}/meta`)}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between gap-5 w-full flex-wrap">
-        <div>
-          <h1 className="text-3xl font-semibold flex items-center gap-3">
-            <NavIcon
-              icon="meta"
-              flat={<Crown className="w-7 h-7" />}
-              active
-              hovered={false}
-              size={32}
-            />
-            Meta
-          </h1>
-          <p className="text-[#8d898a] text-sm">
-            Community weapon tiers and attachment usage for {gameName}
-          </p>
+      <header>
+        <div
+          className="pointer-events-none absolute -right-24 -top-32 size-80 rounded-full opacity-15 blur-[100px]"
+          style={{ backgroundColor: accent }}
+        />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:justify-between">
+          <NavIcon
+            icon="meta"
+            flat={<Crown className="size-5" />}
+            active
+            hovered={false}
+            size={28}
+          />
+          <div className="flex flex-1 flex-col">
+            <h1 className="text-2xl font-semibold text-[#fafafa] sm:text-4xl">
+              {gameName} Meta
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-teritary">
+              See which weapons rise to the top, how often they appear, and the
+              attachments players trust most. Updated from published loadouts
+            </p>
+          </div>
         </div>
+      </header>
 
-        {section === "weapons" && (
+      <div className="flex flex-col gap-3">
+        <FilterPillGroup
+          type="single"
+          value={scope}
+          onValueChange={(value) => value && selectScope(value as Scope)}
+        >
+          <FilterPill value="all">Overview</FilterPill>
+          <FilterPill value="tag">By playstyle</FilterPill>
+          <FilterPill value="category">By category</FilterPill>
+        </FilterPillGroup>
+        {scope === "tag" && tags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            {tags.map((tag) => (
+              <Tag
+                key={tag.id}
+                color={tag.color}
+                onClick={() => setSelectedTagId(tag.id)}
+                className={
+                  selectedTagId === tag.id
+                    ? ""
+                    : "cursor-pointer opacity-45 hover:opacity-80"
+                }
+              >
+                {tag.name}
+              </Tag>
+            ))}
+          </div>
+        )}
+        {scope === "category" && categories.length > 0 && (
           <FilterPillGroup
             type="single"
-            value={rankMode}
-            onValueChange={(v) => v && setRankMode(v as RankMode)}
-            className="inline-flex rounded-xl border border-white/[0.12] p-1 shrink-0"
+            value={selectedCategory ?? ""}
+            onValueChange={(value) => value && setSelectedCategory(value)}
           >
-            <FilterPill value="community">
-              <Star className="w-4 h-4" />
-              Community Rated
-            </FilterPill>
-            <FilterPill value="popularity">
-              <TrendingUp className="w-4 h-4" />
-              Most Loadouts
-            </FilterPill>
+            {categories.map((category) => (
+              <FilterPill key={category} value={category} size="sm">
+                {category}
+              </FilterPill>
+            ))}
           </FilterPillGroup>
         )}
       </div>
 
-      {/* Meta content */}
-      <FilterPillGroup
-        type="single"
-        value={section}
-        onValueChange={(value) => value && setSection(value as MetaSection)}
-      >
-        <FilterPill value="weapons">Weapons</FilterPill>
-        <FilterPill value="attachments">Attachments</FilterPill>
-      </FilterPillGroup>
-
-      {/* Scope tabs */}
-      <FilterPillGroup
-        type="single"
-        value={scope}
-        onValueChange={(v) => v && selectScope(v as Scope)}
-      >
-        {(
-          [
-            { id: "all", label: "All" },
-            { id: "tag", label: "By Tag" },
-            { id: "category", label: "By Category" },
-          ] as const
-        ).map((opt) => (
-          <FilterPill key={opt.id} value={opt.id}>
-            {opt.label}
-          </FilterPill>
-        ))}
-      </FilterPillGroup>
-
-      {/* Secondary pill row for the active scope */}
-      {scope === "tag" && tags.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          {tags.map((tag) => (
-            <Tag
-              key={tag.id}
-              color={tag.color}
-              onClick={() => setSelectedTagId(tag.id)}
-              className={
-                selectedTagId === tag.id ? "" : "opacity-50 hover:opacity-80"
-              }
-            >
-              {tag.name}
-            </Tag>
-          ))}
-        </div>
-      )}
-      {scope === "category" && categories.length > 0 && (
-        <FilterPillGroup
-          type="single"
-          value={selectedCategory ?? ""}
-          onValueChange={(v) => v && setSelectedCategory(v)}
-        >
-          {categories.map((cat) => (
-            <FilterPill key={cat} value={cat} size="sm">
-              {cat}
-            </FilterPill>
-          ))}
-        </FilterPillGroup>
-      )}
-
-      {loadouts.length === 0 ? (
-        <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
-          <p className="text-[#8d898a]">
-            No loadouts published for {gameName} yet -- come back once the
-            community has ranked some builds.
-          </p>
+      {error ? (
+        <div className="rounded-2xl border border-red-400/15 bg-red-400/[0.05] p-12 text-center text-secondary">
+          {error}
         </div>
       ) : scopeNeedsSelection ? (
-        <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
-          <p className="text-secondary">
-            Pick a {scope === "tag" ? "tag" : "category"} above to see its{" "}
-            {section === "weapons" ? "tier list" : "attachment usage"}.
-          </p>
+        <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-12 text-center text-secondary">
+          Choose a {scope === "tag" ? "playstyle" : "weapon category"} to build
+          the dashboard.
         </div>
-      ) : section === "attachments" ? (
-        attachmentGroups.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {attachmentGroups.map((group) => (
-              <AttachmentUsageCard
-                key={group.type}
-                group={group}
-                accent={accent}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
-            <p className="text-secondary">
-              No attachment usage data is available for these loadouts yet.
-            </p>
-          </div>
-        )
+      ) : scopedLoadouts.length === 0 ? (
+        <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-12 text-center text-secondary">
+          No published loadouts match this view yet.
+        </div>
       ) : (
-        <div className="flex flex-col gap-4 w-full">
-          {TIER_ORDER.map((tier) => {
-            const list = tiers.get(tier) ?? [];
-            if (list.length === 0) return null;
-            return (
-              <div
-                key={tier}
-                className="flex items-stretch rounded-2xl overflow-hidden"
-                style={{
-                  background: `linear-gradient(90deg, ${TIER_COLOR[tier]}24 0%, ${TIER_COLOR[tier]}0d 38%, transparent 100%)`,
-                }}
+        <>
+          <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+            <StatCard
+              icon={Layers3}
+              label="Published builds"
+              value={scopedLoadouts.length}
+              accent={accent}
+            />
+            <StatCard
+              icon={Target}
+              label="Active weapons"
+              value={weaponMetrics.length}
+              accent={accent}
+            />
+            <StatCard
+              icon={Trophy}
+              label="Rated builds"
+              value={ratedBuilds}
+              accent={accent}
+            />
+            <StatCard
+              icon={Paperclip}
+              label="Attachment picks"
+              value={attachmentSelections}
+              accent={accent}
+            />
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2>Top weapons</h2>
+                <p className="mt-1 text-sm text-teritary">
+                  Community rating leads the ranking, with loadout usage
+                  breaking ties.
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                onClick={() => navigate(weaponMetaListPath(selectedGame))}
+                className="group hidden shrink-0 items-center gap-2 text-sm text-secondary transition-colors hover:text-[#fafafa] sm:flex"
+              >
+                Full weapon list
+                <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </Button>
+            </div>
+
+            {weaponMetrics[0] && (
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    weaponMetaPath(
+                      selectedGame,
+                      String(weaponMetrics[0].weapon.id),
+                    ),
+                  )
+                }
+                className="group relative grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.035] p-4 text-left transition-colors hover:bg-white/[0.055] sm:grid-cols-[3rem_10rem_minmax(0,1fr)_8rem_7rem_5rem_auto] sm:p-5"
               >
                 <div
-                  className="w-16 rounded-2xl shrink-0 flex items-center justify-center text-2xl font-heading"
+                  className="pointer-events-none absolute inset-0 opacity-[0.06]"
                   style={{
-                    borderLeft: `2px solid ${TIER_COLOR[tier]}26`,
-                    color: TIER_COLOR[tier],
+                    background: `linear-gradient(90deg, ${accent}, transparent 65%)`,
                   }}
-                >
-                  {tier}
+                />
+                <span className="relative font-mono text-lg text-[#fafafa]">
+                  #1
+                </span>
+                <div className="relative hidden sm:block">
+                  <WeaponImage
+                    imageUrl={weaponMetrics[0].weapon.imageUrl}
+                    alt={weaponMetrics[0].weapon.name}
+                  />
                 </div>
-                <div className="grid min-w-0 flex-1 grid-cols-2 gap-3 p-4 sm:grid-cols-3 xl:grid-cols-5">
-                  {list.map(({ weapon, count, avgRating }) => (
-                    <WeaponCard
-                      key={weapon.id}
-                      weapon={weapon}
-                      onSelect={() => navigate(weaponHref(weapon))}
-                      stat={
-                        rankMode === "community"
-                          ? `${avgRating}%`
-                          : `${count} loadout${count === 1 ? "" : "s"}`
+                <div className="relative min-w-0">
+                  <p className="truncate font-mono text-base uppercase text-[#fafafa] sm:text-lg">
+                    {weaponMetrics[0].weapon.name}
+                  </p>
+                  <p className="mt-1 text-xs text-teritary">
+                    Top community weapon
+                  </p>
+                </div>
+                <div className="relative hidden sm:block">
+                  <p className="truncate text-sm text-secondary">
+                    {weaponMetrics[0].weapon.type ?? "Unclassified"}
+                  </p>
+                  <p className="mt-1 text-xs text-teritary">weapon type</p>
+                </div>
+                <div className="relative hidden sm:block">
+                  <p className="font-mono text-sm text-[#fafafa]">
+                    {weaponMetrics[0].count}
+                  </p>
+                  <p className="mt-1 text-xs text-teritary">loadouts</p>
+                </div>
+                <div className="relative flex justify-end">
+                  <RatingRing
+                    percent={weaponMetrics[0].avgRating}
+                    size={48}
+                    fallbackLabel="—"
+                  />
+                </div>
+                <ChevronRight className="relative hidden size-4 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70 sm:block" />
+              </button>
+            )}
+
+            {weaponMetrics.length > 1 && (
+              <div className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+                <div className="divide-y divide-white/[0.06]">
+                  {weaponMetrics.slice(1, 5).map((metric, metricIndex) => (
+                    <button
+                      key={metric.weapon.id}
+                      type="button"
+                      onClick={() =>
+                        navigate(weaponMetaPath(selectedGame, metric.weapon.id))
                       }
-                    />
+                      className="group relative flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.035] sm:gap-4 sm:px-5"
+                    >
+                      <span className="w-7 shrink-0 font-mono text-xs text-teritary">
+                        #{metricIndex + 2}
+                      </span>
+                      <div className="w-20 shrink-0 sm:w-28">
+                        <WeaponImage
+                          imageUrl={metric.weapon.imageUrl}
+                          alt={metric.weapon.name}
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="block truncate font-mono text-sm uppercase text-[#fafafa]">
+                          {metric.weapon.name}
+                        </span>
+                        <div className="mt-2 h-1.5 max-w-md overflow-hidden rounded-full bg-white/[0.07]">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${metric.share}%`,
+                              backgroundColor: accent,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="hidden w-32 shrink-0 md:block">
+                        <p className="truncate text-sm text-secondary">
+                          {metric.weapon.type ?? "Unclassified"}
+                        </p>
+                        <p className="text-xs text-teritary">weapon type</p>
+                      </div>
+                      <div className="hidden w-24 shrink-0 sm:block">
+                        <p className="font-mono text-sm text-[#fafafa]">
+                          {Math.round(metric.share)}%
+                        </p>
+                        <p className="text-xs text-teritary">usage</p>
+                      </div>
+                      <div className="flex w-16 shrink-0 justify-end">
+                        <RatingRing
+                          percent={metric.avgRating}
+                          size={42}
+                          fallbackLabel="—"
+                        />
+                      </div>
+                      <ChevronRight className="size-4 shrink-0 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70" />
+                    </button>
                   ))}
                 </div>
               </div>
-            );
-          })}
+            )}
 
-          {noData.length > 0 && (
-            <div className="flex flex-col gap-3">
-              <p className="text-[10px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
-                Not enough data yet
-              </p>
-              <div className="flex flex-wrap gap-3">
-                {noData.map(({ weapon }) => (
-                  <WeaponCard
-                    key={weapon.id}
-                    weapon={weapon}
-                    onSelect={() => navigate(weaponHref(weapon))}
-                    className="w-[132px] shrink-0 opacity-60 hover:opacity-100"
+            <button
+              type="button"
+              onClick={() => navigate(weaponMetaListPath(selectedGame))}
+              className="group flex items-center justify-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3 text-sm text-secondary transition-colors hover:bg-white/[0.05] hover:text-[#fafafa] sm:hidden"
+            >
+              Full weapon list
+              <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </button>
+          </section>
+
+          {attachmentGroups.length > 0 && (
+            <section className="flex flex-col gap-4">
+              <div>
+                <h2>Attachment trends</h2>
+                {/* <p className="mt-1 text-sm text-teritary">
+                  Top concrete attachment picks by slot.
+                </p> */}
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {attachmentGroups.map((group) => (
+                  <AttachmentTrendCard
+                    key={group.type}
+                    group={group}
+                    onSelect={(attachment) =>
+                      navigate(
+                        attachmentMetaPath(selectedGame, String(attachment.id)),
+                      )
+                    }
                   />
                 ))}
               </div>
-            </div>
+            </section>
           )}
-        </div>
+        </>
       )}
     </AppLayout>
   );
