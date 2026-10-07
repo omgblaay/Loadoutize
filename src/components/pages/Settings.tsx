@@ -12,7 +12,13 @@ import { Upload } from "lucide-react";
 import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
 import { ROLE_TAG_META, ROLE_TAG_ORDER, type RoleTag } from "@/lib/roles";
 import { Button } from "@/components/atoms/Button";
-import { InstagramIcon, TiktokIcon, TwitchIcon, YoutubeIcon, KickIcon } from "@/assets/icons/socials/index";
+import {
+  InstagramIcon,
+  TiktokIcon,
+  TwitchIcon,
+  YoutubeIcon,
+  KickIcon,
+} from "@/assets/icons/socials/index";
 import { CompactPageHeader } from "@/components/molecules/CompactPageHeader";
 import { PasswordStrengthMeter } from "@/components/molecules/PasswordStrengthMeter";
 import { PASSWORD_MIN_LENGTH, isPasswordStrong } from "@/lib/password";
@@ -23,7 +29,11 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_GIF_BYTES = 2 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
-const LINK_FIELDS: { key: "tiktok" | "instagram" | "youtube" | "twitch" | "kick"; label: string; icon: any }[] = [
+const LINK_FIELDS: {
+  key: "tiktok" | "instagram" | "youtube" | "twitch" | "kick";
+  label: string;
+  icon: any;
+}[] = [
   { key: "tiktok", label: "TikTok", icon: TiktokIcon },
   { key: "instagram", label: "Instagram", icon: InstagramIcon },
   { key: "youtube", label: "YouTube", icon: YoutubeIcon },
@@ -65,7 +75,10 @@ function SettingsSkeleton() {
             <Skeleton className={cn("h-3 w-16", block)} />
             <div className="flex gap-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className={cn("h-8 w-20 rounded-full", block)} />
+                <Skeleton
+                  key={i}
+                  className={cn("h-8 w-20 rounded-full", block)}
+                />
               ))}
             </div>
           </div>
@@ -126,9 +139,12 @@ export function Settings() {
 
   useEffect(() => {
     if (!accessToken) return;
-    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/users/me`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
+    fetch(
+      `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/users/me`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    )
       .then((r) => r.json())
       .then((data) => {
         if (!data.profile) return;
@@ -137,7 +153,12 @@ export function Settings() {
         setRoleTag(data.profile.roleTag ?? "player");
         setAvatarUrl(data.profile.avatarUrl ?? null);
         setLinks(
-          Object.fromEntries(Object.entries(data.profile.links ?? {}).map(([k, v]) => [k, (v as string) ?? ""]))
+          Object.fromEntries(
+            Object.entries(data.profile.links ?? {}).map(([k, v]) => [
+              k,
+              (v as string) ?? "",
+            ]),
+          ),
         );
       })
       .catch((error) => console.error("Error fetching profile:", error))
@@ -154,9 +175,12 @@ export function Settings() {
       setAvatarError("Avatar must be a PNG, JPEG, WEBP, or GIF image");
       return;
     }
-    const maxBytes = file.type === "image/gif" ? MAX_GIF_BYTES : MAX_IMAGE_BYTES;
+    const maxBytes =
+      file.type === "image/gif" ? MAX_GIF_BYTES : MAX_IMAGE_BYTES;
     if (file.size > maxBytes) {
-      setAvatarError(`File too large -- max ${Math.round(maxBytes / 1024 / 1024)}MB`);
+      setAvatarError(
+        `File too large -- max ${Math.round(maxBytes / 1024 / 1024)}MB`,
+      );
       return;
     }
 
@@ -166,14 +190,21 @@ export function Settings() {
       form.append("file", file);
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/users/me/avatar`,
-        { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: form }
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}` },
+          body: form,
+        },
       );
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to upload avatar");
+      if (!response.ok)
+        throw new Error(data.error || "Failed to upload avatar");
       setAvatarUrl(data.profile.avatarUrl);
       await refreshProfile();
     } catch (err) {
-      setAvatarError(err instanceof Error ? err.message : "Failed to upload avatar");
+      setAvatarError(
+        err instanceof Error ? err.message : "Failed to upload avatar",
+      );
     } finally {
       setUploadingAvatar(false);
     }
@@ -190,7 +221,9 @@ export function Settings() {
       return;
     }
     if (!NICKNAME_PATTERN.test(nickname)) {
-      setNicknameError("Nickname must be 3-20 characters: lowercase letters, numbers, - or _");
+      setNicknameError(
+        "Nickname must be 3-20 characters: lowercase letters, numbers, - or _",
+      );
       nicknameInputRef.current?.focus();
       return;
     }
@@ -201,9 +234,12 @@ export function Settings() {
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/users/me`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
           body: JSON.stringify({ name, nickname, roleTag, links }),
-        }
+        },
       );
       const data = await response.json();
       if (!response.ok) {
@@ -227,7 +263,9 @@ export function Settings() {
       await refreshProfile();
       toast.success("Profile saved");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to save profile");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to save profile",
+      );
     } finally {
       setSaving(false);
     }
@@ -238,7 +276,9 @@ export function Settings() {
     setPasswordError("");
 
     if (!isPasswordStrong(newPassword)) {
-      setPasswordError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters and include a number and a special character`);
+      setPasswordError(
+        `Password must be at least ${PASSWORD_MIN_LENGTH} characters and include a number and a special character`,
+      );
       return;
     }
     if (newPassword !== confirmNewPassword) {
@@ -248,22 +288,30 @@ export function Settings() {
 
     setPasswordSaving(true);
     try {
-      const response = await fetch(`https://${projectId}.supabase.co/auth/v1/user`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-          apikey: publicAnonKey,
+      const response = await fetch(
+        `https://${projectId}.supabase.co/auth/v1/user`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+            apikey: publicAnonKey,
+          },
+          body: JSON.stringify({ password: newPassword }),
         },
-        body: JSON.stringify({ password: newPassword }),
-      });
+      );
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error_description || data.msg || "Failed to change password");
+      if (!response.ok)
+        throw new Error(
+          data.error_description || data.msg || "Failed to change password",
+        );
       setNewPassword("");
       setConfirmNewPassword("");
       toast.success("Password updated");
     } catch (err) {
-      setPasswordError(err instanceof Error ? err.message : "Failed to change password");
+      setPasswordError(
+        err instanceof Error ? err.message : "Failed to change password",
+      );
     } finally {
       setPasswordSaving(false);
     }
@@ -286,8 +334,12 @@ export function Settings() {
       onGameSelect={(id) => navigate(explorePath(id))}
     >
       <div className="flex flex-col gap-1">
-        <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">Settings</h1>
-        <p className="text-[14px] text-[#8d898a]">Manage your public profile and account.</p>
+        <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">
+          Settings
+        </h1>
+        <p className="text-[14px] text-[#8d898a]">
+          Manage your public profile and account.
+        </p>
       </div>
       <CompactPageHeader
         title="Settings"
@@ -300,12 +352,18 @@ export function Settings() {
 
       <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
         <h2>Profile</h2>
-                <div className="flex items-center gap-5">
+        <div className="flex items-center gap-5">
           <div className="w-20 h-20 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              <img
+                src={avatarUrl}
+                alt=""
+                className="w-full h-full object-cover"
+              />
             ) : (
-              <span className="text-2xl font-semibold text-[#fafafa]">{name?.[0]?.toUpperCase() ?? "U"}</span>
+              <span className="text-2xl font-semibold ">
+                {name?.[0]?.toUpperCase() ?? "U"}
+              </span>
             )}
           </div>
           <div className="flex flex-col gap-2 items-start">
@@ -326,13 +384,19 @@ export function Settings() {
               <Upload className="size-4" />
               {uploadingAvatar ? "Uploading…" : "Upload image"}
             </Button>
-            <p className="text-[12px] text-[#8d898a]">PNG, JPEG, WEBP, or GIF. Max 5MB (2MB for GIFs).</p>
-            {avatarError && <p className="text-[12px] text-[#ef9696]">{avatarError}</p>}
+            <p className="text-[12px] text-[#8d898a]">
+              PNG, JPEG, WEBP, or GIF. Max 5MB (2MB for GIFs).
+            </p>
+            {avatarError && (
+              <p className="text-[12px] text-[#ef9696]">{avatarError}</p>
+            )}
           </div>
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">Name</label>
+            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+              Name
+            </label>
             <input
               ref={nameInputRef}
               type="text"
@@ -343,16 +407,20 @@ export function Settings() {
               }}
               aria-invalid={!!nameError}
               className={cn(
-                "h-12 rounded-xl border px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none transition-colors",
+                "h-12 rounded-xl border px-4 text-[14px]  placeholder:text-[#8d898a] outline-none transition-colors",
                 nameError
                   ? "bg-[#241214] border-[#d4183d] focus:border-[#d4183d]"
-                  : "bg-white/[0.04] border-white/[0.07] focus:border-white/30"
+                  : "bg-white/[0.04] border-white/[0.07] focus:border-white/30",
               )}
             />
-            {nameError && <p className="text-[12px] text-[#ef9696]">{nameError}</p>}
+            {nameError && (
+              <p className="text-[12px] text-[#ef9696]">{nameError}</p>
+            )}
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">Nickname</label>
+            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+              Nickname
+            </label>
             <input
               ref={nicknameInputRef}
               type="text"
@@ -364,16 +432,18 @@ export function Settings() {
               pattern="[a-z0-9_-]{3,20}"
               aria-invalid={!!nicknameError}
               className={cn(
-                "h-12 rounded-xl border px-4 text-[14px] font-mono text-[#fafafa] placeholder:text-[#8d898a] placeholder:font-sans outline-none transition-colors",
+                "h-12 rounded-xl border px-4 text-[14px] font-mono  placeholder:text-[#8d898a] placeholder:font-sans outline-none transition-colors",
                 nicknameError
                   ? "bg-[#241214] border-[#d4183d] focus:border-[#d4183d]"
-                  : "bg-white/[0.04] border-white/[0.07] focus:border-white/30"
+                  : "bg-white/[0.04] border-white/[0.07] focus:border-white/30",
               )}
             />
             {nicknameError ? (
               <p className="text-[12px] text-[#ef9696]">{nicknameError}</p>
             ) : (
-              <p className="text-[12px] text-[#8d898a]">Your public profile: /u/{nickname || "…"}</p>
+              <p className="text-[12px] text-[#8d898a]">
+                Your public profile: /u/{nickname || "…"}
+              </p>
             )}
           </div>
 
@@ -381,7 +451,11 @@ export function Settings() {
             <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
               You are a...
             </label>
-            <FilterPillGroup type="single" value={roleTag} onValueChange={(v) => v && setRoleTag(v as RoleTag)}>
+            <FilterPillGroup
+              type="single"
+              value={roleTag}
+              onValueChange={(v) => v && setRoleTag(v as RoleTag)}
+            >
               {ROLE_TAG_ORDER.map((tag) => (
                 <FilterPill key={tag} value={tag} size="sm">
                   {ROLE_TAG_META[tag].label}
@@ -392,24 +466,25 @@ export function Settings() {
 
           {LINK_FIELDS.map(({ key, label, icon: Icon }) => (
             <div key={key} className="flex flex-col gap-2">
-              <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">{label}</label>
+              <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+                {label}
+              </label>
               <div className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 flex items-center gap-2 focus-within:border-white/30 transition-colors">
                 <Icon className="w-4 h-4 shrink-0" />
                 <input
                   type="text"
                   value={links[key] ?? ""}
-                  onChange={(e) => setLinks((prev) => ({ ...prev, [key]: e.target.value }))}
+                  onChange={(e) =>
+                    setLinks((prev) => ({ ...prev, [key]: e.target.value }))
+                  }
                   placeholder="Your nickname"
-                  className="flex-1 bg-transparent text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none"
+                  className="flex-1 bg-transparent text-[14px]  placeholder:text-[#8d898a] outline-none"
                 />
               </div>
             </div>
           ))}
 
-          <Button
-            onClick={saveProfile}
-            disabled={saving}
-          >
+          <Button onClick={saveProfile} disabled={saving}>
             {saving ? "Saving…" : "Save profile"}
           </Button>
         </div>
@@ -433,10 +508,10 @@ export function Settings() {
               placeholder={`Minimum ${PASSWORD_MIN_LENGTH} characters`}
               aria-invalid={!!passwordError}
               className={cn(
-                "h-12 rounded-xl border px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none transition-colors",
+                "h-12 rounded-xl border px-4 text-[14px]  placeholder:text-[#8d898a] outline-none transition-colors",
                 passwordError
                   ? "bg-[#241214] border-[#d4183d] focus:border-[#d4183d]"
-                  : "bg-white/[0.04] border-white/[0.07] focus:border-white/30"
+                  : "bg-white/[0.04] border-white/[0.07] focus:border-white/30",
               )}
             />
             <PasswordStrengthMeter password={newPassword} />
@@ -455,14 +530,18 @@ export function Settings() {
               }}
               minLength={PASSWORD_MIN_LENGTH}
               placeholder="Re-enter new password"
-              className="h-12 rounded-xl border px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none transition-colors bg-white/[0.04] border-white/[0.07] focus:border-white/30"
+              className="h-12 rounded-xl border px-4 text-[14px]  placeholder:text-[#8d898a] outline-none transition-colors bg-white/[0.04] border-white/[0.07] focus:border-white/30"
             />
             {confirmNewPassword && confirmNewPassword !== newPassword && (
-              <p className="text-[14px] text-[#ef9696]">Passwords do not match</p>
+              <p className="text-[14px] text-[#ef9696]">
+                Passwords do not match
+              </p>
             )}
           </div>
 
-          {passwordError && <p className="text-[14px] text-[#ef9696]">{passwordError}</p>}
+          {passwordError && (
+            <p className="text-[14px] text-[#ef9696]">{passwordError}</p>
+          )}
 
           <Button
             onClick={savePassword}

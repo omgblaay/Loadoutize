@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/molecules/Carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/molecules/Carousel";
 import { LoadoutWall } from "@/components/organisms/LoadoutWall";
 import { SHOWCASE_SLIDES } from "@/lib/showcaseSlides";
 import { cn } from "@/lib/utils";
@@ -25,12 +30,20 @@ export function JoinShowcase() {
       <LoadoutWall />
 
       <div className="relative h-full flex flex-col justify-end p-12 xl:p-16">
-        <Carousel setApi={setApi} opts={{ loop: true }} className="w-full max-w-lg">
+        <Carousel
+          setApi={setApi}
+          opts={{ loop: true }}
+          className="w-full max-w-lg"
+        >
           <CarouselContent>
             {SHOWCASE_SLIDES.map((slide) => (
               <CarouselItem key={slide.title}>
-                <h2 className="text-3xl font-bold text-[#fafafa] mb-3">{slide.title}</h2>
-                <p className="text-neutral-400 text-base leading-relaxed">{slide.body}</p>
+                <h2 className="text-3xl font-bold text-[#fafafa] mb-3">
+                  {slide.title}
+                </h2>
+                <p className="text-neutral-400 text-base leading-relaxed">
+                  {slide.body}
+                </p>
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -45,7 +58,7 @@ export function JoinShowcase() {
               onClick={() => api?.scrollTo(i)}
               className={cn(
                 "h-1.5 rounded-full transition-all",
-                i === current ? "w-8 bg-[#fafafa]" : "w-1.5 bg-white/20"
+                i === current ? "w-8 bg-[#fafafa]" : "w-1.5 bg-white/20",
               )}
             />
           ))}
@@ -54,4 +67,3 @@ export function JoinShowcase() {
     </div>
   );
 }
-

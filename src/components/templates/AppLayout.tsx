@@ -13,6 +13,7 @@ import { SideNav } from "@/components/organisms/SideNav";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { TopNavBar } from "@/components/organisms/TopNavBar";
 import { Footer } from "@/components/organisms/Footer";
+import { compareWeaponCategories } from "@/lib/weaponCategories";
 // import { SpeedInsights } from "@vercel/speed-insights/next"
 
 import { Globe } from "lucide-react";
@@ -82,7 +83,7 @@ export function AppLayout({
           (w) => [w.type, { name: w.type, typeShort: w.typeShort }] as const,
         ),
     ).values(),
-  ).slice(0, 6);
+  ).sort((a, b) => compareWeaponCategories(a.name, b.name));
 
   const isHome = location.pathname === "/home";
   const isExplore = location.pathname === "/explore";

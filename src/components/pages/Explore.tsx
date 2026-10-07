@@ -33,6 +33,7 @@ import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
+import { sortWeaponCategories } from "@/lib/weaponCategories";
 import { CompactPageHeader } from "@/components/molecules/CompactPageHeader";
 import { Button } from "@/components/atoms/Button";
 import { ResponsiveDialog } from "@/components/molecules/ResponsiveDialog";
@@ -176,9 +177,9 @@ export function Explore() {
   const meta = gameMeta[selectedGame] ?? gameMeta.blackops7;
   const { name: gameName } = useGameName(selectedGame);
   usePageTitle(`Explore • Loadoutize • ${gameName}`);
-  const categories = Array.from(
-    new Set(weapons.map((w) => w.type).filter((t): t is string => Boolean(t))),
-  ).slice(0, 6);
+  const categories = sortWeaponCategories(
+    weapons.map((w) => w.type).filter((t): t is string => Boolean(t)),
+  );
 
   const weaponById = new Map(weapons.map((w) => [w.id, w]));
   const activeWeapon = activeWeaponId
@@ -347,7 +348,7 @@ export function Explore() {
             onClick={() => setSortMenuOpen((v) => !v)}
             aria-expanded={sortMenuOpen}
             aria-haspopup="menu"
-            className="h-10 px-3.5 rounded-xl border border-white/[0.18] flex items-center gap-2 text-[#fafafa]"
+            className="h-10 px-3.5 rounded-xl border border-white/[0.18] flex items-center gap-2 "
           >
             <ArrowUpDown className="w-4 h-4" />
             <span>{sortMode === "rating" ? "Rating" : "Published date"}</span>
@@ -437,7 +438,7 @@ export function Explore() {
         <div className="flex flex-col gap-6 pt-2">
           <div className="flex flex-col gap-3">
             <div>
-              <h3 className="font-medium font-sans text-[#fafafa]">Weapon</h3>
+              <h3 className="font-medium font-sans ">Weapon</h3>
               <p className="text-sm text-teritary">
                 Show loadouts using one specific weapon.
               </p>
@@ -455,7 +456,7 @@ export function Explore() {
                 />
               )}
               <span className="flex-1 min-w-0">
-                <span className="block text-sm text-[#fafafa] truncate">
+                <span className="block text-sm  truncate">
                   {draftWeapon?.name ?? "Pick a weapon"}
                 </span>
                 <span className="block text-xs text-teritary truncate">
@@ -468,7 +469,7 @@ export function Explore() {
 
           <div className="flex flex-col gap-3">
             <div>
-              <h3 className="font-medium font-sans text-[#fafafa]">
+              <h3 className="font-medium font-sans ">
                 Or pick a weapon category
               </h3>
               <p className="text-sm text-teritary">
@@ -495,9 +496,7 @@ export function Explore() {
           {tags.length > 0 && (
             <div className="flex flex-col gap-3">
               <div>
-                <h3 className="font-medium font-sans text-[#fafafa]">
-                  Loadout style
-                </h3>
+                <h3 className="font-medium font-sans ">Loadout style</h3>
                 {/* <p className="text-sm text-teritary">
                   Narrow results to a community tag.
                 </p> */}
@@ -594,9 +593,7 @@ export function Explore() {
                   )}
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm text-[#fafafa] truncate">
-                    {weapon.name}
-                  </span>
+                  <span className="block text-sm  truncate">{weapon.name}</span>
                   <span className="block text-xs text-teritary truncate">
                     {weapon.type}
                   </span>
@@ -622,10 +619,7 @@ export function Explore() {
               : "No loadouts match your filters."}
           </p>
           {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="mt-3 text-[14px] text-[#fafafa]"
-            >
+            <button onClick={clearFilters} className="mt-3 text-[14px] ">
               Clear filters
             </button>
           )}

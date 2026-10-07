@@ -294,7 +294,7 @@ export function SideNav({
             onClick={() => go("/home")}
             aria-label="Home"
             aria-current={isHome ? "page" : undefined}
-            className={`flex flex-col items-center justify-center gap-0.5 ${isHome ? "text-[#fafafa]" : "text-[#8d898a]"}`}
+            className={`flex flex-col items-center justify-center gap-0.5 ${isHome ? "" : "text-[#8d898a]"}`}
             {...hoverHandlers("home")}
           >
             <NavIcon
@@ -311,7 +311,7 @@ export function SideNav({
             onClick={() => go(explorePath(selectedGame))}
             aria-label="Explore"
             aria-current={isExplore ? "page" : undefined}
-            className={`flex flex-col items-center justify-center gap-0.5 ${isExplore ? "text-[#fafafa]" : "text-[#8d898a]"}`}
+            className={`flex flex-col items-center justify-center gap-0.5 ${isExplore ? "" : "text-[#8d898a]"}`}
             {...hoverHandlers("explore")}
           >
             <NavIcon
@@ -343,7 +343,7 @@ export function SideNav({
             onClick={() => go(`/${selectedGame}/meta`)}
             aria-label="Meta"
             aria-current={isMeta ? "page" : undefined}
-            className={`flex flex-col items-center justify-center gap-0.5 ${isMeta ? "text-[#fafafa]" : "text-[#8d898a]"}`}
+            className={`flex flex-col items-center justify-center gap-0.5 ${isMeta ? "" : "text-[#8d898a]"}`}
             {...hoverHandlers("meta")}
           >
             <NavIcon
@@ -360,7 +360,7 @@ export function SideNav({
             onClick={() => go(`/${selectedGame}/community`)}
             aria-label="Community"
             aria-current={isCommunity ? "page" : undefined}
-            className={`flex flex-col items-center justify-center gap-0.5 ${isCommunity ? "text-[#fafafa]" : "text-[#8d898a]"}`}
+            className={`flex flex-col items-center justify-center gap-0.5 ${isCommunity ? "" : "text-[#8d898a]"}`}
             {...hoverHandlers("community")}
           >
             <NavIcon

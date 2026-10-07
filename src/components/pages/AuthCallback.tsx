@@ -13,7 +13,13 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_GIF_BYTES = 2 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
-type NicknameStatus = "idle" | "invalid" | "checking" | "available" | "taken" | "error";
+type NicknameStatus =
+  | "idle"
+  | "invalid"
+  | "checking"
+  | "available"
+  | "taken"
+  | "error";
 
 // Handles the redirect back from Supabase's Google OAuth flow: adopts the
 // access token from the URL fragment, then either sends the user home (they
@@ -21,10 +27,17 @@ type NicknameStatus = "idle" | "invalid" | "checking" | "available" | "taken" | 
 export function AuthCallback() {
   usePageTitle("Loadoutize • Sign in");
   const navigate = useNavigate();
-  const { accessToken, pendingOAuthAvatarUrl, loginWithAccessToken, completeProfile } = useAuth();
+  const {
+    accessToken,
+    pendingOAuthAvatarUrl,
+    loginWithAccessToken,
+    completeProfile,
+  } = useAuth();
   const ranRef = useRef(false);
 
-  const [phase, setPhase] = useState<"processing" | "onboarding" | "error">("processing");
+  const [phase, setPhase] = useState<"processing" | "onboarding" | "error">(
+    "processing",
+  );
   const [errorMessage, setErrorMessage] = useState("");
 
   const [nickname, setNickname] = useState("");
@@ -68,7 +81,9 @@ export function AuthCallback() {
         }
       })
       .catch((err) => {
-        setErrorMessage(err instanceof Error ? err.message : "Failed to sign in");
+        setErrorMessage(
+          err instanceof Error ? err.message : "Failed to sign in",
+        );
         setPhase("error");
       });
     // Intentionally run once -- loginWithAccessToken/navigate identity churn shouldn't re-trigger this.
@@ -90,10 +105,11 @@ export function AuthCallback() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/nickname-available?nickname=${encodeURIComponent(value)}`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } },
       );
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to check nickname");
+      if (!response.ok)
+        throw new Error(data.error || "Failed to check nickname");
       setNicknameStatus(data.available ? "available" : "taken");
       return !!data.available;
     } catch {
@@ -105,7 +121,9 @@ export function AuthCallback() {
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
     setNickname(value);
-    setNicknameStatus(value && !NICKNAME_PATTERN.test(value) ? "invalid" : "idle");
+    setNicknameStatus(
+      value && !NICKNAME_PATTERN.test(value) ? "invalid" : "idle",
+    );
   };
 
   const handleNicknameBlur = () => {
@@ -124,9 +142,12 @@ export function AuthCallback() {
       setAvatarError("Avatar must be a PNG, JPEG, WEBP, or GIF image");
       return;
     }
-    const maxBytes = file.type === "image/gif" ? MAX_GIF_BYTES : MAX_IMAGE_BYTES;
+    const maxBytes =
+      file.type === "image/gif" ? MAX_GIF_BYTES : MAX_IMAGE_BYTES;
     if (file.size > maxBytes) {
-      setAvatarError(`File too large -- max ${Math.round(maxBytes / 1024 / 1024)}MB`);
+      setAvatarError(
+        `File too large -- max ${Math.round(maxBytes / 1024 / 1024)}MB`,
+      );
       return;
     }
     setAvatarFile(file);
@@ -150,7 +171,9 @@ export function AuthCallback() {
       await completeProfile(nickname, avatarFile, roleTag);
       navigate("/home", { replace: true });
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to finish registration");
+      setSubmitError(
+        err instanceof Error ? err.message : "Failed to finish registration",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -179,20 +202,32 @@ export function AuthCallback() {
 
   const avatarSrc = avatarPreviewUrl ?? pendingOAuthAvatarUrl;
   const finishDisabled =
-    submitting || !nickname || nicknameStatus === "checking" || nicknameStatus === "taken" || nicknameStatus === "invalid";
+    submitting ||
+    !nickname ||
+    nicknameStatus === "checking" ||
+    nicknameStatus === "taken" ||
+    nicknameStatus === "invalid";
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#0a0909] px-4 py-10">
       <div className="bg-[#141414] border border-white/5 max-w-md w-full p-8 rounded-xl flex flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#fafafa] mb-2">Complete your profile</h1>
-          <p className="text-neutral-400 font-medium text-sm">One last step before you're in.</p>
+          <h1 className="text-2xl font-bold text-[#fafafa] mb-2">
+            Complete your profile
+          </h1>
+          <p className="text-neutral-400 font-medium text-sm">
+            One last step before you're in.
+          </p>
         </div>
 
         <div className="flex items-center gap-5">
           <div className="w-20 h-20 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
             {avatarSrc ? (
-              <img src={avatarSrc} alt="" className="w-full h-full object-cover" />
+              <img
+                src={avatarSrc}
+                alt=""
+                className="w-full h-full object-cover"
+              />
             ) : (
               <span className="text-2xl font-semibold text-[#fafafa]">?</span>
             )}
@@ -213,8 +248,12 @@ export function AuthCallback() {
               <Upload className="w-4 h-4" />
               Change photo
             </button>
-            <p className="text-xs text-neutral-500">PNG, JPEG, WEBP, or GIF. Max 5MB (2MB for GIFs).</p>
-            {avatarError && <p className="text-xs text-[#ef9696]">{avatarError}</p>}
+            <p className="text-xs text-neutral-500">
+              PNG, JPEG, WEBP, or GIF. Max 5MB (2MB for GIFs).
+            </p>
+            {avatarError && (
+              <p className="text-xs text-[#ef9696]">{avatarError}</p>
+            )}
           </div>
         </div>
 
@@ -257,9 +296,15 @@ export function AuthCallback() {
               </span>
             )}
             {nicknameStatus === "invalid" && nickname && (
-              <span className="text-[#ef9696]">3-20 characters: lowercase letters, numbers, - or _</span>
+              <span className="text-[#ef9696]">
+                3-20 characters: lowercase letters, numbers, - or _
+              </span>
             )}
-            {nicknameStatus === "error" && <span className="text-[#ef9696]">Couldn't check availability</span>}
+            {nicknameStatus === "error" && (
+              <span className="text-[#ef9696]">
+                Couldn't check availability
+              </span>
+            )}
           </div>
         </div>
 
@@ -267,7 +312,11 @@ export function AuthCallback() {
           <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
             You are a...
           </label>
-          <FilterPillGroup type="single" value={roleTag} onValueChange={(v) => v && setRoleTag(v as RoleTag)}>
+          <FilterPillGroup
+            type="single"
+            value={roleTag}
+            onValueChange={(v) => v && setRoleTag(v as RoleTag)}
+          >
             {ROLE_TAG_ORDER.map((tag) => (
               <FilterPill key={tag} value={tag} size="sm">
                 {ROLE_TAG_META[tag].label}

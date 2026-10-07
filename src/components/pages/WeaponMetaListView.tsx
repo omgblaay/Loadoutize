@@ -84,7 +84,11 @@ export function WeaponMetaListView() {
       }
     >
       <div>
-        <Button variant="ghost" size="sm" onClick={() => navigate(`/${gameId}/meta`)}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(`/${gameId}/meta`)}
+        >
           <ArrowLeft className="size-4" />
           Meta dashboard
         </Button>
@@ -130,22 +134,30 @@ export function WeaponMetaListView() {
             </div>
             <div className="divide-y divide-white/[0.06]">
               {filteredMetrics.map((metric) => {
-                const rank = weaponMetrics.findIndex(
-                  (candidate) => candidate.weapon.id === metric.weapon.id,
-                ) + 1;
+                const rank =
+                  weaponMetrics.findIndex(
+                    (candidate) => candidate.weapon.id === metric.weapon.id,
+                  ) + 1;
                 return (
                   <button
                     key={metric.weapon.id}
                     type="button"
-                    onClick={() => navigate(weaponMetaPath(gameId, String(metric.weapon.id)))}
+                    onClick={() =>
+                      navigate(weaponMetaPath(gameId, String(metric.weapon.id)))
+                    }
                     className="group grid w-full grid-cols-[3rem_minmax(240px,1.5fr)_minmax(140px,0.8fr)_7rem_7rem_2rem] items-center gap-4 px-5 py-3 text-left transition-colors hover:bg-white/[0.035]"
                   >
-                    <span className="font-mono text-xs text-teritary">#{rank}</span>
+                    <span className="font-mono text-xs text-teritary">
+                      #{rank}
+                    </span>
                     <span className="flex min-w-0 items-center gap-4">
                       <span className="w-24 shrink-0">
-                        <WeaponImage imageUrl={metric.weapon.imageUrl} alt={metric.weapon.name} />
+                        <WeaponImage
+                          imageUrl={metric.weapon.imageUrl}
+                          alt={metric.weapon.name}
+                        />
                       </span>
-                      <span className="truncate font-mono text-sm uppercase text-[#fafafa]">
+                      <span className="truncate font-mono text-sm uppercase ">
                         {metric.weapon.name}
                       </span>
                     </span>
@@ -153,7 +165,7 @@ export function WeaponMetaListView() {
                       {metric.weapon.type ?? "Unclassified"}
                     </span>
                     <span>
-                      <span className="block font-mono text-sm text-[#fafafa]">
+                      <span className="block font-mono text-sm ">
                         {Math.round(metric.share)}%
                       </span>
                       <span className="text-xs text-teritary">
@@ -161,7 +173,11 @@ export function WeaponMetaListView() {
                       </span>
                     </span>
                     <span className="flex justify-center">
-                      <RatingRing percent={metric.avgRating} size={42} fallbackLabel="—" />
+                      <RatingRing
+                        percent={metric.avgRating}
+                        size={42}
+                        fallbackLabel="—"
+                      />
                     </span>
                     <ChevronRight className="size-4 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70" />
                   </button>

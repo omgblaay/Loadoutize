@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
+import { toast } from "sonner";
 import { projectId, publicAnonKey } from "/utils/supabase/info";
 import { getGameColor } from "@/lib/gameColors";
 import { ArrowLeft, Heart, Eye, User, Share2, Edit } from "lucide-react";
@@ -71,7 +72,10 @@ function WeaponConfigPreviewSkeleton() {
           <Skeleton className={cn("h-4 w-28 mb-6", block)} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-neutral-950 border border-neutral-800 p-4">
+              <div
+                key={i}
+                className="bg-neutral-950 border border-neutral-800 p-4"
+              >
                 <Skeleton className={cn("h-3 w-20 mb-2", block)} />
                 <Skeleton className={cn("h-5 w-32", block)} />
               </div>
@@ -88,7 +92,10 @@ function WeaponConfigPreviewSkeleton() {
 }
 
 export function WeaponConfigPreview() {
-  const { gameId, configId } = useParams<{ gameId: string; configId: string }>();
+  const { gameId, configId } = useParams<{
+    gameId: string;
+    configId: string;
+  }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [config, setConfig] = useState<WeaponConfig | null>(null);
@@ -150,7 +157,7 @@ export function WeaponConfigPreview() {
   const copyShareLink = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
-    alert("Link copied to clipboard!");
+    toast.success("Link copied to clipboard");
   };
 
   if (loading) {
@@ -161,7 +168,7 @@ export function WeaponConfigPreview() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-neutral-950">
         <div className="text-center">
-          <h1 className="text-2xl font-black text-[#fafafa] mb-4">Weapon Config Not Found</h1>
+          <h1 className="text-2xl font-black  mb-4">Weapon Config Not Found</h1>
           <button
             onClick={() => navigate(explorePath(gameId))}
             className="bg-[#fafafa] text-neutral-900 font-bold py-3 px-6"
@@ -183,7 +190,7 @@ export function WeaponConfigPreview() {
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate(explorePath(gameId))}
-              className="flex items-center gap-2 text-neutral-400 hover:text-[#fafafa] transition-colors font-medium"
+              className="flex items-center gap-2 text-neutral-400 hover: transition-colors font-medium"
             >
               <ArrowLeft className="w-5 h-5" />
               Back
@@ -191,14 +198,18 @@ export function WeaponConfigPreview() {
             <div className="flex items-center gap-3">
               <button
                 onClick={copyShareLink}
-                className="flex items-center gap-2 px-4 py-2 border-2 border-neutral-700 hover:border-neutral-600 text-[#fafafa] font-bold transition-colors"
+                className="flex items-center gap-2 px-4 py-2 border-2 border-neutral-700 hover:border-neutral-600  font-bold transition-colors"
               >
                 <Share2 className="w-4 h-4" />
                 Share
               </button>
               {canEdit && (
                 <button
-                  onClick={() => navigate(`/${gameId}/explore/weapon-builder?edit=${configId}`)}
+                  onClick={() =>
+                    navigate(
+                      `/${gameId}/explore/weapon-builder?edit=${configId}`,
+                    )
+                  }
                   className="flex items-center gap-2 px-4 py-2 text-neutral-900 font-bold transition-opacity hover:opacity-90 bg-[#fafafa]"
                 >
                   <Edit className="w-4 h-4" />
@@ -214,11 +225,11 @@ export function WeaponConfigPreview() {
         <div className="mb-8">
           <div
             className="inline-block px-3 py-1 text-xs font-black uppercase tracking-wider mb-4"
-            style={{ backgroundColor: accentColor.primary, color: '#141414' }}
+            style={{ backgroundColor: accentColor.primary, color: "#141414" }}
           >
             Weapon Config
           </div>
-          <h1 className="text-5xl font-black text-[#fafafa] mb-4 tracking-tight">
+          <h1 className="text-5xl font-black  mb-4 tracking-tight">
             {config.name}
           </h1>
           <div className="flex items-center gap-6 mb-6">
@@ -229,7 +240,7 @@ export function WeaponConfigPreview() {
               >
                 <User className="w-4 h-4 text-neutral-900" />
               </div>
-              <span className="font-semibold text-[#fafafa]">{config.userName}</span>
+              <span className="font-semibold ">{config.userName}</span>
             </div>
             <div className="flex items-center gap-4 text-neutral-500">
               <div className="flex items-center gap-2">
@@ -260,16 +271,22 @@ export function WeaponConfigPreview() {
             Base Weapon
           </h2>
           <div className="bg-neutral-950 border border-neutral-800 p-6">
-            <h3 className="text-3xl font-black text-[#fafafa] mb-2">{config.weapon.name}</h3>
-            <p className="text-lg text-neutral-400 mb-6">{config.weapon.type}</p>
+            <h3 className="text-3xl font-black  mb-2">{config.weapon.name}</h3>
+            <p className="text-lg text-neutral-400 mb-6">
+              {config.weapon.type}
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div>
-                <span className="text-xs text-neutral-500 uppercase tracking-wider">Damage</span>
-                <p className="text-2xl text-[#fafafa] font-black">{config.weapon.damage}</p>
+                <span className="text-xs text-neutral-500 uppercase tracking-wider">
+                  Damage
+                </span>
+                <p className="text-2xl  font-black">{config.weapon.damage}</p>
               </div>
               <div>
-                <span className="text-xs text-neutral-500 uppercase tracking-wider">Fire Rate</span>
-                <p className="text-2xl text-[#fafafa] font-black">{config.weapon.fireRate}</p>
+                <span className="text-xs text-neutral-500 uppercase tracking-wider">
+                  Fire Rate
+                </span>
+                <p className="text-2xl  font-black">{config.weapon.fireRate}</p>
               </div>
             </div>
           </div>
@@ -285,11 +302,14 @@ export function WeaponConfigPreview() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {config.attachments.map((attachment: any, idx: number) => (
-                <div key={idx} className="bg-neutral-950 border border-neutral-800 p-4">
+                <div
+                  key={idx}
+                  className="bg-neutral-950 border border-neutral-800 p-4"
+                >
                   <p className="text-xs text-neutral-500 uppercase tracking-wider mb-2">
                     {attachment.type}
                   </p>
-                  <p className="text-lg font-black text-[#fafafa]">{attachment.name}</p>
+                  <p className="text-lg font-black ">{attachment.name}</p>
                 </div>
               ))}
             </div>
@@ -299,14 +319,14 @@ export function WeaponConfigPreview() {
         <div className="flex justify-center">
           <button
             onClick={likeConfig}
-            className="flex items-center gap-3 px-8 py-4 border-2 border-neutral-700 hover:text-neutral-900 text-[#fafafa] font-black text-lg transition-all"
+            className="flex items-center gap-3 px-8 py-4 border-2 border-neutral-700 hover:text-neutral-900  font-black text-lg transition-all"
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "#fafafa";
               e.currentTarget.style.borderColor = "#fafafa";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '';
-              e.currentTarget.style.borderColor = '';
+              e.currentTarget.style.backgroundColor = "";
+              e.currentTarget.style.borderColor = "";
             }}
           >
             <Heart className="w-6 h-6" />

@@ -4,16 +4,34 @@ import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { useAuth } from "@/providers/AuthProvider";
 import { AppLayout } from "@/components/templates/AppLayout";
 import { getGameColor } from "@/lib/gameColors";
-import { gameMeta, GAME_ORDER, GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "@/lib/games";
+import {
+  gameMeta,
+  GAME_ORDER,
+  GAME_SELECTOR_ENABLED,
+  LOCKED_GAME_ID,
+} from "@/lib/games";
 import { LoadoutCard } from "@/components/organisms/LoadoutCard";
-import type { CardLoadout, CardWeapon, CardAttachment, CardTag } from "@/types/loadout";
+import type {
+  CardLoadout,
+  CardWeapon,
+  CardAttachment,
+  CardTag,
+} from "@/types/loadout";
 import { Button } from "@/components/atoms/Button";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Settings as SettingsIcon, Download } from "lucide-react";
-import { QRCodeCanvas, generateBrandedQRPng } from "@/components/molecules/QRCode";
-import { SOCIAL_LINK_FIELDS, formatCount, type SocialLinks, type SocialStats } from "@/lib/social";
+import {
+  QRCodeCanvas,
+  generateBrandedQRPng,
+} from "@/components/molecules/QRCode";
+import {
+  SOCIAL_LINK_FIELDS,
+  formatCount,
+  type SocialLinks,
+  type SocialStats,
+} from "@/lib/social";
 import { Tag } from "@/components/atoms/Tag";
 import { ROLE_TAG_META, type RoleTag } from "@/lib/roles";
 import { Container } from "@/components/atoms/Container";
@@ -101,7 +119,7 @@ export function UserPage() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/users/${nickname}`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } },
       );
       if (!response.ok) {
         setNotFound(true);
@@ -123,50 +141,80 @@ export function UserPage() {
     try {
       const results = await Promise.all(
         GAMES_TO_LOAD.map(async (gameId) => {
-          const [loadoutsRes, weaponsRes, attachmentsRes, tagsRes] = await Promise.all([
-            fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts`, {
-              headers: { Authorization: `Bearer ${publicAnonKey}` },
-            }).then((r) => r.json()),
-            fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/weapons`, {
-              headers: { Authorization: `Bearer ${publicAnonKey}` },
-            }).then((r) => r.json()),
-            fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/attachments`, {
-              headers: { Authorization: `Bearer ${publicAnonKey}` },
-            }).then((r) => r.json()),
-            fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/tags`, {
-              headers: { Authorization: `Bearer ${publicAnonKey}` },
-            }).then((r) => r.json()),
-          ]);
+          const [loadoutsRes, weaponsRes, attachmentsRes, tagsRes] =
+            await Promise.all([
+              fetch(
+                `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts`,
+                {
+                  headers: { Authorization: `Bearer ${publicAnonKey}` },
+                },
+              ).then((r) => r.json()),
+              fetch(
+                `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/weapons`,
+                {
+                  headers: { Authorization: `Bearer ${publicAnonKey}` },
+                },
+              ).then((r) => r.json()),
+              fetch(
+                `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/attachments`,
+                {
+                  headers: { Authorization: `Bearer ${publicAnonKey}` },
+                },
+              ).then((r) => r.json()),
+              fetch(
+                `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/tags`,
+                {
+                  headers: { Authorization: `Bearer ${publicAnonKey}` },
+                },
+              ).then((r) => r.json()),
+            ]);
           return {
             gameId,
-            loadouts: (loadoutsRes.loadouts ?? []).filter((l: Loadout) => l.userId === userId),
+            loadouts: (loadoutsRes.loadouts ?? []).filter(
+              (l: Loadout) => l.userId === userId,
+            ),
             catalog: {
               weapons: weaponsRes.weapons ?? [],
               attachments: attachmentsRes.attachments ?? [],
               tags: tagsRes.tags ?? [],
             } as GameCatalog,
           };
-        })
+        }),
       );
 
       setLoadouts(
         results
           .flatMap((r) => r.loadouts)
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          ),
       );
-      setCatalogs(Object.fromEntries(results.map((r) => [r.gameId, r.catalog])));
+      setCatalogs(
+        Object.fromEntries(results.map((r) => [r.gameId, r.catalog])),
+      );
     } catch (error) {
       console.error("Error fetching user loadouts:", error);
     }
   };
 
-  usePageTitle(profile ? `${profile.name} (@${profile.nickname}) • Loadoutize` : "Loadoutize • Profile");
+  usePageTitle(
+    profile
+      ? `${profile.name} (@${profile.nickname}) • Loadoutize`
+      : "Loadoutize • Profile",
+  );
 
   const isOwnProfile = user?.id === profile?.id;
-  const profileUrl = profile ? `${window.location.origin}/u/${profile.nickname}` : "";
+  const profileUrl = profile
+    ? `${window.location.origin}/u/${profile.nickname}`
+    : "";
 
   const downloadBrandedQr = async () => {
-    const dataUrl = await generateBrandedQRPng(profileUrl, 240, "Scan the QR to see all my loadouts");
+    const dataUrl = await generateBrandedQRPng(
+      profileUrl,
+      240,
+      "Scan the QR to see all my loadouts",
+    );
     const a = document.createElement("a");
     a.href = dataUrl;
     a.download = `${profile?.nickname ?? "profile"}-qr.png`;
@@ -175,7 +223,10 @@ export function UserPage() {
 
   if (loading) {
     return (
-      <AppLayout selectedGame={LOCKED_GAME_ID} onGameSelect={(id) => navigate(explorePath(id))}>
+      <AppLayout
+        selectedGame={LOCKED_GAME_ID}
+        onGameSelect={(id) => navigate(explorePath(id))}
+      >
         <UserPageSkeleton />
       </AppLayout>
     );
@@ -185,9 +236,7 @@ export function UserPage() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0a0909] flex-col gap-4">
         <p className="text-[#efedf1] text-xl">User not found.</p>
-        <Button onClick={() => navigate("/home")}>
-          Back to Home
-        </Button>
+        <Button onClick={() => navigate("/home")}>Back to Home</Button>
       </div>
     );
   }
@@ -203,7 +252,11 @@ export function UserPage() {
           <div className="flex gap-5">
             <div className="w-32 h-32 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
               {profile.avatarUrl ? (
-                <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" />
+                <img
+                  src={profile.avatarUrl}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <span className="text-2xl">
                   {profile.name?.[0]?.toUpperCase() ?? "U"}
@@ -211,8 +264,7 @@ export function UserPage() {
               )}
             </div>
             <div className="flex flex-col space-between flex-1 justify-center h-full gap-2">
-
-                <h1 className="text-3xl">{profile.name}</h1>
+              <h1 className="text-3xl">{profile.name}</h1>
               <div className="flex items-center gap-3">
                 <p className="text-md text-secondary">@{profile.nickname}</p>
                 <Tag>{ROLE_TAG_META[profile.roleTag]?.label ?? "Player"}</Tag>
@@ -220,56 +272,72 @@ export function UserPage() {
 
               {SOCIAL_LINK_FIELDS.some(({ key }) => profile.links[key]) && (
                 <div className="flex items-start sgap-2 flex-wrap">
-                  {SOCIAL_LINK_FIELDS.filter(({ key }) => profile.links[key]).map(({ key, label, icon: Icon, url }) => {
+                  {SOCIAL_LINK_FIELDS.filter(
+                    ({ key }) => profile.links[key],
+                  ).map(({ key, label, icon: Icon, url }) => {
                     const count = formatCount(profile.socialStats?.[key]);
                     return (
                       <Button
                         key={key}
-                        onClick={() => window.open(url(profile.links[key]!), "_blank")}
+                        onClick={() =>
+                          window.open(url(profile.links[key]!), "_blank")
+                        }
                         variant="ghost"
                         rel="noopener noreferrer"
                         aria-label={label}
                         tooltip={
                           <>
-                            {label}: <span className="text-teritary">@{profile.links[key]}</span>
+                            {label}:{" "}
+                            <span className="text-teritary">
+                              @{profile.links[key]}
+                            </span>
                           </>
                         }
                         className="gap-2 px-1 !max-w-20"
                       >
                         <Icon className="size-6" />
-                        <span className="text-xs text-teritary font-mono">{count ?? "—"}</span>
+                        <span className="text-xs text-teritary font-mono">
+                          {count ?? "—"}
+                        </span>
                       </Button>
                     );
                   })}
-
                 </div>
               )}
-
             </div>
             {isOwnProfile && (
-              <Button onClick={() => navigate("/settings")} size="sm" variant="outline">
+              <Button
+                onClick={() => navigate("/settings")}
+                size="sm"
+                variant="outline"
+              >
                 <SettingsIcon className="w-4 h-4" />
                 Edit profile
               </Button>
             )}
           </div>
-
-
-
         </Container>
 
         {/* Share profile */}
         <Container className="flex flex-row items-center gap-4">
-          <QRCodeCanvas value={profileUrl} size={104} className="w-[104px] h-[104px]" />
+          <QRCodeCanvas
+            value={profileUrl}
+            size={104}
+            className="w-[104px] h-[104px]"
+          />
           <div className="flex-1 min-w-[200px] flex flex-col gap-3">
-            <h3 className="text-[12px] tracking-[0.5px] uppercase text-[#fafafa] font-medium">
+            <h3 className="text-[12px] tracking-[0.5px] uppercase  font-medium">
               Scan the QR to see all my loadouts
             </h3>
             <p className="text-[12px] text-[#8d898a] break-all">{profileUrl}</p>
             {isOwnProfile && (
-              <Button variant="outline" className="w-fit" onClick={downloadBrandedQr}>
-                <Download className="w-4 h-4 text-[#fafafa]" />
-                <span className="text-[14px] text-[#fafafa]">Download QR</span>
+              <Button
+                variant="outline"
+                className="w-fit"
+                onClick={downloadBrandedQr}
+              >
+                <Download className="w-4 h-4 " />
+                <span className="text-[14px] ">Download QR</span>
                 <span className="text-[14px] text-[#bebcbc]">as PNG</span>
               </Button>
             )}
@@ -278,8 +346,12 @@ export function UserPage() {
 
         {/* Loadouts */}
         <div className="flex flex-col gap-4">
-          <h2 className="text-[16px] text-[#fafafa] font-semibold">loadout{loadouts.length !== 1 ? "s" : ""}
-            <span className="text-sm ml-2 inline-flex font-mono h-8 w-8 items-center rounded-full justify-center bg-[#171417] text-teritary ">{loadouts.length} </span></h2>
+          <h2 className="text-[16px]  font-semibold">
+            loadout{loadouts.length !== 1 ? "s" : ""}
+            <span className="text-sm ml-2 inline-flex font-mono h-8 w-8 items-center rounded-full justify-center bg-[#171417] text-teritary ">
+              {loadouts.length}{" "}
+            </span>
+          </h2>
           {loadouts.length === 0 ? (
             <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
               <p className="text-[#8d898a]">No loadouts published yet.</p>

@@ -33,9 +33,12 @@ export function CookieConsent() {
     <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] sm:bottom-0 z-40 border-t border-[#201e1f] bg-[#121011]">
       <div className="max-w-[1440px] mx-auto px-6 py-4 flex flex-wrap items-center gap-4">
         <p className="flex-1 min-w-[240px] text-[13px] text-[#8d898a]">
-          We use essential local storage to keep you signed in and Google reCAPTCHA to protect
-          against spam when you publish a loadout. See our{" "}
-          <Link to="/privacy" className="underline underline-offset-2 text-[#fafafa]">
+          We use essential local storage to keep you signed in and Google
+          reCAPTCHA to protect against spam when you publish a loadout. See our{" "}
+          <Link
+            to="/privacy"
+            className="underline underline-offset-2 text-[#fafafa]"
+          >
             Privacy Policy
           </Link>{" "}
           for details.

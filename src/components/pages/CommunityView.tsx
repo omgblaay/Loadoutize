@@ -12,7 +12,11 @@ import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
 import { ROLE_TAG_META, ROLE_TAG_ORDER, type RoleTag } from "@/lib/roles";
 import { CompactPageHeader } from "@/components/molecules/CompactPageHeader";
-import { SOCIAL_LINK_FIELDS, type SocialLinks, type SocialPlatform } from "@/lib/social";
+import {
+  SOCIAL_LINK_FIELDS,
+  type SocialLinks,
+  type SocialPlatform,
+} from "@/lib/social";
 
 interface LoadoutSummary {
   userId: string;
@@ -35,6 +39,83 @@ interface Member {
   links: SocialLinks | null;
   loadoutCount: number;
   avgRating: number | null;
+}
+
+interface PublicProfile {
+  id: string;
+  nickname: string;
+  name: string;
+  avatar_path: string | null;
+  role_tag: RoleTag | null;
+  tiktok: string | null;
+  instagram: string | null;
+  youtube: string | null;
+  twitch: string | null;
+  kick: string | null;
+}
+
+const SUPABASE_ORIGIN = `https://${projectId}.supabase.co`;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function publicAvatarUrl(path: string | null) {
+  return path
+    ? `${SUPABASE_ORIGIN}/storage/v1/object/public/avatars/${path}`
+    : null;
+}
+
+async function hydrateLoadoutAuthors(loadouts: LoadoutSummary[]) {
+  const userIds = [
+    ...new Set(
+      loadouts
+        .map((loadout) => loadout.userId)
+        .filter((id) => UUID_PATTERN.test(id)),
+    ),
+  ];
+  if (userIds.length === 0) return loadouts;
+
+  const params = new URLSearchParams({
+    select:
+      "id,nickname,name,avatar_path,role_tag,tiktok,instagram,youtube,twitch,kick",
+    id: `in.(${userIds.join(",")})`,
+  });
+  const response = await fetch(
+    `${SUPABASE_ORIGIN}/rest/v1/profiles?${params}`,
+    {
+      headers: {
+        apikey: publicAnonKey,
+        Authorization: `Bearer ${publicAnonKey}`,
+      },
+    },
+  );
+  if (!response.ok)
+    throw new Error(`Could not load community profiles (${response.status})`);
+
+  const profiles = (await response.json()) as PublicProfile[];
+  const profilesById = new Map(
+    profiles.map((profile) => [profile.id, profile]),
+  );
+
+  return loadouts.map((loadout) => {
+    const profile = profilesById.get(loadout.userId);
+    if (!profile) return loadout;
+
+    return {
+      ...loadout,
+      userName: profile.name ?? loadout.userName,
+      authorNickname: profile.nickname ?? loadout.authorNickname,
+      authorAvatarUrl:
+        publicAvatarUrl(profile.avatar_path) ?? loadout.authorAvatarUrl,
+      authorRoleTag: profile.role_tag ?? loadout.authorRoleTag,
+      authorLinks: {
+        tiktok: profile.tiktok,
+        instagram: profile.instagram,
+        youtube: profile.youtube,
+        twitch: profile.twitch,
+        kick: profile.kick,
+      },
+    };
+  });
 }
 
 const SOCIAL_PLATFORMS = SOCIAL_LINK_FIELDS.map((f) => f.key);
@@ -63,13 +144,18 @@ function CommunityViewSkeleton() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="rounded-2xl border border-white/[0.08] bg-card p-4 flex items-center gap-4">
+          <div
+            key={i}
+            className="rounded-2xl border border-white/[0.08] bg-card p-4 flex items-center gap-4"
+          >
             <Skeleton className={cn("w-14 h-14 rounded-2xl shrink-0", block)} />
             <div className="flex-1 flex flex-col gap-2">
               <Skeleton className={cn("h-4 w-24", block)} />
               <Skeleton className={cn("h-3 w-16", block)} />
             </div>
-            <Skeleton className={cn("w-12 h-12 rounded-full shrink-0", block)} />
+            <Skeleton
+              className={cn("w-12 h-12 rounded-full shrink-0", block)}
+            />
           </div>
         ))}
       </div>
@@ -90,20 +176,49 @@ export function CommunityView() {
   // link here) so landing on this page already shows only creators who have
   // that platform linked -- not kept in sync with the URL afterward, same as
   // roleFilter.
-  const [socialFilter, setSocialFilter] = useState<SocialPlatform | "all">(() => {
-    const param = searchParams.get("social");
-    return param && isSocialPlatform(param) ? param : "all";
-  });
+  const [socialFilter, setSocialFilter] = useState<SocialPlatform | "all">(
+    () => {
+      const param = searchParams.get("social");
+      return param && isSocialPlatform(param) ? param : "all";
+    },
+  );
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
-    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/loadouts`, {
-      headers: { Authorization: `Bearer ${publicAnonKey}` },
-    })
-      .then((r) => r.json())
-      .then((data) => setLoadouts(data.loadouts ?? []))
+    fetch(
+      `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/loadouts`,
+      {
+        headers: { Authorization: `Bearer ${publicAnonKey}` },
+      },
+    )
+      .then((response) => {
+        if (!response.ok)
+          throw new Error(
+            `Could not load community loadouts (${response.status})`,
+          );
+        return response.json();
+      })
+      .then(async (data) => {
+        const nextLoadouts = (data.loadouts ?? []) as LoadoutSummary[];
+        try {
+          return await hydrateLoadoutAuthors(nextLoadouts);
+        } catch (error) {
+          console.error("Error fetching community profiles:", error);
+          return nextLoadouts;
+        }
+      })
+      .then((nextLoadouts) => {
+        if (!cancelled) setLoadouts(nextLoadouts);
+      })
       .catch((error) => console.error("Error fetching community data:", error))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedGame]);
 
   // Only authors with at least one public loadout can appear here -- there's
@@ -115,28 +230,34 @@ export function CommunityView() {
     (byUser.get(l.userId) ?? byUser.set(l.userId, []).get(l.userId)!).push(l);
   }
 
-  const members: Member[] = [...byUser.entries()].map(([userId, userLoadouts]) => {
-    const first = userLoadouts[0];
-    const rated = userLoadouts.filter(
-      (l) => l.ratingPercent != null && l.likes + l.dislikes >= 5,
-    );
-    return {
-      userId,
-      nickname: first.authorNickname ?? first.userName,
-      name: first.userName,
-      avatarUrl: first.authorAvatarUrl,
-      roleTag: first.authorRoleTag ?? "player",
-      links: first.authorLinks ?? null,
-      loadoutCount: userLoadouts.length,
-      avgRating: rated.length > 0 ? Math.round(average(rated.map((l) => l.ratingPercent as number))) : null,
-    };
-  });
+  const members: Member[] = [...byUser.entries()].map(
+    ([userId, userLoadouts]) => {
+      const first = userLoadouts[0];
+      const rated = userLoadouts.filter(
+        (l) => l.ratingPercent != null && l.likes + l.dislikes >= 5,
+      );
+      return {
+        userId,
+        nickname: first.authorNickname ?? first.userName,
+        name: first.userName,
+        avatarUrl: first.authorAvatarUrl,
+        roleTag: first.authorRoleTag ?? "player",
+        links: first.authorLinks ?? null,
+        loadoutCount: userLoadouts.length,
+        avgRating:
+          rated.length > 0
+            ? Math.round(average(rated.map((l) => l.ratingPercent as number)))
+            : null,
+      };
+    },
+  );
 
   const filtered = members
     .filter((m) => roleFilter === "all" || m.roleTag === roleFilter)
     .filter((m) => socialFilter === "all" || !!m.links?.[socialFilter]);
   const sorted = [...filtered].sort((a, b) => {
-    if (a.avgRating == null && b.avgRating == null) return b.loadoutCount - a.loadoutCount;
+    if (a.avgRating == null && b.avgRating == null)
+      return b.loadoutCount - a.loadoutCount;
     if (a.avgRating == null) return 1;
     if (b.avgRating == null) return -1;
     return b.avgRating - a.avgRating;
@@ -144,33 +265,56 @@ export function CommunityView() {
 
   if (loading) {
     return (
-      <AppLayout selectedGame={selectedGame} onGameSelect={(id) => navigate(`/${id}/community`)}>
+      <AppLayout
+        selectedGame={selectedGame}
+        onGameSelect={(id) => navigate(`/${id}/community`)}
+      >
         <CommunityViewSkeleton />
       </AppLayout>
     );
   }
 
   return (
-    <AppLayout selectedGame={selectedGame} onGameSelect={(id) => navigate(`/${id}/community`)}>
+    <AppLayout
+      selectedGame={selectedGame}
+      onGameSelect={(id) => navigate(`/${id}/community`)}
+    >
       <div>
         <h1 className="text-3xl font-semibold flex items-center gap-3">
-          <NavIcon icon="community" flat={<Users className="w-7 h-7" />} active hovered={false} size={32} />
+          <NavIcon
+            icon="community"
+            flat={<Users className="w-7 h-7" />}
+            active
+            hovered={false}
+            size={32}
+          />
           Community
         </h1>
         <p className="text-[#8d898a] text-sm">
-          Loadout creators for {gameName}, filtered by who they are and ranked by their average rating.
+          Loadout creators for {gameName}, filtered by who they are and ranked
+          by their average rating.
         </p>
       </div>
       <CompactPageHeader
         title={
           <span className="flex items-center gap-2">
-            <NavIcon icon="community" flat={<Users className="w-4 h-4" />} active hovered={false} size={18} />
+            <NavIcon
+              icon="community"
+              flat={<Users className="w-4 h-4" />}
+              active
+              hovered={false}
+              size={18}
+            />
             Community
           </span>
         }
       />
 
-      <FilterPillGroup type="single" value={roleFilter} onValueChange={(v) => v && setRoleFilter(v as RoleTag | "all")}>
+      <FilterPillGroup
+        type="single"
+        value={roleFilter}
+        onValueChange={(v) => v && setRoleFilter(v as RoleTag | "all")}
+      >
         <FilterPill value="all">All</FilterPill>
         {ROLE_TAG_ORDER.map((tag) => (
           <FilterPill key={tag} value={tag}>
@@ -211,17 +355,26 @@ export function CommunityView() {
             >
               <div className="w-14 h-14 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
                 {member.avatarUrl ? (
-                  <img src={member.avatarUrl} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={member.avatarUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <span className="text-lg font-semibold text-[#fafafa]">{member.name?.[0]?.toUpperCase() ?? "U"}</span>
+                  <span className="text-lg font-semibold ">
+                    {member.name?.[0]?.toUpperCase() ?? "U"}
+                  </span>
                 )}
               </div>
               <div className="flex-1 min-w-0 flex flex-col gap-1">
-                <p className="text-[15px] font-semibold text-[#fafafa] truncate">{member.name}</p>
+                <p className="text-[15px] font-semibold  truncate">
+                  {member.name}
+                </p>
                 <div className="flex items-center gap-2 flex-wrap">
                   <Tag>{ROLE_TAG_META[member.roleTag].label}</Tag>
                   <span className="text-[12px] text-[#8d898a] font-mono inline-flex items-center h-6 px-2 rounded-full bg-[#171417]">
-                    {member.loadoutCount} loadout{member.loadoutCount !== 1 ? "s" : ""}
+                    {member.loadoutCount} loadout
+                    {member.loadoutCount !== 1 ? "s" : ""}
                   </span>
                 </div>
               </div>
@@ -229,7 +382,11 @@ export function CommunityView() {
                 percent={member.avgRating}
                 size={48}
                 innerClassName="border border-white/5"
-                labelClassName={member.avgRating == null ? "text-[9px] text-teritary" : "text-[11px] text-[#fafafa]"}
+                labelClassName={
+                  member.avgRating == null
+                    ? "text-[9px] text-teritary"
+                    : "text-[11px] "
+                }
                 fallbackLabel="New"
               />
             </Link>

@@ -94,12 +94,11 @@ export function HomeExplorePreview({
     <div className="flex flex-col gap-6">
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-sans text-secondary">Top weapons</h2>
           <Link
             to={`/${selectedGame}/meta`}
             className="font-medium text-teritary hover:text-[#fafafa] flex items-center gap-1 shrink-0"
           >
-            View full Meta
+            <h2 className="text-sm">Top weapons</h2>
             <ChevronRight className="size-4" />
           </Link>
         </div>
@@ -110,7 +109,7 @@ export function HomeExplorePreview({
 
             return (
               <div key={category.short} className="flex flex-col gap-3">
-                <h3 className="font-sans text-secondary flex items-center gap-2">
+                <h3 className="text-xs text-secondary flex items-center gap-2">
                   <Tag>{category.short}</Tag>
                   {category.name}
                 </h3>
@@ -172,12 +171,11 @@ export function HomeExplorePreview({
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-sans text-secondary">Top Loadouts</h2>
           <Link
             to={explorePath(selectedGame)}
-            className="font-medium text-teritary hover:text-[#fafafa] flex items-center gap-1 shrink-0"
+            className="font-medium text-teritary hover: flex items-center gap-1 shrink-0"
           >
-            Explore loadouts
+            <h2 className="text-sm">Top Loadouts</h2>
             <ChevronRight className="size-4" />
           </Link>
         </div>
@@ -212,9 +210,7 @@ export function HomeExplorePreview({
 
         <div className="relative flex gap-8">
           <div>
-            <h2 className="text-lg leading-tight text-[#fafafa]">
-              Why I made Loadoutize
-            </h2>
+            <h2 className="text-lg leading-tight ">Why I made Loadoutize</h2>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-secondary sm:text-base sm:leading-7">
               I got tired of opening ten tabs just to find one useful build. So
               I started making the place I wanted as a player: clear loadouts,

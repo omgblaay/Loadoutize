@@ -829,7 +829,7 @@ async function isTagAllowedForWeapons(gameId: string, tagId: number, weapons: an
 // loadout_perks/loadout_equipment junction rows referencing the catalog by
 // id, but mapLoadout still flattens them back to `string[]` of names --
 // unlike weapons, nothing else about their frontend shape needed to change.
-const LOADOUT_SELECT = `*, loadout_weapons(id, weapon_id, slot_order, loadout_weapon_attachments(attachments(name, attachment_types(name)))), loadout_perks(perks(name)), loadout_equipment(equipment(name)), loadout_reactions(type, user_id)`;
+const LOADOUT_SELECT = `*, loadout_weapons(id, weapon_id, slot_order, loadout_weapon_attachments(attachments(name, attachment_types(name)))), loadout_perks(perks(name)), loadout_equipment(equipment(name)), loadout_reactions(type, user_id, created_at)`;
 
 // Loadout share links use short IDs (loadoutize.com/mw4/l/ab12) rather than a
 // full UUID -- 4 lowercase hex characters (16^4 = 65,536 combos) is plenty
@@ -1137,7 +1137,9 @@ function mapLoadout(l: any, viewerId?: string | null, authorProfiles?: Map<strin
       ? Math.round((likes / totalVotes) * 100)
       : null;
   const score = likes + favorites * FAVORITE_SCORE_WEIGHT - dislikes;
-  const mine = viewerId ? reactions.filter((r: any) => r.user_id === viewerId).map((r: any) => r.type) : [];
+  const viewerReactions = viewerId ? reactions.filter((r: any) => r.user_id === viewerId) : [];
+  const mine = viewerReactions.map((r: any) => r.type);
+  const likedAt = viewerReactions.find((r: any) => r.type === 'like')?.created_at ?? null;
   const author = authorProfiles?.get(l.user_id);
 
   return {
@@ -1176,6 +1178,7 @@ function mapLoadout(l: any, viewerId?: string | null, authorProfiles?: Map<strin
     score,
     ratingPercent,
     liked: mine.includes('like'),
+    likedAt,
     disliked: mine.includes('dislike'),
     favorited: mine.includes('favorite'),
     views: l.views,

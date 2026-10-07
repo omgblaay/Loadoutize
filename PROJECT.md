@@ -19,19 +19,19 @@ Originally generated from a Figma Make design ([source file](https://www.figma.c
 
 ## 2. Tech stack
 
-| Layer | Choice |
-|---|---|
-| Framework | React 18 (SPA), Vite build |
-| Routing | React Router 7 (`BrowserRouter`) |
-| Styling | Tailwind CSS v4 (`@theme inline` tokens), CSS custom properties for theming |
-| Component primitives | Radix UI, wrapped as shadcn/ui-style components in `src/components/atoms/` and `src/components/molecules/` |
-| 3D / motion | `@react-three/fiber` + `@react-three/drei` + `three` (a WebGL flame shader effect for standout cards), `motion` for micro-interactions |
-| Forms | `react-hook-form` |
-| Drag & drop | `react-dnd` |
-| Charts | `recharts` |
-| QR codes | `qrcode` |
-| Backend | Supabase (Postgres, Auth, Storage, Edge Functions on Deno + Hono) |
-| Catalog CMS | Self-hosted Directus, pointed at the same Postgres DB (editorial-only; no runtime dependency) |
+| Layer                | Choice                                                                                                                                 |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework            | React 18 (SPA), Vite build                                                                                                             |
+| Routing              | React Router 7 (`BrowserRouter`)                                                                                                       |
+| Styling              | Tailwind CSS v4 (`@theme inline` tokens), CSS custom properties for theming                                                            |
+| Component primitives | Radix UI, wrapped as shadcn/ui-style components in `src/components/atoms/` and `src/components/molecules/`                             |
+| 3D / motion          | `@react-three/fiber` + `@react-three/drei` + `three` (a WebGL flame shader effect for standout cards), `motion` for micro-interactions |
+| Forms                | `react-hook-form`                                                                                                                      |
+| Drag & drop          | `react-dnd`                                                                                                                            |
+| Charts               | `recharts`                                                                                                                             |
+| QR codes             | `qrcode`                                                                                                                               |
+| Backend              | Supabase (Postgres, Auth, Storage, Edge Functions on Deno + Hono)                                                                      |
+| Catalog CMS          | Self-hosted Directus, pointed at the same Postgres DB (editorial-only; no runtime dependency)                                          |
 
 No test suite is configured. Build with `npm run build`, dev with `npm run dev`.
 
@@ -64,21 +64,21 @@ See [Architecture](docs/ARCHITECTURE.md) for naming and dependency conventions.
 
 ### Routes
 
-| Path | Screen | Notes |
-|---|---|---|
-| `/` | `GameSelector` | Landing page; game picker (locked to MW4 for now) + release countdown |
-| `/u/:nickname` | `UserPage` | Public creator profile |
-| `/liked` | `LikedLoadouts` | Signed-in user's favorited loadouts |
-| `/settings` | `Settings` | Profile, avatar, nickname, role tag |
-| `/join` | `Join` | Combined login/signup, Google OAuth |
-| `/auth/callback` | `AuthCallback` | OAuth redirect handler |
-| `/privacy`, `/terms` | `PrivacyPolicy`, `TermsOfService` | Legal |
-| `/:gameId/explore` | `GameDashboard` | Public loadout feed |
-| `/:gameId/meta` | `MetaView` | Weapon tier list / meta rankings |
-| `/:gameId/community` | `CommunityView` | Per-game community/members |
-| `/:gameId/create` | `LoadoutBuilder` | Requires auth |
-| `/:gameId/l/:loadoutId` | `LoadoutPreview` | Single loadout page (public) |
-| `/:gameId/weapon/:configId` | `WeaponConfigPreview` | Single saved weapon build |
+| Path                        | Screen                            | Notes                                                                 |
+| --------------------------- | --------------------------------- | --------------------------------------------------------------------- |
+| `/`                         | `GameSelector`                    | Landing page; game picker (locked to MW4 for now) + release countdown |
+| `/u/:nickname`              | `UserPage`                        | Public creator profile                                                |
+| `/liked`                    | `LikedLoadouts`                   | Signed-in user's favorited loadouts                                   |
+| `/settings`                 | `Settings`                        | Profile, avatar, nickname, role tag                                   |
+| `/join`                     | `Join`                            | Combined login/signup, Google OAuth                                   |
+| `/auth/callback`            | `AuthCallback`                    | OAuth redirect handler                                                |
+| `/privacy`, `/terms`        | `PrivacyPolicy`, `TermsOfService` | Legal                                                                 |
+| `/:gameId/explore`          | `GameDashboard`                   | Public loadout feed                                                   |
+| `/:gameId/meta`             | `MetaView`                        | Weapon tier list / meta rankings                                      |
+| `/:gameId/community`        | `CommunityView`                   | Per-game community/members                                            |
+| `/:gameId/create`           | `LoadoutBuilder`                  | Requires auth                                                         |
+| `/:gameId/l/:loadoutId`     | `LoadoutPreview`                  | Single loadout page (public)                                          |
+| `/:gameId/weapon/:configId` | `WeaponConfigPreview`             | Single saved weapon build                                             |
 
 `/:gameId/loadout/:loadoutId` (an older URL shape) permanently redirects to the shorter `/:gameId/l/:loadoutId`, so previously shared links keep working. All `:gameId` routes pass through a `GameLock` wrapper that redirects to MW4 while the multi-game switcher is disabled.
 
@@ -110,23 +110,24 @@ bf6:       #00FF85 (green)
 thefinals: #FF00FF (magenta)
 df:        #FFC400 (gold)
 ```
+
 `getGameColor(gameId)` returns `{ primary, light, dark, bg }`; always used instead of hardcoding a color so re-enabling the game switcher doesn't require re-theming every screen.
 
 ### Typography
 
-| Token | Font | Used for |
-|---|---|---|
-| `--font-sans` | Aspekta | Body text |
-| `--font-heading` | BBH Bartle (falls back to Aspekta) | h1–h4 |
-| `--font-mono` | JetBrains Mono | Weapon names, stats, technical labels |
-| `--font-handwritten` | Kabur | Loadout tag/playstyle callouts (e.g. "Long Range") |
-| `--font-rating` | Science Gothic (600 only) | The percentage label inside `RatingRing` |
+| Token                | Font                               | Used for                                           |
+| -------------------- | ---------------------------------- | -------------------------------------------------- |
+| `--font-sans`        | Aspekta                            | Body text                                          |
+| `--font-heading`     | BBH Bartle (falls back to Aspekta) | h1–h4                                              |
+| `--font-mono`        | JetBrains Mono                     | Weapon names, stats, technical labels              |
+| `--font-handwritten` | Kabur                              | Loadout tag/playstyle callouts (e.g. "Long Range") |
+| `--font-rating`      | Science Gothic (600 only)          | The percentage label inside `RatingRing`           |
 
 Tailwind's `text-*` utilities override the `@layer base` element defaults, so the design tokens set sane fallbacks (`h1`/`h2`/`h3`/`label`/`button`/`input` sizes and weights) without fighting component-level overrides.
 
 ### Color tokens & theming
 
-Tokens are defined as CSS custom properties in `src/styles/theme.css` under `:root` and `.dark`, then re-exposed to Tailwind via `@theme inline` (`--color-background`, `--color-card`, `--color-teritary`, etc.). **Known gap:** the `.dark` class is defined but never actually applied anywhere in the app — the UI achieves its dark look by hardcoding dark hex values directly in components (`bg-[#0a0909]`, `text-[#fafafa]`, …) rather than through the token system. Any untouched shadcn primitive that relies on the `--card` / `--muted` / `--accent` tokens for contrast should be checked before reuse, since those tokens are still tuned for a light `:root` that's not what's on screen.
+Tokens are defined as CSS custom properties in `src/styles/theme.css` under `:root` and `.dark`, then re-exposed to Tailwind via `@theme inline` (`--color-background`, `--color-card`, `--color-teritary`, etc.). **Known gap:** the `.dark` class is defined but never actually applied anywhere in the app — the UI achieves its dark look by hardcoding dark hex values directly in components (`bg-[#0a0909]`, ``, …) rather than through the token system. Any untouched shadcn primitive that relies on the `--card`/`--muted`/`--accent`tokens for contrast should be checked before reuse, since those tokens are still tuned for a light`:root` that's not what's on screen.
 
 ### Layout & components
 
@@ -145,7 +146,7 @@ Tokens are defined as CSS custom properties in `src/styles/theme.css` under `:ro
 `WeaponImage` (`src/components/molecules/WeaponImage.tsx`) renders a weapon photo with two independent overlay systems, both keyed by `attachment_types.slug`:
 
 1. **Badges** — small icon chips for each equipped attachment, arranged around a **fixed oval layout**, not the actual location of that part on the gun. Each slug has its own hand-set angle (`OVAL_ANGLE_PERCENT` in `weaponAttachmentBadgePositions.ts`, 0–100% clockwise from 12 o'clock — e.g. `optic: 0`, `stock: 22`, `muzzle: 78`), so positions can be tuned per-slot independent of how many attachments happen to be equipped. Hovering a badge and hovering the corresponding row in the loadout's attachment list are wired together bidirectionally (shared `activeKey` state, matched by slot) — hovering either one enlarges/highlights the badge and highlights the row.
-2. **Highlight regions** — an optional yellow tint over the part of the *actual* weapon photo an attachment occupies (anatomically positioned in `weaponAttachmentHighlightRegions.ts`, front/muzzle on the left through stock on the right — the opposite design intent from the badges above). Rendered as a `mix-blend-mode: color` rectangle over the grayscale image, so the region reads as "this part turned yellow" while keeping the photo's original shading and highlights. Currently wired into `LoadoutBuilder` only, so the weapon preview lights up the relevant square in real time as you add/remove attachments.
+2. **Highlight regions** — an optional yellow tint over the part of the _actual_ weapon photo an attachment occupies (anatomically positioned in `weaponAttachmentHighlightRegions.ts`, front/muzzle on the left through stock on the right — the opposite design intent from the badges above). Rendered as a `mix-blend-mode: color` rectangle over the grayscale image, so the region reads as "this part turned yellow" while keeping the photo's original shading and highlights. Currently wired into `LoadoutBuilder` only, so the weapon preview lights up the relevant square in real time as you add/remove attachments.
 
 Both systems support per-weapon coordinate overrides (keyed by `weapons.id`) for images that are framed or cropped unusually.
 

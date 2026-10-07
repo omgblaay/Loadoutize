@@ -65,11 +65,15 @@ export function Join() {
 
     if (mode === "signup") {
       if (!/^[a-z0-9_-]{3,20}$/.test(nickname)) {
-        setError("Nickname must be 3-20 characters: lowercase letters, numbers, - or _");
+        setError(
+          "Nickname must be 3-20 characters: lowercase letters, numbers, - or _",
+        );
         return;
       }
       if (!isPasswordStrong(password)) {
-        setError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters and include a number and a special character`);
+        setError(
+          `Password must be at least ${PASSWORD_MIN_LENGTH} characters and include a number and a special character`,
+        );
         return;
       }
       if (password !== confirmPassword) {
@@ -115,7 +119,11 @@ export function Join() {
               </p>
             </div>
 
-            <Button variant="secondary" className="w-full" onClick={continueWithGoogle}>
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={continueWithGoogle}
+            >
               <GoogleIcon />
               Continue with Google
             </Button>
@@ -204,10 +212,18 @@ export function Join() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={mode === "signup" ? PASSWORD_MIN_LENGTH : undefined}
-                  placeholder={mode === "signup" ? `Minimum ${PASSWORD_MIN_LENGTH} characters` : "Enter your password"}
+                  minLength={
+                    mode === "signup" ? PASSWORD_MIN_LENGTH : undefined
+                  }
+                  placeholder={
+                    mode === "signup"
+                      ? `Minimum ${PASSWORD_MIN_LENGTH} characters`
+                      : "Enter your password"
+                  }
                 />
-                {mode === "signup" && <PasswordStrengthMeter password={password} />}
+                {mode === "signup" && (
+                  <PasswordStrengthMeter password={password} />
+                )}
               </div>
 
               {mode === "signup" && (
@@ -224,7 +240,9 @@ export function Join() {
                     placeholder="Re-enter your password"
                   />
                   {confirmPassword && confirmPassword !== password && (
-                    <p className="mt-1.5 text-xs text-[#ef9696]">Passwords do not match</p>
+                    <p className="mt-1.5 text-xs text-[#ef9696]">
+                      Passwords do not match
+                    </p>
                   )}
                 </div>
               )}
@@ -254,11 +272,17 @@ export function Join() {
               {mode === "signup" && (
                 <p className="text-center text-xs text-neutral-500">
                   By creating an account, you agree to our{" "}
-                  <Link to="/terms" className="text-neutral-300 underline underline-offset-2 hover:text-[#fafafa]">
+                  <Link
+                    to="/terms"
+                    className="text-neutral-300 underline underline-offset-2 hover:text-[#fafafa]"
+                  >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
-                  <Link to="/privacy" className="text-neutral-300 underline underline-offset-2 hover:text-[#fafafa]">
+                  <Link
+                    to="/privacy"
+                    className="text-neutral-300 underline underline-offset-2 hover:text-[#fafafa]"
+                  >
                     Privacy Policy
                   </Link>
                   .
@@ -268,10 +292,11 @@ export function Join() {
 
             <div className="flex items-center gap-3 my-5">
               <div className="h-px flex-1 bg-white/10" />
-              <span className="text-xs text-neutral-500 font-medium">                
+              <span className="text-xs text-neutral-500 font-medium">
                 {mode === "login"
                   ? "Don't have an account?"
-                  : "Already have an account?"}</span>
+                  : "Already have an account?"}
+              </span>
               <div className="h-px flex-1 bg-white/10" />
             </div>
 
@@ -284,9 +309,7 @@ export function Join() {
                   setError("");
                 }}
               >
-                {mode === "login"
-                  ? "Sign up"
-                  : "Sign in"}
+                {mode === "login" ? "Sign up" : "Sign in"}
               </Button>
             </div>
           </div>

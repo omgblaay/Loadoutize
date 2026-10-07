@@ -211,7 +211,7 @@ export function MetaTrendCharts({
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <article className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 sm:p-5">
+        <article className="overflow-hidden rounded-2xl border border-white/[0.07] p-4 sm:p-5">
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
@@ -225,9 +225,7 @@ export function MetaTrendCharts({
               </p>
             </div>
             <div className="text-right">
-              <p className="font-mono text-2xl text-[#fafafa]">
-                {rangeLoadoutCount}
-              </p>
+              <p className="font-mono text-2xl ">{rangeLoadoutCount}</p>
               <p className="text-xs text-teritary">new builds</p>
             </div>
           </div>
@@ -274,7 +272,7 @@ export function MetaTrendCharts({
           </div>
         </article>
 
-        <article className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 sm:p-5">
+        <article className="relative overflow-hidden rounded-2xl border border-white/[0.07] p-4 sm:p-5">
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
@@ -287,7 +285,7 @@ export function MetaTrendCharts({
               </p>
             </div>
             <div className="text-right">
-              <p className="font-rating text-2xl text-[#fafafa]">
+              <p className="font-rating text-2xl ">
                 {ratingTier(rangeAverageRating)}
               </p>
               <p className="text-xs text-teritary">average tier</p>

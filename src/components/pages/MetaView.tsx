@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   Activity,
-  BarChart3,
+  Check,
+  ChevronDown,
   ChevronRight,
   Crown,
   Layers3,
@@ -15,10 +16,18 @@ import { NavIcon } from "@/components/atoms/NavIcon";
 import { RatingRing } from "@/components/atoms/RatingRing";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { Tag } from "@/components/atoms/Tag";
-import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
+import { toggleVariants } from "@/components/atoms/Toggle";
 import { WeaponImage } from "@/components/molecules/WeaponImage";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/molecules/DropdownMenu";
 import { AttachmentSlotCard } from "@/components/organisms/AttachmentSlotCard";
 import { cn } from "@/lib/utils";
+import { sortWeaponCategories } from "@/lib/weaponCategories";
 import {
   attachmentMetaPath,
   weaponMetaListPath,
@@ -70,9 +79,18 @@ function DashboardSkeleton() {
           <Skeleton className={cn("h-4 w-72 max-w-full", block)} />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/[0.07] xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Skeleton key={index} className={cn("h-28 rounded-2xl", block)} />
+          <Skeleton
+            key={index}
+            className={cn(
+              "h-28 rounded-none border-white/[0.07]",
+              index === 0 && "border-b border-r xl:border-b-0",
+              index === 1 && "border-b xl:border-b-0 xl:border-r",
+              index === 2 && "border-r",
+              block,
+            )}
+          />
         ))}
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -91,32 +109,37 @@ function StatCard({
   value,
   detail,
   accent,
+  className,
 }: {
   icon: typeof Activity;
   label: string;
   value: string | number;
   detail?: string;
   accent: string;
+  className?: string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4 sm:p-5">
-      <div
+    <div
+      className={cn(
+        "relative overflow-hidden border-white/[0.07] p-4 sm:p-5",
+        className,
+      )}
+    >
+      {/* <div
         className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full opacity-10 blur-3xl"
         style={{ backgroundColor: accent }}
-      />
+      /> */}
       <div className="relative flex items-start justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.08em] text-teritary">
             {label}
           </p>
-          <p className="mt-2 text-2xl font-semibold text-[#fafafa] sm:text-3xl">
-            {value}
-          </p>
+          <p className="mt-2 text-2xl font-semibold  sm:text-3xl">{value}</p>
           {/* <p className="mt-1 text-xs text-teritary">{detail}</p> */}
         </div>
-        <span className="flex items-center justify-center">
+        {/* <span className="flex items-center justify-center">
           <Icon className="size-4" style={{ color: accent }} />
-        </span>
+        </span> */}
       </div>
     </div>
   );
@@ -133,22 +156,37 @@ export function MetaView() {
   const [scope, setScope] = useState<Scope>("all");
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [openScopeMenu, setOpenScopeMenu] = useState<"tag" | "category" | null>(
+    null,
+  );
 
   const categories = useMemo(
     () =>
-      Array.from(
-        new Set(
-          weapons
-            .map((weapon) => weapon.type)
-            .filter((type): type is string => Boolean(type)),
-        ),
+      sortWeaponCategories(
+        weapons
+          .map((weapon) => weapon.type)
+          .filter((type): type is string => Boolean(type)),
       ),
     [weapons],
   );
+  const categoryShortNames = useMemo(() => {
+    const names = new Map<string, string>();
+
+    for (const weapon of weapons) {
+      if (!weapon.type || names.has(weapon.type)) continue;
+      names.set(
+        weapon.type,
+        weapon.typeShort?.trim() || weapon.type.slice(0, 3).toUpperCase(),
+      );
+    }
+
+    return names;
+  }, [weapons]);
   const weaponById = useMemo(
     () => new Map(weapons.map((weapon) => [weapon.id, weapon])),
     [weapons],
   );
+  const selectedTag = tags.find((tag) => tag.id === selectedTagId);
 
   const selectScope = (nextScope: Scope) => {
     setScope(nextScope);
@@ -286,10 +324,6 @@ export function MetaView() {
       onGameSelect={(id) => navigate(`/${id}/meta`)}
     >
       <header>
-        <div
-          className="pointer-events-none absolute -right-24 -top-32 size-80 rounded-full opacity-15 blur-[100px]"
-          style={{ backgroundColor: accent }}
-        />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:justify-between">
           <NavIcon
             icon="meta"
@@ -299,10 +333,10 @@ export function MetaView() {
             size={28}
           />
           <div className="flex flex-1 flex-col">
-            <h1 className="text-2xl font-semibold text-[#fafafa] sm:text-4xl">
+            <h1 className="text-2xl font-semibold  sm:text-4xl">
               {gameName} Meta
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-teritary">
+            <p className="mt-2 max-w-2xl leading-6 text-teritary">
               See which weapons rise to the top, how often they appear, and the
               attachments players trust most. Updated from published loadouts
             </p>
@@ -310,47 +344,197 @@ export function MetaView() {
         </div>
       </header>
 
-      <div className="flex flex-col gap-3">
-        <FilterPillGroup
-          type="single"
-          value={scope}
-          onValueChange={(value) => value && selectScope(value as Scope)}
+      <div
+        role="group"
+        aria-label="Meta view"
+        className="flex w-fit max-w-full flex-wrap items-center gap-1 rounded-xl bg-[#1c191b] p-1"
+      >
+        <button
+          type="button"
+          onClick={() => {
+            setOpenScopeMenu(null);
+            selectScope("all");
+          }}
+          aria-pressed={scope === "all"}
+          className={toggleVariants({
+            variant: "outline",
+            className: cn(
+              "h-9 px-3.5 text-[14px]",
+              scope === "all" &&
+                "!border-slate-100 !bg-slate-100 !text-[#0C0B0B] hover:!border-[#D8CED6] hover:!bg-[#D8CED6] hover:!text-[#0C0B0B]",
+            ),
+          })}
         >
-          <FilterPill value="all">Overview</FilterPill>
-          <FilterPill value="tag">By playstyle</FilterPill>
-          <FilterPill value="category">By category</FilterPill>
-        </FilterPillGroup>
-        {scope === "tag" && tags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            {tags.map((tag) => (
-              <Tag
-                key={tag.id}
-                color={tag.color}
-                onClick={() => setSelectedTagId(tag.id)}
-                className={
-                  selectedTagId === tag.id
-                    ? ""
-                    : "cursor-pointer opacity-45 hover:opacity-80"
-                }
-              >
-                {tag.name}
-              </Tag>
-            ))}
-          </div>
-        )}
-        {scope === "category" && categories.length > 0 && (
-          <FilterPillGroup
-            type="single"
-            value={selectedCategory ?? ""}
-            onValueChange={(value) => value && setSelectedCategory(value)}
+          Overview
+        </button>
+
+        <DropdownMenu
+          open={openScopeMenu === "tag"}
+          onOpenChange={(open) => {
+            setOpenScopeMenu(open ? "tag" : null);
+            if (open) selectScope("tag");
+          }}
+        >
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-pressed={scope === "tag"}
+              className={toggleVariants({
+                variant: "outline",
+                className: cn(
+                  "h-9 px-3.5 text-[14px]",
+                  scope === "tag" &&
+                    "!border-slate-100 !bg-slate-100 !text-[#0C0B0B] hover:!border-[#D8CED6] hover:!bg-[#D8CED6] hover:!text-[#0C0B0B]",
+                ),
+              })}
+            >
+              <span className={scope === "tag" ? "font-normal opacity-70" : ""}>
+                {scope === "tag" ? "Playstyle:" : "By playstyle"}
+              </span>
+              {scope === "tag" && selectedTag && (
+                <>
+                  <strong className="font-semibold">{selectedTag.name}</strong>
+                  <span
+                    role="button"
+                    aria-label="Clear playstyle filter"
+                    className="flex size-5 items-center justify-center text-destructive hover:text-red-600"
+                    onPointerDown={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    }}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setSelectedTagId(null);
+                      setOpenScopeMenu(null);
+                      selectScope("all");
+                    }}
+                  >
+                    ×
+                  </span>
+                </>
+              )}
+              <ChevronDown
+                className={cn(
+                  "size-3.5 transition-transform duration-200",
+                  openScopeMenu === "tag" && "rotate-180",
+                )}
+              />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            sideOffset={8}
+            className="!w-max min-w-[var(--radix-dropdown-menu-trigger-width)] max-w-[calc(100vw-2rem)] rounded-2xl p-2"
           >
-            {categories.map((category) => (
-              <FilterPill key={category} value={category} size="sm">
-                {category}
-              </FilterPill>
-            ))}
-          </FilterPillGroup>
-        )}
+            <DropdownMenuLabel className="px-3 pb-1 pt-2 text-xs font-normal text-teritary">
+              Playstyle
+            </DropdownMenuLabel>
+            {tags.map((tag) => {
+              const selected = selectedTagId === tag.id;
+              return (
+                <DropdownMenuItem
+                  key={tag.id}
+                  onSelect={() => setSelectedTagId(tag.id)}
+                  className={cn(
+                    "h-11 gap-3 font-handwritten aliassed whitespace-nowrap rounded-xl px-3 text-sm",
+                    selected && "bg-white/[0.08] text-[#fafafa]",
+                  )}
+                >
+                  {/* <Activity className="size-4 text-teritary" /> */}
+                  <span>{tag.name}</span>
+                  {selected && <Check className="ml-auto size-4" />}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu
+          open={openScopeMenu === "category"}
+          onOpenChange={(open) => {
+            setOpenScopeMenu(open ? "category" : null);
+            if (open) selectScope("category");
+          }}
+        >
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-pressed={scope === "category"}
+              className={toggleVariants({
+                variant: "outline",
+                className: cn(
+                  "h-9 px-3.5 text-[14px]",
+                  scope === "category" &&
+                    "!border-slate-100 !bg-slate-100 !text-[#0C0B0B] hover:!border-[#D8CED6] hover:!bg-[#D8CED6] hover:!text-[#0C0B0B]",
+                ),
+              })}
+            >
+              <span
+                className={scope === "category" ? "font-normal opacity-70" : ""}
+              >
+                {scope === "category" ? "Weapon type:" : "Weapon type"}
+              </span>
+              {scope === "category" && selectedCategory && (
+                <>
+                  <strong className="font-semibold">{selectedCategory}</strong>
+                  <span
+                    role="button"
+                    aria-label="Clear weapon type filter"
+                    className="flex size-5 items-center justify-center text-destructive hover:text-red-600"
+                    onPointerDown={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    }}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setSelectedCategory(null);
+                      setOpenScopeMenu(null);
+                      selectScope("all");
+                    }}
+                  >
+                    ×
+                  </span>
+                </>
+              )}
+              <ChevronDown
+                className={cn(
+                  "size-3.5 transition-transform duration-200",
+                  openScopeMenu === "category" && "rotate-180",
+                )}
+              />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            sideOffset={8}
+            className="!w-max min-w-[var(--radix-dropdown-menu-trigger-width)] max-w-[calc(100vw-2rem)] rounded-2xl p-2"
+          >
+            <DropdownMenuLabel className="px-3 pb-1 pt-2 text-xs font-normal text-teritary">
+              Weapon type
+            </DropdownMenuLabel>
+            {categories.map((category) => {
+              const selected = selectedCategory === category;
+              return (
+                <DropdownMenuItem
+                  key={category}
+                  onSelect={() => setSelectedCategory(category)}
+                  className={cn(
+                    "h-11 gap-3 whitespace-nowrap rounded-xl px-3 text-sm",
+                    selected && "bg-white/[0.08] text-[#fafafa]",
+                  )}
+                >
+                  <Tag className="shrink-0">
+                    {categoryShortNames.get(category)}
+                  </Tag>
+                  <span>{category}</span>
+                  {selected && <Check className="ml-auto size-4" />}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {error ? (
@@ -368,24 +552,27 @@ export function MetaView() {
         </div>
       ) : (
         <>
-          <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <section className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.025] xl:grid-cols-4">
             <StatCard
               icon={Layers3}
               label="Published builds"
               value={scopedLoadouts.length}
               accent={accent}
+              className="border-b border-r xl:border-b-0"
             />
             <StatCard
               icon={Target}
               label="Active weapons"
               value={weaponMetrics.length}
               accent={accent}
+              className="border-b xl:border-b-0 xl:border-r"
             />
             <StatCard
               icon={Trophy}
               label="Rated builds"
               value={ratedBuilds}
               accent={accent}
+              className="border-r"
             />
             <StatCard
               icon={Paperclip}
@@ -407,129 +594,107 @@ export function MetaView() {
               <Button
                 variant="ghost"
                 onClick={() => navigate(weaponMetaListPath(selectedGame))}
-                className="group hidden shrink-0 items-center gap-2 text-sm text-secondary transition-colors hover:text-[#fafafa] sm:flex"
+                className="group hidden shrink-0 items-center gap-2 text-sm text-secondary transition-colors hover: sm:flex"
               >
                 Full weapon list
                 <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Button>
             </div>
 
-            {weaponMetrics[0] && (
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(
-                    weaponMetaPath(
-                      selectedGame,
-                      String(weaponMetrics[0].weapon.id),
-                    ),
-                  )
-                }
-                className="group relative grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.035] p-4 text-left transition-colors hover:bg-white/[0.055] sm:grid-cols-[3rem_10rem_minmax(0,1fr)_8rem_7rem_5rem_auto] sm:p-5"
-              >
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-[0.06]"
-                  style={{
-                    background: `linear-gradient(90deg, ${accent}, transparent 65%)`,
-                  }}
-                />
-                <span className="relative font-mono text-lg text-[#fafafa]">
-                  #1
-                </span>
-                <div className="relative hidden sm:block">
-                  <WeaponImage
-                    imageUrl={weaponMetrics[0].weapon.imageUrl}
-                    alt={weaponMetrics[0].weapon.name}
-                  />
-                </div>
-                <div className="relative min-w-0">
-                  <p className="truncate font-mono text-base uppercase text-[#fafafa] sm:text-lg">
-                    {weaponMetrics[0].weapon.name}
-                  </p>
-                  <p className="mt-1 text-xs text-teritary">
-                    Top community weapon
-                  </p>
-                </div>
-                <div className="relative hidden sm:block">
-                  <p className="truncate text-sm text-secondary">
-                    {weaponMetrics[0].weapon.type ?? "Unclassified"}
-                  </p>
-                  <p className="mt-1 text-xs text-teritary">weapon type</p>
-                </div>
-                <div className="relative hidden sm:block">
-                  <p className="font-mono text-sm text-[#fafafa]">
-                    {weaponMetrics[0].count}
-                  </p>
-                  <p className="mt-1 text-xs text-teritary">loadouts</p>
-                </div>
-                <div className="relative flex justify-end">
-                  <RatingRing
-                    percent={weaponMetrics[0].avgRating}
-                    size={48}
-                    fallbackLabel="—"
-                  />
-                </div>
-                <ChevronRight className="relative hidden size-4 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70 sm:block" />
-              </button>
-            )}
-
-            {weaponMetrics.length > 1 && (
+            {weaponMetrics.length > 0 && (
               <div className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02]">
                 <div className="divide-y divide-white/[0.06]">
-                  {weaponMetrics.slice(1, 5).map((metric, metricIndex) => (
-                    <button
-                      key={metric.weapon.id}
-                      type="button"
-                      onClick={() =>
-                        navigate(weaponMetaPath(selectedGame, metric.weapon.id))
-                      }
-                      className="group relative flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.035] sm:gap-4 sm:px-5"
-                    >
-                      <span className="w-7 shrink-0 font-mono text-xs text-teritary">
-                        #{metricIndex + 2}
-                      </span>
-                      <div className="w-20 shrink-0 sm:w-28">
-                        <WeaponImage
-                          imageUrl={metric.weapon.imageUrl}
-                          alt={metric.weapon.name}
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="block truncate font-mono text-sm uppercase text-[#fafafa]">
-                          {metric.weapon.name}
+                  {weaponMetrics.slice(0, 5).map((metric, index) => {
+                    const isTopWeapon = index === 0;
+                    return (
+                      <button
+                        key={metric.weapon.id}
+                        type="button"
+                        onClick={() =>
+                          navigate(
+                            weaponMetaPath(
+                              selectedGame,
+                              String(metric.weapon.id),
+                            ),
+                          )
+                        }
+                        className={cn(
+                          "group relative flex w-full items-center gap-3 px-4 text-left transition-colors hover:bg-white/[0.045] sm:gap-4 sm:px-5",
+                          isTopWeapon
+                            ? "bg-white/[0.035] py-5 sm:py-6"
+                            : "py-3",
+                        )}
+                      >
+                        {isTopWeapon && (
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute right-20 top-1/2 -translate-y-1/2 font-rating text-7xl font-semibold text-white/[0.035] sm:text-8xl"
+                          >
+                            01
+                          </span>
+                        )}
+                        <span
+                          className={cn(
+                            "relative w-7 shrink-0 text-teritary",
+                            isTopWeapon ? "text-base " : "text-xs",
+                          )}
+                        >
+                          #{index + 1}
                         </span>
-                        <div className="mt-2 h-1.5 max-w-md overflow-hidden rounded-full bg-white/[0.07]">
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${metric.share}%`,
-                              backgroundColor: accent,
-                            }}
+                        <div
+                          className={cn(
+                            "relative shrink-0",
+                            isTopWeapon ? "w-24 sm:w-36" : "w-20 sm:w-28",
+                          )}
+                        >
+                          <WeaponImage
+                            imageUrl={metric.weapon.imageUrl}
+                            alt={metric.weapon.name}
                           />
                         </div>
-                      </div>
-                      <div className="hidden w-32 shrink-0 md:block">
-                        <p className="truncate text-sm text-secondary">
-                          {metric.weapon.type ?? "Unclassified"}
-                        </p>
-                        <p className="text-xs text-teritary">weapon type</p>
-                      </div>
-                      <div className="hidden w-24 shrink-0 sm:block">
-                        <p className="font-mono text-sm text-[#fafafa]">
-                          {Math.round(metric.share)}%
-                        </p>
-                        <p className="text-xs text-teritary">usage</p>
-                      </div>
-                      <div className="flex w-16 shrink-0 justify-end">
-                        <RatingRing
-                          percent={metric.avgRating}
-                          size={42}
-                          fallbackLabel="—"
-                        />
-                      </div>
-                      <ChevronRight className="size-4 shrink-0 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70" />
-                    </button>
-                  ))}
+                        <div className="relative min-w-0 flex-1">
+                          <span
+                            className={cn(
+                              "block truncate uppercase",
+                              isTopWeapon ? "text-base sm:text-lg" : "text-sm",
+                            )}
+                          >
+                            {metric.weapon.name}
+                          </span>
+
+                          <div className="mt-2 h-1.5 max-w-md overflow-hidden rounded-full bg-white/[0.07]">
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${metric.share}%`,
+                                backgroundColor: accent,
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="relative hidden w-32 shrink-0 md:block">
+                          <p className="truncate text-sm text-secondary">
+                            {metric.weapon.type ?? "Unclassified"}
+                          </p>
+                          <p className="text-xs text-teritary">weapon type</p>
+                        </div>
+                        <div className="relative hidden w-24 shrink-0 sm:block">
+                          <p className="text-sm ">
+                            {Math.round(metric.share)}%
+                          </p>
+                          <p className="text-xs text-teritary">usage</p>
+                        </div>
+                        <div className="relative flex w-16 shrink-0 justify-end">
+                          <RatingRing
+                            percent={metric.avgRating}
+                            size={isTopWeapon ? 48 : 42}
+                            fallbackLabel="—"
+                          />
+                        </div>
+                        <ChevronRight className="relative size-4 shrink-0 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70" />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -537,7 +702,7 @@ export function MetaView() {
             <button
               type="button"
               onClick={() => navigate(weaponMetaListPath(selectedGame))}
-              className="group flex items-center justify-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3 text-sm text-secondary transition-colors hover:bg-white/[0.05] hover:text-[#fafafa] sm:hidden"
+              className="group flex items-center justify-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3 text-sm text-secondary transition-colors hover:bg-white/[0.05] hover: sm:hidden"
             >
               Full weapon list
               <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />

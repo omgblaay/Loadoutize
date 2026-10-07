@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { projectId } from "../../../utils/supabase/info";
+import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { useAuth } from "@/providers/AuthProvider";
 import { AppLayout } from "@/components/templates/AppLayout";
 import { getGameColor } from "@/lib/gameColors";
@@ -16,6 +16,7 @@ interface Loadout extends CardLoadout {
   gameId: string;
   createdAt: string;
   liked: boolean;
+  likedAt?: string | null;
 }
 
 interface GameCatalog {
@@ -25,6 +26,88 @@ interface GameCatalog {
 }
 
 const GAMES_TO_LOAD = GAME_SELECTOR_ENABLED ? GAME_ORDER : [LOCKED_GAME_ID];
+const SUPABASE_ORIGIN = `https://${projectId}.supabase.co`;
+
+interface DayGroup {
+  key: string;
+  dayNumber: string;
+  weekday: string;
+  loadouts: Loadout[];
+}
+
+interface MonthGroup {
+  key: string;
+  label: string;
+  days: DayGroup[];
+}
+
+const monthFormatter = new Intl.DateTimeFormat(undefined, {
+  month: "long",
+  year: "numeric",
+});
+const weekdayFormatter = new Intl.DateTimeFormat(undefined, { weekday: "long" });
+const dayFormatter = new Intl.DateTimeFormat(undefined, { day: "2-digit" });
+
+function likedDate(loadout: Loadout) {
+  const date = new Date(loadout.likedAt ?? loadout.createdAt);
+  return Number.isNaN(date.getTime()) ? new Date(0) : date;
+}
+
+function groupLoadoutsByDate(loadouts: Loadout[]): MonthGroup[] {
+  const months = new Map<string, MonthGroup>();
+
+  for (const loadout of loadouts) {
+    const date = likedDate(loadout);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const dayKey = `${monthKey}-${String(date.getDate()).padStart(2, "0")}`;
+
+    let month = months.get(monthKey);
+    if (!month) {
+      month = { key: monthKey, label: monthFormatter.format(date), days: [] };
+      months.set(monthKey, month);
+    }
+
+    let day = month.days.find((group) => group.key === dayKey);
+    if (!day) {
+      day = {
+        key: dayKey,
+        dayNumber: dayFormatter.format(date),
+        weekday: weekdayFormatter.format(date),
+        loadouts: [],
+      };
+      month.days.push(day);
+    }
+    day.loadouts.push(loadout);
+  }
+
+  return [...months.values()];
+}
+
+async function hydrateLikedDates(loadouts: Loadout[], token: string, userId: string) {
+  const missingDates = loadouts.filter((loadout) => !loadout.likedAt);
+  if (missingDates.length === 0) return loadouts;
+
+  const params = new URLSearchParams({
+    select: "loadout_id,created_at",
+    type: "eq.like",
+    user_id: `eq.${userId}`,
+    loadout_id: `in.(${missingDates.map((loadout) => loadout.id).join(",")})`,
+  });
+  const response = await fetch(`${SUPABASE_ORIGIN}/rest/v1/loadout_reactions?${params}`, {
+    headers: {
+      apikey: publicAnonKey,
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error(`Could not load liked dates (${response.status})`);
+
+  const reactions = (await response.json()) as { loadout_id: string; created_at: string }[];
+  const likedAtByLoadout = new Map(reactions.map((reaction) => [reaction.loadout_id, reaction.created_at]));
+  return loadouts.map((loadout) => ({
+    ...loadout,
+    likedAt: loadout.likedAt ?? likedAtByLoadout.get(loadout.id) ?? null,
+  }));
+}
 
 function LikedLoadoutsSkeleton() {
   const block = "bg-white/[0.06]";
@@ -49,6 +132,7 @@ export function LikedLoadouts() {
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
   const [catalogs, setCatalogs] = useState<Record<string, GameCatalog>>({});
   const [loading, setLoading] = useState(true);
+  const groupedLoadouts = useMemo(() => groupLoadoutsByDate(loadouts), [loadouts]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -57,11 +141,11 @@ export function LikedLoadouts() {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (!accessToken) return;
-    fetchLikedLoadouts(accessToken);
-  }, [accessToken]);
+    if (!accessToken || !user?.id) return;
+    fetchLikedLoadouts(accessToken, user.id);
+  }, [accessToken, user?.id]);
 
-  const fetchLikedLoadouts = async (token: string) => {
+  const fetchLikedLoadouts = async (token: string, userId: string) => {
     setLoading(true);
     try {
       const results = await Promise.all(
@@ -92,11 +176,15 @@ export function LikedLoadouts() {
         })
       );
 
-      setLoadouts(
-        results
-          .flatMap((r) => r.loadouts)
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      );
+      const likedLoadouts = results.flatMap((result) => result.loadouts);
+      let datedLoadouts = likedLoadouts;
+      try {
+        datedLoadouts = await hydrateLikedDates(likedLoadouts, token, userId);
+      } catch (error) {
+        console.error("Error fetching liked dates:", error);
+      }
+
+      setLoadouts(datedLoadouts.sort((a, b) => likedDate(b).getTime() - likedDate(a).getTime()));
       setCatalogs(Object.fromEntries(results.map((r) => [r.gameId, r.catalog])));
     } catch (error) {
       console.error("Error fetching liked loadouts:", error);
@@ -122,25 +210,50 @@ export function LikedLoadouts() {
             <p className="text-[#8d898a]">You haven't liked any loadouts yet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-            {loadouts.map((l, i) => {
-              const catalog = catalogs[l.gameId];
-              const meta = gameMeta[l.gameId] ?? gameMeta.mw4;
-              const accent = getGameColor(l.gameId).primary;
-              return (
-                <LoadoutCard
-                  key={l.id}
-                  loadout={l}
-                  weapons={catalog?.weapons ?? []}
-                  attachments={catalog?.attachments ?? []}
-                  tags={catalog?.tags ?? []}
-                  accent={accent}
-                  gameShort={meta.short}
-                  index={i}
-                  to={`/${l.gameId}/l/${l.id}`}
-                />
-              );
-            })}
+          <div className="flex flex-col gap-10">
+            {groupedLoadouts.map((month) => (
+              <section key={month.key} className="flex flex-col gap-6">
+                <div className="flex items-center gap-4">
+                  <h2 className="text-xl font-semibold text-[#efedf1]">{month.label}</h2>
+                  <div className="h-px flex-1 bg-white/[0.08]" />
+                </div>
+
+                <div className="flex flex-col gap-8">
+                  {month.days.map((day) => (
+                    <section key={day.key} className="flex flex-col gap-3">
+                      <div className="flex items-baseline gap-3">
+                        <span className="font-mono text-2xl leading-none text-[#efedf1]">{day.dayNumber}</span>
+                        <h3 className="text-sm font-medium capitalize text-[#8d898a]">{day.weekday}</h3>
+                        <span className="text-xs font-mono text-teritary">
+                          {day.loadouts.length} loadout{day.loadouts.length === 1 ? "" : "s"}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                        {day.loadouts.map((loadout, index) => {
+                          const catalog = catalogs[loadout.gameId];
+                          const meta = gameMeta[loadout.gameId] ?? gameMeta.mw4;
+                          const accent = getGameColor(loadout.gameId).primary;
+                          return (
+                            <LoadoutCard
+                              key={loadout.id}
+                              loadout={loadout}
+                              weapons={catalog?.weapons ?? []}
+                              attachments={catalog?.attachments ?? []}
+                              tags={catalog?.tags ?? []}
+                              accent={accent}
+                              gameShort={meta.short}
+                              index={index}
+                              to={`/${loadout.gameId}/l/${loadout.id}`}
+                            />
+                          );
+                        })}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </section>
+            ))}
           </div>
         )}
       </div>

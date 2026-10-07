@@ -2,12 +2,23 @@ import type { Loadout } from "@/types/loadout";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { getGameColor } from "@/lib/gameColors";
-import { gameMeta, GAME_ORDER, LAST_SELECTED_GAME_KEY, GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "@/lib/games";
+import {
+  gameMeta,
+  GAME_ORDER,
+  LAST_SELECTED_GAME_KEY,
+  GAME_SELECTOR_ENABLED,
+  LOCKED_GAME_ID,
+} from "@/lib/games";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "@/components/templates/AppLayout";
 import type { CardWeapon, CardAttachment, CardTag } from "@/types/loadout";
-import { ChevronRight, Crosshair } from "lucide-react";
-import { YoutubeIcon, TwitchIcon, TiktokIcon, InstagramIcon } from "@/assets/icons/socials/index";
+import { ChevronRight } from "lucide-react";
+import {
+  YoutubeIcon,
+  TwitchIcon,
+  TiktokIcon,
+  InstagramIcon,
+} from "@/assets/icons/socials/index";
 import { HomeExplorePreview } from "@/components/organisms/HomeExplorePreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/atoms/Skeleton";
@@ -15,12 +26,10 @@ import { cn } from "@/lib/utils";
 import { Countdown } from "@/components/molecules/Countdown";
 import { Button } from "@/components/atoms/Button";
 import gameLogo from "figma:asset/mw4_logo.png";
-import { Container } from "@/components/atoms/Container";
 import { explorePath } from "@/lib/routes";
 
 // Oct 23, 2026, 12:00 AM EDT (UTC-4)
 const MW4_RELEASE_DATE = new Date("2026-10-23T04:00:00Z");
-
 
 interface Game {
   id: string;
@@ -34,14 +43,7 @@ function HomeSkeleton() {
 
   return (
     <>
-      {/* Header */}
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <Skeleton className={cn("w-12 h-12 rounded-full", block)} />
-          <Skeleton className={cn("h-8 w-64", block)} />
-        </div>
-        <Skeleton className={cn("h-5 w-80 max-w-full", block)} />
-      </div>
+      <Skeleton className={cn("h-[340px] rounded-[28px]", block)} />
 
       {/* Feature row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -58,7 +60,10 @@ function HomeSkeleton() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className={cn("rounded-2xl h-[240px]", block)} />
+              <Skeleton
+                key={i}
+                className={cn("rounded-2xl h-[240px]", block)}
+              />
             ))}
           </div>
         </div>
@@ -67,7 +72,10 @@ function HomeSkeleton() {
           <Skeleton className={cn("h-5 w-40", block)} />
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className={cn("rounded-2xl h-[220px]", block)} />
+              <Skeleton
+                key={i}
+                className={cn("rounded-2xl h-[220px]", block)}
+              />
             ))}
           </div>
         </div>
@@ -84,15 +92,20 @@ export function Home() {
   const [weapons, setWeapons] = useState<CardWeapon[]>([]);
   const [attachments, setAttachments] = useState<CardAttachment[]>([]);
   const [tags, setTags] = useState<CardTag[]>([]);
-  const [selectedGame, setSelectedGame] = useState<string>(GAME_SELECTOR_ENABLED ? "" : LOCKED_GAME_ID);
+  const [selectedGame, setSelectedGame] = useState<string>(
+    GAME_SELECTOR_ENABLED ? "" : LOCKED_GAME_ID,
+  );
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    fetch(`https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games`, {
-      headers: { Authorization: `Bearer ${publicAnonKey}` },
-    })
+    fetch(
+      `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games`,
+      {
+        headers: { Authorization: `Bearer ${publicAnonKey}` },
+      },
+    )
       .then((r) => r.json())
       .then((data) => data.games && setGames(data.games))
       .catch((error) => console.error("Error fetching games:", error));
@@ -151,9 +164,9 @@ export function Home() {
         gameIds.map((gameId) =>
           fetch(
             `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts`,
-            { headers: { Authorization: `Bearer ${publicAnonKey}` } }
-          ).then((r) => r.json())
-        )
+            { headers: { Authorization: `Bearer ${publicAnonKey}` } },
+          ).then((r) => r.json()),
+        ),
       );
       setLoadouts(results.flatMap((data) => data.loadouts ?? []));
     } catch (error) {
@@ -167,7 +180,7 @@ export function Home() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/weapons`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } },
       );
       const data = await response.json();
       if (data.weapons) setWeapons(data.weapons);
@@ -180,7 +193,7 @@ export function Home() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/attachments`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } },
       );
       const data = await response.json();
       if (data.attachments) setAttachments(data.attachments);
@@ -193,7 +206,7 @@ export function Home() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/tags`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } },
       );
       const data = await response.json();
       if (data.tags) setTags(data.tags);
@@ -206,8 +219,6 @@ export function Home() {
   const activeMeta = gameMeta[selectedGame];
   const activeName = activeGame?.name ?? activeMeta?.name ?? selectedGame;
   const activeShort = activeMeta?.short ?? activeName.slice(0, 3).toUpperCase();
-  const ActiveIcon = activeMeta?.icon ?? Crosshair;
-  const activeLogoUrl = activeGame?.logoUrl;
   const accent = getGameColor(selectedGame).primary;
 
   if (loading) {
@@ -220,118 +231,117 @@ export function Home() {
 
   return (
     <AppLayout selectedGame={selectedGame} onGameSelect={setSelectedGame}>
-      {/* Header */}
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-
-          <img src={gameLogo} alt="Modern Warfare 4" className="w-56 object-contain" />
-          <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">
-            Meta Vault
-          </h1>
-        </div>
-        <p className="text-secondary text-lg max-w-2xl">
-          Build the best Modern Warfare 4 loadouts, rate the community's top class setups, and share your own weapon
-          builds and attachments with a link.
-        </p>
-      </div>
-
-      {selectedGame === "mw4" && (
-        <Countdown targetDate={MW4_RELEASE_DATE} label="Modern Warfare 4 releases on Friday 23 October 2026" accent={accent} />
-      )}
-
-      {/* Feature row */}
-      {/*<div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div
-          className="relative rounded-2xl border border-white/[0.1] h-[296px] overflow-hidden flex flex-col items-center justify-center gap-6 px-6 py-6"
-          style={{
-            backgroundImage:
-              "radial-gradient(ellipse at top, rgba(102,0,252,0.35), transparent 65%), linear-gradient(#1b141b, #000143)",
-            boxShadow: "0px 0px 32px 0px rgba(96,23,199,0.4)",
-          }}
-        >
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center"
-            style={{
-              backgroundImage: "linear-gradient(160deg, #6214d3 0%, #a379de 100%)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), 0 0 30px rgba(245,245,250,0.14)",
-            }}
-          >
-            <Sparkles className="w-8 h-8 text-[#fafafa]" />
+      <section className="relative overflow-hidden lg:min-h-[350px]">
+        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.9fr)] lg:gap-12">
+          <div className="flex min-w-0 flex-col items-start">
+            <img
+              src={gameLogo}
+              alt="Modern Warfare 4"
+              className="w-44 object-contain sm:w-52"
+            />
+            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-teritary sm:text-xs">
+              Loadoutize Meta Vault
+            </p>
+            <h1 className="mt-3 max-w-2xl text-[clamp(2.5rem,5.5vw,5rem)] leading-[0.92] uppercase tracking-[-0.04em]">
+              Build smarter from day one
+            </h1>
+            <p className="mt-5 max-w-xl text-base leading-7 text-secondary sm:text-lg">
+              Discover community-built Modern Warfare 4 loadouts, compare
+              ratings and the live meta, follow creator setups, and share weapon
+              codes or downloadable QR codes.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Button onClick={() => navigate(explorePath(selectedGame))}>
+                Explore loadouts
+                <ChevronRight className="size-4" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/${selectedGame}/create`)}
+              >
+                Create a loadout
+              </Button>
+            </div>
           </div>
-          <div className="text-center flex flex-col gap-2">
-            <p className="text-[16px] text-[#f7f6f6] font-semibold">Quick add with AI</p>
-            <p className="text-[14px] text-[#fafafa]/50">
-              Take a picture of your loadout.
-              <br />
-              It will appear on your profile with ease.
+
+          {selectedGame === "mw4" && (
+            <Countdown
+              targetDate={MW4_RELEASE_DATE}
+              label="Modern Warfare 4 releases on Friday 23 October 2026"
+              accent={accent}
+            />
+          )}
+        </div>
+        <div className="mt-8 grid gap-5 rounded-2xl bg-white/[0.035] p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-teritary">
+              Creator loadouts
+            </p>
+            <h2 className="mt-2 text-lg  sm:text-xl">
+              See what your favourite creators actually run.
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-secondary">
+              Jump straight to verified builds shared by streamers and content
+              creators across the platforms you follow.
             </p>
           </div>
-          <button
-            className="w-full h-[52px] rounded-xl flex items-center justify-center gap-2 text-[#fafafa]"
-            style={{ background: "#6600fc", boxShadow: "inset 0 4px 20px rgba(255,255,255,0.24)" }}
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Try now</span>
-            <span className="text-[#bebcbc]">For Free</span>
-          </button>
-        </div> */}
 
-      <Container className="flex-row bg-[#1f1b1e]">
-
-        <div className="flex flex-col gap-4 flex-1">
-          <h2 className="text-[14px]">
-            From your favourite Streamers &amp; Content Creators</h2>
-          <p className="text-secondary">
-            Check what they are currently running in-game for the best outcome.
-          </p>
-          <div className="flex w-full gap-2 justify-between">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/${selectedGame}/community?social=youtube`)}
-                className="opacity-80 hover:opacity-100 transition-opacity"
-                aria-label="Find YouTube creators"
-              >
-                <YoutubeIcon size={24} />
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/${selectedGame}/community?social=twitch`)}
-                className="opacity-80 hover:opacity-100 transition-opacity"
-                aria-label="Find Twitch creators"
-              >
-                <TwitchIcon size={24} />
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/${selectedGame}/community?social=tiktok`)}
-                className="opacity-80 hover:opacity-100 transition-opacity"
-                aria-label="Find TikTok creators"
-              >
-                <TiktokIcon size={24} />
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/${selectedGame}/community?social=instagram`)}
-                className="opacity-80 hover:opacity-100 transition-opacity"
-                aria-label="Find Instagram creators"
-              >
-                <InstagramIcon size={24} />
-              </Button>
-
-            </div>           <Button
-              onClick={() => navigate(explorePath(selectedGame))}
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+            <Button
               variant="outline"
+              size="icon"
+              onClick={() =>
+                navigate(`/${selectedGame}/community?social=youtube`)
+              }
+              className="opacity-75 transition-opacity hover:opacity-100"
+              aria-label="Find YouTube creators"
             >
-              Explore all weapon builds
-              <ChevronRight className="w-4 h-4" />
+              <YoutubeIcon size={22} />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() =>
+                navigate(`/${selectedGame}/community?social=twitch`)
+              }
+              className="opacity-75 transition-opacity hover:opacity-100"
+              aria-label="Find Twitch creators"
+            >
+              <TwitchIcon size={22} />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() =>
+                navigate(`/${selectedGame}/community?social=tiktok`)
+              }
+              className="opacity-75 transition-opacity hover:opacity-100"
+              aria-label="Find TikTok creators"
+            >
+              <TiktokIcon size={22} />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() =>
+                navigate(`/${selectedGame}/community?social=instagram`)
+              }
+              className="opacity-75 transition-opacity hover:opacity-100"
+              aria-label="Find Instagram creators"
+            >
+              <InstagramIcon size={22} />
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => navigate(`/${selectedGame}/community`)}
+              className="group ml-auto sm:ml-2"
+            >
+              Browse all creators
+              <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Button>
           </div>
-
         </div>
-
-      </Container>
-
+      </section>
 
       <HomeExplorePreview
         selectedGame={selectedGame}

@@ -181,9 +181,7 @@ export function WeaponMetaView() {
         onGameSelect={(id) => navigate(`/${id}/meta`)}
       >
         <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-12 text-center">
-          <h1 className="text-xl font-semibold text-[#fafafa]">
-            Weapon data unavailable
-          </h1>
+          <h1 className="text-xl font-semibold ">Weapon data unavailable</h1>
           <p className="mt-2 text-sm text-teritary">
             {error ?? "This weapon could not be found in the current game."}
           </p>
@@ -217,13 +215,13 @@ export function WeaponMetaView() {
               Weapon performance profile
             </p>
             <div className="mt-3 min-w-0">
-              <h1 className="text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.9] uppercase tracking-[-0.04em] text-[#fafafa]">
+              <h1 className="text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.9] uppercase tracking-[-0.04em] ">
                 {weapon.name}
               </h1>
               {weapon.type && weaponGroupRank != null && (
                 <Link
                   to={weaponGroupMetaPath(gameId, weapon.type)}
-                  className="group mt-3 inline-flex items-center gap-1.5 text-sm text-secondary transition-colors hover:text-[#fafafa]"
+                  className="group mt-3 inline-flex items-center gap-1.5 text-sm text-secondary transition-colors hover:"
                 >
                   Top {weaponGroupRank} in {weapon.type}
                   <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -235,22 +233,18 @@ export function WeaponMetaView() {
               <div className="flex items-center gap-3">
                 <RatingRing percent={avgRating} size={54} fallbackLabel="—" />
                 <div>
-                  <p className="font-rating text-lg text-[#fafafa]">
+                  <p className="font-rating text-lg ">
                     {ratingTier(avgRating) ?? "Unrated"}
                   </p>
                   <p className="text-xs text-teritary">community tier</p>
                 </div>
               </div>
               <div>
-                <p className="font-mono text-lg text-[#fafafa]">
-                  {weaponLoadouts.length}
-                </p>
+                <p className="font-mono text-lg ">{weaponLoadouts.length}</p>
                 <p className="text-xs text-teritary">published loadouts</p>
               </div>
               <div>
-                <p className="font-mono text-lg text-[#fafafa]">
-                  {ratedLoadouts.length}
-                </p>
+                <p className="font-mono text-lg ">{ratedLoadouts.length}</p>
                 <p className="text-xs text-teritary">qualified ratings</p>
               </div>
             </div>
@@ -325,9 +319,7 @@ export function WeaponMetaView() {
                   #{index + 1}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-[#fafafa]">
-                    {loadout.name}
-                  </p>
+                  <p className="truncate font-medium ">{loadout.name}</p>
                   <p className="mt-1 truncate text-xs text-teritary">
                     {loadout.description || `${weapon.name} community loadout`}
                   </p>

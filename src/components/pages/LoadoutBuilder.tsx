@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router";
+import { toast } from "sonner";
 import { useAuth } from "@/providers/AuthProvider";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { gameMeta } from "@/lib/games";
@@ -31,6 +32,7 @@ import {
 import { ResponsiveDialog } from "@/components/molecules/ResponsiveDialog";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
+import { sortWeaponCategories } from "@/lib/weaponCategories";
 import { detectVideoPlatform, VIDEO_PLATFORM_META } from "@/lib/video";
 import { Container } from "@/components/atoms/Container";
 import { Button } from "@/components/atoms/Button";
@@ -151,7 +153,7 @@ function AttachmentPickerList({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search attachments..."
-        className="h-11 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
+        className="h-11 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px]  placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
       />
 
       {allowAny && (
@@ -162,7 +164,7 @@ function AttachmentPickerList({
             "flex h-12 shrink-0 items-center gap-3 rounded-lg px-3 text-left text-sm transition-colors",
             selected === ANY_ATTACHMENT_VALUE
               ? "bg-[#fafafa] text-[#161414]"
-              : "text-[#fafafa] hover:bg-white/[0.05]",
+              : " hover:bg-white/[0.05]",
           )}
         >
           <div className="flex size-6 shrink-0 items-center justify-center rounded-md border border-current/20 font-mono text-[10px] font-semibold">
@@ -215,7 +217,7 @@ function AttachmentPickerList({
                   "flex items-center gap-3 h-12 px-3 rounded-lg text-left text-[14px] transition-colors shrink-0",
                   isSelected
                     ? "bg-[#fafafa] text-[#161414]"
-                    : "text-[#fafafa] hover:bg-white/[0.05]",
+                    : " hover:bg-white/[0.05]",
                 )}
               >
                 {att.imageUrl ? (
@@ -326,6 +328,7 @@ export function LoadoutBuilder() {
   const { user, accessToken, loading: authLoading } = useAuth();
 
   const [loadoutName, setLoadoutName] = useState("");
+  const [loadoutNameError, setLoadoutNameError] = useState("");
   const [loadoutDescription, setLoadoutDescription] = useState("");
   const [gameLoadoutCode, setGameLoadoutCode] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
@@ -355,6 +358,7 @@ export function LoadoutBuilder() {
   const [downloadingQr, setDownloadingQr] = useState(false);
   const [attachmentRequirementOpen, setAttachmentRequirementOpen] =
     useState(false);
+  const [attachmentError, setAttachmentError] = useState(false);
 
   const selectedAttachmentCount = selectedWeapons.reduce(
     (total, weapon) =>
@@ -363,6 +367,12 @@ export function LoadoutBuilder() {
         .length,
     0,
   );
+
+  useEffect(() => {
+    if (selectedAttachmentCount >= MIN_REQUIRED_ATTACHMENTS) {
+      setAttachmentError(false);
+    }
+  }, [selectedAttachmentCount]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -481,27 +491,41 @@ export function LoadoutBuilder() {
   };
 
   const saveLoadout = async () => {
-    if (!loadoutName.trim()) {
-      alert("Please enter a loadout name");
+    const nameMissing = !loadoutName.trim();
+    const attachmentsMissing =
+      selectedAttachmentCount < MIN_REQUIRED_ATTACHMENTS;
+    const trimmedVideoUrl = videoUrl.trim();
+    const videoInvalid =
+      Boolean(trimmedVideoUrl) && !detectVideoPlatform(trimmedVideoUrl);
+
+    setLoadoutNameError(nameMissing ? "A loadout name is required." : "");
+    setAttachmentError(attachmentsMissing);
+    setVideoError(
+      videoInvalid
+        ? "Video must be a TikTok, Instagram, or YouTube link"
+        : "",
+    );
+
+    if (nameMissing) {
+      toast.error("Loadout name is missing", {
+        description: "Give your loadout a name before finishing.",
+      });
       return;
     }
 
-    if (selectedAttachmentCount < MIN_REQUIRED_ATTACHMENTS) {
+    if (attachmentsMissing) {
       setAttachmentRequirementOpen(true);
       return;
     }
 
     if (!accessToken) {
-      alert("You must be logged in to save loadouts");
+      toast.error("Sign in required", {
+        description: "You must be signed in to save a loadout.",
+      });
       return;
     }
 
-    const trimmedVideoUrl = videoUrl.trim();
-    if (trimmedVideoUrl && !detectVideoPlatform(trimmedVideoUrl)) {
-      setVideoError("Video must be a TikTok, Instagram, or YouTube link");
-      return;
-    }
-    setVideoError("");
+    if (videoInvalid) return;
 
     setSaving(true);
     try {
@@ -551,11 +575,15 @@ export function LoadoutBuilder() {
       } else {
         const error = await response.json();
         console.error("Error saving loadout:", error);
-        alert(error.error || "Failed to save loadout");
+        toast.error(error.error || "Failed to save loadout", {
+          description: "Check your loadout and try again.",
+        });
       }
     } catch (error) {
       console.error("Error saving loadout:", error);
-      alert("Failed to save loadout");
+      toast.error("Failed to save loadout", {
+        description: "Something went wrong. Please try again.",
+      });
     } finally {
       setSaving(false);
     }
@@ -579,7 +607,9 @@ export function LoadoutBuilder() {
       link.click();
     } catch (error) {
       console.error("Error generating loadout QR code:", error);
-      alert("Could not download the QR code. Please try again.");
+      toast.error("Could not download the QR code", {
+        description: "Please try again.",
+      });
     } finally {
       setDownloadingQr(false);
     }
@@ -588,6 +618,7 @@ export function LoadoutBuilder() {
   const createAnotherLoadout = () => {
     setCreatedLoadoutId(null);
     setLoadoutName("");
+    setLoadoutNameError("");
     setLoadoutDescription("");
     setGameLoadoutCode("");
     setVideoUrl("");
@@ -601,6 +632,7 @@ export function LoadoutBuilder() {
     setOpenAttachmentType(null);
     setWeaponSearchOpen(false);
     setWeaponSearchQuery("");
+    setAttachmentError(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -700,9 +732,7 @@ export function LoadoutBuilder() {
               {meta.short}
             </BreadcrumbLink>
             <BreadcrumbSpacer />
-            <span className="text-[#fafafa]">
-              {editId ? "Edit Loadout" : "New Loadout"}
-            </span>
+            <span className="">{editId ? "Edit Loadout" : "New Loadout"}</span>
           </>
         }
       >
@@ -720,12 +750,10 @@ export function LoadoutBuilder() {
   );
   const attachmentTypes = Object.keys(attachmentsByType);
 
-  const weaponTypes = Array.from(
-    new Set(
-      weapons
-        .map((w) => w.typeShort || w.type)
-        .filter((t): t is string => Boolean(t)),
-    ),
+  const weaponTypes = sortWeaponCategories(
+    weapons
+      .map((w) => w.typeShort || w.type)
+      .filter((t): t is string => Boolean(t)),
   );
 
   // Only one weapon is ever selected at once (toggleWeapon always replaces the array
@@ -775,9 +803,7 @@ export function LoadoutBuilder() {
         <>
           <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>
           <BreadcrumbSpacer />
-          <span className="text-[#fafafa]">
-            {editId ? "Edit Loadout" : "New Loadout"}
-          </span>
+          <span className="">{editId ? "Edit Loadout" : "New Loadout"}</span>
         </>
       }
     >
@@ -810,21 +836,43 @@ export function LoadoutBuilder() {
       </div>
 
       <Container>
-        <h2 className="text-[16px] text-[#fafafa] font-semibold">
-          Loadout details
-        </h2>
+        <h2 className="text-[16px]  font-semibold">Loadout details</h2>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+            <label
+              htmlFor="loadout-name"
+              className={cn(
+                "text-[12px] tracking-[0.5px] uppercase font-semibold",
+                loadoutNameError ? "text-[#ef9696]" : "text-[#8d898a]",
+              )}
+            >
               Name
             </label>
             <input
+              id="loadout-name"
               type="text"
               value={loadoutName}
-              onChange={(e) => setLoadoutName(e.target.value)}
+              onChange={(e) => {
+                setLoadoutName(e.target.value);
+                if (loadoutNameError && e.target.value.trim()) {
+                  setLoadoutNameError("");
+                }
+              }}
+              aria-invalid={Boolean(loadoutNameError)}
+              aria-describedby={loadoutNameError ? "loadout-name-error" : undefined}
               placeholder="Enter a name for this loadout"
-              className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
+              className={cn(
+                "h-12 rounded-xl border px-4 text-[14px] placeholder:text-[#8d898a] outline-none transition-colors",
+                loadoutNameError
+                  ? "border-destructive bg-[#241214] focus:border-destructive focus:ring-2 focus:ring-destructive/20"
+                  : "border-white/[0.07] bg-white/[0.04] focus:border-white/30",
+              )}
             />
+            {loadoutNameError && (
+              <p id="loadout-name-error" className="text-[12px] text-[#ef9696]">
+                {loadoutNameError}
+              </p>
+            )}
           </div>
           {tags.length > 0 && (
             <div>
@@ -860,7 +908,7 @@ export function LoadoutBuilder() {
               onChange={(e) => setLoadoutDescription(e.target.value)}
               placeholder="Describe your strategy, playstyle, or tips..."
               rows={3}
-              className="rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 py-3 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors resize-none"
+              className="rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 py-3 text-[14px]  placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors resize-none"
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -872,14 +920,27 @@ export function LoadoutBuilder() {
               value={gameLoadoutCode}
               onChange={(e) => setGameLoadoutCode(e.target.value)}
               placeholder="Paste the loadout code from the game"
-              className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] font-mono text-[#fafafa] placeholder:text-[#8d898a] placeholder:font-sans outline-none focus:border-white/30 transition-colors"
+              className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] font-mono  placeholder:text-[#8d898a] placeholder:font-sans outline-none focus:border-white/30 transition-colors"
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+            <label
+              htmlFor="loadout-video"
+              className={cn(
+                "text-[12px] tracking-[0.5px] uppercase font-semibold",
+                videoError ? "text-[#ef9696]" : "text-[#8d898a]",
+              )}
+            >
               Attach a video (optional)
             </label>
-            <div className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 flex items-center gap-2 focus-within:border-white/30 transition-colors">
+            <div
+              className={cn(
+                "h-12 rounded-xl border px-4 flex items-center gap-2 transition-colors",
+                videoError
+                  ? "border-destructive bg-[#241214] focus-within:border-destructive focus-within:ring-2 focus-within:ring-destructive/20"
+                  : "border-white/[0.07] bg-white/[0.04] focus-within:border-white/30",
+              )}
+            >
               {(() => {
                 const platform = videoUrl.trim()
                   ? detectVideoPlatform(videoUrl.trim())
@@ -892,25 +953,43 @@ export function LoadoutBuilder() {
                 ) : null;
               })()}
               <input
+                id="loadout-video"
                 type="url"
                 value={videoUrl}
                 onChange={(e) => {
                   setVideoUrl(e.target.value);
                   setVideoError("");
                 }}
+                aria-invalid={Boolean(videoError)}
+                aria-describedby={videoError ? "loadout-video-error" : undefined}
                 placeholder="Paste a TikTok, Instagram, or YouTube link"
-                className="flex-1 bg-transparent text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none"
+                className="flex-1 bg-transparent text-[14px]  placeholder:text-[#8d898a] outline-none"
               />
             </div>
             {videoError && (
-              <p className="text-[12px] text-[#ef9696]">{videoError}</p>
+              <p id="loadout-video-error" className="text-[12px] text-[#ef9696]">
+                {videoError}
+              </p>
             )}
           </div>
         </div>
       </Container>
 
-      <Container>
-        <h2 className="text-base">Weapon</h2>
+      <Container
+        className={cn(
+          "transition-colors",
+          attachmentError && "border-destructive/40 bg-[#1b1113]",
+        )}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className={cn("text-base", attachmentError && "text-[#ef9696]")}>Weapon</h2>
+          {attachmentError && (
+            <p className="text-xs text-[#ef9696]" role="alert">
+              Choose {MIN_REQUIRED_ATTACHMENTS - selectedAttachmentCount} more attachment
+              {MIN_REQUIRED_ATTACHMENTS - selectedAttachmentCount === 1 ? "" : "s"}
+            </p>
+          )}
+        </div>
 
         {primaryWeapon && !pickingWeapon ? (
           <>
@@ -963,7 +1042,11 @@ export function LoadoutBuilder() {
                         className={cn(
                           "h-12 px-4 rounded-xl border border-white/[0.12] flex items-center gap-2 text-left transition-colors hover:border-white/40",
                           selectedName && "bg-white/5",
+                          attachmentError &&
+                            !selectedName &&
+                            "border-destructive/50 bg-destructive/[0.06] hover:border-destructive",
                         )}
+                        aria-invalid={attachmentError && !selectedName}
                       >
                         <div className="flex gap-2 flex-1 flex-row">
                           {isAnySelected ? (
@@ -1017,7 +1100,7 @@ export function LoadoutBuilder() {
                 value={weaponSearchQuery}
                 onChange={(e) => setWeaponSearchQuery(e.target.value)}
                 placeholder="Search weapons by name..."
-                className="h-11 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px] text-[#fafafa] placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
+                className="h-11 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 text-[14px]  placeholder:text-[#8d898a] outline-none focus:border-white/30 transition-colors"
               />
             )}
 
@@ -1030,7 +1113,7 @@ export function LoadoutBuilder() {
                       setWeaponSearchOpen((v) => !v);
                       if (weaponSearchOpen) setWeaponSearchQuery("");
                     }}
-                    className="w-9 h-9 rounded-xl border border-white/[0.18] flex items-center justify-center text-[#fafafa] hover:bg-white/[0.05] transition-colors"
+                    className="w-9 h-9 rounded-xl border border-white/[0.18] flex items-center justify-center  hover:bg-white/[0.05] transition-colors"
                     aria-label={
                       weaponSearchOpen ? "Close search" : "Search weapons"
                     }
@@ -1117,10 +1200,11 @@ export function LoadoutBuilder() {
         open={attachmentRequirementOpen}
         onOpenChange={setAttachmentRequirementOpen}
         title="Add more attachments"
+        variant="destructive"
       >
         <div className="flex flex-col gap-5">
           <div>
-            <p className="text-base leading-6 text-[#fafafa]">
+            <p className="text-base leading-6 ">
               Choose at least {MIN_REQUIRED_ATTACHMENTS} specific attachments
               before finishing your loadout.
             </p>
@@ -1130,16 +1214,18 @@ export function LoadoutBuilder() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
+          <div className="rounded-xl border border-destructive/25 bg-destructive/[0.06] p-4">
             <div className="mb-3 flex items-center justify-between gap-4">
-              <span className="text-sm text-secondary">Attachments selected</span>
-              <span className="font-mono text-sm text-[#fafafa]">
+              <span className="text-sm text-secondary">
+                Attachments selected
+              </span>
+              <span className="font-mono text-sm text-[#ef9696]">
                 {selectedAttachmentCount}/{MIN_REQUIRED_ATTACHMENTS}
               </span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-white/[0.08]">
               <div
-                className="h-full rounded-full bg-[#fafafa] transition-[width] duration-300"
+                className="h-full rounded-full bg-destructive transition-[width] duration-300"
                 style={{
                   width: `${Math.min(
                     100,
@@ -1163,6 +1249,7 @@ export function LoadoutBuilder() {
       <ResponsiveDialog
         open={Boolean(createdLoadoutId)}
         title=""
+        variant="success"
         onOpenChange={(open) => {
           if (!open && createdLoadoutPath) navigate(createdLoadoutPath);
         }}
@@ -1174,7 +1261,7 @@ export function LoadoutBuilder() {
             </div>
 
             <div>
-              <h3 className="text-xl font-semibold text-[#fafafa]">
+              <h3 className="text-xl font-semibold ">
                 Your loadout was created successfully
               </h3>
               <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-teritary">
@@ -1225,7 +1312,7 @@ export function LoadoutBuilder() {
 
       <div className="flex flex-col gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div>
-          <p className="font-semibold text-[#fafafa]">
+          <p className="font-semibold ">
             {editId
               ? "Ready to save your changes?"
               : "Ready to share your loadout?"}
@@ -1248,8 +1335,8 @@ export function LoadoutBuilder() {
       {/* Perks and Equipment sections
       <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
         <div className="flex items-center justify-between">
-          <p className="text-[16px] text-[#fafafa] font-semibold">Perks</p>
-          <span className="h-7 px-3 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] text-[#fafafa]">
+          <p className="text-[16px]  font-semibold">Perks</p>
+          <span className="h-7 px-3 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] ">
             {selectedPerks.length}/3 selected
           </span>
         </div>
@@ -1271,8 +1358,8 @@ export function LoadoutBuilder() {
 
       <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
         <div className="flex items-center justify-between">
-          <p className="text-[16px] text-[#fafafa] font-semibold">Equipment</p>
-          <span className="h-7 px-3 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] text-[#fafafa]">
+          <p className="text-[16px]  font-semibold">Equipment</p>
+          <span className="h-7 px-3 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] ">
             {selectedEquipment.length}/2 selected
           </span>
         </div>

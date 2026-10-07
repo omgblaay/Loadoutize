@@ -237,7 +237,7 @@ export function AttachmentMetaView() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="truncate font-mono text-sm uppercase text-[#fafafa]">
+                    <span className="truncate font-mono text-sm uppercase ">
                       {weapon.name}
                     </span>
                     {weapon.typeShort && (
@@ -254,9 +254,7 @@ export function AttachmentMetaView() {
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="font-mono text-sm text-[#fafafa]">
-                    {count} builds
-                  </p>
+                  <p className="font-mono text-sm ">{count} builds</p>
                   <p className="text-xs text-teritary">
                     {Math.round(adoption)}% adoption
                   </p>

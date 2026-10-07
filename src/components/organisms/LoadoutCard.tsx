@@ -109,7 +109,7 @@ export function LoadoutCard({
         <div className="flex-1 min-w-0 flex flex-col gap-0 justify-center">
           <h3 className="text-lg font-sans font-semibold">{loadout.name}</h3>
           <p className="text-sm text-teritary truncate">
-            {loadout.video && (
+            {/* {loadout.video && (
               <div
                 className="absolute right-4 top-4"
                 title={`Video: ${VIDEO_PLATFORM_META[loadout.video.platform].label}`}
@@ -121,7 +121,7 @@ export function LoadoutCard({
                   },
                 )}
               </div>
-            )}
+            )} */}
             {loadout.description}
           </p>
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router";
+import { toast } from "sonner";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { getGameColor } from "@/lib/gameColors";
 import { gameMeta } from "@/lib/games";
@@ -31,6 +32,17 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/molecules/Dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/molecules/AlertDialog";
 import { SHOWCASE_SLIDES } from "@/lib/showcaseSlides";
 import { LoadoutWall } from "@/components/organisms/LoadoutWall";
 import type { CardWeapon, CardTag, CardAttachment } from "@/types/loadout";
@@ -346,7 +358,6 @@ export function LoadoutPreview() {
 
   const deleteLoadout = async () => {
     if (!accessToken) return;
-    if (!confirm("Delete this loadout? This can't be undone.")) return;
 
     try {
       const response = await fetch(
@@ -360,10 +371,15 @@ export function LoadoutPreview() {
         navigate(explorePath(gameId));
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to delete loadout");
+        toast.error(error.error || "Failed to delete loadout", {
+          description: "The loadout was not deleted. Please try again.",
+        });
       }
     } catch (error) {
       console.error("Error deleting loadout:", error);
+      toast.error("Failed to delete loadout", {
+        description: "Something went wrong. Please try again.",
+      });
     }
   };
 
@@ -525,7 +541,7 @@ export function LoadoutPreview() {
               labelClassName={
                 loadout.likes + loadout.dislikes < 5
                   ? "text-[10px] text-teritary"
-                  : "text-[11px] text-[#fafafa]"
+                  : "text-[11px] "
               }
               fallbackLabel="New"
             />
@@ -671,7 +687,7 @@ export function LoadoutPreview() {
                     <Puzzle className="w-3.5 h-3.5 text-[#8d898a]" />
                   </div>
                   <span className="text-[14px] text-[#8d898a] flex-1">Gear</span>
-                  <span className="text-[14px] text-[#fafafa] font-medium">{item}</span>
+                  <span className="text-[14px]  font-medium">{item}</span>
                 </div>
               ))} */}
 
@@ -703,7 +719,7 @@ export function LoadoutPreview() {
                       </>
                     ) : (
                       <>
-                        <Copy className="size-3 text-[#fafafa]" />
+                        <Copy className="size-3 " />
                       </>
                     )}
                   </Button>
@@ -731,7 +747,7 @@ export function LoadoutPreview() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-[12px] font-semibold text-[#fafafa]">
+                        <span className="text-[12px] font-semibold ">
                           {loadout.userName?.[0]?.toUpperCase() ?? "U"}
                         </span>
                       )}
@@ -834,7 +850,7 @@ export function LoadoutPreview() {
                         )}
                         <div className="flex flex-col gap-1.5 min-w-0 flex-1 justify-center">
                           {loadout.video.title && (
-                            <p className="text-[14px] text-[#fafafa] font-medium line-clamp-2">
+                            <p className="text-[14px]  font-medium line-clamp-2">
                               {loadout.video.title}
                             </p>
                           )}
@@ -850,8 +866,8 @@ export function LoadoutPreview() {
                             className="w-fit"
                           >
                             <Button variant="outline" size="sm">
-                              <ExternalLink className="w-3.5 h-3.5 text-[#fafafa]" />
-                              <span className="text-[13px] text-[#fafafa]">
+                              <ExternalLink className="w-3.5 h-3.5 " />
+                              <span className="text-[13px] ">
                                 Watch on {platformMeta.label}
                               </span>
                             </Button>
@@ -871,17 +887,15 @@ export function LoadoutPreview() {
               className="w-[104px] h-[104px]"
             />
             <div className="flex-1 min-w-[200px] flex flex-col gap-3">
-              <h3 className="text-[12px] tracking-[0.5px] uppercase text-[#fafafa] font-medium">
+              <h3 className="text-[12px] tracking-[0.5px] uppercase  font-medium">
                 Share loadout
               </h3>
               <p className="text-[12px] text-[#8d898a] break-all">{shareUrl}</p>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-fit">
-                    <Download className="w-4 h-4 text-[#fafafa]" />
-                    <span className="text-[14px] text-[#fafafa]">
-                      Download QR
-                    </span>
+                    <Download className="w-4 h-4 " />
+                    <span className="text-[14px] ">Download QR</span>
                     <span className="text-[14px] text-[#bebcbc]">as PNG</span>
                     <ChevronDown className="w-4 h-4 text-[#bebcbc]" />
                   </Button>
@@ -907,10 +921,28 @@ export function LoadoutPreview() {
                 <Edit className="w-4 h-4" />
                 Edit
               </Button>
-              <Button onClick={deleteLoadout}>
-                <Trash2 className="w-4 h-4" />
-                Delete
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button>
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent variant="destructive">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete this loadout?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. The loadout and its shared link will be removed permanently.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Keep loadout</AlertDialogCancel>
+                    <AlertDialogAction variant="destructive" onClick={() => void deleteLoadout()}>
+                      Delete loadout
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           )}
         </div>
@@ -949,7 +981,7 @@ export function LoadoutPreview() {
             <div className="relative hidden sm:block min-h-[280px] bg-[#0a0909] overflow-hidden">
               <LoadoutWall />
               <div className="absolute inset-0 flex flex-col justify-end p-6">
-                <h3 className="text-xl font-bold text-[#fafafa] mb-1">
+                <h3 className="text-xl font-bold  mb-1">
                   {SHOWCASE_SLIDES[2].title}
                 </h3>
                 <p className="text-neutral-400 text-sm">
