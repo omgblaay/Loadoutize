@@ -652,16 +652,18 @@ export function MetaView() {
                             alt={metric.weapon.name}
                           />
                         </div>
-                        <div className="relative min-w-0 flex-1">
+                        <div className="relative min-w-0 flex-row flex gap-2 flex-1">
+                          <Tag className="shrink-0">
+                            {metric.weapon.typeShort}
+                          </Tag>
                           <span
                             className={cn(
                               "block truncate uppercase",
                               isTopWeapon ? "text-base sm:text-lg" : "text-sm",
                             )}
                           >
-                            {metric.weapon.name}
-                          </span>
-
+                            {metric.weapon.name}{" "}
+                          </span>{" "}
                           <div className="mt-2 h-1.5 max-w-md overflow-hidden rounded-full bg-white/[0.07]">
                             <div
                               className="h-full rounded-full"
@@ -672,12 +674,7 @@ export function MetaView() {
                             />
                           </div>
                         </div>
-                        <div className="relative hidden w-32 shrink-0 md:block">
-                          <p className="truncate text-sm text-secondary">
-                            {metric.weapon.type ?? "Unclassified"}
-                          </p>
-                          <p className="text-xs text-teritary">weapon type</p>
-                        </div>
+
                         <div className="relative hidden w-24 shrink-0 sm:block">
                           <p className="text-sm ">
                             {Math.round(metric.share)}%
