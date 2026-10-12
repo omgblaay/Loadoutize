@@ -27,7 +27,7 @@ export default function Scene3D({ icon }: { icon: NavIconKey }) {
     <Canvas
       gl={{ alpha: true, antialias: true }}
       camera={{ position: [0, 0, 3.4], fov: 32 }}
-      style={{ pointerEvents: "none" }}
+      style={{ width: "100%", height: "100%", pointerEvents: "none" }}
     >
       <ambientLight intensity={0.7} />
       <directionalLight position={[2, 3, 4]} intensity={1.1} />

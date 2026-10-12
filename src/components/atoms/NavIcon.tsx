@@ -30,24 +30,53 @@ export function NavIcon({
   size?: number;
 }) {
   const show3d = active || hovered;
-  // Mounts the (lazy) 3D scene the first time it's needed and leaves it
-  // mounted -- repeat hovers just toggle CSS, not a re-fetch/re-init.
-  const [mounted3d, setMounted3d] = React.useState(active);
-  React.useEffect(() => {
-    if (show3d) setMounted3d(true);
-  }, [show3d]);
-
   const prefersReducedMotion =
     typeof window !== "undefined" ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false;
   const transition = prefersReducedMotion ? "opacity 0.001ms" : "opacity 0.2s ease, transform 0.2s ease";
+  const hostRef = React.useRef<HTMLSpanElement>(null);
+  const [mounted3d, setMounted3d] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!show3d) {
+      // Let the opacity transition finish, then release the WebGL context.
+      // Keeping every previously-hovered icon mounted eventually exhausts
+      // the browser's context limit on navigation-heavy pages.
+      const timeout = window.setTimeout(
+        () => setMounted3d(false),
+        prefersReducedMotion ? 0 : 220,
+      );
+      return () => window.clearTimeout(timeout);
+    }
+
+    const host = hostRef.current;
+    if (!host) return;
+
+    const syncVisibility = () => {
+      const rect = host.getBoundingClientRect();
+      // SideNav renders desktop, rail, and mobile variants together and
+      // hides two with CSS. A shared hover key reaches all copies, so only
+      // create a Canvas for the copy that actually occupies layout space.
+      setMounted3d(rect.width > 0 && rect.height > 0);
+    };
+
+    syncVisibility();
+    const observer = new ResizeObserver(syncVisibility);
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, [prefersReducedMotion, show3d]);
+  const display3d = show3d && mounted3d;
 
   return (
-    <span className="relative inline-flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+    <span
+      ref={hostRef}
+      className="relative inline-flex items-center justify-center shrink-0"
+      style={{ width: size, height: size }}
+    >
       <span
         className="absolute inset-0 flex items-center justify-center"
         style={{
-          opacity: show3d ? 0 : 1,
-          transform: show3d ? "scale(0.4)" : "scale(1)",
+          opacity: display3d ? 0 : 1,
+          transform: display3d ? "scale(0.4)" : "scale(1)",
           transition,
           pointerEvents: "none",
         }}
@@ -58,9 +87,13 @@ export function NavIcon({
         <span
           className="absolute inset-0 flex items-center justify-center"
           style={{
-            opacity: show3d ? 1 : 0,
-            transform: show3d ? "scale(1)" : "scale(0.4)",
-            transition,
+            opacity: display3d ? 1 : 0,
+            // Never transform the Canvas host. React Three Fiber measures
+            // its rendered bounds when WebGL initializes; mounting at
+            // scale(0.4) can leave an 8px drawing buffer inside a 20px icon.
+            transition: prefersReducedMotion
+              ? "opacity 0.001ms"
+              : "opacity 0.2s ease",
             pointerEvents: "none",
           }}
         >
