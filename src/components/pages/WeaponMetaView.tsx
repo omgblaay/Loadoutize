@@ -216,9 +216,6 @@ export function WeaponMetaView() {
       <header className="relative overflow-hidden py-3 sm:py-7">
         <div className="grid items-center gap-5 md:grid-cols-[minmax(0,1fr)_minmax(300px,0.82fr)] md:gap-10">
           <div className="order-2 min-w-0 md:order-1">
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-teritary">
-              Weapon performance profile
-            </p>
             <div className="mt-3 min-w-0">
               <h1 className="text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.9] uppercase tracking-[-0.04em] ">
                 {weapon.name}

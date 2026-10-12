@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router";
 import { LoadoutCard } from "@/components/organisms/LoadoutCard";
 import type { CardWeapon, CardAttachment, CardTag } from "@/types/loadout";
-import { WeaponCard } from "@/components/organisms/WeaponCard";
+import { WeaponImage } from "@/components/molecules/WeaponImage";
 import { Button } from "@/components/atoms/Button";
 import {
   ChevronRight,
@@ -11,15 +11,19 @@ import {
   Users,
 } from "lucide-react";
 import type { Loadout } from "@/types/loadout";
-import { explorePath, loadoutPath } from "@/lib/routes";
-import { Tag } from "../atoms/Tag";
-import { BorderBeam } from "@/components/ui/border-beam";
+import {
+  explorePath,
+  loadoutPath,
+  weaponGroupMetaPath,
+  weaponMetaPath,
+} from "@/lib/routes";
 import {
   InstagramIcon,
   TiktokIcon,
   TwitchIcon,
   YoutubeIcon,
 } from "@/assets/icons/socials";
+import { Tag } from "../atoms/Tag";
 
 const CREATOR_PLATFORMS = [
   {
@@ -90,8 +94,12 @@ export function HomeExplorePreview({
 }) {
   const navigate = useNavigate();
 
-  const topWeapons = (aliases: readonly string[]) =>
-    weapons
+  const topWeapons = (aliases: readonly string[]) => {
+    const gameLoadouts = loadouts.filter(
+      (loadout) => loadout.gameId === selectedGame,
+    );
+
+    return weapons
       .filter((weapon) => {
         const categoryNames = [weapon.typeShort, weapon.type]
           .filter((value): value is string => Boolean(value))
@@ -99,11 +107,12 @@ export function HomeExplorePreview({
         return categoryNames.some((value) => aliases.includes(value));
       })
       .map((weapon, index) => {
-        const ratings = loadouts
+        const weaponLoadouts = gameLoadouts.filter(
+          (loadout) => loadout.weapons?.[0]?.id === weapon.id,
+        );
+        const ratings = weaponLoadouts
           .filter(
             (loadout) =>
-              loadout.gameId === selectedGame &&
-              loadout.weapons?.[0]?.id === weapon.id &&
               loadout.likes + loadout.dislikes >= 5 &&
               loadout.ratingPercent != null,
           )
@@ -119,8 +128,8 @@ export function HomeExplorePreview({
         };
       })
       .sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1) || a.index - b.index)
-      .slice(0, 3)
-      .map((entry) => entry.weapon);
+      .slice(0, 3);
+  };
 
   const topLoadouts = loadouts
     .filter((l) => l.gameId === selectedGame)
@@ -128,7 +137,7 @@ export function HomeExplorePreview({
     .slice(0, 6);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col mt-4 gap-6">
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <Link
@@ -143,65 +152,77 @@ export function HomeExplorePreview({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {TOP_WEAPON_CATEGORIES.map((category) => {
             const categoryWeapons = topWeapons(category.aliases);
+            const categoryName =
+              categoryWeapons[0]?.weapon.type ?? category.name;
 
             return (
-              <div key={category.short} className="flex flex-col gap-3">
-                <h3 className="text-xs text-secondary font-sans flex items-center gap-2">
+              <section
+                key={category.short}
+                className="overflow-hidden rounded-2xl border border-white/[0.07]"
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(weaponGroupMetaPath(selectedGame, categoryName))
+                  }
+                  className="group/category flex w-full items-center gap-3 border-b border-white/[0.07] px-4 py-3 text-left transition-colors hover:bg-white/[0.035]"
+                >
                   <Tag>{category.short}</Tag>
-                  {category.name}
-                </h3>
+                  <h3 className="min-w-0 flex-1 truncate text-sm font-sans">
+                    {category.name}
+                  </h3>
+                  <ChevronRight className="size-4 shrink-0 text-white/25 transition-transform group-hover/category:translate-x-0.5 group-hover/category:text-white/70" />
+                </button>
 
                 {categoryWeapons.length > 0 ? (
-                  <ol className="flex flex-col gap-2">
-                    {categoryWeapons.map((weapon, index) => {
-                      const weaponCard = (
-                        <WeaponCard
-                          variant="compact"
-                          weapon={weapon}
-                          rank={index + 1}
-                          hoverLift={index !== 0}
-                          onSelect={() =>
+                  <ol className="divide-y divide-white/[0.06]">
+                    {categoryWeapons.map((entry, index) => (
+                      <li key={entry.weapon.id}>
+                        <button
+                          type="button"
+                          onClick={() =>
                             navigate(
-                              explorePath(selectedGame, {
-                                weapon: weapon.name,
-                              }),
+                              weaponMetaPath(
+                                selectedGame,
+                                String(entry.weapon.id),
+                              ),
                             )
                           }
-                        />
-                      );
+                          className="group flex w-full items-center gap-3 bg-white/[0.02] px-4 py-3 text-left transition-colors hover:bg-white/[0.035]"
+                        >
+                          <span
+                            className="w-6 shrink-0 text-center text-xs text-teritary"
+                            aria-label={`Rank ${index + 1}`}
+                          >
+                            #{index + 1}
+                          </span>
+                          <div className="relative shrink-0 w-20 sm:w-28">
+                            <WeaponImage
+                              imageUrl={entry.weapon.imageUrl}
+                              alt={entry.weapon.name}
+                            />
+                          </div>
 
-                      return (
-                        <li key={weapon.id}>
-                          {index === 0 ? (
-                            <BorderBeam
-                              size="sm"
-                              colorVariant="colorful"
-                              borderRadius={12}
-                              strength={0.58}
-                              duration={3.2}
-                              className="h-full transition-[transform,filter] duration-200 ease-out hover:-translate-y-1 hover:drop-shadow-[0_16px_18px_rgba(0,0,0,0.45)]"
-                            >
-                              {weaponCard}
-                            </BorderBeam>
-                          ) : (
-                            weaponCard
-                          )}
-                        </li>
-                      );
-                    })}
+                          <span className="min-w-0 flex-1 truncate text-sm text-secondary">
+                            {entry.weapon.name}
+                          </span>
+                          <ChevronRight className="size-4 shrink-0 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70" />
+                        </button>
+                      </li>
+                    ))}
                   </ol>
                 ) : (
-                  <p className="text-sm text-teritary py-4">
+                  <p className="bg-white/[0.02] px-4 py-6 text-sm text-teritary">
                     No ranked {category.name.toLowerCase()} for {gameName} yet.
                   </p>
                 )}
-              </div>
+              </section>
             );
           })}
         </div>
       </section>
 
-      <section className="relative mt-10  isolate overflow-hidden rounded-3xl border border-white/[0.1] bg-[#121011] p-5 sm:p-7 lg:p-8">
+      <section className="relative mt-4  isolate overflow-hidden rounded-3xl border border-white/[0.1] bg-[#121011] p-5 sm:p-7 lg:p-8">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -left-20 -top-28 size-80 rounded-full opacity-20 blur-[110px]"
@@ -240,18 +261,12 @@ export function HomeExplorePreview({
                 >
                   <span
                     aria-hidden="true"
-                    className="absolute inset-x-6 bottom-0 h-px origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
-                    style={{ backgroundColor: accent }}
+                    className="absolute inset-x-6 bottom-0 h-px origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100 bg-gray-600"
                   />
-                  <span className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-black/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-transform duration-200 group-hover:scale-105">
-                    <Icon size={24} />
-                  </span>
+                  <Icon size={24} />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-medium text-white">
                       {label}
-                    </span>
-                    <span className="mt-1 block text-xs text-teritary">
-                      {description}
                     </span>
                   </span>
                   <ChevronRight className="size-4 shrink-0 text-white/25 transition-all group-hover:translate-x-1 group-hover:text-white/75" />
@@ -319,7 +334,7 @@ export function HomeExplorePreview({
             </p>
           </div>
 
-          <div className="flex gap-2 flex-1 h-full flex-col">
+          {/* <div className="flex gap-2 flex-1 h-full flex-col">
             {[
               { icon: MessageCircle, label: "Guided by your feedback" },
               { icon: Heart, label: "Made for the community" },
@@ -332,7 +347,7 @@ export function HomeExplorePreview({
                 <span className="text-sm text-secondary">{label}</span>
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       </section>
     </div>

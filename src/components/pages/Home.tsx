@@ -273,7 +273,7 @@ export function Home() {
           onPointerLeave={() => setHoveredAction(null)}
           onFocus={() => setHoveredAction("explore")}
           onBlur={() => setHoveredAction(null)}
-          className="group relative min-h-[180px] overflow-hidden rounded-2xl border border-white/[0.1] bg-[#151314] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="group relative min-h-[180px] overflow-hidden rounded-2xl border border-white/[0.1]  p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
           <div
             aria-hidden="true"
@@ -311,7 +311,7 @@ export function Home() {
           onPointerLeave={() => setHoveredAction(null)}
           onFocus={() => setHoveredAction("meta")}
           onBlur={() => setHoveredAction(null)}
-          className="group relative min-h-[180px] overflow-hidden rounded-2xl border border-white/[0.1] bg-[#151314] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="group relative min-h-[180px] overflow-hidden rounded-2xl border border-white/[0.1] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
           <div
             aria-hidden="true"
@@ -348,10 +348,7 @@ export function Home() {
           onBlur={() => setHoveredAction(null)}
           className="group relative min-h-[180px] overflow-hidden rounded-2xl border border-white/[0.1] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
-          <div
-            aria-hidden="true"
-            className="bg-white/10 absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]"
-          />
+          <div aria-hidden="true" className="bg-[#151314] absolute inset-0 " />
           <div className="relative flex h-full flex-col">
             <div className="flex items-start justify-between gap-4">
               <span className="flex size-11 items-center justify-center rounded-xl border border-black/10 bg-black/10">
