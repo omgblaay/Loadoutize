@@ -146,7 +146,7 @@ export function HomeExplorePreview({
 
             return (
               <div key={category.short} className="flex flex-col gap-3">
-                <h3 className="text-xs text-secondary flex items-center gap-2">
+                <h3 className="text-xs text-secondary font-sans flex items-center gap-2">
                   <Tag>{category.short}</Tag>
                   {category.name}
                 </h3>
