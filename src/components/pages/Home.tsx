@@ -12,19 +12,14 @@ import {
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "@/components/templates/AppLayout";
 import type { CardWeapon, CardAttachment, CardTag } from "@/types/loadout";
-import { ChevronRight } from "lucide-react";
-import {
-  YoutubeIcon,
-  TwitchIcon,
-  TiktokIcon,
-  InstagramIcon,
-} from "@/assets/icons/socials/index";
+import { ChevronRight, Crown, Globe, Plus } from "lucide-react";
 import { HomeExplorePreview } from "@/components/organisms/HomeExplorePreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
 import { Countdown } from "@/components/molecules/Countdown";
 import { Button } from "@/components/atoms/Button";
+import { NavIcon } from "@/components/atoms/NavIcon";
 import gameLogo from "figma:asset/mw4_logo.png";
 import { explorePath } from "@/lib/routes";
 
@@ -45,10 +40,11 @@ function HomeSkeleton() {
     <>
       <Skeleton className={cn("h-[340px] rounded-[28px]", block)} />
 
-      {/* Feature row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <Skeleton className={cn("rounded-2xl h-[296px]", block)} />
-        <Skeleton className={cn("rounded-2xl h-[296px]", block)} />
+      {/* Primary actions */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className={cn("h-[180px] rounded-2xl", block)} />
+        ))}
       </div>
 
       {/* Top weapons + popular loadouts */}
@@ -96,6 +92,10 @@ export function Home() {
     GAME_SELECTOR_ENABLED ? "" : LOCKED_GAME_ID,
   );
   const [loading, setLoading] = useState(true);
+  const [exploreCtaHovered, setExploreCtaHovered] = useState(false);
+  const [hoveredAction, setHoveredAction] = useState<
+    "explore" | "meta" | "create" | null
+  >(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -239,29 +239,17 @@ export function Home() {
               alt="Modern Warfare 4"
               className="w-44 object-contain sm:w-52"
             />
-            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-teritary sm:text-xs">
-              Loadoutize Meta Vault
-            </p>
-            <h1 className="mt-3 max-w-2xl text-[clamp(2.5rem,5.5vw,5rem)] leading-[0.92] uppercase tracking-[-0.04em]">
-              Build smarter from day one
+            <h1 className="mt-10 text-[clamp(1.2rem,4.5vw,4rem)] leading-[0.92] uppercase tracking-[-0.04em]">
+              LOADOUTS DRIVEN BY COMMUNITY
             </h1>
+            {/* <p className="text-sm uppercase tracking-[0.18em] text-teritary">
+              Loadoutize Meta Vault
+            </p> */}
             <p className="mt-5 max-w-xl text-base leading-7 text-secondary sm:text-lg">
-              Discover community-built Modern Warfare 4 loadouts, compare
-              ratings and the live meta, follow creator setups, and share weapon
-              codes or downloadable QR codes.
+              Discover community-built MW4 and Warzone loadouts. Compare ratings
+              and the live meta. Follow creator setups, and share weapon codes
+              or downloadable QR codes.
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button onClick={() => navigate(explorePath(selectedGame))}>
-                Explore loadouts
-                <ChevronRight className="size-4" />
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/${selectedGame}/create`)}
-              >
-                Create a loadout
-              </Button>
-            </div>
           </div>
 
           {selectedGame === "mw4" && (
@@ -272,75 +260,114 @@ export function Home() {
             />
           )}
         </div>
-        <div className="mt-8 grid gap-5 rounded-2xl bg-white/[0.035] p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
-          <div className="min-w-0">
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-teritary">
-              Creator loadouts
-            </p>
-            <h2 className="mt-2 text-lg  sm:text-xl">
-              See what your favourite creators actually run.
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-secondary">
-              Jump straight to verified builds shared by streamers and content
-              creators across the platforms you follow.
-            </p>
-          </div>
+      </section>
 
-          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() =>
-                navigate(`/${selectedGame}/community?social=youtube`)
-              }
-              className="opacity-75 transition-opacity hover:opacity-100"
-              aria-label="Find YouTube creators"
-            >
-              <YoutubeIcon size={22} />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() =>
-                navigate(`/${selectedGame}/community?social=twitch`)
-              }
-              className="opacity-75 transition-opacity hover:opacity-100"
-              aria-label="Find Twitch creators"
-            >
-              <TwitchIcon size={22} />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() =>
-                navigate(`/${selectedGame}/community?social=tiktok`)
-              }
-              className="opacity-75 transition-opacity hover:opacity-100"
-              aria-label="Find TikTok creators"
-            >
-              <TiktokIcon size={22} />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() =>
-                navigate(`/${selectedGame}/community?social=instagram`)
-              }
-              className="opacity-75 transition-opacity hover:opacity-100"
-              aria-label="Find Instagram creators"
-            >
-              <InstagramIcon size={22} />
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => navigate(`/${selectedGame}/community`)}
-              className="group ml-auto sm:ml-2"
-            >
-              Browse all creators
-              <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </Button>
+      <section
+        aria-label="Get started"
+        className="grid grid-cols-1 gap-4 md:grid-cols-3"
+      >
+        <button
+          type="button"
+          onClick={() => navigate(explorePath(selectedGame))}
+          onPointerEnter={() => setHoveredAction("explore")}
+          onPointerLeave={() => setHoveredAction(null)}
+          onFocus={() => setHoveredAction("explore")}
+          onBlur={() => setHoveredAction(null)}
+          className="group relative min-h-[180px] overflow-hidden rounded-2xl border border-white/[0.1] bg-[#151314] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+        >
+          <div
+            aria-hidden="true"
+            className="absolute -right-12 -top-16 size-44 rounded-full opacity-0 blur-3xl transition-opacity duration-300 group-hover:opacity-25"
+          />
+          <div className="relative flex h-full flex-col">
+            <div className="flex items-start justify-between gap-4">
+              <span className="flex size-11 items-center justify-center rounded-xl border border-white/[0.1] bg-black/25">
+                <NavIcon
+                  icon="explore"
+                  flat={<Globe className="size-5" />}
+                  active={false}
+                  hovered={hoveredAction === "explore"}
+                  size={24}
+                />
+              </span>
+              <ChevronRight className="size-5 text-teritary transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white" />
+            </div>
+            <div className="mt-auto pt-7">
+              <p className="text-xl font-semibold text-white">
+                Explore loadouts
+              </p>
+              <p className="mt-2 text-sm leading-6 text-teritary">
+                Find community builds, creator setups, and your next favorite
+                weapon.
+              </p>
+            </div>
           </div>
-        </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate(`/${selectedGame}/meta`)}
+          onPointerEnter={() => setHoveredAction("meta")}
+          onPointerLeave={() => setHoveredAction(null)}
+          onFocus={() => setHoveredAction("meta")}
+          onBlur={() => setHoveredAction(null)}
+          className="group relative min-h-[180px] overflow-hidden rounded-2xl border border-white/[0.1] bg-[#151314] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+        >
+          <div
+            aria-hidden="true"
+            className="absolute -right-12 -top-16 size-44 rounded-full opacity-0 blur-3xl transition-opacity duration-300 group-hover:opacity-25"
+          />
+          <div className="relative flex h-full flex-col">
+            <div className="flex items-start justify-between gap-4">
+              <span className="flex size-11 items-center justify-center rounded-xl border border-white/[0.1] bg-black/25">
+                <NavIcon
+                  icon="meta"
+                  flat={<Crown className="size-5" />}
+                  active={false}
+                  hovered={hoveredAction === "meta"}
+                  size={24}
+                />
+              </span>
+              <ChevronRight className="size-5 text-teritary transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white" />
+            </div>
+            <div className="mt-auto pt-7">
+              <p className="text-xl font-semibold text-white">Explore meta</p>
+              <p className="mt-2 text-sm leading-6 text-teritary">
+                See the weapons and attachments climbing the community rankings.
+              </p>
+            </div>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate(`/${selectedGame}/create`)}
+          onPointerEnter={() => setHoveredAction("create")}
+          onPointerLeave={() => setHoveredAction(null)}
+          onFocus={() => setHoveredAction("create")}
+          onBlur={() => setHoveredAction(null)}
+          className="group relative min-h-[180px] overflow-hidden rounded-2xl border border-white/[0.1] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        >
+          <div
+            aria-hidden="true"
+            className="bg-white/10 absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_45%)]"
+          />
+          <div className="relative flex h-full flex-col">
+            <div className="flex items-start justify-between gap-4">
+              <span className="flex size-11 items-center justify-center rounded-xl border border-black/10 bg-black/10">
+                <Plus className="size-6 transition-transform duration-300 group-hover:rotate-90" />
+              </span>
+              <ChevronRight className="size-5 opacity-55 transition-transform duration-300 group-hover:translate-x-1 group-hover:opacity-100" />
+            </div>
+            <div className="mt-auto pt-7">
+              <p className="text-xl font-semibold">Create new</p>
+              <p className="mt-2 text-sm leading-6 opacity-70">
+                Build a loadout, add your notes, and share it with the
+                community.
+              </p>
+            </div>
+          </div>
+        </button>
       </section>
 
       <HomeExplorePreview

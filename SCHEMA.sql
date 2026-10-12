@@ -194,6 +194,7 @@ CREATE TABLE perks (
   id SERIAL PRIMARY KEY,
   game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
+  slot TEXT CHECK (slot IS NULL OR slot IN ('perk_1', 'perk_2', 'perk_3')),
   description TEXT,
   image UUID,
   display_order INTEGER DEFAULT 0,
@@ -201,6 +202,7 @@ CREATE TABLE perks (
 );
 
 CREATE INDEX idx_perks_game ON perks(game_id);
+CREATE INDEX idx_perks_game_slot_order ON perks(game_id, slot, display_order, name);
 
 INSERT INTO perks (game_id, name, display_order) VALUES
   ('blackops7', 'Ghost', 1), ('blackops7', 'Quick Fix', 2), ('blackops7', 'Scavenger', 3),
@@ -215,6 +217,7 @@ CREATE TABLE equipment (
   id SERIAL PRIMARY KEY,
   game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
+  slot TEXT CHECK (slot IS NULL OR slot IN ('throwable', 'tactical', 'field_upgrade')),
   description TEXT,
   image UUID,
   display_order INTEGER DEFAULT 0,
@@ -222,6 +225,7 @@ CREATE TABLE equipment (
 );
 
 CREATE INDEX idx_equipment_game ON equipment(game_id);
+CREATE INDEX idx_equipment_game_slot ON equipment(game_id, slot, name);
 
 INSERT INTO equipment (game_id, name, display_order) VALUES
   ('blackops7', 'Frag Grenade', 1), ('blackops7', 'Semtex', 2), ('blackops7', 'Flashbang', 3),
@@ -317,6 +321,8 @@ CREATE TABLE loadouts (
   user_id TEXT NOT NULL,
   user_name TEXT NOT NULL,
   name TEXT NOT NULL,
+  content_type TEXT NOT NULL DEFAULT 'weapon_config'
+    CHECK (content_type IN ('full_loadout', 'weapon_config')),
   description TEXT,
   tag_id INTEGER REFERENCES tags(id) ON DELETE SET NULL,
   views INTEGER DEFAULT 0,
@@ -328,6 +334,7 @@ CREATE TABLE loadouts (
 CREATE INDEX idx_loadouts_game ON loadouts(game_id);
 CREATE INDEX idx_loadouts_user ON loadouts(user_id);
 CREATE INDEX idx_loadouts_created ON loadouts(created_at DESC);
+CREATE INDEX idx_loadouts_content_type ON loadouts(game_id, content_type, created_at DESC);
 
 ALTER TABLE loadouts ENABLE ROW LEVEL SECURITY;
 
@@ -357,7 +364,10 @@ CREATE TABLE loadout_weapons (
   id SERIAL PRIMARY KEY,
   loadout_id TEXT REFERENCES loadouts(id) ON DELETE CASCADE,
   weapon_id TEXT REFERENCES weapons(id) ON DELETE CASCADE,
-  slot_order INTEGER DEFAULT 0
+  slot_order INTEGER DEFAULT 0,
+  slot TEXT NOT NULL DEFAULT 'primary'
+    CHECK (slot IN ('primary', 'secondary', 'melee')),
+  UNIQUE (loadout_id, slot)
 );
 
 CREATE INDEX idx_loadout_weapons_loadout ON loadout_weapons(loadout_id);
@@ -460,7 +470,14 @@ CREATE TABLE loadout_equipment (
   id SERIAL PRIMARY KEY,
   loadout_id TEXT REFERENCES loadouts(id) ON DELETE CASCADE,
   equipment_id INTEGER REFERENCES equipment(id) ON DELETE CASCADE,
-  UNIQUE (loadout_id, equipment_id)
+  slot TEXT NOT NULL CHECK (slot IN ('throwable', 'tactical', 'field_upgrade')),
+  is_any BOOLEAN NOT NULL DEFAULT false,
+  CHECK (
+    (is_any = true AND equipment_id IS NULL)
+    OR (is_any = false AND equipment_id IS NOT NULL)
+  ),
+  UNIQUE (loadout_id, equipment_id),
+  UNIQUE (loadout_id, slot)
 );
 
 CREATE INDEX idx_loadout_equipment_loadout ON loadout_equipment(loadout_id);

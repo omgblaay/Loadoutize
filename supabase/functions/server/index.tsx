@@ -725,8 +725,9 @@ app.get("/make-server-6db475c7/games/:gameId/perks", async (c) => {
     const gameId = c.req.param("gameId");
     const { data, error } = await supabase
       .from('perks')
-      .select('id, name, description, image, display_order')
+      .select('id, name, description, image, slot, display_order')
       .eq('game_id', gameId)
+      .order('slot', { ascending: true })
       .order('display_order', { ascending: true });
     if (error) throw error;
 
@@ -734,6 +735,8 @@ app.get("/make-server-6db475c7/games/:gameId/perks", async (c) => {
     const perks = (data ?? []).map((p: any) => ({
       id: p.id,
       name: p.name,
+      slot: p.slot,
+      displayOrder: p.display_order ?? 0,
       description: p.description,
       imageUrl: p.image ? urlById.get(p.image) ?? null : null,
     }));
@@ -749,16 +752,17 @@ app.get("/make-server-6db475c7/games/:gameId/equipment", async (c) => {
     const gameId = c.req.param("gameId");
     const { data, error } = await supabase
       .from('equipment')
-      .select('id, name, description, image, display_order')
+      .select('id, name, image, slot')
       .eq('game_id', gameId)
-      .order('display_order', { ascending: true });
+      .order('name', { ascending: true });
     if (error) throw error;
 
     const urlById = await resolveImageUrls((data ?? []).map((e: any) => e.image));
     const equipment = (data ?? []).map((e: any) => ({
       id: e.id,
       name: e.name,
-      description: e.description,
+      slot: e.slot,
+      description: null,
       imageUrl: e.image ? urlById.get(e.image) ?? null : null,
     }));
     return c.json({ equipment });
@@ -829,7 +833,7 @@ async function isTagAllowedForWeapons(gameId: string, tagId: number, weapons: an
 // loadout_perks/loadout_equipment junction rows referencing the catalog by
 // id, but mapLoadout still flattens them back to `string[]` of names --
 // unlike weapons, nothing else about their frontend shape needed to change.
-const LOADOUT_SELECT = `*, loadout_weapons(id, weapon_id, slot_order, loadout_weapon_attachments(attachments(name, attachment_types(name)))), loadout_perks(perks(name)), loadout_equipment(equipment(name)), loadout_reactions(type, user_id, created_at)`;
+const LOADOUT_SELECT = `*, loadout_weapons(id, weapon_id, slot_order, slot, loadout_weapon_attachments(attachments(name, attachment_types(name)))), loadout_perks(perks(name)), loadout_equipment(slot, is_any, equipment(name, slot)), loadout_reactions(type, user_id, created_at)`;
 
 // Loadout share links use short IDs (loadoutize.com/mw4/l/ab12) rather than a
 // full UUID -- 4 lowercase hex characters (16^4 = 65,536 combos) is plenty
@@ -874,9 +878,16 @@ async function saveLoadoutWeapons(loadoutId: string, gameId: string, weaponsPayl
 
   for (let i = 0; i < weaponsPayload.length; i++) {
     const w = weaponsPayload[i];
+    const slot = ['primary', 'secondary', 'melee'].includes(w.slot)
+      ? w.slot
+      : i === 1
+        ? 'secondary'
+        : i === 2
+          ? 'melee'
+          : 'primary';
     const { data: lw, error: lwError } = await supabase
       .from('loadout_weapons')
-      .insert({ loadout_id: loadoutId, weapon_id: w.id, slot_order: i })
+      .insert({ loadout_id: loadoutId, weapon_id: w.id, slot_order: i, slot })
       .select('id')
       .single();
     if (lwError) throw lwError;
@@ -902,13 +913,22 @@ async function saveLoadoutPerks(loadoutId: string, gameId: string, perkNames: st
 
   const { data: catalogPerks, error: catError } = await supabase
     .from('perks')
-    .select('id, name')
+    .select('id, name, slot')
     .eq('game_id', gameId);
   if (catError) throw catError;
 
-  const perkIds = perkNames
-    .map((name) => (catalogPerks ?? []).find((p: any) => p.name === name)?.id)
-    .filter((id): id is number => id != null);
+  const perkIdsBySlot = new Map<string, number>();
+  for (const name of perkNames) {
+    const perk = (catalogPerks ?? []).find((p: any) => p.name === name);
+    if (
+      perk &&
+      ['perk_1', 'perk_2', 'perk_3'].includes(perk.slot) &&
+      !perkIdsBySlot.has(perk.slot)
+    ) {
+      perkIdsBySlot.set(perk.slot, perk.id);
+    }
+  }
+  const perkIds = [...perkIdsBySlot.values()];
   if (!perkIds.length) return;
 
   const { error: insertError } = await supabase
@@ -917,25 +937,48 @@ async function saveLoadoutPerks(loadoutId: string, gameId: string, perkNames: st
   if (insertError) throw insertError;
 }
 
-async function saveLoadoutEquipment(loadoutId: string, gameId: string, equipmentNames: string[]) {
+async function saveLoadoutEquipment(loadoutId: string, gameId: string, equipmentPayload: any[]) {
   const { error: deleteError } = await supabase.from('loadout_equipment').delete().eq('loadout_id', loadoutId);
   if (deleteError) throw deleteError;
-  if (!equipmentNames.length) return;
+  if (!equipmentPayload.length) return;
 
   const { data: catalogEquipment, error: catError } = await supabase
     .from('equipment')
-    .select('id, name')
+    .select('id, name, slot')
     .eq('game_id', gameId);
   if (catError) throw catError;
 
-  const equipmentIds = equipmentNames
-    .map((name) => (catalogEquipment ?? []).find((e: any) => e.name === name)?.id)
-    .filter((id): id is number => id != null);
-  if (!equipmentIds.length) return;
+  const selections = equipmentPayload
+    .map((selection: any) => {
+      const name = typeof selection === 'string' ? selection : selection?.name;
+      const requestedSlot = typeof selection === 'string' ? null : selection?.slot;
+      const isAny = typeof selection !== 'string' && selection?.isAny === true;
+      if (
+        isAny &&
+        ['throwable', 'tactical', 'field_upgrade'].includes(requestedSlot)
+      ) {
+        return { equipment_id: null, slot: requestedSlot, is_any: true };
+      }
+      const catalogItem = (catalogEquipment ?? []).find((e: any) => e.name === name);
+      const slot = typeof selection === 'string' ? catalogItem?.slot : requestedSlot;
+      if (
+        !catalogItem ||
+        !['throwable', 'tactical', 'field_upgrade'].includes(slot) ||
+        catalogItem.slot !== slot
+      ) return null;
+      return { equipment_id: catalogItem.id, slot, is_any: false };
+    })
+    .filter((selection: any): selection is { equipment_id: number | null; slot: string; is_any: boolean } => Boolean(selection));
+  if (!selections.length) return;
 
   const { error: insertError } = await supabase
     .from('loadout_equipment')
-    .insert(equipmentIds.map((equipment_id) => ({ loadout_id: loadoutId, equipment_id })));
+    .insert(selections.map(({ equipment_id, slot, is_any }) => ({
+      loadout_id: loadoutId,
+      equipment_id,
+      slot,
+      is_any,
+    })));
   if (insertError) throw insertError;
 }
 
@@ -1116,7 +1159,7 @@ function mapLoadout(l: any, viewerId?: string | null, authorProfiles?: Map<strin
         const attachmentName = lwa.attachments?.name;
         if (typeName && attachmentName) attachments[typeName] = attachmentName;
       }
-      return { id: lw.weapon_id, attachments };
+      return { id: lw.weapon_id, slot: lw.slot ?? 'primary', attachments };
     });
 
   const perks = (l.loadout_perks ?? [])
@@ -1124,8 +1167,14 @@ function mapLoadout(l: any, viewerId?: string | null, authorProfiles?: Map<strin
     .filter((name: any): name is string => Boolean(name));
 
   const equipment = (l.loadout_equipment ?? [])
-    .map((le: any) => le.equipment?.name)
-    .filter((name: any): name is string => Boolean(name));
+    .map((le: any) => ({
+      name: le.is_any ? 'Any' : le.equipment?.name,
+      slot: le.slot ?? le.equipment?.slot,
+      isAny: Boolean(le.is_any),
+    }))
+    .filter((item: any) =>
+      Boolean(item.name) && ['throwable', 'tactical', 'field_upgrade'].includes(item.slot)
+    );
 
   const reactions = l.loadout_reactions ?? [];
   const likes = reactions.filter((r: any) => r.type === 'like').length;
@@ -1165,6 +1214,7 @@ function mapLoadout(l: any, viewerId?: string | null, authorProfiles?: Map<strin
       : null,
     authorSocialStats: author?.social_stats ?? null,
     name: l.name,
+    contentType: l.content_type ?? 'weapon_config',
     description: l.description,
     gameLoadoutCode: l.game_loadout_code ?? null,
     video: l.video ?? null,
@@ -1346,13 +1396,21 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
 
     const gameId = c.req.param("gameId");
     const body = await c.req.json();
+    const contentType = body.contentType === 'full_loadout'
+      ? 'full_loadout'
+      : 'weapon_config';
+    const weapons = contentType === 'weapon_config'
+      ? (body.weapons ?? []).filter((weapon: any, index: number) =>
+          (weapon.slot ?? (index === 0 ? 'primary' : null)) === 'primary'
+        ).slice(0, 1)
+      : body.weapons ?? [];
 
     if (!(await verifyRecaptcha(body.recaptchaToken, "create_loadout"))) {
       return c.json({ error: "reCAPTCHA verification failed -- please try again" }, 400);
     }
 
     let tagId = body.tagId ?? null;
-    if (tagId != null && !(await isTagAllowedForWeapons(gameId, tagId, body.weapons ?? []))) {
+    if (tagId != null && !(await isTagAllowedForWeapons(gameId, tagId, weapons))) {
       tagId = null;
     }
 
@@ -1366,6 +1424,7 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
       user_id: user.id,
       user_name: user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous',
       name: body.name,
+      content_type: contentType,
       description: body.description || '',
       game_loadout_code: body.gameLoadoutCode || null,
       video,
@@ -1373,9 +1432,9 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
     });
     const loadoutId = inserted.id;
 
-    await saveLoadoutWeapons(loadoutId, gameId, body.weapons ?? []);
-    await saveLoadoutPerks(loadoutId, gameId, body.perks ?? []);
-    await saveLoadoutEquipment(loadoutId, gameId, body.equipment ?? []);
+    await saveLoadoutWeapons(loadoutId, gameId, weapons);
+    await saveLoadoutPerks(loadoutId, gameId, contentType === 'full_loadout' ? body.perks ?? [] : []);
+    await saveLoadoutEquipment(loadoutId, gameId, contentType === 'full_loadout' ? body.equipment ?? [] : []);
 
     const { data: full, error: reloadError } = await supabase
       .from('loadouts')
@@ -1402,6 +1461,14 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
     const gameId = c.req.param("gameId");
     const loadoutId = c.req.param("loadoutId");
     const body = await c.req.json();
+    const contentType = body.contentType === 'full_loadout'
+      ? 'full_loadout'
+      : 'weapon_config';
+    const weapons = contentType === 'weapon_config'
+      ? (body.weapons ?? []).filter((weapon: any, index: number) =>
+          (weapon.slot ?? (index === 0 ? 'primary' : null)) === 'primary'
+        ).slice(0, 1)
+      : body.weapons ?? [];
 
     const { data: existing, error: fetchError } = await supabase
       .from('loadouts')
@@ -1417,7 +1484,7 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
     }
 
     let tagId = body.tagId ?? null;
-    if (tagId != null && !(await isTagAllowedForWeapons(gameId, tagId, body.weapons ?? []))) {
+    if (tagId != null && !(await isTagAllowedForWeapons(gameId, tagId, weapons))) {
       tagId = null;
     }
 
@@ -1430,6 +1497,7 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
       .from('loadouts')
       .update({
         name: body.name,
+        content_type: contentType,
         description: body.description ?? '',
         game_loadout_code: body.gameLoadoutCode || null,
         video,
@@ -1442,9 +1510,9 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
       .single();
     if (error) throw error;
 
-    await saveLoadoutWeapons(loadoutId, gameId, body.weapons ?? []);
-    await saveLoadoutPerks(loadoutId, gameId, body.perks ?? []);
-    await saveLoadoutEquipment(loadoutId, gameId, body.equipment ?? []);
+    await saveLoadoutWeapons(loadoutId, gameId, weapons);
+    await saveLoadoutPerks(loadoutId, gameId, contentType === 'full_loadout' ? body.perks ?? [] : []);
+    await saveLoadoutEquipment(loadoutId, gameId, contentType === 'full_loadout' ? body.equipment ?? [] : []);
 
     const { data: full, error: reloadError } = await supabase
       .from('loadouts')

@@ -9,7 +9,12 @@ import { Button } from "@/components/atoms/Button";
 import { MetaTrendCharts } from "@/components/organisms/MetaTrendCharts";
 import { AttachmentSlotCard } from "@/components/organisms/AttachmentSlotCard";
 import { cn } from "@/lib/utils";
-import { attachmentMetaPath, weaponGroupMetaPath } from "@/lib/routes";
+import {
+  attachmentGroupMetaPath,
+  attachmentMetaPath,
+  loadoutPath,
+  weaponGroupMetaPath,
+} from "@/lib/routes";
 import { buildWeaponMetrics, ratingTier } from "@/lib/metaMetrics";
 import {
   useMetaData,
@@ -288,6 +293,9 @@ export function WeaponMetaView() {
             <AttachmentSlotCard
               key={slot.type}
               slot={slot}
+              onSelectSlot={() =>
+                navigate(attachmentGroupMetaPath(gameId, slot.type))
+              }
               onSelect={(attachment) =>
                 navigate(attachmentMetaPath(gameId, String(attachment.id)))
               }
@@ -312,7 +320,15 @@ export function WeaponMetaView() {
               <button
                 key={loadout.id}
                 type="button"
-                onClick={() => navigate(`/${gameId}/l/${loadout.id}`)}
+                onClick={() =>
+                  navigate(
+                    loadoutPath(
+                      gameId,
+                      loadout.id,
+                      loadout.contentType ?? "weapon_config",
+                    ),
+                  )
+                }
                 className="group flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-white/[0.035] sm:px-5"
               >
                 <span className="w-7 shrink-0 font-mono text-xs text-teritary">

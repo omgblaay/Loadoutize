@@ -30,7 +30,7 @@ export function CompactPageHeader({ title, actions }: CompactPageHeaderProps) {
 
   return (
     <>
-      {/* <div ref={sentinelRef} aria-hidden className="h-px -mt-px" />
+      <div ref={sentinelRef} aria-hidden className="h-px -mt-px" />
       <div
         className={cn(
           "fixed top-0 inset-x-0 z-40 backdrop-blur-md bg-[rgba(6,5,9,0.6)] border-b border-white/[0.16] transition-all duration-200",
@@ -47,7 +47,7 @@ export function CompactPageHeader({ title, actions }: CompactPageHeaderProps) {
             <div className="flex items-center gap-2 shrink-0">{actions}</div>
           )}
         </div>
-      </div> */}
+      </div>
     </>
   );
 }

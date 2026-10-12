@@ -67,7 +67,7 @@ export function LoadoutCard({
   const card = (
     <Link
       to={to}
-      className="relative bg-card rounded-2xl border border-white/[0.08] hover:bg-[#1a161a] hover:border-white/20 hover:-translate-y-1 transition-all duration-100 flex flex-col text-left overflow-hidden w-full h-full"
+      className="relative bg-card rounded-2xl border border-white/[0.08] hover:bg-[#1a161a] hover:border-white/20 transition-[background-color,border-color,box-shadow] duration-200 flex flex-col text-left overflow-hidden w-full h-full"
       // style={{
       //   boxShadow: "0px 30px 70px -36px rgba(0,0,0,0.85)",
       // }}
@@ -107,7 +107,12 @@ export function LoadoutCard({
           {" "}{loadout.name}
         </h3> */}
         <div className="flex-1 min-w-0 flex flex-col gap-0 justify-center">
-          <h3 className="text-lg font-sans font-semibold">{loadout.name}</h3>
+          <span className="mb-1 font-mono text-[9px] uppercase tracking-[0.12em] text-teritary">
+            {loadout.contentType === "full_loadout"
+              ? "Full loadout"
+              : "Weapon config"}
+          </span>
+          <h3 className="text-base font-sans font-semibold">{loadout.name}</h3>
           <p className="text-sm text-teritary truncate">
             {/* {loadout.video && (
               <div
@@ -162,25 +167,29 @@ export function LoadoutCard({
         </div>
       </div>
 
-      {/* {attachmentIcons.length > 0 && (
+      {attachmentIcons.length > 0 && (
         <div className="relative flex items-center w-full">
           {attachmentIcons.map((a) => (
             <div
               key={a.id}
               className="bg-gradient-to-b from-white/0 from-[60%] to-white/[0.08] opacity-80 p-2 border w-full border-white/12 h-14 flex items-center justify-center"
             >
-              <img src={a.imageUrl ?? undefined} alt={a.name} className="max-size-6 object-contain" />
+              <img
+                src={a.imageUrl ?? undefined}
+                alt={a.name}
+                className="max-size-6 object-contain"
+              />
             </div>
           ))}
         </div>
-      )} */}
+      )}
 
       {/* <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[inset_0px_0px_0px_1px_rgba(255,255,255,0.07)]" /> */}
     </Link>
   );
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full transition-[transform,filter] duration-200 ease-out hover:-translate-y-1 hover:drop-shadow-[0_16px_18px_rgba(0,0,0,0.45)]">
       {fire && <FireCardEffect radius={12} />}
       {isTopLoadout ? (
         <BorderBeam

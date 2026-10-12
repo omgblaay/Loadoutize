@@ -1,5 +1,5 @@
 import { useGameName } from "@/hooks/useGameName";
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "@/providers/AuthProvider";
 import {
@@ -10,20 +10,11 @@ import {
   LOCKED_GAME_ID,
 } from "@/lib/games";
 import { SideNav } from "@/components/organisms/SideNav";
-import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { TopNavBar } from "@/components/organisms/TopNavBar";
 import { Footer } from "@/components/organisms/Footer";
-import { compareWeaponCategories } from "@/lib/weaponCategories";
 // import { SpeedInsights } from "@vercel/speed-insights/next"
 
 import { Globe } from "lucide-react";
-
-interface Weapon {
-  id: string;
-  name: string;
-  type: string | null;
-  typeShort: string | null;
-}
 
 export function AppLayout({
   selectedGame,
@@ -36,8 +27,6 @@ export function AppLayout({
   breadcrumb?: ReactNode;
   children: ReactNode;
 }) {
-  const [weapons, setWeapons] = useState<Weapon[]>([]);
-
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -47,18 +36,6 @@ export function AppLayout({
     game: activeGame,
     name: activeName,
   } = useGameName(selectedGame);
-
-  useEffect(() => {
-    fetch(
-      `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${selectedGame}/weapons`,
-      {
-        headers: { Authorization: `Bearer ${publicAnonKey}` },
-      },
-    )
-      .then((r) => r.json())
-      .then((data) => data.weapons && setWeapons(data.weapons))
-      .catch((error) => console.error("Error fetching weapons:", error));
-  }, [selectedGame]);
 
   // Known games (GAME_ORDER) come first in that order; any game added in
   // Directus that isn't in the hardcoded list yet is appended rather than
@@ -75,16 +52,6 @@ export function AppLayout({
     .filter((g) => GAME_SELECTOR_ENABLED || g.id === LOCKED_GAME_ID);
   const activeMeta = gameMeta[selectedGame];
   const ActiveIcon = activeMeta?.icon ?? Globe;
-  const categories = Array.from(
-    new Map(
-      weapons
-        .filter((w): w is Weapon & { type: string } => Boolean(w.type))
-        .map(
-          (w) => [w.type, { name: w.type, typeShort: w.typeShort }] as const,
-        ),
-    ).values(),
-  ).sort((a, b) => compareWeaponCategories(a.name, b.name));
-
   const isHome = location.pathname === "/home";
   const isExplore = location.pathname === "/explore";
   const isMeta = /^\/[^/]+\/meta(?:\/|$)/.test(location.pathname);
@@ -126,9 +93,7 @@ export function AppLayout({
           isMeta={isMeta}
           isCommunity={isCommunity}
           selectedGame={selectedGame}
-          categories={categories}
           navigate={navigate}
-          handleGameSelect={handleGameSelect}
         />
 
         {/* Page content */}

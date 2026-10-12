@@ -382,11 +382,6 @@ export function CommunityView() {
                 percent={member.avgRating}
                 size={48}
                 innerClassName="border border-white/5"
-                labelClassName={
-                  member.avgRating == null
-                    ? "text-[9px] text-teritary"
-                    : "text-[11px] "
-                }
                 fallbackLabel="New"
               />
             </Link>

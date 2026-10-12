@@ -45,7 +45,6 @@ function ShowcaseCard({
           votes={item.votes}
           size={22}
           innerClassName="border border-white/5"
-          labelClassName="text-[8px] "
           fallbackLabel="—"
         />
         <p className="text-xs font-semibold text-[#fafafa] truncate flex-1">

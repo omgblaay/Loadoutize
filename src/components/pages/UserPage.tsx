@@ -35,7 +35,7 @@ import {
 import { Tag } from "@/components/atoms/Tag";
 import { ROLE_TAG_META, type RoleTag } from "@/lib/roles";
 import { Container } from "@/components/atoms/Container";
-import { explorePath } from "@/lib/routes";
+import { explorePath, loadoutPath } from "@/lib/routes";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -372,7 +372,11 @@ export function UserPage() {
                     accent={accent}
                     gameShort={meta.short}
                     index={i}
-                    to={`/${l.gameId}/l/${l.id}`}
+                    to={loadoutPath(
+                      l.gameId,
+                      l.id,
+                      l.contentType ?? "weapon_config",
+                    )}
                   />
                 );
               })}

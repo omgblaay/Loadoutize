@@ -3,24 +3,24 @@ import { useLocation } from "react-router";
 import {
   HomeIcon,
   Globe,
-  Flame,
   Crown,
   Users,
-  Zap,
   Menu,
   X,
+  Crosshair,
+  Paperclip,
+  Shield,
 } from "lucide-react";
 import { SideNavButton } from "@/components/molecules/SideNavButton";
 import { AppTooltip } from "@/components/atoms/Tooltip";
 import { NavIcon, type NavIconKey } from "@/components/atoms/NavIcon";
 import { Button } from "@/components/atoms/Button";
-import { Tag } from "@/components/atoms/Tag";
-import { explorePath } from "@/lib/routes";
-
-export interface SideNavCategory {
-  name: string;
-  typeShort: string | null;
-}
+import {
+  attachmentMetaListPath,
+  explorePath,
+  perkMetaListPath,
+  weaponMetaListPath,
+} from "@/lib/routes";
 
 export function SideNav({
   isHome,
@@ -28,18 +28,14 @@ export function SideNav({
   isMeta,
   isCommunity,
   selectedGame,
-  categories,
   navigate,
-  handleGameSelect,
 }: {
   isHome: boolean;
   isExplore: boolean;
   isMeta: boolean;
   isCommunity: boolean;
   selectedGame: string;
-  categories: SideNavCategory[];
   navigate: (path: string, options?: { state?: unknown }) => void;
-  handleGameSelect: (id: string) => void;
 }) {
   const location = useLocation();
   const [expanded, setExpanded] = useState(false);
@@ -59,6 +55,31 @@ export function SideNav({
     navigate(path);
     setExpanded(false);
   };
+
+  const bestOfLinks = [
+    {
+      label: "Best weapons",
+      path: weaponMetaListPath(selectedGame),
+      icon: Crosshair,
+      active: /^\/[^/]+\/meta\/(?:weapons|weapongroup)(?:\/|$)/.test(
+        location.pathname,
+      ),
+    },
+    {
+      label: "Best attachments",
+      path: attachmentMetaListPath(selectedGame),
+      icon: Paperclip,
+      active: /^\/[^/]+\/meta\/(?:attachments|attachmentgroup)(?:\/|$)/.test(
+        location.pathname,
+      ),
+    },
+    {
+      label: "Best perks",
+      path: perkMetaListPath(selectedGame),
+      icon: Shield,
+      active: location.pathname === perkMetaListPath(selectedGame),
+    },
+  ];
 
   const fullMenu = (
     <>
@@ -126,25 +147,22 @@ export function SideNav({
         </SideNavButton>
       </div>
 
-      {categories.length > 0 && (
-        <div className="flex flex-col gap-0.5 w-full">
-          <p className="text-[10px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold mb-2">
-            Best of
-          </p>
-          {categories.map((cat) => (
-            <SideNavButton
-              key={cat.name}
-              onClick={() =>
-                go(explorePath(selectedGame, { category: cat.name }))
-              }
-              className="text-secondary text-xs"
-            >
-              <Tag>{cat.typeShort ?? cat.name.slice(0, 3)}</Tag>
-              {cat.name}
-            </SideNavButton>
-          ))}
-        </div>
-      )}
+      <div className="flex flex-col gap-0.5 w-full">
+        <p className="text-[10px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold mb-2">
+          Best of
+        </p>
+        {bestOfLinks.map(({ label, path, icon: Icon, active }) => (
+          <SideNavButton
+            key={path}
+            state={active ? "active" : "default"}
+            onClick={() => go(path)}
+            className="text-secondary text-xs"
+          >
+            <Icon className="size-4 shrink-0" />
+            {label}
+          </SideNavButton>
+        ))}
+      </div>
 
       {/* <div
         className="relative rounded-xl p-6 flex flex-col gap-5 overflow-hidden"
@@ -265,23 +283,20 @@ export function SideNav({
           </SideNavButton>
         </div>
 
-        {categories.length > 0 && (
-          <div className="flex flex-col items-center gap-1 w-full">
-            {categories.map((cat) => (
-              <AppTooltip key={cat.name} content={cat.name} side="right">
-                <SideNavButton
-                  onClick={() =>
-                    go(explorePath(selectedGame, { category: cat.name }))
-                  }
-                  aria-label={cat.name}
-                  className="hover:bg-white/[0.05] !h-max-[20px]"
-                >
-                  <Tag>{cat.typeShort ?? cat.name.slice(0, 3)}</Tag>
-                </SideNavButton>
-              </AppTooltip>
-            ))}
-          </div>
-        )}
+        <div className="flex flex-col items-center gap-1 w-full">
+          {bestOfLinks.map(({ label, path, icon: Icon, active }) => (
+            <AppTooltip key={path} content={label} side="right">
+              <SideNavButton
+                state={active ? "active" : "default"}
+                onClick={() => go(path)}
+                aria-label={label}
+                className="justify-center px-0 w-11"
+              >
+                <Icon className="size-4" />
+              </SideNavButton>
+            </AppTooltip>
+          ))}
+        </div>
       </aside>
 
       {/* Bottom tab bar, below sm: primary nav links + a "More" tab for categories/join, reusing the same overlay */}

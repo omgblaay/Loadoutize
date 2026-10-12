@@ -8,7 +8,6 @@ import { MetaView } from "@/components/pages/MetaView";
 import { CommunityView } from "@/components/pages/CommunityView";
 import { LoadoutBuilder } from "@/components/pages/LoadoutBuilder";
 import { LoadoutPreview } from "@/components/pages/LoadoutPreview";
-import { WeaponConfigPreview } from "@/components/pages/WeaponConfigPreview";
 import { UserPage } from "@/components/pages/UserPage";
 import { LikedLoadouts } from "@/components/pages/LikedLoadouts";
 import { Settings } from "@/components/pages/Settings";
@@ -43,6 +42,16 @@ const WeaponMetaListView = lazy(() =>
 const AttachmentMetaView = lazy(() =>
   import("@/components/pages/AttachmentMetaView").then((module) => ({
     default: module.AttachmentMetaView,
+  })),
+);
+const AttachmentMetaListView = lazy(() =>
+  import("@/components/pages/AttachmentMetaListView").then((module) => ({
+    default: module.AttachmentMetaListView,
+  })),
+);
+const PerkMetaListView = lazy(() =>
+  import("@/components/pages/PerkMetaListView").then((module) => ({
+    default: module.PerkMetaListView,
   })),
 );
 
@@ -190,11 +199,41 @@ export default function App() {
             }
           />
           <Route
+            path="/:gameId/meta/attachmentgroup/:attachmentGroup"
+            element={
+              <GameLock>
+                <Suspense fallback={null}>
+                  <AttachmentMetaListView />
+                </Suspense>
+              </GameLock>
+            }
+          />
+          <Route
+            path="/:gameId/meta/attachments"
+            element={
+              <GameLock>
+                <Suspense fallback={null}>
+                  <AttachmentMetaListView />
+                </Suspense>
+              </GameLock>
+            }
+          />
+          <Route
             path="/:gameId/meta/attachments/:attachmentId"
             element={
               <GameLock>
                 <Suspense fallback={null}>
                   <AttachmentMetaView />
+                </Suspense>
+              </GameLock>
+            }
+          />
+          <Route
+            path="/:gameId/meta/perks"
+            element={
+              <GameLock>
+                <Suspense fallback={null}>
+                  <PerkMetaListView />
                 </Suspense>
               </GameLock>
             }
@@ -228,7 +267,7 @@ export default function App() {
             path="/:gameId/weapon/:configId"
             element={
               <GameLock>
-                <WeaponConfigPreview />
+                <LoadoutPreview />
               </GameLock>
             }
           />

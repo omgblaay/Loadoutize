@@ -3,13 +3,50 @@ import { LoadoutCard } from "@/components/organisms/LoadoutCard";
 import type { CardWeapon, CardAttachment, CardTag } from "@/types/loadout";
 import { WeaponCard } from "@/components/organisms/WeaponCard";
 import { Button } from "@/components/atoms/Button";
-import { ChevronRight, Heart, MessageCircle, Wrench } from "lucide-react";
+import {
+  ChevronRight,
+  Heart,
+  MessageCircle,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import type { Loadout } from "@/types/loadout";
-import { explorePath } from "@/lib/routes";
+import { explorePath, loadoutPath } from "@/lib/routes";
 import { Tag } from "../atoms/Tag";
 import { BorderBeam } from "@/components/ui/border-beam";
+import {
+  InstagramIcon,
+  TiktokIcon,
+  TwitchIcon,
+  YoutubeIcon,
+} from "@/assets/icons/socials";
 
-const TOP_WEAPON_MEDALS = ["🥇", "🥈", "🥉"];
+const CREATOR_PLATFORMS = [
+  {
+    key: "youtube",
+    label: "YouTube",
+    description: "Video builds",
+    icon: YoutubeIcon,
+  },
+  {
+    key: "twitch",
+    label: "Twitch",
+    description: "Live setups",
+    icon: TwitchIcon,
+  },
+  {
+    key: "tiktok",
+    label: "TikTok",
+    description: "Quick loadouts",
+    icon: TiktokIcon,
+  },
+  {
+    key: "instagram",
+    label: "Instagram",
+    description: "Creator picks",
+    icon: InstagramIcon,
+  },
+] as const;
 const TOP_WEAPON_CATEGORIES = [
   {
     name: "Assault Rifles",
@@ -95,8 +132,8 @@ export function HomeExplorePreview({
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <Link
-            to={`/${selectedGame}/meta`}
-            className="font-medium text-teritary hover:text-[#fafafa] flex items-center gap-1 shrink-0"
+            to={`/${selectedGame}/meta/weapons`}
+            className="font-medium hover:text-teritary text-white flex items-center gap-1 shrink-0"
           >
             <h2 className="text-sm">Top weapons</h2>
             <ChevronRight className="size-4" />
@@ -121,7 +158,8 @@ export function HomeExplorePreview({
                         <WeaponCard
                           variant="compact"
                           weapon={weapon}
-                          className="pr-10"
+                          rank={index + 1}
+                          hoverLift={index !== 0}
                           onSelect={() =>
                             navigate(
                               explorePath(selectedGame, {
@@ -133,13 +171,7 @@ export function HomeExplorePreview({
                       );
 
                       return (
-                        <li key={weapon.id} className="relative">
-                          <span
-                            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 text-xl leading-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] pointer-events-none"
-                            aria-label={`Rank ${index + 1}`}
-                          >
-                            {TOP_WEAPON_MEDALS[index]}
-                          </span>
+                        <li key={weapon.id}>
                           {index === 0 ? (
                             <BorderBeam
                               size="sm"
@@ -147,7 +179,7 @@ export function HomeExplorePreview({
                               borderRadius={12}
                               strength={0.58}
                               duration={3.2}
-                              className="h-full"
+                              className="h-full transition-[transform,filter] duration-200 ease-out hover:-translate-y-1 hover:drop-shadow-[0_16px_18px_rgba(0,0,0,0.45)]"
                             >
                               {weaponCard}
                             </BorderBeam>
@@ -169,11 +201,72 @@ export function HomeExplorePreview({
         </div>
       </section>
 
+      <section className="relative mt-10  isolate overflow-hidden rounded-3xl border border-white/[0.1] bg-[#121011] p-5 sm:p-7 lg:p-8">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-20 -top-28 size-80 rounded-full opacity-20 blur-[110px]"
+        />
+
+        <div className="relative grid items-center gap-7 lg:grid-cols-[minmax(0,0.82fr)_minmax(420px,1.18fr)] lg:gap-10">
+          <div className="flex flex-col items-start">
+            <h2 className="mt-4 max-w-lg text-2xl leading-tight sm:text-xl">
+              See what your favourite creators actually run.
+            </h2>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-secondary sm:text-base">
+              Go from the video or stream straight to the complete build—every
+              attachment, rating, and shareable code in one place.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/${selectedGame}/community`)}
+              className="group mt-6"
+            >
+              <Users className="size-4" />
+              Browse all creators
+              <ChevronRight className="size-4 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {CREATOR_PLATFORMS.map(
+              ({ key, label, description, icon: Icon }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() =>
+                    navigate(`/${selectedGame}/community?social=${key}`)
+                  }
+                  className="group relative flex min-h-24 items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.035] p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.065]"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-6 bottom-0 h-px origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+                    style={{ backgroundColor: accent }}
+                  />
+                  <span className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-black/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-transform duration-200 group-hover:scale-105">
+                    <Icon size={24} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium text-white">
+                      {label}
+                    </span>
+                    <span className="mt-1 block text-xs text-teritary">
+                      {description}
+                    </span>
+                  </span>
+                  <ChevronRight className="size-4 shrink-0 text-white/25 transition-all group-hover:translate-x-1 group-hover:text-white/75" />
+                </button>
+              ),
+            )}
+          </div>
+        </div>
+      </section>
+
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <Link
             to={explorePath(selectedGame)}
-            className="font-medium text-teritary hover: flex items-center gap-1 shrink-0"
+            className="font-medium hover:text-teritary text-white flex items-center gap-1 shrink-0"
           >
             <h2 className="text-sm">Top Loadouts</h2>
             <ChevronRight className="size-4" />
@@ -191,7 +284,11 @@ export function HomeExplorePreview({
                 accent={accent}
                 gameShort={gameShort}
                 index={i}
-                to={`/${l.gameId}/l/${l.id}`}
+                to={loadoutPath(
+                  l.gameId,
+                  l.id,
+                  l.contentType ?? "weapon_config",
+                )}
               />
             ))}
           </div>

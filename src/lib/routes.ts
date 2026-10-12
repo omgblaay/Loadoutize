@@ -35,3 +35,28 @@ export function weaponGroupMetaPath(gameId: string, weaponGroup: string) {
 export function attachmentMetaPath(gameId: string, attachmentId: string) {
   return `/${gameId}/meta/attachments/${encodeURIComponent(attachmentId)}`;
 }
+
+export function attachmentMetaListPath(gameId: string) {
+  return `/${gameId}/meta/attachments`;
+}
+
+export function attachmentGroupMetaPath(
+  gameId: string,
+  attachmentGroup: string,
+) {
+  return `/${gameId}/meta/attachmentgroup/${encodeURIComponent(attachmentGroup)}`;
+}
+
+export function perkMetaListPath(gameId: string) {
+  return `/${gameId}/meta/perks`;
+}
+
+export function loadoutPath(
+  gameId: string,
+  loadoutId: string,
+  contentType: "full_loadout" | "weapon_config" = "weapon_config",
+) {
+  return contentType === "full_loadout"
+    ? `/${gameId}/l/${loadoutId}`
+    : `/${gameId}/weapon/${loadoutId}`;
+}

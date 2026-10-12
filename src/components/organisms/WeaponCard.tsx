@@ -17,6 +17,7 @@ type Weapon = {
  * picker's selection styling (checkmark badge, dimmed when at the pick
  * limit); `stat` opts into Meta's rating/loadout-count line. Neither is
  * required, so the same component covers plain "navigate on click" usage too.
+ * `rank` places an optional ranking badge directly on the card.
  */
 export function WeaponCard({
   weapon,
@@ -24,9 +25,11 @@ export function WeaponCard({
   variant = "default",
   selected = false,
   disabled = false,
+  rank,
   stat,
   className,
   fire = false,
+  hoverLift = true,
 }: {
   weapon: Weapon;
   onSelect: () => void;
@@ -34,15 +37,34 @@ export function WeaponCard({
   variant?: "default" | "compact";
   selected?: boolean;
   disabled?: boolean;
+  rank?: number;
   stat?: string;
   className?: string;
   /** Layers a shader flame effect over the card's edge -- reserve for a single standout card (e.g. the #1 meta weapon), not whole grids: each instance is its own WebGL context. */
   fire?: boolean;
+  /** Disable when a parent effect wrapper owns the hover transform. */
+  hoverLift?: boolean;
 }) {
   const isCompact = variant === "compact";
+  const rankLabel =
+    rank != null ? (
+      <span
+        className="pointer-events-none flex min-w-7 shrink-0 items-center justify-center font-rating text-sm leading-none text-secondary"
+        aria-label={`Rank ${rank}`}
+      >
+        #{rank}
+      </span>
+    ) : null;
 
   return (
-    <div className="relative h-full">
+    <div
+      className={cn(
+        "relative h-full transition-[transform,filter] duration-200 ease-out",
+        hoverLift &&
+          !disabled &&
+          "hover:-translate-y-1 hover:drop-shadow-[0_16px_18px_rgba(0,0,0,0.45)]",
+      )}
+    >
       {fire && (
         <FireCardEffect radius={12} margin={{ x: 14, top: 30, bottom: 10 }} />
       )}
@@ -53,8 +75,8 @@ export function WeaponCard({
         aria-pressed={selected ? true : undefined}
         className={cn(
           "group/weapon isolate relative flex h-full w-full overflow-hidden rounded-xl border text-left",
-          "transition-[transform,background-color,border-color,box-shadow] duration-200 ease-out",
-          "hover:-translate-y-1 hover:shadow-[0_16px_35px_-22px_rgba(0,0,0,0.95)]",
+          "transition-[background-color,border-color,box-shadow] duration-200 ease-out",
+          "hover:shadow-[0_16px_35px_-22px_rgba(0,0,0,0.95)]",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60",
           isCompact
             ? "min-h-[76px] flex-row items-center gap-3 p-3"
@@ -63,19 +85,10 @@ export function WeaponCard({
             ? "border-white/50 bg-white/[0.08] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
             : "border-white/[0.09] bg-[#121111] hover:border-white/25 hover:bg-[#181517]",
           disabled &&
-            "cursor-not-allowed opacity-40 hover:translate-y-0 hover:border-white/[0.09] hover:bg-[#121111] hover:shadow-none",
+            "cursor-not-allowed opacity-40 hover:border-white/[0.09] hover:bg-[#121111] hover:shadow-none",
           className,
         )}
       >
-        <div
-          className="pointer-events-none absolute inset-0 -z-10 opacity-70 transition-opacity duration-300 group-hover/weapon:opacity-100"
-          style={{
-            background:
-              "radial-gradient(circle at 72% 18%, rgba(255,255,255,0.09), transparent 34%), linear-gradient(145deg, rgba(255,255,255,0.035), transparent 48%)",
-          }}
-        />
-        <div className="pointer-events-none absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-60" />
-
         {selected && (
           <span className="absolute right-2 top-2 z-20 flex size-6 items-center justify-center rounded-full border border-white/20 bg-[#fafafa] text-[#161414] shadow-lg">
             <Check size={14} strokeWidth={2.5} />
@@ -84,6 +97,7 @@ export function WeaponCard({
 
         {isCompact ? (
           <>
+            {rankLabel}
             <div className="relative w-24 shrink-0 rounded-lg  px-2 py-1 sm:w-28">
               <div className="transition-transform duration-300 group-hover/weapon:scale-[1.06]">
                 <WeaponImage imageUrl={weapon.imageUrl} alt={weapon.name} />
@@ -114,6 +128,7 @@ export function WeaponCard({
             </div>
 
             <div className="flex w-full items-center gap-2">
+              {rankLabel}
               <div className="flex w-full items-center justify-between gap-2">
                 {weapon.typeShort ? (
                   <Tag className="relative z-10">{weapon.typeShort}</Tag>

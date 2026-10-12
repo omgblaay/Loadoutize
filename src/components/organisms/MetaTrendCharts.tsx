@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
 import type { MetaLoadout } from "@/hooks/useMetaData";
+import { ratingTier } from "@/lib/metaMetrics";
 
 const MIN_RATING_VOTES = 5;
 const META_ACCENT = "#f4f1ea";
@@ -36,15 +37,6 @@ const CHART_RANGES: { value: ChartRange; label: string }[] = [
 
 function average(values: number[]) {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
-function ratingTier(score: number | null) {
-  if (score == null) return "—";
-  if (score >= 90) return "S";
-  if (score >= 75) return "A";
-  if (score >= 60) return "B";
-  if (score >= 40) return "C";
-  return "D";
 }
 
 function startOfDay(date: Date) {
@@ -286,7 +278,7 @@ export function MetaTrendCharts({
             </div>
             <div className="text-right">
               <p className="font-rating text-2xl ">
-                {ratingTier(rangeAverageRating)}
+                {ratingTier(rangeAverageRating) ?? "—"}
               </p>
               <p className="text-xs text-teritary">average tier</p>
             </div>
@@ -329,7 +321,7 @@ export function MetaTrendCharts({
                 <YAxis
                   domain={[0, 100]}
                   ticks={[20, 50, 68, 82, 95]}
-                  tickFormatter={(value) => ratingTier(Number(value))}
+                  tickFormatter={(value) => ratingTier(Number(value)) ?? "—"}
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: "#8d898a", fontSize: 11 }}

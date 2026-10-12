@@ -11,13 +11,16 @@ export interface MetaWeapon {
 
 export interface MetaLoadout {
   id: string;
+  contentType?: "full_loadout" | "weapon_config";
   name: string;
   description?: string;
   createdAt: string;
   weapons: {
     id: string;
+    slot?: "primary" | "secondary" | "melee";
     attachments?: Record<string, string>;
   }[];
+  perks?: string[];
   tagId: number | null;
   ratingPercent: number | null;
   likes: number;
@@ -40,10 +43,20 @@ export interface MetaTag {
   color: string;
 }
 
+export interface MetaPerk {
+  id: number;
+  name: string;
+  slot: "perk_1" | "perk_2" | "perk_3" | null;
+  displayOrder: number;
+  description: string | null;
+  imageUrl: string | null;
+}
+
 interface MetaData {
   loadouts: MetaLoadout[];
   weapons: MetaWeapon[];
   attachments: MetaAttachment[];
+  perks: MetaPerk[];
   tags: MetaTag[];
 }
 
@@ -51,6 +64,7 @@ const EMPTY_META_DATA: MetaData = {
   loadouts: [],
   weapons: [],
   attachments: [],
+  perks: [],
   tags: [],
 };
 
@@ -79,16 +93,20 @@ export function useMetaData(gameId: string) {
       getJson("loadouts"),
       getJson("weapons"),
       getJson("attachments"),
+      getJson("perks"),
       getJson("tags"),
     ])
-      .then(([loadoutsData, weaponsData, attachmentsData, tagsData]) => {
-        setData({
-          loadouts: loadoutsData.loadouts ?? [],
-          weapons: weaponsData.weapons ?? [],
-          attachments: attachmentsData.attachments ?? [],
-          tags: tagsData.tags ?? [],
-        });
-      })
+      .then(
+        ([loadoutsData, weaponsData, attachmentsData, perksData, tagsData]) => {
+          setData({
+            loadouts: loadoutsData.loadouts ?? [],
+            weapons: weaponsData.weapons ?? [],
+            attachments: attachmentsData.attachments ?? [],
+            perks: perksData.perks ?? [],
+            tags: tagsData.tags ?? [],
+          });
+        },
+      )
       .catch((requestError) => {
         if (requestError instanceof DOMException && requestError.name === "AbortError") return;
         console.error("Error fetching Meta dashboard data:", requestError);

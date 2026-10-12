@@ -29,6 +29,7 @@ import { AttachmentSlotCard } from "@/components/organisms/AttachmentSlotCard";
 import { cn } from "@/lib/utils";
 import { sortWeaponCategories } from "@/lib/weaponCategories";
 import {
+  attachmentGroupMetaPath,
   attachmentMetaPath,
   weaponMetaListPath,
   weaponMetaPath,
@@ -393,7 +394,12 @@ export function MetaView() {
               </span>
               {scope === "tag" && selectedTag && (
                 <>
-                  <strong className="font-semibold">{selectedTag.name}</strong>
+                  <strong
+                    className="font-semibold font-handwritten"
+                    style={{ color: selectedTag.color || undefined }}
+                  >
+                    {selectedTag.name}
+                  </strong>
                   <span
                     role="button"
                     aria-label="Clear playstyle filter"
@@ -441,8 +447,9 @@ export function MetaView() {
                     selected && "bg-white/[0.08] text-[#fafafa]",
                   )}
                 >
-                  {/* <Activity className="size-4 text-teritary" /> */}
-                  <span>{tag.name}</span>
+                  <span style={{ color: tag.color || undefined }}>
+                    {tag.name}
+                  </span>
                   {selected && <Check className="ml-auto size-4" />}
                 </DropdownMenuItem>
               );
@@ -466,7 +473,7 @@ export function MetaView() {
                 className: cn(
                   "h-9 px-3.5 text-[14px]",
                   scope === "category" &&
-                    "!border-slate-100 !bg-slate-100 !text-[#0C0B0B] hover:!border-[#D8CED6] hover:!bg-[#D8CED6] hover:!text-[#0C0B0B]",
+                    "!border-slate-100 !bg-slate-100 !text-[#0C0B0B] hover:!border-[#D8CED6] hover:!text-[#0C0B0B]",
                 ),
               })}
             >
@@ -594,7 +601,7 @@ export function MetaView() {
               <Button
                 variant="ghost"
                 onClick={() => navigate(weaponMetaListPath(selectedGame))}
-                className="group hidden shrink-0 items-center gap-2 text-sm text-secondary transition-colors hover: sm:flex"
+                className="group hidden shrink-0 items-center gap-2 text-sm text-secondary transition-colors sm:flex"
               >
                 Full weapon list
                 <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -719,6 +726,11 @@ export function MetaView() {
                   <AttachmentSlotCard
                     key={group.type}
                     slot={group}
+                    onSelectSlot={() =>
+                      navigate(
+                        attachmentGroupMetaPath(selectedGame, group.type),
+                      )
+                    }
                     onSelect={(attachment) =>
                       navigate(
                         attachmentMetaPath(selectedGame, String(attachment.id)),

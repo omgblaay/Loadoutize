@@ -10,7 +10,7 @@ import type { CardLoadout, CardWeapon, CardAttachment, CardTag } from "@/types/l
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { explorePath } from "@/lib/routes";
+import { explorePath, loadoutPath } from "@/lib/routes";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -244,7 +244,11 @@ export function LikedLoadouts() {
                               accent={accent}
                               gameShort={meta.short}
                               index={index}
-                              to={`/${loadout.gameId}/l/${loadout.id}`}
+                              to={loadoutPath(
+                                loadout.gameId,
+                                loadout.id,
+                                loadout.contentType ?? "weapon_config",
+                              )}
                             />
                           );
                         })}

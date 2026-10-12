@@ -4,6 +4,7 @@ import {
   Globe,
   Heart,
   LogOut,
+  Plus,
   Settings as SettingsIcon,
   UserRound,
 } from "lucide-react";
@@ -134,7 +135,7 @@ export function TopNavBar({
                 }
                 size="default"
               >
-                <span>Create</span>
+                <Plus /> Create
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

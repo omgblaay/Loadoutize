@@ -79,12 +79,28 @@ import {
   Puzzle,
   Copy,
   Check,
+  LoaderCircle,
+  Shield,
 } from "lucide-react";
 import * as React from "react";
 
 interface Weapon {
   id: string;
+  slot?: "primary" | "secondary" | "melee";
   attachments?: Record<string, string>;
+}
+
+interface EquipmentSelection {
+  name: string;
+  slot: "throwable" | "tactical" | "field_upgrade";
+  isAny?: boolean;
+}
+
+interface PerkCatalogItem {
+  id: number;
+  name: string;
+  slot: "perk_1" | "perk_2" | "perk_3" | null;
+  imageUrl: string | null;
 }
 
 interface Loadout {
@@ -97,12 +113,13 @@ interface Loadout {
   authorLinks?: SocialLinks | null;
   authorSocialStats?: SocialStats | null;
   name: string;
+  contentType?: "full_loadout" | "weapon_config";
   description?: string;
   gameLoadoutCode?: string | null;
   video?: LoadoutVideo | null;
   weapons: Weapon[];
   perks?: string[];
-  equipment?: string[];
+  equipment?: EquipmentSelection[];
   likes: number;
   dislikes: number;
   favorites: number;
@@ -136,6 +153,20 @@ function FireReactionButton({
   className?: string;
 }) {
   const [pending, setPending] = useState(false);
+  const activeTone =
+    tone === "green"
+      ? {
+          icon: "border-emerald-200/25 bg-emerald-950/35 text-emerald-100",
+          count: "border-emerald-200/20 bg-emerald-950/40 text-emerald-50",
+          dot: "bg-emerald-300 shadow-[0_0_8px_rgba(110,231,183,0.9)]",
+          glow: "from-emerald-300/45",
+        }
+      : {
+          icon: "border-rose-200/25 bg-rose-950/35 text-rose-100",
+          count: "border-rose-200/20 bg-rose-950/40 text-rose-50",
+          dot: "bg-rose-300 shadow-[0_0_8px_rgba(253,164,175,0.9)]",
+          glow: "from-rose-300/45",
+        };
 
   const handleClick = async () => {
     if (pending) return;
@@ -154,12 +185,84 @@ function FireReactionButton({
       disabled={pending}
       ariaLabel={`${label}, ${count}`}
       ariaPressed={active}
-      className={cn("h-[52px] rounded-xl", className)}
+      className={cn(
+        "group h-[56px] rounded-2xl px-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_28px_-18px_rgba(0,0,0,0.9)] [&>span.relative]:w-full",
+        className,
+      )}
       onClick={() => void handleClick()}
+      overlay={
+        <>
+          <span
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r via-white/25 to-transparent opacity-60",
+              activeTone.glow,
+            )}
+          />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 translate-x-[-130%] skew-x-[-24deg] bg-gradient-to-r from-transparent via-white/[0.07] to-transparent transition-transform duration-700 group-hover:translate-x-[130%]"
+          />
+        </>
+      }
     >
-      {icon}
-      <span>{pending ? "Updating…" : label}</span>
-      {!pending && <span className="tabular-nums opacity-80">{count}</span>}
+      <span
+        className={cn(
+          "relative flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-black/25 text-white/70 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-white/20 group-hover:text-white",
+          active && activeTone.icon,
+        )}
+      >
+        {pending ? (
+          <LoaderCircle className="size-4 animate-spin" />
+        ) : (
+          <span
+            className={cn(
+              "flex transition-transform duration-200 group-active:scale-90",
+              active && "scale-110",
+            )}
+          >
+            {React.isValidElement(icon)
+              ? React.cloneElement(
+                  icon as React.ReactElement<{
+                    fill?: string;
+                    strokeWidth?: number;
+                  }>,
+                  {
+                    fill: active ? "currentColor" : "none",
+                    strokeWidth: active ? 2.4 : 2,
+                  },
+                )
+              : icon}
+          </span>
+        )}
+        {active && !pending && (
+          <span
+            aria-hidden="true"
+            className={cn(
+              "absolute -right-0.5 -top-0.5 size-2 rounded-full",
+              activeTone.dot,
+            )}
+          />
+        )}
+      </span>
+
+      <span className="flex min-w-0 flex-1 flex-col items-start leading-none">
+        <span className="text-[13px] font-semibold tracking-[-0.01em] text-white">
+          {pending ? "Updating" : label}
+        </span>
+        <span className="mt-1 text-[9px] font-medium uppercase tracking-[0.12em] text-white/40">
+          {active ? "Your vote" : "Cast vote"}
+        </span>
+      </span>
+
+      <span
+        className={cn(
+          "flex min-w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/25 px-2 py-1.5 text-xs tabular-nums text-white/60 transition-colors group-hover:text-white",
+          active && activeTone.count,
+        )}
+      >
+        {count}
+      </span>
     </PixelFireButton>
   );
 }
@@ -228,10 +331,16 @@ function LoadoutPreviewSkeleton() {
 }
 
 export function LoadoutPreview() {
-  const { gameId = "mw4", loadoutId } = useParams<{
+  const {
+    gameId = "mw4",
+    loadoutId: routeLoadoutId,
+    configId,
+  } = useParams<{
     gameId: string;
     loadoutId: string;
+    configId: string;
   }>();
+  const loadoutId = routeLoadoutId ?? configId;
   const navigate = useNavigate();
   const location = useLocation();
   const { user, accessToken } = useAuth();
@@ -241,6 +350,7 @@ export function LoadoutPreview() {
     CardAttachment[]
   >([]);
   const [catalogTags, setCatalogTags] = useState<CardTag[]>([]);
+  const [catalogPerks, setCatalogPerks] = useState<PerkCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [codeCopied, setCodeCopied] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -290,6 +400,16 @@ export function LoadoutPreview() {
       .then((r) => r.json())
       .then((data) => setCatalogTags(data.tags ?? []))
       .catch((error) => console.error("Error fetching tags:", error));
+
+    fetch(
+      `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/perks`,
+      {
+        headers: { Authorization: `Bearer ${publicAnonKey}` },
+      },
+    )
+      .then((r) => r.json())
+      .then((data) => setCatalogPerks(data.perks ?? []))
+      .catch((error) => console.error("Error fetching perks:", error));
   }, [gameId]);
 
   const fetchLoadout = async () => {
@@ -409,7 +529,12 @@ export function LoadoutPreview() {
   const { game: activeGame } = useGameName(gameId);
   const accent = getGameColor(gameId).primary;
 
-  const primaryWeapon = loadout?.weapons?.[0];
+  const primaryWeapon =
+    loadout?.weapons?.find((weapon) => weapon.slot === "primary") ??
+    loadout?.weapons?.[0];
+  const secondaryWeapon = loadout?.weapons?.find(
+    (weapon) => weapon.slot === "secondary",
+  );
   const titleWeapon = catalogWeapons.find((w) => w.id === primaryWeapon?.id);
   const titleTag =
     loadout?.tagId != null
@@ -441,6 +566,20 @@ export function LoadoutPreview() {
       } satisfies WeaponImageBadge;
     });
   }, [primaryWeapon, attachmentIndex]);
+
+  const secondaryAttachments = React.useMemo(() => {
+    if (!secondaryWeapon?.attachments) return [];
+
+    return Object.entries(secondaryWeapon.attachments).map(([slot, value]) => {
+      const attachment = attachmentIndex.get(`${slot}:${value}`);
+      return {
+        key: slot,
+        typeSlug: attachment?.typeSlug || slot,
+        label: value,
+        iconUrl: attachment?.imageUrl ?? null,
+      } satisfies WeaponImageBadge;
+    });
+  }, [secondaryWeapon, attachmentIndex]);
 
   if (loading) {
     return (
@@ -483,6 +622,26 @@ export function LoadoutPreview() {
       } satisfies WeaponImageBadge;
     })
     .filter((b) => b !== null);
+  const secondaryWeaponCatalog = catalogWeapons.find(
+    (w) => w.id === secondaryWeapon?.id,
+  );
+  const secondaryWeaponBadges = Object.entries(
+    secondaryWeapon?.attachments ?? {},
+  )
+    .map(([slot, value]) => {
+      const attachment = catalogAttachments.find(
+        (a) => a.type === slot && a.name === value,
+      );
+      if (!attachment) return null;
+      return {
+        key: slot,
+        typeSlug: attachment.typeSlug || slot,
+        label: attachment.name,
+        iconUrl: attachment.imageUrl,
+      } satisfies WeaponImageBadge;
+    })
+    .filter((badge) => badge !== null);
+  const isFullLoadout = loadout.contentType === "full_loadout";
   const shareUrl = window.location.href;
 
   return (
@@ -529,82 +688,148 @@ export function LoadoutPreview() {
         </>
       }
     >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Weapon build */}
-        <Container>
-          <div className="flex items-center gap-4">
+      {isFullLoadout && (
+        <header className="flex flex-row gap-4 ">
+          <div className="flex min-w-0  flex-1 items-center gap-4">
             <RatingRing
               percent={loadout.ratingPercent}
               votes={loadout.likes + loadout.dislikes}
-              size={56}
+              size={64}
               innerClassName="border border-white/5"
-              labelClassName={
-                loadout.likes + loadout.dislikes < 5
-                  ? "text-[10px] text-teritary"
-                  : "text-[11px] "
-              }
               fallbackLabel="New"
             />
-            <h1 className="text-sm antialiased sm:text-xl wrap-anywhere">
-              <span
-                style={{
-                  color: catalogTags.find((t) => t.id === loadout.tagId)?.color,
-                }}
-                className="font-handwritten text-2xl py-4 font-light"
-              >
-                {catalogTags.find((t) => t.id === loadout.tagId)?.name}
-              </span>{" "}
-              <Tag
-                color={""}
-                className="inline relative top-[-5px]"
-                link={
-                  primaryWeaponCatalog?.type
-                    ? explorePath(gameId, {
-                        category: primaryWeaponCatalog.type,
-                      })
-                    : undefined
-                }
-              >
-                {primaryWeaponCatalog?.typeShort || meta.short}
-              </Tag>
-              <span className="font-base font-sans  text-teritary">
-                {" "}
-                {primaryWeaponCatalog?.name}
-              </span>{" "}
-              {loadout.name}
-            </h1>
-          </div>
-
-          <CompactPageHeader
-            title={loadout.name}
-            actions={
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate(explorePath(gameId))}
+            <div className="flex-1">
+              {titleTag && (
+                <p
+                  style={{ color: titleTag.color }}
+                  className="font-handwritten text-xl font-light"
                 >
-                  Back
-                </Button>
-                <FireReactionButton
-                  icon={<ThumbsUp className="w-4 h-4" />}
-                  label={loadout.liked ? "Liked" : "Like"}
-                  count={loadout.likes}
-                  active={loadout.liked}
-                  tone="green"
-                  onClick={() => react("like")}
-                />
-                <FireReactionButton
-                  icon={<ThumbsDown className="w-4 h-4" />}
-                  label={loadout.disliked ? "Disliked" : "Dislike"}
-                  count={loadout.dislikes}
-                  active={loadout.disliked}
-                  tone="red"
-                  onClick={() => react("dislike")}
-                />
-              </>
-            }
-          />
+                  {titleTag.name}
+                </p>
+              )}
+              <h1 className="wrap-anywhere flxe-1 text-xl sm:text-2xl">
+                {loadout.name}
+              </h1>
+            </div>
+          </div>
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <FireReactionButton
+              icon={<ThumbsUp className="w-4 h-4" />}
+              label={loadout.liked ? "Liked" : "Like"}
+              count={loadout.likes}
+              active={loadout.liked}
+              tone="green"
+              onClick={() => react("like")}
+              className="flex-1 sm:min-w-36"
+            />
+            <FireReactionButton
+              icon={<ThumbsDown className="w-4 h-4" />}
+              label={loadout.disliked ? "Disliked" : "Dislike"}
+              count={loadout.dislikes}
+              active={loadout.disliked}
+              tone="red"
+              onClick={() => react("dislike")}
+              className="flex-1 sm:min-w-36"
+            />
+          </div>
+        </header>
+      )}
+
+      <div
+        className={cn(
+          "grid grid-cols-1 gap-6 items-start",
+          isFullLoadout ? "md:grid-cols-2" : "lg:grid-cols-2",
+        )}
+      >
+        {/* Weapon build */}
+        <Container>
+          {isFullLoadout ? (
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-teritary">
+                  Primary weapon
+                </p>
+                <h2 className="mt-1 font-mono text-base uppercase">
+                  {primaryWeaponCatalog?.name ?? "Not selected"}
+                </h2>
+              </div>
+              {primaryWeaponCatalog?.typeShort && (
+                <Tag>{primaryWeaponCatalog.typeShort}</Tag>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-4">
+              <RatingRing
+                percent={loadout.ratingPercent}
+                votes={loadout.likes + loadout.dislikes}
+                size={56}
+                innerClassName="border border-white/5"
+                fallbackLabel="New"
+              />
+              <h1 className="text-sm antialiased sm:text-xl wrap-anywhere">
+                <span
+                  style={{
+                    color: catalogTags.find((t) => t.id === loadout.tagId)
+                      ?.color,
+                  }}
+                  className="font-handwritten text-2xl py-4 font-light"
+                >
+                  {catalogTags.find((t) => t.id === loadout.tagId)?.name}
+                </span>{" "}
+                <Tag
+                  color={""}
+                  className="inline relative top-[-5px]"
+                  link={
+                    primaryWeaponCatalog?.type
+                      ? explorePath(gameId, {
+                          category: primaryWeaponCatalog.type,
+                        })
+                      : undefined
+                  }
+                >
+                  {primaryWeaponCatalog?.typeShort || meta.short}
+                </Tag>
+                <span className="font-base font-sans  text-teritary">
+                  {" "}
+                  {primaryWeaponCatalog?.name}
+                </span>{" "}
+                {loadout.name}
+              </h1>
+            </div>
+          )}
+
+          {!isFullLoadout && (
+            <CompactPageHeader
+              title={loadout.name}
+              actions={
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(explorePath(gameId))}
+                  >
+                    Back
+                  </Button>
+                  <FireReactionButton
+                    icon={<ThumbsUp className="w-4 h-4" />}
+                    label={loadout.liked ? "Liked" : "Like"}
+                    count={loadout.likes}
+                    active={loadout.liked}
+                    tone="green"
+                    onClick={() => react("like")}
+                  />
+                  <FireReactionButton
+                    icon={<ThumbsDown className="w-4 h-4" />}
+                    label={loadout.disliked ? "Disliked" : "Dislike"}
+                    count={loadout.dislikes}
+                    active={loadout.disliked}
+                    tone="red"
+                    onClick={() => react("dislike")}
+                  />
+                </>
+              }
+            />
+          )}
 
           <div className="flex flex-col items-center gap-2 py-4">
             <div
@@ -626,26 +851,28 @@ export function LoadoutPreview() {
               />
             </div>
           </div>
-          <div className="flex items-center w-full gap-2">
-            <FireReactionButton
-              icon={<ThumbsUp className="w-4 h-4" />}
-              label={loadout.liked ? "Liked" : "Like"}
-              count={loadout.likes}
-              active={loadout.liked}
-              tone="green"
-              onClick={() => react("like")}
-              className="flex-1"
-            />
-            <FireReactionButton
-              icon={<ThumbsDown className="w-4 h-4" />}
-              label={loadout.disliked ? "Disliked" : "Dislike"}
-              count={loadout.dislikes}
-              active={loadout.disliked}
-              tone="red"
-              onClick={() => react("dislike")}
-              className="flex-1"
-            />
-          </div>
+          {!isFullLoadout && (
+            <div className="flex items-center w-full gap-2">
+              <FireReactionButton
+                icon={<ThumbsUp className="w-4 h-4" />}
+                label={loadout.liked ? "Liked" : "Like"}
+                count={loadout.likes}
+                active={loadout.liked}
+                tone="green"
+                onClick={() => react("like")}
+                className="flex-1"
+              />
+              <FireReactionButton
+                icon={<ThumbsDown className="w-4 h-4" />}
+                label={loadout.disliked ? "Disliked" : "Dislike"}
+                count={loadout.dislikes}
+                active={loadout.disliked}
+                tone="red"
+                onClick={() => react("dislike")}
+                className="flex-1"
+              />
+            </div>
+          )}
 
           <div className="divide-y-1 divide-solid divide-white/5 w-full">
             {primaryAttachments.map((att) => {
@@ -698,7 +925,7 @@ export function LoadoutPreview() {
                 </p>
               )}
 
-            {loadout.gameLoadoutCode && (
+            {!isFullLoadout && loadout.gameLoadoutCode && (
               <div className="flex flex-row bg-white/[0.03] h-10 rounded-lg items-center mt-4 gap-4 justify-center w-full">
                 <span className="text-sm text-teritary/50">In-game code:</span>
                 <div className="flex items-center gap-2">
@@ -729,7 +956,124 @@ export function LoadoutPreview() {
           </div>
         </Container>
 
-        <div className="flex flex-col gap-4">
+        {isFullLoadout && (
+          <Container>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-teritary">
+                  Secondary weapon
+                </p>
+                <h2 className="mt-1 font-mono text-base uppercase">
+                  {secondaryWeaponCatalog?.name ?? "Not selected"}
+                </h2>
+              </div>
+              {secondaryWeaponCatalog?.typeShort && (
+                <Tag>{secondaryWeaponCatalog.typeShort}</Tag>
+              )}
+            </div>
+
+            {secondaryWeapon && secondaryWeaponCatalog ? (
+              <>
+                <div className="flex flex-col items-center gap-2 py-4">
+                  <div
+                    style={{
+                      background: `radial-gradient(ellipse at center, ${titleTag?.color || null}14, transparent 70%)`,
+                    }}
+                  >
+                    <WeaponImage
+                      imageUrl={secondaryWeaponCatalog.imageUrl}
+                      weaponId={secondaryWeapon.id}
+                      badges={secondaryWeaponBadges}
+                      activeBadgeKey={
+                        activeKey?.startsWith("secondary:")
+                          ? activeKey.slice("secondary:".length)
+                          : null
+                      }
+                      onBadgeHover={(key) =>
+                        setActiveKey(key ? `secondary:${key}` : null)
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="divide-y-1 divide-solid divide-white/5 w-full">
+                  {secondaryAttachments.map((attachment) => {
+                    const attachmentKey = `secondary:${attachment.key}`;
+                    const isActive = activeKey === attachmentKey;
+                    return (
+                      <button
+                        key={attachment.key}
+                        type="button"
+                        onPointerEnter={() => setActiveKey(attachmentKey)}
+                        onPointerLeave={() => setActiveKey(null)}
+                        onFocus={() => setActiveKey(attachmentKey)}
+                        onBlur={() => setActiveKey(null)}
+                        className={cn(
+                          "-mx-2 flex w-full items-center gap-4 rounded-md px-2 py-3 text-left transition-colors duration-150",
+                          isActive
+                            ? "bg-white/[0.06]"
+                            : "hover:bg-white/[0.03]",
+                        )}
+                      >
+                        <div className="flex size-6 shrink-0 items-center justify-center overflow-hidden">
+                          {attachment.iconUrl && (
+                            <img
+                              src={attachment.iconUrl}
+                              alt=""
+                              className={cn(
+                                "size-full object-contain transition-opacity duration-150",
+                                isActive ? "opacity-100" : "opacity-50",
+                              )}
+                            />
+                          )}
+                        </div>
+                        <span className="font-medium">{attachment.label}</span>
+                        <span className="text-white/20">•</span>
+                        <span className="flex-1 text-teritary">
+                          {attachment.typeSlug}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <p className="py-8 text-sm text-teritary">
+                No secondary weapon selected.
+              </p>
+            )}
+          </Container>
+        )}
+
+        {isFullLoadout && loadout.gameLoadoutCode && (
+          <div className="flex min-h-12 items-center justify-center gap-4 rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 md:col-span-2">
+            <span className="text-sm text-teritary/50">In-game code:</span>
+            <code className="uppercase tracking-wider text-sm text-secondary">
+              {loadout.gameLoadoutCode}
+            </code>
+            <Button
+              onClick={copyGameLoadoutCode}
+              variant="ghost"
+              size="sm"
+              aria-label="Copy loadout code"
+            >
+              {codeCopied ? (
+                <>
+                  <Check className="size-3 text-[#01a059]" />
+                  <span className="text-sm">Copied</span>
+                </>
+              ) : (
+                <Copy className="size-3" />
+              )}
+            </Button>
+          </div>
+        )}
+
+        <div
+          className={cn(
+            "flex flex-col gap-4",
+            isFullLoadout && "md:col-span-2",
+          )}
+        >
           {/* Description, reactions, author, in-game code, and video are all
               one info panel now instead of separate cards -- divide-y draws
               the hairline between sections (none above the first). */}
@@ -932,12 +1276,16 @@ export function LoadoutPreview() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete this loadout?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. The loadout and its shared link will be removed permanently.
+                      This action cannot be undone. The loadout and its shared
+                      link will be removed permanently.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Keep loadout</AlertDialogCancel>
-                    <AlertDialogAction variant="destructive" onClick={() => void deleteLoadout()}>
+                    <AlertDialogAction
+                      variant="destructive"
+                      onClick={() => void deleteLoadout()}
+                    >
                       Delete loadout
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -947,6 +1295,141 @@ export function LoadoutPreview() {
           )}
         </div>
       </div>
+
+      {isFullLoadout && (
+        <Container>
+          <h2 className="mt-1 text-xl">Perks, equipment & melee</h2>
+
+          <div className="grid gap-4">
+            {(["melee"] as const).map((slot) => {
+              const weapon = loadout.weapons.find(
+                (candidate) => (candidate.slot ?? "primary") === slot,
+              );
+              const catalogWeapon = catalogWeapons.find(
+                (candidate) => candidate.id === weapon?.id,
+              );
+              return (
+                <section
+                  key={slot}
+                  className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02]"
+                >
+                  <div className="border-b border-white/[0.07] px-4 py-3 font-mono text-[10px] uppercase tracking-[0.12em] text-teritary">
+                    {slot}
+                  </div>
+                  {weapon && catalogWeapon ? (
+                    <div className="flex flex-col gap-3 p-4">
+                      <div className="h-24">
+                        <WeaponImage
+                          imageUrl={catalogWeapon.imageUrl}
+                          alt={catalogWeapon.name}
+                          weaponId={weapon.id}
+                          variant="small"
+                        />
+                      </div>
+                      <p className="font-mono text-sm uppercase">
+                        {catalogWeapon.name}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {Object.values(weapon.attachments ?? {}).map((name) => (
+                          <span
+                            key={name}
+                            className="rounded-md border border-white/[0.08] bg-black/20 px-2 py-1 text-[10px] text-secondary"
+                          >
+                            {name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="p-4 text-sm text-teritary">Not selected</p>
+                  )}
+                </section>
+              );
+            })}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <section className="rounded-2xl border border-white/[0.08] p-4">
+              <div className="flex items-center gap-2">
+                <Puzzle className="size-4 text-teritary" />
+                <h3 className="text-sm">Perks</h3>
+              </div>
+              <div className="mt-3">
+                {(loadout.perks ?? []).length > 0 ? (
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {loadout.perks!.map((perkName) => {
+                      const perk = catalogPerks.find(
+                        (candidate) => candidate.name === perkName,
+                      );
+                      const group = perk?.slot
+                        ? `Perk ${perk.slot.slice(-1)}`
+                        : "Perk";
+
+                      return (
+                        <div
+                          key={perkName}
+                          className="flex min-w-0 items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.025] p-3"
+                        >
+                          <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-black/25 p-2">
+                            {perk?.imageUrl ? (
+                              <img
+                                src={perk.imageUrl}
+                                alt=""
+                                className="size-full object-contain"
+                              />
+                            ) : (
+                              <Shield className="size-5 text-white/25" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <span className="block font-mono text-[10px] uppercase tracking-[0.1em] text-teritary">
+                              {group}
+                            </span>
+                            <span className="mt-1 block truncate font-mono text-sm uppercase">
+                              {perkName}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <span className="text-sm text-teritary">None selected</span>
+                )}
+              </div>
+            </section>
+
+            <section className="rounded-2xl border border-white/[0.08] p-4">
+              <div className="flex items-center gap-2">
+                <Puzzle className="size-4 text-teritary" />
+                <h3 className="text-sm">Equipment</h3>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                {(["throwable", "tactical", "field_upgrade"] as const).map(
+                  (slot) => {
+                    const equipment = loadout.equipment?.find(
+                      (item) => item.slot === slot,
+                    );
+                    return (
+                      <div
+                        key={slot}
+                        className="rounded-lg bg-white/[0.035] px-3 py-2"
+                      >
+                        <span className="block text-[10px] uppercase tracking-[0.08em] text-teritary">
+                          {slot === "field_upgrade" ? "Field upgrade" : slot}
+                        </span>
+                        <span className="mt-1 block truncate text-sm">
+                          {equipment?.name ?? "Not selected"}
+                        </span>
+                      </div>
+                    );
+                  },
+                )}
+              </div>
+            </section>
+          </div>
+        </Container>
+      )}
 
       <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
         <DialogContent className="!p-0 gap-0 overflow-hidden sm:max-w-3xl">

@@ -7,7 +7,7 @@ import {
   LAST_SELECTED_GAME_KEY,
   LOCKED_GAME_ID,
 } from "@/lib/games";
-import { explorePath } from "@/lib/routes";
+import { explorePath, loadoutPath } from "@/lib/routes";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "@/components/templates/AppLayout";
 import { useGameName } from "@/hooks/useGameName";
@@ -38,6 +38,8 @@ import { CompactPageHeader } from "@/components/molecules/CompactPageHeader";
 import { Button } from "@/components/atoms/Button";
 import { ResponsiveDialog } from "@/components/molecules/ResponsiveDialog";
 import { Input } from "@/components/atoms/Input";
+import { MIN_RATING_VOTES } from "@/lib/metaMetrics";
+import { SOCIAL_LINK_FIELDS } from "@/lib/social";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -45,6 +47,15 @@ interface Loadout extends CardLoadout {
 }
 
 type SortMode = "rating" | "published";
+
+function normalizeSearchValue(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/+$/, "");
+}
 
 function ExploreSkeleton() {
   const block = "bg-white/[0.06]";
@@ -113,6 +124,9 @@ export function Explore() {
   const [weaponQuery, setWeaponQuery] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("rating");
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [contentType, setContentType] = useState<
+    "all" | "full_loadout" | "weapon_config"
+  >("all");
 
   useEffect(() => {
     const categoryParam = searchParams.get("category");
@@ -197,6 +211,11 @@ export function Explore() {
     );
 
   const filtered = loadouts.filter((l) => {
+    if (
+      contentType !== "all" &&
+      (l.contentType ?? "weapon_config") !== contentType
+    )
+      return false;
     if (activeWeaponId) {
       const matchesWeapon = (l.weapons ?? []).some(
         (weapon: any) => weapon?.id === activeWeaponId,
@@ -210,16 +229,30 @@ export function Explore() {
     }
     if (activeTagId != null && l.tagId !== activeTagId) return false;
     if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
+      const q = normalizeSearchValue(searchQuery);
+      const authorSocialTerms = SOCIAL_LINK_FIELDS.flatMap(
+        ({ key, label, url }) => {
+          const handle = l.authorLinks?.[key];
+          return handle ? [key, label, handle, url(handle)] : [];
+        },
+      );
       const haystack = [
         l.name,
         l.userName,
+        l.authorNickname,
         l.description,
         ...(l.weapons ?? []).map((w: any) => weaponById.get(w?.id)?.name),
+        l.video?.url,
+        l.video?.platform,
+        l.video?.title,
+        l.video?.authorName,
+        ...authorSocialTerms,
       ]
         .filter(Boolean)
         .join(" ")
-        .toLowerCase();
+        .split(/\s+/)
+        .map(normalizeSearchValue)
+        .join(" ");
       if (!haystack.includes(q)) return false;
     }
     return true;
@@ -229,9 +262,26 @@ export function Explore() {
     const publishedDifference =
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     if (sortMode === "published") return publishedDifference;
-    return (
-      (b.ratingPercent ?? -1) - (a.ratingPercent ?? -1) || publishedDifference
-    );
+
+    const aVotes = a.likes + a.dislikes;
+    const bVotes = b.likes + b.dislikes;
+    const aIsRated =
+      a.ratingPercent != null && aVotes >= MIN_RATING_VOTES;
+    const bIsRated =
+      b.ratingPercent != null && bVotes >= MIN_RATING_VOTES;
+
+    if (aIsRated !== bIsRated) return Number(bIsRated) - Number(aIsRated);
+
+    if (aIsRated && bIsRated) {
+      const ratingDifference =
+        (b.ratingPercent as number) - (a.ratingPercent as number);
+      if (ratingDifference !== 0) return ratingDifference;
+    } else {
+      const voteProgressDifference = bVotes - aVotes;
+      if (voteProgressDifference !== 0) return voteProgressDifference;
+    }
+
+    return publishedDifference;
   });
 
   const activeFilterCount =
@@ -318,6 +368,35 @@ export function Explore() {
       />
 
       {/* Filter / sort row */}
+      <div
+        role="group"
+        aria-label="Loadout type"
+        className="flex w-fit rounded-xl bg-[#1c191b] p-1"
+      >
+        {(
+          [
+            { id: "all", label: "All" },
+            { id: "full_loadout", label: "Full loadouts" },
+            { id: "weapon_config", label: "Weapon configs" },
+          ] as const
+        ).map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            aria-pressed={contentType === option.id}
+            onClick={() => setContentType(option.id)}
+            className={cn(
+              "h-9 rounded-lg px-3.5 text-sm transition-colors",
+              contentType === option.id
+                ? "bg-[#fafafa] text-[#0c0b0b]"
+                : "text-secondary hover:text-white",
+            )}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex items-center gap-3 w-full flex-wrap">
         <div className="flex-1 flex items-center gap-3 flex-wrap min-w-0">
           <Button
@@ -636,7 +715,11 @@ export function Explore() {
               accent={accent}
               gameShort={meta.short}
               index={i}
-              to={`/${selectedGame}/l/${l.id}`}
+              to={loadoutPath(
+                selectedGame,
+                l.id,
+                l.contentType ?? "weapon_config",
+              )}
             />
           ))}
         </div>

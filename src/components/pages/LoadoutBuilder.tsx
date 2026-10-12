@@ -13,6 +13,11 @@ import {
   Check,
   X,
   Download,
+  Crosshair,
+  Layers3,
+  Shield,
+  Bomb,
+  Radio,
 } from "lucide-react";
 import { WeaponCard } from "@/components/organisms/WeaponCard";
 import {
@@ -58,6 +63,7 @@ interface Weapon {
 }
 
 interface SelectedWeapon extends Weapon {
+  slot: WeaponSlot;
   attachments: Record<string, string>;
 }
 
@@ -73,11 +79,27 @@ interface Attachment {
 interface Perk {
   id: number;
   name: string;
+  slot: PerkSlot | null;
+  displayOrder: number;
+  imageUrl?: string | null;
 }
 
 interface Equipment {
   id: number;
   name: string;
+  slot: EquipmentSlot | null;
+  imageUrl?: string | null;
+}
+
+type ContentType = "full_loadout" | "weapon_config";
+type WeaponSlot = "primary" | "secondary" | "melee";
+type PerkSlot = "perk_1" | "perk_2" | "perk_3";
+type EquipmentSlot = "throwable" | "tactical" | "field_upgrade";
+
+interface EquipmentSelection {
+  name: string;
+  slot: EquipmentSlot;
+  isAny?: boolean;
 }
 
 interface LoadoutTag {
@@ -92,8 +114,31 @@ interface LoadoutTag {
 // are resolved against the already-fetched catalog `weapons` list by id.
 interface LoadoutWeaponRef {
   id: string;
+  slot?: WeaponSlot;
   attachments: Record<string, string>;
 }
+
+const WEAPON_SLOTS: { id: WeaponSlot; label: string; description: string }[] = [
+  { id: "primary", label: "Primary", description: "Main weapon" },
+  { id: "secondary", label: "Secondary", description: "Sidearm and attachments" },
+  { id: "melee", label: "Melee", description: "Close-range backup" },
+];
+
+const EQUIPMENT_SLOTS: {
+  id: EquipmentSlot;
+  label: string;
+  icon: typeof Bomb;
+}[] = [
+  { id: "throwable", label: "Throwable", icon: Bomb },
+  { id: "tactical", label: "Tactical", icon: Crosshair },
+  { id: "field_upgrade", label: "Field upgrade", icon: Radio },
+];
+
+const PERK_GROUPS: { id: PerkSlot; label: string }[] = [
+  { id: "perk_1", label: "Perk 1" },
+  { id: "perk_2", label: "Perk 2" },
+  { id: "perk_3", label: "Perk 3" },
+];
 
 const allowsAnyAttachment = (type: string) =>
   type.trim().toLowerCase() !== "apex";
@@ -325,9 +370,17 @@ export function LoadoutBuilder() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get("edit");
+  const requestedType = searchParams.get("type");
   const { user, accessToken, loading: authLoading } = useAuth();
 
   const [loadoutName, setLoadoutName] = useState("");
+  const [contentType, setContentType] = useState<ContentType | null>(
+    requestedType === "full_loadout" || requestedType === "weapon_config"
+      ? requestedType
+      : editId
+        ? "weapon_config"
+        : null,
+  );
   const [loadoutNameError, setLoadoutNameError] = useState("");
   const [loadoutDescription, setLoadoutDescription] = useState("");
   const [gameLoadoutCode, setGameLoadoutCode] = useState("");
@@ -339,7 +392,9 @@ export function LoadoutBuilder() {
   const [availablePerks, setAvailablePerks] = useState<Perk[]>([]);
   const [selectedPerks, setSelectedPerks] = useState<string[]>([]);
   const [availableEquipment, setAvailableEquipment] = useState<Equipment[]>([]);
-  const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
+  const [selectedEquipment, setSelectedEquipment] = useState<
+    EquipmentSelection[]
+  >([]);
   const [tags, setTags] = useState<LoadoutTag[]>([]);
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
   const [pendingWeaponRefs, setPendingWeaponRefs] = useState<
@@ -347,9 +402,13 @@ export function LoadoutBuilder() {
   >(null);
   const [weaponTypeFilter, setWeaponTypeFilter] = useState<string | null>(null);
   const [pickingWeapon, setPickingWeapon] = useState(false);
+  const [activeWeaponSlot, setActiveWeaponSlot] =
+    useState<WeaponSlot>("primary");
   const [openAttachmentType, setOpenAttachmentType] = useState<string | null>(
     null,
   );
+  const [openEquipmentSlot, setOpenEquipmentSlot] =
+    useState<EquipmentSlot | null>(null);
   const [weaponSearchOpen, setWeaponSearchOpen] = useState(false);
   const [weaponSearchQuery, setWeaponSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -472,17 +531,23 @@ export function LoadoutBuilder() {
       const loadout = data.loadouts?.find((l: any) => l.id === editId);
       if (loadout) {
         setLoadoutName(loadout.name);
+        setContentType(loadout.contentType ?? "weapon_config");
         setLoadoutDescription(loadout.description || "");
         setGameLoadoutCode(loadout.gameLoadoutCode || "");
         setVideoUrl(loadout.video?.url || "");
         setPendingWeaponRefs(
           (loadout.weapons || []).map((w: any) => ({
             id: w.id,
+            slot: w.slot,
             attachments: w.attachments ?? {},
           })),
         );
         setSelectedPerks(loadout.perks || []);
-        setSelectedEquipment(loadout.equipment || []);
+        setSelectedEquipment(
+          (loadout.equipment || []).filter(
+            (item: EquipmentSelection) => item?.name && item?.slot,
+          ),
+        );
         setSelectedTagId(loadout.tagId ?? null);
       }
     } catch (error) {
@@ -525,6 +590,8 @@ export function LoadoutBuilder() {
       return;
     }
 
+    if (!contentType) return;
+
     if (videoInvalid) return;
 
     setSaving(true);
@@ -538,6 +605,7 @@ export function LoadoutBuilder() {
         description: loadoutDescription,
         gameLoadoutCode: gameLoadoutCode.trim() || null,
         videoUrl: trimmedVideoUrl || null,
+        contentType,
         weapons: selectedWeapons.map((weapon) => ({
           ...weapon,
           attachments: Object.fromEntries(
@@ -568,7 +636,11 @@ export function LoadoutBuilder() {
       if (response.ok) {
         const { loadout } = await response.json();
         if (editId) {
-          navigate(`/${gameId}/l/${loadout.id}`);
+          navigate(
+            loadout.contentType === "full_loadout"
+              ? `/${gameId}/l/${loadout.id}`
+              : `/${gameId}/weapon/${loadout.id}`,
+          );
         } else {
           setCreatedLoadoutId(loadout.id);
         }
@@ -590,7 +662,9 @@ export function LoadoutBuilder() {
   };
 
   const createdLoadoutPath = createdLoadoutId
-    ? `/${gameId}/l/${createdLoadoutId}`
+    ? contentType === "full_loadout"
+      ? `/${gameId}/l/${createdLoadoutId}`
+      : `/${gameId}/weapon/${createdLoadoutId}`
     : "";
   const createdLoadoutUrl = createdLoadoutPath
     ? new URL(createdLoadoutPath, window.location.origin).toString()
@@ -603,7 +677,7 @@ export function LoadoutBuilder() {
       const dataUrl = await generateBrandedQRPng(createdLoadoutUrl);
       const link = document.createElement("a");
       link.href = dataUrl;
-      link.download = `${createdLoadoutId}-loadout-qr.png`;
+      link.download = `${createdLoadoutId}-${contentType === "full_loadout" ? "loadout" : "weapon-config"}-qr.png`;
       link.click();
     } catch (error) {
       console.error("Error generating loadout QR code:", error);
@@ -618,6 +692,7 @@ export function LoadoutBuilder() {
   const createAnotherLoadout = () => {
     setCreatedLoadoutId(null);
     setLoadoutName("");
+    setContentType(null);
     setLoadoutNameError("");
     setLoadoutDescription("");
     setGameLoadoutCode("");
@@ -629,7 +704,9 @@ export function LoadoutBuilder() {
     setSelectedTagId(null);
     setWeaponTypeFilter(null);
     setPickingWeapon(false);
+    setActiveWeaponSlot("primary");
     setOpenAttachmentType(null);
+    setOpenEquipmentSlot(null);
     setWeaponSearchOpen(false);
     setWeaponSearchQuery("");
     setAttachmentError(false);
@@ -638,10 +715,19 @@ export function LoadoutBuilder() {
 
   const toggleWeapon = (weapon: Weapon) => {
     setSelectedWeapons((prev) => {
-      if (prev.some((w) => w.id === weapon.id)) {
-        return prev.filter((w) => w.id !== weapon.id);
+      const current = prev.find((w) => w.slot === activeWeaponSlot);
+      if (current?.id === weapon.id) {
+        return prev.filter((w) => w.slot !== activeWeaponSlot);
       }
-      return [{ ...weapon, attachments: {} }];
+      const next = prev.filter(
+        (w) => w.slot !== activeWeaponSlot && w.id !== weapon.id,
+      );
+      next.push({ ...weapon, slot: activeWeaponSlot, attachments: {} });
+      return next.sort(
+        (a, b) =>
+          WEAPON_SLOTS.findIndex((slot) => slot.id === a.slot) -
+          WEAPON_SLOTS.findIndex((slot) => slot.id === b.slot),
+      );
     });
   };
 
@@ -666,20 +752,35 @@ export function LoadoutBuilder() {
     );
   };
 
-  const togglePerk = (perk: string) => {
-    if (selectedPerks.includes(perk)) {
-      setSelectedPerks(selectedPerks.filter((p) => p !== perk));
-    } else if (selectedPerks.length < 3) {
-      setSelectedPerks([...selectedPerks, perk]);
-    }
+  const togglePerk = (perk: Perk) => {
+    if (!perk.slot) return;
+    setSelectedPerks((current) => {
+      if (current.includes(perk.name)) {
+        return current.filter((name) => name !== perk.name);
+      }
+      const namesInGroup = new Set(
+        availablePerks
+          .filter((candidate) => candidate.slot === perk.slot)
+          .map((candidate) => candidate.name),
+      );
+      return [
+        ...current.filter((name) => !namesInGroup.has(name)),
+        perk.name,
+      ];
+    });
   };
 
-  const toggleEquipment = (equipment: string) => {
-    if (selectedEquipment.includes(equipment)) {
-      setSelectedEquipment(selectedEquipment.filter((e) => e !== equipment));
-    } else if (selectedEquipment.length < 2) {
-      setSelectedEquipment([...selectedEquipment, equipment]);
-    }
+  const selectEquipment = (
+    slot: EquipmentSlot,
+    name: string,
+    isAny = false,
+  ) => {
+    setSelectedEquipment((current) => {
+      return [
+        ...current.filter((item) => item.slot !== slot),
+        { slot, name, isAny },
+      ];
+    });
   };
 
   const isTagAllowed = (tag: LoadoutTag) => {
@@ -711,7 +812,11 @@ export function LoadoutBuilder() {
         .map((ref) => {
           const catalogWeapon = weapons.find((w) => w.id === ref.id);
           return catalogWeapon
-            ? { ...catalogWeapon, attachments: ref.attachments }
+            ? {
+                ...catalogWeapon,
+                slot: ref.slot ?? "primary",
+                attachments: ref.attachments,
+              }
             : null;
         })
         .filter((w): w is SelectedWeapon => w !== null),
@@ -756,11 +861,10 @@ export function LoadoutBuilder() {
       .filter((t): t is string => Boolean(t)),
   );
 
-  // Only one weapon is ever selected at once (toggleWeapon always replaces the array
-  // rather than appending), so the builder's preview/attachments UI just uses the first.
-  const primaryWeapon = selectedWeapons[0];
-  const primaryWeaponBadges: WeaponImageBadge[] = primaryWeapon
-    ? Object.entries(primaryWeapon.attachments)
+  const selectedWeapon =
+    selectedWeapons.find((weapon) => weapon.slot === activeWeaponSlot) ?? null;
+  const selectedWeaponBadges: WeaponImageBadge[] = selectedWeapon
+    ? Object.entries(selectedWeapon.attachments)
         .map(([type, name]): WeaponImageBadge | null => {
           const attachment = attachmentsByType[type]?.find(
             (a) => a.name === name,
@@ -777,6 +881,18 @@ export function LoadoutBuilder() {
     : [];
 
   const filteredWeapons = weapons.filter((weapon) => {
+    const category = `${weapon.type ?? ""} ${weapon.typeShort ?? ""}`.toLowerCase();
+    if (contentType === "full_loadout") {
+      if (activeWeaponSlot === "secondary" && !category.includes("pistol"))
+        return false;
+      if (activeWeaponSlot === "melee" && !category.includes("melee"))
+        return false;
+      if (
+        activeWeaponSlot === "primary" &&
+        (category.includes("pistol") || category.includes("melee"))
+      )
+        return false;
+    }
     if (
       weaponTypeFilter &&
       weapon.typeShort !== weaponTypeFilter &&
@@ -795,6 +911,77 @@ export function LoadoutBuilder() {
     return true;
   });
 
+  if (!contentType) {
+    return (
+      <AppLayout
+        selectedGame={gameId}
+        onGameSelect={(id) => navigate(`/${id}/create`)}
+        breadcrumb={
+          <>
+            <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>
+            <BreadcrumbSpacer />
+            <span>Choose creation type</span>
+          </>
+        }
+      >
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 py-6 sm:py-12">
+          <header className="max-w-2xl">
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-teritary">
+              Create
+            </p>
+            <h1 className="mt-3 text-3xl uppercase sm:text-5xl">
+              What are you sharing?
+            </h1>
+            <p className="mt-3 leading-7 text-secondary">
+              Publish a complete class setup or focus on one finely tuned
+              weapon configuration.
+            </p>
+          </header>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setContentType("full_loadout")}
+              className="group min-h-72 rounded-3xl border border-white/[0.1] bg-[#151314] p-7 text-left transition-all hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719]"
+            >
+              <span className="flex size-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
+                <Layers3 className="size-6" />
+              </span>
+              <h2 className="mt-14 text-2xl uppercase">Full loadout</h2>
+              <p className="mt-3 max-w-md text-sm leading-6 text-teritary">
+                Primary and secondary builds, melee, perks, throwable,
+                tactical, and field upgrade—all in one shareable setup.
+              </p>
+              <span className="mt-6 flex items-center gap-2 text-sm text-secondary">
+                Build complete loadout
+                <ChevronRight className="size-4 transition-transform group-hover:translate-x-1" />
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setContentType("weapon_config")}
+              className="group min-h-72 rounded-3xl border border-white/[0.1] bg-[#151314] p-7 text-left transition-all hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719]"
+            >
+              <span className="flex size-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
+                <Crosshair className="size-6" />
+              </span>
+              <h2 className="mt-14 text-2xl uppercase">Weapon config</h2>
+              <p className="mt-3 max-w-md text-sm leading-6 text-teritary">
+                Share one weapon and its attachments without building an
+                entire class around it.
+              </p>
+              <span className="mt-6 flex items-center gap-2 text-sm text-secondary">
+                Configure one weapon
+                <ChevronRight className="size-4 transition-transform group-hover:translate-x-1" />
+              </span>
+            </button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout
       selectedGame={gameId}
@@ -803,13 +990,21 @@ export function LoadoutBuilder() {
         <>
           <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>
           <BreadcrumbSpacer />
-          <span className="">{editId ? "Edit Loadout" : "New Loadout"}</span>
+          <span className="">
+            {editId
+              ? `Edit ${contentType === "full_loadout" ? "Loadout" : "Weapon Config"}`
+              : contentType === "full_loadout"
+                ? "New Loadout"
+                : "New Weapon Config"}
+          </span>
         </>
       }
     >
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <Button
-          onClick={() => navigate(explorePath(gameId))}
+          onClick={() =>
+            editId ? navigate(explorePath(gameId)) : setContentType(null)
+          }
           variant="ghost"
           className="*:h-14 w-14"
         >
@@ -817,11 +1012,13 @@ export function LoadoutBuilder() {
         </Button>
         <div className="flex flex-col flex-1 gap-1">
           <h1 className="text-[32px] leading-[40px] text-[#efedf1] font-semibold">
-            {editId ? "Edit Loadout" : "New Loadout"}
+            {editId ? "Edit" : "New"}{" "}
+            {contentType === "full_loadout" ? "Loadout" : "Weapon Config"}
           </h1>
           <p className="text-[14px] text-[#8d898a]">
-            Pick your weapons, tune each build, then publish it for the
-            community.
+            {contentType === "full_loadout"
+              ? "Build the full class—from weapons and perks to every equipment slot."
+              : "Pick one weapon, tune its attachments, and publish the config."}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -982,7 +1179,7 @@ export function LoadoutBuilder() {
         )}
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className={cn("text-base", attachmentError && "text-[#ef9696]")}>Weapon</h2>
+          <h2 className={cn("text-base", attachmentError && "text-[#ef9696]")}>Weapons</h2>
           {attachmentError && (
             <p className="text-xs text-[#ef9696]" role="alert">
               Choose {MIN_REQUIRED_ATTACHMENTS - selectedAttachmentCount} more attachment
@@ -991,20 +1188,59 @@ export function LoadoutBuilder() {
           )}
         </div>
 
-        {primaryWeapon && !pickingWeapon ? (
+        {contentType === "full_loadout" && (
+          <div className="grid gap-2 sm:grid-cols-3">
+            {WEAPON_SLOTS.map((slot) => {
+              const weapon = selectedWeapons.find(
+                (candidate) => candidate.slot === slot.id,
+              );
+              const selected = activeWeaponSlot === slot.id;
+              return (
+                <button
+                  key={slot.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveWeaponSlot(slot.id);
+                    setPickingWeapon(!weapon);
+                    setWeaponTypeFilter(null);
+                    setWeaponSearchQuery("");
+                  }}
+                  className={cn(
+                    "rounded-xl border p-3 text-left transition-colors",
+                    selected
+                      ? "border-white/35 bg-white/[0.08]"
+                      : "border-white/[0.08] bg-white/[0.025] hover:bg-white/[0.05]",
+                  )}
+                >
+                  <span className="block text-xs uppercase tracking-[0.08em] text-teritary">
+                    {slot.label}
+                  </span>
+                  <span className="mt-1 block truncate text-sm">
+                    {weapon?.name ?? slot.description}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {selectedWeapon && !pickingWeapon ? (
           <>
             <div className="flex flex-col items-center gap-3 pb-2">
               <WeaponImage
-                imageUrl={primaryWeapon.imageUrl}
+                imageUrl={selectedWeapon.imageUrl}
                 variant="small"
-                alt={primaryWeapon.name}
-                weaponId={primaryWeapon.id}
-                badges={primaryWeaponBadges}
-                highlightSlugs={primaryWeaponBadges.map(
+                alt={selectedWeapon.name}
+                weaponId={selectedWeapon.id}
+                badges={selectedWeaponBadges}
+                highlightSlugs={selectedWeaponBadges.map(
                   (badge) => badge.typeSlug,
                 )}
               />
-              {primaryWeapon.name}
+              <span className="text-xs uppercase tracking-[0.12em] text-teritary">
+                {activeWeaponSlot}
+              </span>
+              {selectedWeapon.name}
               <Button variant="outline" onClick={() => setPickingWeapon(true)}>
                 Change weapon
               </Button>
@@ -1020,7 +1256,7 @@ export function LoadoutBuilder() {
               <div className="flex flex-col gap-1.5">
                 {attachmentTypes.map((type) => {
                   const typeImageUrl = attachmentsByType[type][0]?.typeImageUrl;
-                  const selectedName = primaryWeapon.attachments[type];
+                  const selectedName = selectedWeapon.attachments[type];
                   const isAnySelected = selectedName === ANY_ATTACHMENT_VALUE;
                   return (
                     <div key={type} className="flex flex-col">
@@ -1172,7 +1408,7 @@ export function LoadoutBuilder() {
         )}
       </Container>
 
-      {primaryWeapon && openAttachmentType && (
+      {selectedWeapon && openAttachmentType && (
         <ResponsiveDialog
           open
           onOpenChange={(open) => {
@@ -1182,17 +1418,122 @@ export function LoadoutBuilder() {
         >
           <AttachmentPickerList
             options={attachmentsByType[openAttachmentType]}
-            selected={primaryWeapon.attachments[openAttachmentType]}
+            selected={selectedWeapon.attachments[openAttachmentType]}
             allowAny={allowsAnyAttachment(openAttachmentType)}
             onSelect={(name) => {
-              setWeaponAttachment(primaryWeapon.id, openAttachmentType, name);
+              setWeaponAttachment(selectedWeapon.id, openAttachmentType, name);
               setOpenAttachmentType(null);
             }}
             onDeselect={() => {
-              setWeaponAttachment(primaryWeapon.id, openAttachmentType, "");
+              setWeaponAttachment(selectedWeapon.id, openAttachmentType, "");
               setOpenAttachmentType(null);
             }}
           />
+        </ResponsiveDialog>
+      )}
+
+      {openEquipmentSlot && (
+        <ResponsiveDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setOpenEquipmentSlot(null);
+          }}
+          title={`Choose ${EQUIPMENT_SLOTS.find((slot) => slot.id === openEquipmentSlot)?.label ?? "equipment"}`}
+        >
+          <div className="flex flex-col gap-2">
+            {(() => {
+              const selected = selectedEquipment.find(
+                (item) => item.slot === openEquipmentSlot,
+              );
+              const choices = availableEquipment.filter(
+                (equipment) => equipment.slot === openEquipmentSlot,
+              );
+              return (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      selectEquipment(openEquipmentSlot, "Any", true);
+                      setOpenEquipmentSlot(null);
+                    }}
+                    className={cn(
+                      "flex min-h-14 items-center gap-3 rounded-xl border px-4 text-left transition-colors",
+                      selected?.isAny
+                        ? "border-white/40 bg-white/[0.1]"
+                        : "border-white/[0.08] bg-white/[0.025] hover:bg-white/[0.05]",
+                    )}
+                  >
+                    <span className="flex size-8 items-center justify-center rounded-lg border border-white/[0.12] font-mono text-sm">
+                      ∞
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-medium">Any</span>
+                      <span className="block text-xs text-teritary">
+                        Any item in this equipment slot
+                      </span>
+                    </span>
+                    {selected?.isAny && <Check className="size-4" />}
+                  </button>
+
+                  {choices.map((equipment) => {
+                    const isSelected =
+                      !selected?.isAny && selected?.name === equipment.name;
+                    return (
+                      <button
+                        key={equipment.id}
+                        type="button"
+                        onClick={() => {
+                          selectEquipment(
+                            openEquipmentSlot,
+                            equipment.name,
+                          );
+                          setOpenEquipmentSlot(null);
+                        }}
+                        className={cn(
+                          "flex min-h-14 items-center gap-3 rounded-xl border px-4 text-left text-sm transition-colors",
+                          isSelected
+                            ? "border-white/40 bg-white/[0.1]"
+                            : "border-white/[0.08] bg-white/[0.025] hover:bg-white/[0.05]",
+                        )}
+                      >
+                        {equipment.imageUrl ? (
+                          <img
+                            src={equipment.imageUrl}
+                            alt=""
+                            className="size-8 object-contain"
+                          />
+                        ) : (
+                          <span className="size-8" />
+                        )}
+                        <span className="min-w-0 flex-1 truncate">
+                          {equipment.name}
+                        </span>
+                        {isSelected && <Check className="size-4" />}
+                      </button>
+                    );
+                  })}
+
+                  {selected && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedEquipment((current) =>
+                          current.filter(
+                            (item) => item.slot !== openEquipmentSlot,
+                          ),
+                        );
+                        setOpenEquipmentSlot(null);
+                      }}
+                      className="mt-2 w-full"
+                    >
+                      Clear selection
+                    </Button>
+                  )}
+                </>
+              );
+            })()}
+          </div>
         </ResponsiveDialog>
       )}
 
@@ -1262,11 +1603,11 @@ export function LoadoutBuilder() {
 
             <div>
               <h3 className="text-xl font-semibold ">
-                Your loadout was created successfully
+                Your {contentType === "full_loadout" ? "loadout" : "weapon config"} was created successfully
               </h3>
               <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-teritary">
                 Download its QR code to share the build anywhere, or jump
-                straight to your published loadout.
+                straight to your published {contentType === "full_loadout" ? "loadout" : "weapon config"}.
               </p>
             </div>
 
@@ -1294,7 +1635,7 @@ export function LoadoutBuilder() {
                 type="button"
                 onClick={() => navigate(createdLoadoutPath)}
               >
-                View loadout
+                View {contentType === "full_loadout" ? "loadout" : "weapon config"}
               </Button>
               <Button
                 type="button"
@@ -1307,6 +1648,139 @@ export function LoadoutBuilder() {
           </div>
         )}
       </ResponsiveDialog>
+
+      {contentType === "full_loadout" && (
+        <>
+          <Container>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-semibold">Perks</h2>
+                <p className="mt-1 text-sm text-teritary">
+                  Choose one perk from each group.
+                </p>
+              </div>
+              <span className="rounded-lg border border-white/[0.12] px-3 py-1.5 text-xs text-secondary">
+                {selectedPerks.length}/3
+              </span>
+            </div>
+            {availablePerks.length === 0 ? (
+              <p className="text-sm text-teritary">
+                No perks are available for this game yet.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-6">
+                {PERK_GROUPS.map((group) => {
+                  const perks = availablePerks
+                    .filter((perk) => perk.slot === group.id)
+                    .sort((a, b) => a.displayOrder - b.displayOrder);
+                  return (
+                    <section key={group.id}>
+                      <div className="mb-3 flex items-center gap-4">
+                        <h3 className="shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-secondary">
+                          {group.label}
+                        </h3>
+                        <span className="h-px flex-1 bg-white/[0.08]" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+                        {perks.map((perk) => {
+                          const selected = selectedPerks.includes(perk.name);
+                          return (
+                            <button
+                              key={perk.id}
+                              type="button"
+                              onClick={() => togglePerk(perk)}
+                              aria-pressed={selected}
+                              className={cn(
+                                "flex min-h-24 flex-col items-center justify-center gap-3 rounded-xl border p-3 text-center text-xs transition-colors",
+                                selected
+                                  ? "border-[#d6bf49]/60 bg-[#d6bf49]/10 text-[#f2d858]"
+                                  : "border-white/[0.08] bg-white/[0.025] hover:bg-white/[0.05]",
+                              )}
+                            >
+                              {perk.imageUrl ? (
+                                <img
+                                  src={perk.imageUrl}
+                                  alt=""
+                                  className="size-9 object-contain"
+                                />
+                              ) : (
+                                <Shield className="size-7 text-teritary" />
+                              )}
+                              <span className="flex items-center gap-1.5 uppercase tracking-wide">
+                                {selected && <Check className="size-3.5" />}
+                                {perk.name}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
+            )}
+          </Container>
+
+          <Container>
+            <div>
+              <h2 className="text-base font-semibold">Equipment</h2>
+              <p className="mt-1 text-sm text-teritary">
+                Pick one item for each equipment slot.
+              </p>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-3">
+              {EQUIPMENT_SLOTS.map(({ id, label, icon: Icon }) => {
+                const selected = selectedEquipment.find(
+                  (equipment) => equipment.slot === id,
+                );
+                const selectedCatalog = availableEquipment.find(
+                  (equipment) =>
+                    equipment.slot === id && equipment.name === selected?.name,
+                );
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setOpenEquipmentSlot(id)}
+                    className="group overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] text-left transition-colors hover:border-white/[0.18] hover:bg-white/[0.04]"
+                  >
+                    <div className="flex items-center gap-2 border-b border-white/[0.07] px-4 py-3">
+                      <Icon className="size-4 text-teritary" />
+                      <h3 className="flex-1 text-sm">{label}</h3>
+                      <ChevronRight className="size-4 text-teritary transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                    <div className="flex min-h-20 items-center gap-3 p-4">
+                      {selected?.isAny ? (
+                        <span className="flex size-9 items-center justify-center rounded-lg border border-white/[0.12] font-mono text-sm">
+                          ∞
+                        </span>
+                      ) : selectedCatalog?.imageUrl ? (
+                        <img
+                          src={selectedCatalog.imageUrl}
+                          alt=""
+                          className="size-9 object-contain"
+                        />
+                      ) : (
+                        <span className="flex size-9 items-center justify-center rounded-lg bg-white/[0.04]">
+                          <Icon className="size-4 text-teritary" />
+                        </span>
+                      )}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm">
+                          {selected?.name ?? `Choose ${label.toLowerCase()}`}
+                        </span>
+                        <span className="mt-1 block text-xs text-teritary">
+                          Open list
+                        </span>
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </Container>
+        </>
+      )}
 
       {!editId && <RecaptchaNotice className="text-[12px] text-[#8d898a]" />}
 
@@ -1332,52 +1806,6 @@ export function LoadoutBuilder() {
         </Button>
       </div>
 
-      {/* Perks and Equipment sections
-      <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
-        <div className="flex items-center justify-between">
-          <p className="text-[16px]  font-semibold">Perks</p>
-          <span className="h-7 px-3 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] ">
-            {selectedPerks.length}/3 selected
-          </span>
-        </div>
-        {availablePerks.length === 0 ? (
-          <p className="text-[14px] text-[#8d898a]">No perks available for this game yet.</p>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {availablePerks.map((perk) => (
-              <Pill
-                key={perk.id}
-                label={perk.name}
-                isSelected={selectedPerks.includes(perk.name)}
-                onClick={() => togglePerk(perk.name)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="bg-[#121111] border border-[#201e1f] rounded-3xl p-6 flex flex-col gap-5">
-        <div className="flex items-center justify-between">
-          <p className="text-[16px]  font-semibold">Equipment</p>
-          <span className="h-7 px-3 rounded-[10px] border border-white/[0.18] flex items-center text-[12px] ">
-            {selectedEquipment.length}/2 selected
-          </span>
-        </div>
-        {availableEquipment.length === 0 ? (
-          <p className="text-[14px] text-[#8d898a]">No equipment available for this game yet.</p>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {availableEquipment.map((equipment) => (
-              <Pill
-                key={equipment.id}
-                label={equipment.name}
-                isSelected={selectedEquipment.includes(equipment.name)}
-                onClick={() => toggleEquipment(equipment.name)}
-              />
-            ))}
-          </div>
-        )}
-      </div>*/}
     </AppLayout>
   );
 }
