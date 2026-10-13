@@ -1,6 +1,6 @@
 # Loadoutize Guidelines
 
-Project-specific rules for generating or editing UI in this codebase. See `CLAUDE.md` at the repo root for architecture details (routing, auth, backend).
+Project-specific rules for generating or editing UI in this codebase. See `docs/ARCHITECTURE.md` for architecture details (routing, auth, backend).
 
 ## General guidelines
 
@@ -10,7 +10,7 @@ Project-specific rules for generating or editing UI in this codebase. See `CLAUD
 * Use flexbox/grid layouts by default; reserve absolute positioning for cases that genuinely need it (overlays, decorative layers, 3D canvas overlays).
 * Keep components in their own PascalCase files under the appropriate atomic layer in `src/components/`: atoms, molecules, organisms, templates, or pages. Follow [the architecture guide](../docs/ARCHITECTURE.md). Extract helper functions/hooks rather than growing a single file.
 * Routes are locked behind `GAME_SELECTOR_ENABLED` / `LOCKED_GAME_ID` (`src/lib/games.ts`) — when adding a new `/:gameId/*` route, wrap it in `GameLock` like the existing routes in `App.tsx`, so the lock behavior stays consistent instead of being bypassed for the new route.
-* Backend responses use camelCase field names regardless of the underlying snake_case columns (see `CLAUDE.md`) — map new fields explicitly rather than passing raw row data through.
+* Backend responses use camelCase field names regardless of the underlying snake_case columns (see `docs/ARCHITECTURE.md`) — map new fields explicitly rather than passing raw row data through.
 
 ## Design system guidelines
 

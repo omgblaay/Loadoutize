@@ -9,7 +9,7 @@ node_modules/
 .env.*
 !.env.example
 .vercel/
-.claude/settings.local.json
+.claude/
 src/components/pages/ComponentTest.tsx
 
 # macOS
