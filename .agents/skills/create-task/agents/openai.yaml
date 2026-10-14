@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Task"
+  short_description: "Create actionable Markdown task specifications"
+  default_prompt: "Use $create-task to turn this request into an actionable Markdown task file in the repository."

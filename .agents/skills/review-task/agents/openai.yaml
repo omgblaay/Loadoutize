@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Task"
+  short_description: "Audit task work against its requirements"
+  default_prompt: "Review this task's implementation against the original requirements. Report actionable findings by severity with file and line references, then summarize verification and residual risk."
