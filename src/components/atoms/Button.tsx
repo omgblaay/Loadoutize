@@ -4,7 +4,6 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 import { AppTooltip } from "@/components/atoms/Tooltip";
-<title>Loadoutize - Compio</title>;
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-all [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 text-[#fafafa] shrink-0 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:opacity-50 disabled:cursor-not-allowed",
@@ -15,7 +14,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive  hover:bg-destructive/90 focus-visible:ring-destructive/20",
         outline:
-          "rounded-xl border border-white/[0.18] text-white hover:border-white/70 hover:",
+          "rounded-xl border border-white/[0.18] text-white hover:border-white/70",
         secondary: "bg-container-alt alt-foreground hover:bg-[#353132]   ",
         ghost: "hover:bg-accent hover:bg-white/10",
         sidenav:

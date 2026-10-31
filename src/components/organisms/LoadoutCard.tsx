@@ -141,6 +141,7 @@ export function LoadoutCard({
           }
           weaponId={primaryWeaponId}
           showSkeleton
+          imageLoading={index < 3 ? "eager" : "lazy"}
           badges={attachmentIcons.map(
             (a): WeaponImageBadge => ({
               key: a.id,
@@ -177,6 +178,8 @@ export function LoadoutCard({
               <img
                 src={a.imageUrl ?? undefined}
                 alt={a.name}
+                loading="lazy"
+                decoding="async"
                 className="max-size-6 object-contain"
               />
             </div>

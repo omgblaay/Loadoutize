@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState, type MouseEvent } from "react";
 import { useLocation } from "react-router";
 import {
   HomeIcon,
@@ -6,7 +6,6 @@ import {
   Crown,
   Users,
   Menu,
-  X,
   Crosshair,
   Paperclip,
   Shield,
@@ -14,7 +13,12 @@ import {
 import { SideNavButton } from "@/components/molecules/SideNavButton";
 import { AppTooltip } from "@/components/atoms/Tooltip";
 import { NavIcon, type NavIconKey } from "@/components/atoms/NavIcon";
-import { Button } from "@/components/atoms/Button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+} from "@/components/molecules/Sheet";
 import {
   attachmentMetaListPath,
   explorePath,
@@ -39,6 +43,7 @@ export function SideNav({
 }) {
   const location = useLocation();
   const [expanded, setExpanded] = useState(false);
+  const lastMenuTriggerRef = useRef<HTMLButtonElement | null>(null);
   // Shared between the full menu and the icon rail -- only one of the two
   // layouts is ever hit-testable at a given viewport width (the other is
   // `hidden`), so one hover key covers both without cross-wiring.
@@ -54,6 +59,11 @@ export function SideNav({
   const go = (path: string) => {
     navigate(path);
     setExpanded(false);
+  };
+
+  const openMenu = (event: MouseEvent<HTMLButtonElement>) => {
+    lastMenuTriggerRef.current = event.currentTarget;
+    setExpanded(true);
   };
 
   const bestOfLinks = [
@@ -199,7 +209,7 @@ export function SideNav({
       <aside className="hidden sm:flex xl:hidden flex-col items-center gap-4 w-[72px] shrink-0">
         <AppTooltip content="Show full menu" side="right">
           <button
-            onClick={() => setExpanded(true)}
+            onClick={openMenu}
             aria-label="Show full menu"
             className="min-h-10 w-11 rounded-xl flex items-center justify-center text-[#8d898a] hover:text-[#fafafa] hover:bg-white/[0.05]"
           >
@@ -389,7 +399,7 @@ export function SideNav({
             </span>
           </SideNavButton>
           <SideNavButton
-            onClick={() => setExpanded(true)}
+            onClick={openMenu}
             aria-label="More"
             className="flex flex-col items-center justify-center gap-0.5 text-[#8d898a]"
           >
@@ -402,25 +412,23 @@ export function SideNav({
       </nav>
 
       {/* Full menu overlay, opened from the icon rail below xl, or the More tab below sm */}
-      {expanded && (
-        <div className="xl:hidden fixed inset-0 z-50 flex">
-          <div
-            className="absolute inset-0 bg-black/60"
-            onClick={() => setExpanded(false)}
-          />
-          <aside className="relative w-[320px] max-w-[85vw] h-full bg-[#0a0909] border-r border-white/[0.08] p-6 flex flex-col gap-6 overflow-y-auto">
-            <Button
-              onClick={() => setExpanded(false)}
-              aria-label="Close menu"
-              className="self-end"
-              variant="ghost"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-            {fullMenu}
-          </aside>
-        </div>
-      )}
+      <Sheet open={expanded} onOpenChange={setExpanded}>
+        <SheetContent
+          side="left"
+          className="xl:hidden w-[320px] max-w-[85vw] overflow-y-auto border-white/[0.08] bg-[#0a0909] p-6 pt-16"
+          onCloseAutoFocus={(event) => {
+            if (!lastMenuTriggerRef.current) return;
+            event.preventDefault();
+            lastMenuTriggerRef.current.focus();
+          }}
+        >
+          <SheetTitle className="sr-only">Navigation menu</SheetTitle>
+          <SheetDescription className="sr-only">
+            Navigate between Loadoutize sections and game categories.
+          </SheetDescription>
+          <div className="flex flex-col gap-6">{fullMenu}</div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

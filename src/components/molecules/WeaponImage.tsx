@@ -30,6 +30,7 @@ export function WeaponImage({
   onBadgeHover,
   showSkeleton = true,
   loading = false,
+  imageLoading = "eager",
 }: {
   imageUrl?: string | null;
   variant?: "small" | "large";
@@ -37,6 +38,7 @@ export function WeaponImage({
   showSkeleton?: boolean;
   /** Keeps the skeleton visible while the parent is still resolving the image URL. */
   loading?: boolean;
+  imageLoading?: "eager" | "lazy";
   alt?: string;
   /** weapons.id, used to look up per-weapon badge position overrides. */
   weaponId?: string;
@@ -80,6 +82,8 @@ export function WeaponImage({
       <img
         src={imageUrl ?? undefined}
         alt={alt}
+        loading={imageLoading}
+        decoding="async"
         className={`w-full aspect-2/1 transition-opacity duration-200 ${isLoading ? "opacity-0" : "opacity-100"}`}
         onLoad={() => imageUrl && setLoadedImageUrl(imageUrl)}
         onError={() => imageUrl && setFailedImageUrl(imageUrl)}
@@ -130,7 +134,7 @@ export function WeaponImage({
                   style={{ left: `${position.x}%`, top: `${position.y}%` }}
                 >
                   {badge.iconUrl ? (
-                    <img src={badge.iconUrl} alt={badge.label} className="w-full h-full object-contain p-1" />
+                    <img src={badge.iconUrl} alt={badge.label} loading="lazy" decoding="async" className="w-full h-full object-contain p-1" />
                   ) : (
                     <span className="text-[9px] font-semibold text-white/70 leading-none">
                       {badge.label.slice(0, 2).toUpperCase()}

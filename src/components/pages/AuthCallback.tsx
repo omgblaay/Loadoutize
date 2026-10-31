@@ -252,17 +252,19 @@ export function AuthCallback() {
               PNG, JPEG, WEBP, or GIF. Max 5MB (2MB for GIFs).
             </p>
             {avatarError && (
-              <p className="text-xs text-[#ef9696]">{avatarError}</p>
+              <p className="text-xs text-[#ef9696]" role="alert">{avatarError}</p>
             )}
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+          <label htmlFor="auth-nickname" className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
             Nickname
           </label>
           <input
+            id="auth-nickname"
             type="text"
+            autoComplete="username"
             value={nickname}
             onChange={handleNicknameChange}
             onBlur={handleNicknameBlur}
@@ -270,13 +272,14 @@ export function AuthCallback() {
             maxLength={20}
             pattern="[a-z0-9_-]{3,20}"
             autoFocus
+            aria-describedby="auth-nickname-help auth-nickname-status"
             className="w-full bg-white/[0.02] border border-white/5 px-4 py-2.5 text-[#fafafa] font-medium focus:border-white/20 focus:outline-none transition-all placeholder-neutral-600 rounded-md text-sm"
             placeholder="your-public-handle"
           />
-          <p className="mt-1.5 text-xs text-neutral-500">
+          <p id="auth-nickname-help" className="mt-1.5 text-xs text-neutral-500">
             Your public profile URL: /u/{nickname || "your-public-handle"}
           </p>
-          <div className="mt-1.5 text-xs min-h-[16px]">
+          <div id="auth-nickname-status" className="mt-1.5 text-xs min-h-[16px]" aria-live="polite">
             {nicknameStatus === "checking" && (
               <span className="flex items-center gap-1.5 text-neutral-500">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -309,10 +312,11 @@ export function AuthCallback() {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+          <span id="auth-role-label" className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
             You are a...
-          </label>
+          </span>
           <FilterPillGroup
+            aria-labelledby="auth-role-label"
             type="single"
             value={roleTag}
             onValueChange={(v) => v && setRoleTag(v as RoleTag)}
@@ -326,7 +330,7 @@ export function AuthCallback() {
         </div>
 
         {submitError && (
-          <div className="bg-red-950/20 border border-red-600/20 p-3 text-red-400 font-medium rounded-md text-sm">
+          <div className="bg-red-950/20 border border-red-600/20 p-3 text-red-400 font-medium rounded-md text-sm" role="alert">
             {submitError}
           </div>
         )}
@@ -334,6 +338,7 @@ export function AuthCallback() {
         <button
           onClick={handleFinish}
           disabled={finishDisabled}
+          aria-busy={submitting}
           className="w-full bg-[#fafafa] hover:bg-white/90 disabled:bg-white/10 text-black disabled:text-neutral-500 font-semibold py-2.5 transition-all flex items-center justify-center gap-2 rounded-md text-sm"
         >
           {submitting ? (

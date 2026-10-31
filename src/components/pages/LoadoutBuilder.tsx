@@ -1073,10 +1073,11 @@ export function LoadoutBuilder() {
           </div>
           {tags.length > 0 && (
             <div>
-              <label className="text-[12px] pb-2 tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+              <span id="loadout-tag-label" className="block text-[12px] pb-2 tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
                 Tag
-              </label>
+              </span>
               <ToggleGroup
+                aria-labelledby="loadout-tag-label"
                 type="single"
                 value={selectedTagId != null ? String(selectedTagId) : ""}
                 onValueChange={(value) => {
@@ -1097,10 +1098,11 @@ export function LoadoutBuilder() {
             </div>
           )}
           <div className="flex flex-col gap-2">
-            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+            <label htmlFor="loadout-description" className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
               Description (optional)
             </label>
             <textarea
+              id="loadout-description"
               value={loadoutDescription}
               onChange={(e) => setLoadoutDescription(e.target.value)}
               placeholder="Describe your strategy, playstyle, or tips..."
@@ -1109,10 +1111,11 @@ export function LoadoutBuilder() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+            <label htmlFor="loadout-code" className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
               In-game loadout code (optional)
             </label>
             <input
+              id="loadout-code"
               type="text"
               value={gameLoadoutCode}
               onChange={(e) => setGameLoadoutCode(e.target.value)}

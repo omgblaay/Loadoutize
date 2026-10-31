@@ -358,6 +358,8 @@ export function CommunityView() {
                   <img
                     src={member.avatarUrl}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                   />
                 ) : (
