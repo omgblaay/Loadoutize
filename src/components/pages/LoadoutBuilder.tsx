@@ -1236,6 +1236,7 @@ export function LoadoutBuilder() {
                 alt={selectedWeapon.name}
                 weaponId={selectedWeapon.id}
                 badges={selectedWeaponBadges}
+                enableSpritePreview={gameId === "mw4"}
                 highlightSlugs={selectedWeaponBadges.map(
                   (badge) => badge.typeSlug,
                 )}

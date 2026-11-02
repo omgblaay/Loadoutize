@@ -266,6 +266,8 @@ export function WeaponMetaView() {
                 imageUrl={weapon.imageUrl}
                 variant="large"
                 alt={weapon.name}
+                weaponId={weapon.id}
+                enableSpritePreview={gameId === "mw4"}
               />
             </div>
             {weapon.type && (

@@ -140,6 +140,7 @@ export function LoadoutCard({
             weapons.length === 0
           }
           weaponId={primaryWeaponId}
+          enableSpritePreview={loadout.gameId === "mw4"}
           showSkeleton
           imageLoading={index < 3 ? "eager" : "lazy"}
           badges={attachmentIcons.map(

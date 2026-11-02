@@ -846,6 +846,7 @@ export function LoadoutPreview() {
                 }
                 weaponId={primaryWeapon?.id}
                 badges={primaryWeaponBadges}
+                enableSpritePreview={gameId === "mw4"}
                 activeBadgeKey={activeKey}
                 onBadgeHover={setActiveKey}
               />
@@ -984,6 +985,7 @@ export function LoadoutPreview() {
                       imageUrl={secondaryWeaponCatalog.imageUrl}
                       weaponId={secondaryWeapon.id}
                       badges={secondaryWeaponBadges}
+                      enableSpritePreview={gameId === "mw4"}
                       activeBadgeKey={
                         activeKey?.startsWith("secondary:")
                           ? activeKey.slice("secondary:".length)
@@ -1324,6 +1326,7 @@ export function LoadoutPreview() {
                           alt={catalogWeapon.name}
                           weaponId={weapon.id}
                           variant="small"
+                          enableSpritePreview={gameId === "mw4"}
                         />
                       </div>
                       <p className="font-mono text-sm uppercase">
