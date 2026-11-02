@@ -17,14 +17,10 @@ import { HomeExplorePreview } from "@/components/organisms/HomeExplorePreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
-import { Countdown } from "@/components/molecules/Countdown";
 import { Button } from "@/components/atoms/Button";
 import { NavIcon } from "@/components/atoms/NavIcon";
 import gameLogo from "figma:asset/mw4_logo.png";
 import { explorePath } from "@/lib/routes";
-
-// Oct 23, 2026, 12:00 AM EDT (UTC-4)
-const MW4_RELEASE_DATE = new Date("2026-10-23T04:00:00Z");
 
 interface Game {
   id: string;
@@ -231,8 +227,8 @@ export function Home() {
 
   return (
     <AppLayout selectedGame={selectedGame} onGameSelect={setSelectedGame}>
-      <section className="relative overflow-hidden lg:min-h-[350px]">
-        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.9fr)] lg:gap-12">
+      <section className="relative overflow-hidden py-8 sm:py-12">
+        <div className="max-w-3xl">
           <div className="flex min-w-0 flex-col items-start">
             <img
               src={gameLogo}
@@ -252,13 +248,6 @@ export function Home() {
             </p>
           </div>
 
-          {selectedGame === "mw4" && (
-            <Countdown
-              targetDate={MW4_RELEASE_DATE}
-              label="Modern Warfare 4 releases on Friday 23 October 2026"
-              accent={accent}
-            />
-          )}
         </div>
       </section>
 
