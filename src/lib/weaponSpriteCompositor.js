@@ -3,7 +3,7 @@ export const SLOT_LABELS = {muzzle:'Muzzle',barrel:'Barrel',optic:'Optic',underb
 // Rear grips must remain above both the receiver assembly and magazines. Some
 // magazine card sprites include a white upper body which otherwise hides the
 // selected grip even though the grip is the foreground component in game.
-const ORDER = ['stock','receiver','barrel','cylinder','underbarrel','magazine','rear_grip','trigger','hammer','apex','muzzle','optic','laser','comb'];
+const ORDER = ['stock','receiver','barrel','cylinder','underbarrel','guard','magazine','rear_grip','bolt','trigger','hammer','apex','muzzle','optic','laser','comb'];
 // Asset-specific corrections are kept separate from the factory registration so
 // one unusually framed sprite does not distort every variant in the same slot.
 const ASSET_TUNING = {
@@ -22,7 +22,6 @@ const ASSET_TUNING = {
   // game, but the generic family registration cannot infer their variant
   // extents from the factory configuration.
   rex_bar_hvy_mpapa7:{dx:-27,dy:-3},
-  rex_stock_hvysht_mpapa7:{dx:-49,dy:0},
   // In game the drum is an extension below the retained white magazine body.
   // The extracted card sprite contains that body too, so only its lower part
   // should be tinted/composed and it must not erase the factory magazine.
@@ -34,6 +33,14 @@ const ASSET_TUNING = {
   rex_rec_mpapa7_quickdraw:{eraseBounds:[209,46,363,221]}
 };
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,Number(v)||0));
+function opticSize(id,width,height){
+  // Shared menu icons fill their source canvas independently of physical size.
+  // Fit the icon first, then include the user-checked 1.49x correction in
+  // the baseline so the adjustment control remains neutral at 1.0x.
+  const targetHeight=/_(minireddot|reflex)/.test(id)?20:id.includes('_holo')?24:28;
+  const scale=Math.min(targetHeight/height,90/width)*1.49;
+  return [width*scale,height*scale];
+}
 export function factoryBuild(catalog){const receiver=catalog.component_base&&catalog.factory_parts?.receiver;return {version:2,weapon:catalog.weapon,mode:catalog.mode,color:catalog.color_default,parts:receiver?{receiver}:{},transforms:{},autoParts:receiver?{receiver:'factory_component'}:{}};}
 export function exampleBuild(catalog,previous){
   const create=()=>{
@@ -65,7 +72,7 @@ export function validateBuild(value,catalog){
   const out=factoryBuild(catalog),byId=new Map(catalog.assets.map(a=>[a.id,a]));
   if(/^#[0-9a-f]{6}$/i.test(value.color||''))out.color=value.color;
   for(const slot of catalog.slots){const id=value.parts?.[slot];if(id){if(byId.get(id)?.slot!==slot)throw new Error(`Unknown ${slot} sprite.`);out.parts[slot]=id;}
-    const t=value.transforms?.[slot];if(t)out.transforms[slot]={dx:clamp(t.dx,-400,400),dy:clamp(t.dy,-250,250),scale:clamp(t.scale||1,.1,5),rotation:clamp(t.rotation,-30,30)};}
+    const t=value.transforms?.[slot];if(t){out.transforms[slot]={dx:clamp(t.dx,-400,400),dy:clamp(t.dy,-250,250),scale:clamp(t.scale||1,.1,5),rotation:clamp(t.rotation,-30,30)};if(slot==='barrel'&&Number.isFinite(t.muzzleCut))out.transforms[slot].muzzleCut=clamp(t.muzzleCut,0,.45);}}
   if(value.autoParts?.receiver&&out.parts.receiver)out.autoParts.receiver='barrel';
   return out;
 }
@@ -76,10 +83,9 @@ function rotatedPoint(x,y,angle){const c=Math.cos(angle),s=Math.sin(angle);retur
 export class WeaponSpriteCompositor{
   constructor(catalog){this.catalog=catalog;this.assets=new Map(catalog.assets.map(a=>[a.id,a]));this.images=new Map();this.tintCache=new Map();}
   order(){
-    // DECHO magazines sit inside the grip assembly. Their visible body/base
-    // must be painted after a replacement grip; the general rifle ordering
-    // hides them completely.
-    if(this.catalog.family==='decho')return ['stock','receiver','barrel','cylinder','underbarrel','rear_grip','magazine','trigger','hammer','apex','muzzle','optic','laser','comb'];
+    // Pistol magazines sit inside the frame/grip. Paint them first so every
+    // other component can occlude them, including replacement grips.
+    if(this.catalog.group==='Pistols'||this.catalog.weapon?.startsWith('rex_pi_'))return ['magazine',...ORDER.filter(slot=>slot!=='magazine')];
     return ORDER;
   }
   async ensure(state){const ids=[...Object.values(this.catalog.factory_parts||{}),...Object.values(state?.parts||{})],assets=[...new Set(ids)].map(id=>this.assets.get(id)).filter(Boolean);await Promise.all(assets.map(async a=>this.images.set(a.id,await loadImage(a.src))));return this;}
@@ -91,13 +97,36 @@ export class WeaponSpriteCompositor{
     await this.ensure(state);return this;
   }
   part(state,slot){const locked=String(state.autoParts?.[slot]||'').startsWith('apex:'),id=state.parts[slot]||(!locked&&this.catalog.factory_parts?.[slot]);const asset=this.assets.get(id);return asset?.controller_only?null:asset;}
+  barrelMount(state,barrel){
+    // The PMIKE63 barrel faces right; the automatic source probe assumes a
+    // left muzzle. Keep its full layer until a right-edge cut is calibrated.
+    if(!barrel?.asset.muzzle_mount||this.catalog.profile.muzzle_right)return null;
+    const [l,t,r,b]=barrel.asset.bbox,meta=barrel.asset.muzzle_mount;
+    const edit=state.transforms?.barrel||this.catalog.placement_overrides?.[barrel.asset.id]||{};
+    const cut=clamp(edit.muzzleCut??(meta.cut_x-l)/(r-l),0,.45);
+    const localX=(cut-barrel.anchor[0])*barrel.width;
+    const localY=((meta.bore_y-t)/(b-t)-barrel.anchor[1])*barrel.height;
+    const q=rotatedPoint(localX,localY,barrel.angle);
+    return {cut,point:[barrel.x+q[0],barrel.y+q[1]]};
+  }
   placement(state,slot){
+    // Lasers are retained in the build as icon-only choices. They must not
+    // affect the composed preview, its camera bounds, guides or hit testing.
+    if(slot==='laser')return null;
+    if(slot==='rear_grip'&&this.catalog.family==='mike4'&&this.part(state,'stock')?.id==='rex_stock_mike4_pdw')return null;
+    // MOSCAR has no separate magazine layer in its default configuration.
+    if(slot==='magazine'&&this.catalog.family==='moscar'&&!state.parts.magazine)return null;
+    // MOSCAR's stock sprites supply its visible body. The automatic receiver
+    // texture adds a duplicate rail and detached rectangle in every setup.
+    if(slot==='receiver'&&this.catalog.family==='moscar')return null;
+    // This stock also includes the barrel; keep its selection for restoration.
+    if(slot==='barrel'&&this.catalog.family==='moscar'&&this.part(state,'stock')?.id==='rex_stockno_lgt_moscar')return null;
     const asset=this.part(state,slot),registered=this.catalog.profile.asset_placements?.[asset?.id],preset=registered||this.catalog.profile.placements[slot];if(!asset||!asset.composable||!preset)return null;
     const b=asset.bbox,saved=this.catalog.placement_overrides?.[asset.id]||{},t=state.transforms[slot]||saved;
     // DECHO's factory structural sprites register correctly, but its small
     // accessories are authored at a different source scale/offset than the
     // other pistols. Apply family corrections before user overrides.
-    const familyTuning=this.catalog.family==='decho'?({
+    const familyTuning=this.catalog.family==='decho'&&!this.catalog.profile.assembly_scale?({
       // DECHO sprites were already authored for the pistol card camera. Do
       // not shrink them again here: the general pistol and muzzle reductions
       // below previously compounded to roughly 0.37x, forcing manual ~3x
@@ -116,7 +145,33 @@ export class WeaponSpriteCompositor{
     const sourceWidth=b[2]-b[0],sourceHeight=b[3]-b[1];
     const profileScale=registered&&Number.isFinite(registered.size)&&registered.size>0
       ?registered.size/(registered.axis==='height'?sourceHeight:sourceWidth):1;
-    const width=sourceWidth*profileScale*scale,height=sourceHeight*profileScale*scale;
+    let width=sourceWidth*profileScale*scale,height=sourceHeight*profileScale*scale;
+    if(slot==='optic'&&!registered){
+      const [mountedWidth,mountedHeight]=opticSize(asset.id,sourceWidth,sourceHeight);
+      width=mountedWidth*scale;height=mountedHeight*scale;
+    }
+    if(slot==='muzzle'&&!registered){
+      // Menu-icon crop dimensions are not physical muzzle dimensions. Use
+      // the weapon's mounted-size estimate, including its family correction.
+      const suppressor=asset.id.includes('_sil_');
+      const mountedSize=preset.size*.7*(suppressor?1.35:1);
+      const mountedScale=mountedSize/(preset.axis==='height'?sourceHeight:sourceWidth);
+      const heightLimit=suppressor?24:22;
+      const fittedScale=Math.min(mountedScale,heightLimit/sourceHeight)*(preset.scale_correction||1);
+      width=sourceWidth*fittedScale*scale;height=sourceHeight*fittedScale*scale;
+    }
+    if(slot==='underbarrel'&&!registered){
+      // Shared underbarrel menu sprites have independent source framing.
+      // Estimate the mounted footprint rather than drawing the full crop.
+      const module=asset.id.includes('_ub_');
+      const familyFactor=preset.size/52;
+      const mountedSize=preset.size*(module?2.1:.67);
+      const mountedScale=mountedSize/(preset.axis==='height'?sourceHeight:sourceWidth);
+      // User-checked correction: the previous compact baseline needed a
+      // manual 1.49x adjustment. Include it after fitting both dimensions.
+      const fittedScale=Math.min(mountedScale,(module?48:60)*familyFactor/sourceHeight)*1.49;
+      width=sourceWidth*fittedScale*scale;height=sourceHeight*fittedScale*scale;
+    }
     let point=[...preset.point],anchor=[...preset.anchor];
     if(slot==='optic'&&this.catalog.family==='psierra41'){
       const barrel=this.placement(state,'barrel');
@@ -129,11 +184,14 @@ export class WeaponSpriteCompositor{
     if(slot==='underbarrel'&&asset.id.includes('_ub_'))anchor=[.75,.03];
     if(slot==='muzzle'){
         const barrel=this.placement(state,'barrel');if(barrel){
-          if(barrel.registered){
+          const mount=this.barrelMount(state,barrel);
+          if(mount){
+            point=mount.point;
+          }else if(barrel.registered){
             // Registered complete-part sprites use a top-left anchor. Their Y
             // coordinate is not the bore line; retain the recovered weapon bore
             // while attaching X to the visible front edge of the barrel.
-            point=[barrel.bounds[0]+2,this.catalog.profile.placements.muzzle.point[1]];
+            point=[this.catalog.profile.muzzle_right?barrel.bounds[2]-2:barrel.bounds[0]+2,this.catalog.profile.placements.muzzle.point[1]];
           }else{
             const q=rotatedPoint((.02-barrel.anchor[0])*barrel.width,0,barrel.angle);point=[barrel.x+q[0],barrel.y+q[1]];
           }
@@ -156,19 +214,24 @@ export class WeaponSpriteCompositor{
   }
   tinted(asset,color){
     const key=asset.id+color;if(this.tintCache.has(key))return this.tintCache.get(key);
-    const [x,y,r,b]=asset.bbox,c=canvas(r-x,b-y),ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(this.images.get(asset.id),x,y,r-x,b-y,0,0,r-x,b-y);
+    const [x,y,r,b]=asset.bbox,c=canvas(r-x,b-y),ctx=c.getContext('2d',{willReadFrequently:true});
+    ctx.save();
+    if(this.catalog.profile.muzzle_right&&asset.slot==='muzzle'){ctx.translate(c.width,0);ctx.scale(-1,1);}
+    ctx.drawImage(this.images.get(asset.id),x,y,r-x,b-y,0,0,r-x,b-y);ctx.restore();
     const data=ctx.getImageData(0,0,c.width,c.height),rgb=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16));
     for(let i=0;i<data.data.length;i+=4){const l=(data.data[i]+data.data[i+1]+data.data[i+2])/765,shade=.28+.72*l;if(Math.max(data.data[i],data.data[i+1],data.data[i+2])<32)data.data[i+3]=0;for(let k=0;k<3;k++)data.data[i+k]=Math.round(rgb[k]*shade);}
     ctx.putImageData(data,0,0);this.tintCache.set(key,c);return c;
   }
-  drawPart(ctx,p,color){
+  drawPart(ctx,p,color,state){
     const tuning=ASSET_TUNING[p.asset.id]||{},source=this.tinted(p.asset,color),clipTop=clamp(tuning.clipTop||0,0,.95);
     const sy=source.height*clipTop,dy=-p.anchor[1]*p.height+p.height*clipTop;
     if(tuning.whiteTop&&color!=='#FFFFFF'){
       const white=this.tinted(p.asset,'#FFFFFF');
       ctx.drawImage(white,0,0,white.width,sy,-p.anchor[0]*p.width,-p.anchor[1]*p.height,p.width,p.height*clipTop);
     }
-    ctx.drawImage(source,0,sy,source.width,source.height-sy,-p.anchor[0]*p.width,dy,p.width,p.height*(1-clipTop));
+    const mount=p.slot==='barrel'&&state?.parts?.muzzle?this.barrelMount(state,p):null;
+    const cut=mount?.cut||0;
+    ctx.drawImage(source,source.width*cut,sy,source.width*(1-cut),source.height-sy,-p.anchor[0]*p.width+p.width*cut,dy,p.width*(1-cut),p.height*(1-clipTop));
   }
   render(target,state,{guides=false,selectedSlot=null,viewport=null}={}){
     const ctx=target.getContext('2d'),view=viewport||this.viewport(state),scale=target.width/view.width;ctx.clearRect(0,0,target.width,target.height);ctx.save();ctx.scale(scale,scale);ctx.translate(-view.x,-view.y);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
@@ -184,7 +247,18 @@ export class WeaponSpriteCompositor{
         if(this.catalog.family==='xar1'&&slot==='receiver'&&state.parts.underbarrel){
           ctx.beginPath();ctx.rect(-2048,-2048,4096,4096);ctx.rect(122,116,98,76);ctx.rect(220,124,28,68);ctx.clip('evenodd');
         }
-        ctx.translate(p.x,p.y);ctx.rotate(p.angle);this.drawPart(ctx,p,slot==='receiver'||!selected||conversionPart?'#FFFFFF':state.color);ctx.restore();}
+        ctx.translate(p.x,p.y);ctx.rotate(p.angle);
+        const replacementBarrel=state.parts.barrel&&state.parts.barrel!==this.catalog.factory_parts?.barrel;
+        const apexBarrel=this.assets.get(state.parts.apex)?.render_slot==='barrel';
+        if(this.catalog.family==='akilo'&&slot==='receiver'&&(replacementBarrel||apexBarrel)){
+          // The first 55 source pixels are the factory front stub/lug marked
+          // by the user. Clip only this receiver layer in its local coordinates
+          // so replacement barrels remain intact and edits follow scale/rotation.
+          const sourceWidth=p.asset.bbox[2]-p.asset.bbox[0];
+          const cutWidth=p.width*Math.min(55/sourceWidth,1);
+          ctx.beginPath();ctx.rect(-p.anchor[0]*p.width+cutWidth,-p.anchor[1]*p.height,p.width-cutWidth,p.height);ctx.clip();
+        }
+        this.drawPart(ctx,p,slot==='receiver'||!selected||conversionPart?'#FFFFFF':state.color,state);ctx.restore();}
       if(guides){for(const slot of this.order()){const p=this.placement(state,slot);if(!p)continue;const active=slot===selectedSlot;ctx.strokeStyle=active?'#74dfd1':'#93aabd';ctx.lineWidth=1/scale;ctx.setLineDash([3/scale,3/scale]);ctx.strokeRect(p.bounds[0],p.bounds[1],p.bounds[2]-p.bounds[0],p.bounds[3]-p.bounds[1]);ctx.setLineDash([]);ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(p.x,p.y,2/scale,0,Math.PI*2);ctx.fill();}}
       ctx.restore();return {view,scale};
     }
@@ -201,14 +275,14 @@ export class WeaponSpriteCompositor{
       if(tuning.eraseBounds){const [x0,y0,x1,y1]=tuning.eraseBounds;base.fillRect(x0,y0,x1-x0,y1-y0);continue;}
       const mask=this.catalog.profile.masks[slot];if(!mask||!this.placement(state,slot))continue;base.beginPath();mask.forEach(([x,y],i)=>i?base.lineTo(x,y):base.moveTo(x,y));base.closePath();base.fill();
     }
-    for(const slot of this.order()){const p=this.placement(state,slot);if(!p||!this.images.has(p.asset.id))continue;base.save();base.translate(p.x,p.y);base.rotate(p.angle);this.drawPart(base,p,'#FFFFFF');base.restore();}
+    for(const slot of this.order()){const p=this.placement(state,slot);if(!p||!this.images.has(p.asset.id))continue;base.save();base.translate(p.x,p.y);base.rotate(p.angle);this.drawPart(base,p,'#FFFFFF',state);base.restore();}
     base.globalCompositeOperation='source-over';
     // Paint the retained factory weapon first. Replacement sprites are then
     // layered over it, matching the in-game card: the white receiver sits
     // behind barrels, handguards and other mounted parts instead of clipping
     // their visible pixels.
     ctx.drawImage(this.baseLayer,0,0);
-    for(const slot of this.order()){const p=this.placement(state,slot);if(!p||!this.images.has(p.asset.id))continue;const conversionPart=String(state.autoParts?.[slot]||'').startsWith('apex:');ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);this.drawPart(ctx,p,slot==='receiver'||conversionPart?'#FFFFFF':state.color);ctx.restore();}
+    for(const slot of this.order()){const p=this.placement(state,slot);if(!p||!this.images.has(p.asset.id))continue;const conversionPart=String(state.autoParts?.[slot]||'').startsWith('apex:');ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);this.drawPart(ctx,p,slot==='receiver'||conversionPart?'#FFFFFF':state.color,state);ctx.restore();}
     if(guides){for(const slot of this.order()){const p=this.placement(state,slot);if(!p)continue;const active=slot===selectedSlot;ctx.strokeStyle=active?'#74dfd1':'#93aabd';ctx.lineWidth=1/scale;ctx.setLineDash([3/scale,3/scale]);ctx.strokeRect(p.bounds[0],p.bounds[1],p.bounds[2]-p.bounds[0],p.bounds[3]-p.bounds[1]);ctx.setLineDash([]);ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(p.x,p.y,2/scale,0,Math.PI*2);ctx.fill();}}
     ctx.restore();return {view,scale};
   }

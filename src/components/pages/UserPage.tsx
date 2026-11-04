@@ -171,7 +171,7 @@ export function UserPage() {
           return {
             gameId,
             loadouts: (loadoutsRes.loadouts ?? []).filter(
-              (l: Loadout) => l.userId === userId,
+              (l: Loadout) => l.userId === userId && l.contentType !== "full_loadout",
             ),
             catalog: {
               weapons: weaponsRes.weapons ?? [],
@@ -213,7 +213,7 @@ export function UserPage() {
     const dataUrl = await generateBrandedQRPng(
       profileUrl,
       240,
-      "Scan the QR to see all my loadouts",
+      "Scan the QR to see all my weapon configs",
     );
     const a = document.createElement("a");
     a.href = dataUrl;
@@ -327,7 +327,7 @@ export function UserPage() {
           />
           <div className="flex-1 min-w-[200px] flex flex-col gap-3">
             <h3 className="text-[12px] tracking-[0.5px] uppercase  font-medium">
-              Scan the QR to see all my loadouts
+              Scan the QR to see all my weapon configs
             </h3>
             <p className="text-[12px] text-[#8d898a] break-all">{profileUrl}</p>
             {isOwnProfile && (
@@ -347,14 +347,14 @@ export function UserPage() {
         {/* Loadouts */}
         <div className="flex flex-col gap-4">
           <h2 className="text-[16px]  font-semibold">
-            loadout{loadouts.length !== 1 ? "s" : ""}
+            weapon config{loadouts.length !== 1 ? "s" : ""}
             <span className="text-sm ml-2 inline-flex font-mono h-8 w-8 items-center rounded-full justify-center bg-[#171417] text-teritary ">
               {loadouts.length}{" "}
             </span>
           </h2>
           {loadouts.length === 0 ? (
             <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
-              <p className="text-[#8d898a]">No loadouts published yet.</p>
+              <p className="text-[#8d898a]">No weapon configs published yet.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

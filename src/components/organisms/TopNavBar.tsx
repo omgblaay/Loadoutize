@@ -202,7 +202,7 @@ export function TopNavBar({
                   <DialogHeader>
                     <DialogTitle>Log out?</DialogTitle>
                     <DialogDescription>
-                      You'll need to sign back in to create or edit loadouts.
+                      You'll need to sign back in to create or edit weapon configs.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>

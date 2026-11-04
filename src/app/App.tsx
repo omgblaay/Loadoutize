@@ -7,6 +7,7 @@ import { CookieConsent } from "@/components/organisms/CookieConsent";
 import { Toaster } from "@/components/molecules/Toaster";
 import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "@/lib/games";
 import { explorePath } from "@/lib/routes";
+import { FULL_LOADOUTS_ENABLED } from "@/lib/contentVisibility";
 
 // ComponentTest.tsx is gitignored (a local-only scratch/preview page) -- a
 // normal static import of it breaks the build anywhere the file doesn't
@@ -87,6 +88,7 @@ function LegacyExploreRedirect() {
 // working instead of 404ing.
 function LegacyLoadoutRedirect() {
   const { gameId, loadoutId } = useParams();
+  if (!FULL_LOADOUTS_ENABLED) return <Navigate to={explorePath(gameId)} replace />;
   return <Navigate to={`/${gameId}/l/${loadoutId}`} replace />;
 }
 
@@ -255,7 +257,7 @@ export default function App() {
             path="/:gameId/l/:loadoutId"
             element={
               <GameLock>
-                <LoadoutPreview />
+                {FULL_LOADOUTS_ENABLED ? <LoadoutPreview /> : <Navigate to="/explore" replace />}
               </GameLock>
             }
           />

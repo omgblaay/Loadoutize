@@ -339,7 +339,7 @@ export function MetaView() {
             </h1>
             <p className="mt-2 max-w-2xl leading-6 text-teritary">
               See which weapons rise to the top, how often they appear, and the
-              attachments players trust most. Updated from published loadouts
+              attachments players trust most. Updated from published weapon configs.
             </p>
           </div>
         </div>
@@ -400,24 +400,6 @@ export function MetaView() {
                   >
                     {selectedTag.name}
                   </strong>
-                  <span
-                    role="button"
-                    aria-label="Clear playstyle filter"
-                    className="flex size-5 items-center justify-center text-destructive hover:text-red-600"
-                    onPointerDown={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                    }}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      setSelectedTagId(null);
-                      setOpenScopeMenu(null);
-                      selectScope("all");
-                    }}
-                  >
-                    ×
-                  </span>
                 </>
               )}
               <ChevronDown
@@ -456,6 +438,20 @@ export function MetaView() {
             })}
           </DropdownMenuContent>
         </DropdownMenu>
+        {scope === "tag" && selectedTag && (
+          <button
+            type="button"
+            aria-label="Clear playstyle filter"
+            className="flex size-9 items-center justify-center rounded-lg text-destructive hover:bg-white/[0.08] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            onClick={() => {
+              setSelectedTagId(null);
+              setOpenScopeMenu(null);
+              selectScope("all");
+            }}
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        )}
 
         <DropdownMenu
           open={openScopeMenu === "category"}
@@ -485,24 +481,6 @@ export function MetaView() {
               {scope === "category" && selectedCategory && (
                 <>
                   <strong className="font-semibold">{selectedCategory}</strong>
-                  <span
-                    role="button"
-                    aria-label="Clear weapon type filter"
-                    className="flex size-5 items-center justify-center text-destructive hover:text-red-600"
-                    onPointerDown={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                    }}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      setSelectedCategory(null);
-                      setOpenScopeMenu(null);
-                      selectScope("all");
-                    }}
-                  >
-                    ×
-                  </span>
                 </>
               )}
               <ChevronDown
@@ -542,6 +520,20 @@ export function MetaView() {
             })}
           </DropdownMenuContent>
         </DropdownMenu>
+        {scope === "category" && selectedCategory && (
+          <button
+            type="button"
+            aria-label="Clear weapon type filter"
+            className="flex size-9 items-center justify-center rounded-lg text-destructive hover:bg-white/[0.08] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            onClick={() => {
+              setSelectedCategory(null);
+              setOpenScopeMenu(null);
+              selectScope("all");
+            }}
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        )}
       </div>
 
       {error ? (
@@ -555,7 +547,7 @@ export function MetaView() {
         </div>
       ) : scopedLoadouts.length === 0 ? (
         <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-12 text-center text-secondary">
-          No published loadouts match this view yet.
+          No published weapon configs match this view yet.
         </div>
       ) : (
         <>

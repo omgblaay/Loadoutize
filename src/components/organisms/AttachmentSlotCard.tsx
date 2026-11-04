@@ -2,6 +2,8 @@ import { ChevronRight, Paperclip } from "lucide-react";
 import type { MetaAttachment } from "@/hooks/useMetaData";
 import { ratingTier } from "@/lib/metaMetrics";
 import { cn } from "@/lib/utils";
+import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
+import { attachmentDisplayName } from "@/lib/attachmentPresentation";
 
 const RANK_MEDALS = ["#1", "#2", "#3"];
 
@@ -35,7 +37,9 @@ export function AttachmentSlotCard({
   const slotHeader = (
     <>
       <span className="flex size-6 shrink-0 items-center justify-center">
-        {slot.typeImageUrl ? (
+        {slot.type === "APEX" ? (
+          <AttachmentIcon attachment={{ name: "APEX", type: "APEX" }} className="size-4" />
+        ) : slot.typeImageUrl ? (
           <img
             src={slot.typeImageUrl}
             alt=""
@@ -91,17 +95,9 @@ export function AttachmentSlotCard({
                 >
                   {RANK_MEDALS[index] ?? `#${index + 1}`}
                 </span>
-                {/* {attachment.imageUrl ? (
-                  <img
-                    src={attachment.imageUrl}
-                    alt=""
-                    className="size-7 shrink-0 object-contain"
-                  />
-                ) : (
-                  <span className="size-7 shrink-0" />
-                )} */}
+                <AttachmentIcon attachment={attachment} className="size-7" />
                 <span className="min-w-0 flex-1 truncate text-sm text-secondary">
-                  {attachment.name}
+                  {attachmentDisplayName(attachment)}
                 </span>
                 <span className="shrink-0 text-right">
                   <span className="block font-mono text-xs text-[#fafafa]">

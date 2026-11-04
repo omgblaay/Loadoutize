@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
 import { ROLE_TAG_META, ROLE_TAG_ORDER, type RoleTag } from "@/lib/roles";
 import { CompactPageHeader } from "@/components/molecules/CompactPageHeader";
+import { isVisibleConfig } from "@/lib/contentVisibility";
 import {
   SOCIAL_LINK_FIELDS,
   type SocialLinks,
@@ -19,6 +20,7 @@ import {
 } from "@/lib/social";
 
 interface LoadoutSummary {
+  contentType?: string | null;
   userId: string;
   authorNickname: string | null;
   authorAvatarUrl: string | null;
@@ -200,7 +202,7 @@ export function CommunityView() {
         return response.json();
       })
       .then(async (data) => {
-        const nextLoadouts = (data.loadouts ?? []) as LoadoutSummary[];
+        const nextLoadouts = ((data.loadouts ?? []) as LoadoutSummary[]).filter(isVisibleConfig);
         try {
           return await hydrateLoadoutAuthors(nextLoadouts);
         } catch (error) {
@@ -375,7 +377,7 @@ export function CommunityView() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <Tag>{ROLE_TAG_META[member.roleTag].label}</Tag>
                   <span className="text-[12px] text-[#8d898a] font-mono inline-flex items-center h-6 px-2 rounded-full bg-[#171417]">
-                    {member.loadoutCount} loadout
+                    {member.loadoutCount} config
                     {member.loadoutCount !== 1 ? "s" : ""}
                   </span>
                 </div>

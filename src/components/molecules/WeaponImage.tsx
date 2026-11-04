@@ -4,15 +4,17 @@ import { AppTooltip } from "@/components/atoms/Tooltip";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { WeaponSpriteCanvas } from "@/components/molecules/WeaponSpriteCanvas";
 import { getWeaponPreviewRef } from "@/lib/weaponSpritePreview";
+import { Puzzle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 export interface WeaponImageBadge {
   key: string;
+  assetId?: string;
   /** attachment_types.slug for the equipped attachment, used to place the badge. */
   typeSlug: string;
   label: string;
   iconUrl?: string | null;
-
+  isApex?: boolean;
 }
 
 const BADGE_SIZE_CLASSES: Record<"small" | "large" | "default", string> = {
@@ -61,7 +63,7 @@ export function WeaponImage({
     enableSpritePreview && getWeaponPreviewRef(weaponId),
   );
   const spriteAttachmentKey =
-    badges?.map((badge) => `${badge.typeSlug}:${badge.label}`).join("|") ?? "";
+    badges?.map((badge) => `${badge.typeSlug}:${badge.assetId ?? badge.label}`).join("|") ?? "";
   const markSpriteReady = useCallback(() => setSpriteReady(true), []);
   const markSpriteUnavailable = useCallback(() => setSpriteReady(false), []);
 
@@ -163,7 +165,9 @@ export function WeaponImage({
                   ].join(" ")}
                   style={{ left: `${position.x}%`, top: `${position.y}%` }}
                 >
-                  {badge.iconUrl ? (
+                  {badge.isApex ? (
+                    <Puzzle aria-hidden="true" className="size-5 text-white/80" />
+                  ) : badge.iconUrl ? (
                     <img src={badge.iconUrl} alt={badge.label} loading="lazy" decoding="async" className="w-full h-full object-contain p-1" />
                   ) : (
                     <span className="text-[9px] font-semibold text-white/70 leading-none">

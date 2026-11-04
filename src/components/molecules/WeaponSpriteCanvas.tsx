@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import {
-  choosePreviewAsset,
+  createPreviewBuild,
   getWeaponPreviewRef,
   resolveCatalogAssetUrls,
   type SpriteLibrary,
@@ -12,16 +12,23 @@ import {
 } from "@/lib/weaponSpriteCompositor.js";
 
 const CATALOG_URL = "/weapon-preview/weapon-builder/catalog.json";
+const PLACEMENTS_URL = "/weapon-preview/weapon-builder/placement-overrides.json";
 
-let libraryPromise: Promise<SpriteLibrary> | null = null;
+type PlacementOverrides = Record<string, Record<string, { dx: number; dy: number; scale: number }>>;
+let libraryPromise: Promise<{ library: SpriteLibrary; placements: PlacementOverrides }> | null = null;
 
 function loadLibrary() {
-  libraryPromise ??= fetch(CATALOG_URL)
-    .then((response) => {
-      if (!response.ok) throw new Error("Weapon preview catalog is unavailable.");
-      return response.json() as Promise<SpriteLibrary>;
-    })
-    .then((library) => resolveCatalogAssetUrls(library, CATALOG_URL));
+  libraryPromise ??= Promise.all([fetch(CATALOG_URL), fetch(PLACEMENTS_URL)])
+    .then(async ([catalogResponse, placementsResponse]) => {
+      if (!catalogResponse.ok || !placementsResponse.ok) {
+        throw new Error("Weapon preview calibration is unavailable.");
+      }
+      const [catalog, placements] = await Promise.all([
+        catalogResponse.json() as Promise<SpriteLibrary>,
+        placementsResponse.json() as Promise<PlacementOverrides>,
+      ]);
+      return { library: resolveCatalogAssetUrls(catalog, CATALOG_URL), placements };
+    });
   return libraryPromise;
 }
 
@@ -40,7 +47,7 @@ export function WeaponSpriteCanvas({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const attachmentKey = useMemo(
-    () => attachments.map((item) => `${item.typeSlug}:${item.label}`).join("|"),
+    () => attachments.map((item) => `${item.typeSlug}:${item.assetId ?? item.label}`).join("|"),
     [attachments],
   );
 
@@ -56,7 +63,7 @@ export function WeaponSpriteCanvas({
     onError();
 
     void loadLibrary()
-      .then(async (library) => {
+      .then(async ({ library, placements }) => {
         const weapon = library.weapons.find((item) => item.id === previewRef);
         if (!weapon) throw new Error(`Missing sprite recipe for ${previewRef}.`);
 
@@ -65,12 +72,12 @@ export function WeaponSpriteCanvas({
           ...weapon,
           weapon: weapon.id,
           assets: library.assets,
+          placement_overrides: placements[weapon.id] ?? {},
         };
-        const state = factoryBuild(catalog);
-        for (const attachment of attachments) {
-          const asset = choosePreviewAsset(weapon, library.assets, attachment);
-          if (asset) state.parts[asset.slot] = asset.id;
-        }
+        const state = {
+          ...factoryBuild(catalog),
+          ...createPreviewBuild(weapon, library.assets, attachments),
+        };
 
         const renderer = new WeaponSpriteCompositor(catalog);
         await renderer.load(state);

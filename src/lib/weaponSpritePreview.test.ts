@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   choosePreviewAsset,
+  createPreviewBuild,
   getWeaponPreviewRef,
   normalizePreviewSlot,
   type SpriteAsset,
@@ -41,9 +42,10 @@ const assets: SpriteAsset[] = [
 ];
 
 describe("weapon sprite preview mapping", () => {
-  it("only enables verified app weapon mappings", () => {
+  it("resolves imported MW4 weapon IDs and legacy aliases", () => {
     expect(getWeaponPreviewRef("m4")).toBe("rex_ar_mike4");
     expect(getWeaponPreviewRef("ISO")).toBe("rex_sm_spier9");
+    expect(getWeaponPreviewRef("rex_ar_akilo")).toBe("rex_ar_akilo");
     expect(getWeaponPreviewRef("unmapped")).toBeNull();
   });
 
@@ -61,5 +63,33 @@ describe("weapon sprite preview mapping", () => {
     expect(choosePreviewAsset(weapon, assets, attachment)?.id).toBe(
       "family-barrel",
     );
+  });
+
+  it("uses the selected asset ID even when its display label differs", () => {
+    expect(choosePreviewAsset(weapon, assets, {
+      typeSlug: "barrel",
+      label: "Official display name",
+      assetId: "family-barrel",
+    })?.id).toBe("family-barrel");
+  });
+
+  it("applies APEX dependencies and its linked receiver", () => {
+    const conversion: SpriteAsset = {
+      id: "apex-pdw", slot: "apex", src: "apex.png", families: ["mike4"],
+      composable: false, receiver_variant: "receiver-pdw",
+      dependencies: { magazine: "magazine-pdw" }, locked_slots: ["barrel"],
+    };
+    const build = createPreviewBuild(
+      { ...weapon, assets: ["apex-pdw", "receiver-pdw", "magazine-pdw"],
+        component_base: true, factory_parts: { receiver: "receiver-factory" } },
+      [conversion,
+        { id: "receiver-pdw", slot: "receiver", src: "receiver.png", families: ["mike4"] },
+        { id: "magazine-pdw", slot: "magazine", src: "magazine.png", families: ["mike4"] },
+        { id: "barrel-old", slot: "barrel", src: "barrel.png", families: ["mike4"] }],
+      [{ typeSlug: "barrel", label: "Old barrel", assetId: "barrel-old" },
+        { typeSlug: "apex", label: "PDW conversion", assetId: "apex-pdw" }],
+    );
+    expect(build.parts).toEqual({ apex: "apex-pdw", magazine: "magazine-pdw", receiver: "receiver-pdw" });
+    expect(build.autoParts.magazine).toBe("apex:apex-pdw");
   });
 });

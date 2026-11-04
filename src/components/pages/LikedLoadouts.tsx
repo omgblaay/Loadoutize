@@ -125,7 +125,7 @@ function LikedLoadoutsSkeleton() {
 }
 
 export function LikedLoadouts() {
-  usePageTitle("Liked Loadouts • Loadoutize");
+  usePageTitle("Liked Weapon Configs • Loadoutize");
 
   const navigate = useNavigate();
   const { user, accessToken, loading: authLoading } = useAuth();
@@ -166,7 +166,7 @@ export function LikedLoadouts() {
           ]);
           return {
             gameId,
-            loadouts: ((loadoutsRes.loadouts ?? []) as Loadout[]).filter((l) => l.liked),
+            loadouts: ((loadoutsRes.loadouts ?? []) as Loadout[]).filter((l) => l.liked && l.contentType !== "full_loadout"),
             catalog: {
               weapons: weaponsRes.weapons ?? [],
               attachments: attachmentsRes.attachments ?? [],
@@ -204,10 +204,10 @@ export function LikedLoadouts() {
   return (
     <AppLayout selectedGame={LOCKED_GAME_ID} onGameSelect={(id) => navigate(explorePath(id))}>
       <div className="flex flex-col gap-4">
-        <h1 className="text-[24px] leading-[32px] text-[#efedf1] font-semibold">Liked Loadouts</h1>
+        <h1 className="text-[24px] leading-[32px] text-[#efedf1] font-semibold">Liked Weapon Configs</h1>
         {loadouts.length === 0 ? (
           <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
-            <p className="text-[#8d898a]">You haven't liked any loadouts yet.</p>
+            <p className="text-[#8d898a]">You haven't liked any weapon configs yet.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-10">
@@ -225,7 +225,7 @@ export function LikedLoadouts() {
                         <span className="font-mono text-2xl leading-none text-[#efedf1]">{day.dayNumber}</span>
                         <h3 className="text-sm font-medium capitalize text-[#8d898a]">{day.weekday}</h3>
                         <span className="text-xs font-mono text-teritary">
-                          {day.loadouts.length} loadout{day.loadouts.length === 1 ? "" : "s"}
+                          {day.loadouts.length} config{day.loadouts.length === 1 ? "" : "s"}
                         </span>
                       </div>
 
