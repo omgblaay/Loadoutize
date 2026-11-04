@@ -68,6 +68,7 @@ import {
   type SocialStats,
 } from "@/lib/social";
 import { explorePath } from "@/lib/routes";
+import { isVisibleConfig } from "@/lib/contentVisibility";
 import { ExternalLink } from "lucide-react";
 import {
   Edit,
@@ -422,7 +423,7 @@ export function LoadoutPreview() {
       );
       const data = await response.json();
       const found = data.loadouts?.find((l: any) => l.id === loadoutId);
-      if (found) setLoadout(found);
+      if (found && isVisibleConfig(found)) setLoadout(found);
     } catch (error) {
       console.error("Error fetching loadout:", error);
     } finally {
@@ -560,9 +561,11 @@ export function LoadoutPreview() {
       const attachment = attachmentIndex.get(`${slot}:${value}`);
       return {
         key: slot,
+        assetId: attachment?.stats?.assetId,
         typeSlug: attachment?.typeSlug || slot,
-        label: value,
-        iconUrl: attachment?.imageUrl ?? null,
+        label: attachment?.stats?.displayName ?? value,
+        iconUrl: attachment?.imageUrl ?? attachment?.stats?.imagePath ?? null,
+        isApex: slot.toLowerCase() === "apex",
       } satisfies WeaponImageBadge;
     });
   }, [primaryWeapon, attachmentIndex]);
@@ -574,9 +577,11 @@ export function LoadoutPreview() {
       const attachment = attachmentIndex.get(`${slot}:${value}`);
       return {
         key: slot,
+        assetId: attachment?.stats?.assetId,
         typeSlug: attachment?.typeSlug || slot,
-        label: value,
-        iconUrl: attachment?.imageUrl ?? null,
+        label: attachment?.stats?.displayName ?? value,
+        iconUrl: attachment?.imageUrl ?? attachment?.stats?.imagePath ?? null,
+        isApex: slot.toLowerCase() === "apex",
       } satisfies WeaponImageBadge;
     });
   }, [secondaryWeapon, attachmentIndex]);
@@ -616,9 +621,11 @@ export function LoadoutPreview() {
       if (!attachment) return null;
       return {
         key: slot,
+        assetId: attachment.stats?.assetId,
         typeSlug: attachment.typeSlug || slot,
-        label: attachment.name,
-        iconUrl: attachment.imageUrl,
+        label: attachment.stats?.displayName ?? attachment.name,
+        iconUrl: attachment.imageUrl ?? attachment.stats?.imagePath,
+        isApex: slot.toLowerCase() === "apex",
       } satisfies WeaponImageBadge;
     })
     .filter((b) => b !== null);
@@ -635,9 +642,11 @@ export function LoadoutPreview() {
       if (!attachment) return null;
       return {
         key: slot,
+        assetId: attachment.stats?.assetId,
         typeSlug: attachment.typeSlug || slot,
-        label: attachment.name,
-        iconUrl: attachment.imageUrl,
+        label: attachment.stats?.displayName ?? attachment.name,
+        iconUrl: attachment.imageUrl ?? attachment.stats?.imagePath,
+        isApex: slot.toLowerCase() === "apex",
       } satisfies WeaponImageBadge;
     })
     .filter((badge) => badge !== null);
@@ -846,6 +855,7 @@ export function LoadoutPreview() {
                 }
                 weaponId={primaryWeapon?.id}
                 badges={primaryWeaponBadges}
+                enableSpritePreview={gameId === "mw4"}
                 activeBadgeKey={activeKey}
                 onBadgeHover={setActiveKey}
               />
@@ -891,14 +901,11 @@ export function LoadoutPreview() {
         ${isActive ? "bg-white/[0.06]" : "hover:bg-white/[0.03]"}`}
                 >
                   <div className="w-6 h-6 flex items-center justify-center shrink-0 overflow-hidden">
-                    {att.iconUrl && (
-                      <img
-                        src={att.iconUrl}
-                        alt=""
-                        className={`w-full h-full object-contain transition-opacity duration-150
-              ${isActive ? "opacity-100" : "opacity-50"}`}
-                      />
-                    )}
+                    {att.isApex ? (
+                      <Puzzle aria-hidden="true" className="size-5 text-white/70" />
+                    ) : att.iconUrl ? (
+                      <img src={att.iconUrl} alt="" className="size-full object-contain" />
+                    ) : null}
                   </div>
                   <span className="font-medium">{att.label}</span>
                   <span className="text-white/20">•</span>
@@ -984,6 +991,7 @@ export function LoadoutPreview() {
                       imageUrl={secondaryWeaponCatalog.imageUrl}
                       weaponId={secondaryWeapon.id}
                       badges={secondaryWeaponBadges}
+                      enableSpritePreview={gameId === "mw4"}
                       activeBadgeKey={
                         activeKey?.startsWith("secondary:")
                           ? activeKey.slice("secondary:".length)
@@ -1015,16 +1023,11 @@ export function LoadoutPreview() {
                         )}
                       >
                         <div className="flex size-6 shrink-0 items-center justify-center overflow-hidden">
-                          {attachment.iconUrl && (
-                            <img
-                              src={attachment.iconUrl}
-                              alt=""
-                              className={cn(
-                                "size-full object-contain transition-opacity duration-150",
-                                isActive ? "opacity-100" : "opacity-50",
-                              )}
-                            />
-                          )}
+                          {attachment.isApex ? (
+                            <Puzzle aria-hidden="true" className="size-5 text-white/70" />
+                          ) : attachment.iconUrl ? (
+                            <img src={attachment.iconUrl} alt="" className="size-full object-contain" />
+                          ) : null}
                         </div>
                         <span className="font-medium">{attachment.label}</span>
                         <span className="text-white/20">•</span>
@@ -1324,6 +1327,7 @@ export function LoadoutPreview() {
                           alt={catalogWeapon.name}
                           weaponId={weapon.id}
                           variant="small"
+                          enableSpritePreview={gameId === "mw4"}
                         />
                       </div>
                       <p className="font-mono text-sm uppercase">

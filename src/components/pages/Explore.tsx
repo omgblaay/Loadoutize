@@ -8,6 +8,7 @@ import {
   LOCKED_GAME_ID,
 } from "@/lib/games";
 import { explorePath, loadoutPath } from "@/lib/routes";
+import { isVisibleConfig } from "@/lib/contentVisibility";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "@/components/templates/AppLayout";
 import { useGameName } from "@/hooks/useGameName";
@@ -124,9 +125,6 @@ export function Explore() {
   const [weaponQuery, setWeaponQuery] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("rating");
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
-  const [contentType, setContentType] = useState<
-    "all" | "full_loadout" | "weapon_config"
-  >("all");
 
   useEffect(() => {
     const categoryParam = searchParams.get("category");
@@ -152,7 +150,7 @@ export function Explore() {
       },
     )
       .then((r) => r.json())
-      .then((data) => setLoadouts(data.loadouts ?? []))
+      .then((data) => setLoadouts((data.loadouts ?? []).filter(isVisibleConfig)))
       .catch((error) => console.error("Error fetching loadouts:", error))
       .finally(() => setLoading(false));
 
@@ -211,11 +209,6 @@ export function Explore() {
     );
 
   const filtered = loadouts.filter((l) => {
-    if (
-      contentType !== "all" &&
-      (l.contentType ?? "weapon_config") !== contentType
-    )
-      return false;
     if (activeWeaponId) {
       const matchesWeapon = (l.weapons ?? []).some(
         (weapon: any) => weapon?.id === activeWeaponId,
@@ -366,36 +359,6 @@ export function Explore() {
           </span>
         }
       />
-
-      {/* Filter / sort row */}
-      <div
-        role="group"
-        aria-label="Loadout type"
-        className="flex w-fit rounded-xl bg-[#1c191b] p-1"
-      >
-        {(
-          [
-            { id: "all", label: "All" },
-            { id: "full_loadout", label: "Full loadouts" },
-            { id: "weapon_config", label: "Weapon configs" },
-          ] as const
-        ).map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            aria-pressed={contentType === option.id}
-            onClick={() => setContentType(option.id)}
-            className={cn(
-              "h-9 rounded-lg px-3.5 text-sm transition-colors",
-              contentType === option.id
-                ? "bg-[#fafafa] text-[#0c0b0b]"
-                : "text-secondary hover:text-white",
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
 
       <div className="flex items-center gap-3 w-full flex-wrap">
         <div className="flex-1 flex items-center gap-3 flex-wrap min-w-0">
@@ -694,8 +657,8 @@ export function Explore() {
         <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
           <p className="text-[#8d898a]">
             {loadouts.length === 0
-              ? `No loadouts published for ${gameName} yet. Be the first to create one!`
-              : "No loadouts match your filters."}
+              ? `No weapon configs published for ${gameName} yet. Be the first to create one!`
+              : "No weapon configs match your filters."}
           </p>
           {hasActiveFilters && (
             <button onClick={clearFilters} className="mt-3 text-[14px] ">

@@ -675,6 +675,12 @@ app.get("/make-server-6db475c7/games/:gameId/weapons", async (c) => {
     const categoryById = new Map((categoryRows ?? []).map((cat: any) => [cat.id, cat]));
 
     const urlById = await resolveImageUrls((data ?? []).map((w: any) => w.image));
+    const sharedWeaponPreview: Record<string, string> = {
+      rex_me_diveknife: 'rex_knifestab',
+      rex_me_tacknifea: 'rex_knifestab',
+      rex_me_fists: 'rex_me_climbfists',
+      rex_me_swimfists: 'rex_me_climbfists',
+    };
     const weapons = (data ?? []).map((w: any) => {
       const category = categoryById.get(w.weapon_category?.key);
       return {
@@ -683,7 +689,11 @@ app.get("/make-server-6db475c7/games/:gameId/weapons", async (c) => {
         type: category?.name ?? null,
         typeShort: category?.short_version ?? null,
         categoryId: category?.id ?? null,
-        imageUrl: w.image ? urlById.get(w.image) ?? null : null,
+        imageUrl: w.image
+          ? urlById.get(w.image) ?? null
+          : gameId === 'mw4'
+            ? `/weapon-preview/mw4-weapon-previews/images/${sharedWeaponPreview[w.id] ?? w.id}.png`
+            : null,
       };
     });
     return c.json({ weapons });
@@ -703,14 +713,17 @@ app.get("/make-server-6db475c7/games/:gameId/attachments", async (c) => {
     if (error) throw error;
 
     const urlById = await resolveImageUrls((data ?? []).flatMap((a: any) => [a.image, a.type_image]));
-    const attachments = (data ?? []).map((a: any) => ({
+    const attachments = (data ?? [])
+      .filter((a: any) => a.stats?.composable !== false)
+      .map((a: any) => ({
       id: a.id,
       name: a.name,
       description: a.description,
       stats: a.stats,
       type: a.type_name,
       typeSlug: a.type_slug,
-      imageUrl: a.image ? urlById.get(a.image) ?? null : null,
+      imageUrl: a.image ? urlById.get(a.image) ?? null : a.stats?.imagePath ?? null,
+      weaponIds: a.stats?.weaponIds ?? null,
       typeImageUrl: a.type_image ? urlById.get(a.type_image) ?? null : null,
     }));
     return c.json({ attachments });
@@ -904,6 +917,17 @@ async function saveLoadoutWeapons(loadoutId: string, gameId: string, weaponsPayl
       .insert(attachmentIds.map((attachment_id) => ({ loadout_weapon_id: lw.id, attachment_id })));
     if (insertAttError) throw insertAttError;
   }
+}
+
+function validateWeaponConfigAttachments(weapons: any[]): string | null {
+  if (weapons.length !== 1) return 'A weapon config requires one weapon';
+  const selected = Object.entries(weapons[0]?.attachments ?? {}).filter(([, name]) => Boolean(name));
+  const standardCount = selected.filter(([type]) => type.trim().toLowerCase() !== 'apex').length;
+  const apexCount = selected.length - standardCount;
+  if (standardCount < 1 || standardCount > 5 || apexCount > 1) {
+    return 'Choose 1–5 standard attachments and optionally one APEX attachment';
+  }
+  return null;
 }
 
 async function saveLoadoutPerks(loadoutId: string, gameId: string, perkNames: string[]) {
@@ -1396,6 +1420,9 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
 
     const gameId = c.req.param("gameId");
     const body = await c.req.json();
+    if (body.contentType === 'full_loadout') {
+      return c.json({ error: 'Full loadouts are temporarily unavailable' }, 400);
+    }
     const contentType = body.contentType === 'full_loadout'
       ? 'full_loadout'
       : 'weapon_config';
@@ -1404,6 +1431,8 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
           (weapon.slot ?? (index === 0 ? 'primary' : null)) === 'primary'
         ).slice(0, 1)
       : body.weapons ?? [];
+    const attachmentError = validateWeaponConfigAttachments(weapons);
+    if (attachmentError) return c.json({ error: attachmentError }, 400);
 
     if (!(await verifyRecaptcha(body.recaptchaToken, "create_loadout"))) {
       return c.json({ error: "reCAPTCHA verification failed -- please try again" }, 400);
@@ -1461,6 +1490,9 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
     const gameId = c.req.param("gameId");
     const loadoutId = c.req.param("loadoutId");
     const body = await c.req.json();
+    if (body.contentType === 'full_loadout') {
+      return c.json({ error: 'Full loadouts are temporarily unavailable' }, 400);
+    }
     const contentType = body.contentType === 'full_loadout'
       ? 'full_loadout'
       : 'weapon_config';
@@ -1469,6 +1501,8 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
           (weapon.slot ?? (index === 0 ? 'primary' : null)) === 'primary'
         ).slice(0, 1)
       : body.weapons ?? [];
+    const attachmentError = validateWeaponConfigAttachments(weapons);
+    if (attachmentError) return c.json({ error: attachmentError }, 400);
 
     const { data: existing, error: fetchError } = await supabase
       .from('loadouts')

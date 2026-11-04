@@ -18,9 +18,13 @@ export function Loading({
   fullScreen?: boolean;
 }) {
   const content = (
-    <div className={cn("flex flex-col items-center justify-center gap-3", className)}>
+    <div
+      className={cn("flex flex-col items-center justify-center gap-3", className)}
+      role={label ? "status" : undefined}
+      aria-live={label ? "polite" : undefined}
+    >
       <div style={{ width: size, height: size }}>
-        <React.Suspense fallback={null}>
+        <React.Suspense fallback={<div className="size-full animate-pulse rounded-full bg-white/[0.06]" aria-hidden="true" />}>
           <LoaderScene3D />
         </React.Suspense>
       </div>

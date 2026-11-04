@@ -17,14 +17,11 @@ import { HomeExplorePreview } from "@/components/organisms/HomeExplorePreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
-import { Countdown } from "@/components/molecules/Countdown";
 import { Button } from "@/components/atoms/Button";
 import { NavIcon } from "@/components/atoms/NavIcon";
 import gameLogo from "figma:asset/mw4_logo.png";
 import { explorePath } from "@/lib/routes";
-
-// Oct 23, 2026, 12:00 AM EDT (UTC-4)
-const MW4_RELEASE_DATE = new Date("2026-10-23T04:00:00Z");
+import { isVisibleConfig } from "@/lib/contentVisibility";
 
 interface Game {
   id: string;
@@ -81,7 +78,7 @@ function HomeSkeleton() {
 }
 
 export function Home() {
-  usePageTitle("Loadoutize • Build, Rate, and Share Elite Loadouts");
+  usePageTitle("Loadoutize • Build, Rate, and Share Weapon Configs");
 
   const [games, setGames] = useState<Game[]>([]);
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
@@ -92,6 +89,7 @@ export function Home() {
     GAME_SELECTOR_ENABLED ? "" : LOCKED_GAME_ID,
   );
   const [loading, setLoading] = useState(true);
+  const [loadoutsError, setLoadoutsError] = useState(false);
   const [exploreCtaHovered, setExploreCtaHovered] = useState(false);
   const [hoveredAction, setHoveredAction] = useState<
     "explore" | "meta" | "create" | null
@@ -159,18 +157,24 @@ export function Home() {
   }, [selectedGame]);
 
   const fetchLoadouts = async (gameIds: string[]) => {
+    setLoading(true);
+    setLoadoutsError(false);
     try {
       const results = await Promise.all(
         gameIds.map((gameId) =>
           fetch(
             `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/loadouts`,
             { headers: { Authorization: `Bearer ${publicAnonKey}` } },
-          ).then((r) => r.json()),
+          ).then((r) => {
+            if (!r.ok) throw new Error(`Loadouts request failed: ${r.status}`);
+            return r.json();
+          }),
         ),
       );
-      setLoadouts(results.flatMap((data) => data.loadouts ?? []));
+      setLoadouts(results.flatMap((data) => data.loadouts ?? []).filter(isVisibleConfig));
     } catch (error) {
       console.error("Error fetching loadouts:", error);
+      setLoadoutsError(true);
     } finally {
       setLoading(false);
     }
@@ -231,8 +235,8 @@ export function Home() {
 
   return (
     <AppLayout selectedGame={selectedGame} onGameSelect={setSelectedGame}>
-      <section className="relative overflow-hidden lg:min-h-[350px]">
-        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.9fr)] lg:gap-12">
+      <section className="relative overflow-hidden py-8 sm:py-12">
+        <div className="max-w-3xl">
           <div className="flex min-w-0 flex-col items-start">
             <img
               src={gameLogo}
@@ -240,25 +244,18 @@ export function Home() {
               className="w-44 object-contain sm:w-52"
             />
             <h1 className="mt-10 text-[clamp(1.2rem,4.5vw,4rem)] leading-[0.92] uppercase tracking-[-0.04em]">
-              LOADOUTS DRIVEN BY COMMUNITY
+              WEAPON CONFIGS DRIVEN BY COMMUNITY
             </h1>
             {/* <p className="text-sm uppercase tracking-[0.18em] text-teritary">
               Loadoutize Meta Vault
             </p> */}
             <p className="mt-5 max-w-xl text-base leading-7 text-secondary sm:text-lg">
-              Discover community-built MW4 and Warzone loadouts. Compare ratings
+              Discover community-built MW4 weapon configs. Compare ratings
               and the live meta. Follow creator setups, and share weapon codes
               or downloadable QR codes.
             </p>
           </div>
 
-          {selectedGame === "mw4" && (
-            <Countdown
-              targetDate={MW4_RELEASE_DATE}
-              label="Modern Warfare 4 releases on Friday 23 October 2026"
-              accent={accent}
-            />
-          )}
         </div>
       </section>
 
@@ -294,7 +291,7 @@ export function Home() {
             </div>
             <div className="mt-auto pt-7">
               <p className="text-xl font-semibold text-white">
-                Explore loadouts
+                Explore configs
               </p>
               <p className="mt-2 text-sm leading-6 text-teritary">
                 Find community builds, creator setups, and your next favorite
@@ -359,7 +356,7 @@ export function Home() {
             <div className="mt-auto pt-7">
               <p className="text-xl font-semibold">Create new</p>
               <p className="mt-2 text-sm leading-6 opacity-70">
-                Build a loadout, add your notes, and share it with the
+                Configure a weapon, add your notes, and share it with the
                 community.
               </p>
             </div>
@@ -367,16 +364,29 @@ export function Home() {
         </button>
       </section>
 
-      <HomeExplorePreview
-        selectedGame={selectedGame}
-        loadouts={loadouts}
-        weapons={weapons}
-        attachments={attachments}
-        tags={tags}
-        accent={accent}
-        gameShort={activeShort}
-        gameName={activeName}
-      />
+      {loadoutsError ? (
+        <section role="alert" className="rounded-2xl border border-white/[0.1] bg-white/[0.02] px-6 py-10 text-center">
+          <h2 className="text-xl text-white">Weapon configs are unavailable</h2>
+          <p className="mt-2 text-secondary">We couldn't load community builds. Please try again.</p>
+          <Button
+            className="mt-5"
+            onClick={() => fetchLoadouts(GAME_SELECTOR_ENABLED ? games.map((game) => game.id) : [LOCKED_GAME_ID])}
+          >
+            Try again
+          </Button>
+        </section>
+      ) : (
+        <HomeExplorePreview
+          selectedGame={selectedGame}
+          loadouts={loadouts}
+          weapons={weapons}
+          attachments={attachments}
+          tags={tags}
+          accent={accent}
+          gameShort={activeShort}
+          gameName={activeName}
+        />
+      )}
     </AppLayout>
   );
 }

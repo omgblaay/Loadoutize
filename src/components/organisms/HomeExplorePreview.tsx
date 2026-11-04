@@ -41,7 +41,7 @@ const CREATOR_PLATFORMS = [
   {
     key: "tiktok",
     label: "TikTok",
-    description: "Quick loadouts",
+    description: "Quick weapon configs",
     icon: TiktokIcon,
   },
   {
@@ -283,7 +283,7 @@ export function HomeExplorePreview({
             to={explorePath(selectedGame)}
             className="font-medium hover:text-teritary text-white flex items-center gap-1 shrink-0"
           >
-            <h2 className="text-sm">Top Loadouts</h2>
+            <h2 className="text-sm">Top Weapon Configs</h2>
             <ChevronRight className="size-4" />
           </Link>
         </div>
@@ -308,11 +308,13 @@ export function HomeExplorePreview({
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 flex gap-8 text-center">
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-6 py-10 text-center sm:py-16">
             <p className="text-teritary">
-              No loadouts published yet. Be the first to create one!
+              No weapon configs published yet. Be the first to create one!
             </p>
-            <Button>Create new loadout</Button>
+            <Button onClick={() => navigate(`/${selectedGame}/create`)}>
+              Create weapon config
+            </Button>
           </div>
         )}
       </div>

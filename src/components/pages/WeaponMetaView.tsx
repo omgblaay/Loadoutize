@@ -243,7 +243,7 @@ export function WeaponMetaView() {
               </div>
               <div>
                 <p className="font-mono text-lg ">{weaponLoadouts.length}</p>
-                <p className="text-xs text-teritary">published loadouts</p>
+                <p className="text-xs text-teritary">published configs</p>
               </div>
               <div>
                 <p className="font-mono text-lg ">{ratedLoadouts.length}</p>
@@ -266,6 +266,8 @@ export function WeaponMetaView() {
                 imageUrl={weapon.imageUrl}
                 variant="large"
                 alt={weapon.name}
+                weaponId={weapon.id}
+                enableSpritePreview={gameId === "mw4"}
               />
             </div>
             {weapon.type && (
@@ -281,7 +283,7 @@ export function WeaponMetaView() {
         entityName={weapon.name}
         title="Weapon trends"
         popularityTitle="Weapon popularity"
-        popularityDescription={`New ${weapon.name} loadouts created in this period`}
+        popularityDescription={`New ${weapon.name} configs created in this period`}
       />
       <h2 className="mt-1 text-base font-semibold">Top attachments by slot</h2>
       {attachmentSlots.length > 0 ? (
@@ -307,7 +309,7 @@ export function WeaponMetaView() {
       {topLoadouts.length > 0 && (
         <section className="">
           <div>
-            <h2 className="mt-4 text-base ">Top {weapon.name} loadouts</h2>
+            <h2 className="mt-4 text-base ">Top {weapon.name} configs</h2>
             <p className="mb-4 text-base text-teritary">
               Highest-rated community builds using this weapon.
             </p>

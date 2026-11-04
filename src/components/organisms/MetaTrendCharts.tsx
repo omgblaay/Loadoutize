@@ -123,7 +123,7 @@ function PopularityTooltip({ active, payload }: any) {
     <div className="rounded-xl border border-white/[0.1] bg-[#121011] px-3 py-2 shadow-xl">
       <p className="text-xs text-teritary">{point.fullLabel}</p>
       <p className="mt-1 text-sm font-medium text-[#fafafa]">
-        {point.loadouts} loadout{point.loadouts === 1 ? "" : "s"} created
+        {point.loadouts} config{point.loadouts === 1 ? "" : "s"} created
       </p>
     </div>
   );

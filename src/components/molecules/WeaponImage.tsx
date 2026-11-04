@@ -2,15 +2,19 @@ import { getAttachmentBadgePosition } from "@/lib/weaponAttachmentBadgePositions
 import { getAttachmentHighlightRegion } from "@/lib/weaponAttachmentHighlightRegions";
 import { AppTooltip } from "@/components/atoms/Tooltip";
 import { Skeleton } from "@/components/atoms/Skeleton";
-import { useState } from "react";
+import { WeaponSpriteCanvas } from "@/components/molecules/WeaponSpriteCanvas";
+import { getWeaponPreviewRef } from "@/lib/weaponSpritePreview";
+import { Puzzle } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 export interface WeaponImageBadge {
   key: string;
+  assetId?: string;
   /** attachment_types.slug for the equipped attachment, used to place the badge. */
   typeSlug: string;
   label: string;
   iconUrl?: string | null;
-
+  isApex?: boolean;
 }
 
 const BADGE_SIZE_CLASSES: Record<"small" | "large" | "default", string> = {
@@ -30,6 +34,8 @@ export function WeaponImage({
   onBadgeHover,
   showSkeleton = true,
   loading = false,
+  imageLoading = "eager",
+  enableSpritePreview = false,
 }: {
   imageUrl?: string | null;
   variant?: "small" | "large";
@@ -37,6 +43,9 @@ export function WeaponImage({
   showSkeleton?: boolean;
   /** Keeps the skeleton visible while the parent is still resolving the image URL. */
   loading?: boolean;
+  imageLoading?: "eager" | "lazy";
+  /** Uses the calibrated MW4 sprite compositor when a verified weapon recipe exists. */
+  enableSpritePreview?: boolean;
   alt?: string;
   /** weapons.id, used to look up per-weapon badge position overrides. */
   weaponId?: string;
@@ -49,6 +58,18 @@ export function WeaponImage({
 }) {
   const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
   const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
+  const [spriteReady, setSpriteReady] = useState(false);
+  const spriteSupported = Boolean(
+    enableSpritePreview && getWeaponPreviewRef(weaponId),
+  );
+  const spriteAttachmentKey =
+    badges?.map((badge) => `${badge.typeSlug}:${badge.assetId ?? badge.label}`).join("|") ?? "";
+  const markSpriteReady = useCallback(() => setSpriteReady(true), []);
+  const markSpriteUnavailable = useCallback(() => setSpriteReady(false), []);
+
+  useEffect(() => {
+    setSpriteReady(false);
+  }, [weaponId, spriteAttachmentKey]);
   const isLoading =
     showSkeleton &&
     (loading ||
@@ -80,12 +101,27 @@ export function WeaponImage({
       <img
         src={imageUrl ?? undefined}
         alt={alt}
-        className={`w-full aspect-2/1 transition-opacity duration-200 ${isLoading ? "opacity-0" : "opacity-100"}`}
+        loading={imageLoading}
+        decoding="async"
+        className={`w-full aspect-2/1 transition-opacity duration-200 ${isLoading || spriteReady ? "opacity-0" : "opacity-100"}`}
         onLoad={() => imageUrl && setLoadedImageUrl(imageUrl)}
         onError={() => imageUrl && setFailedImageUrl(imageUrl)}
       // brightness-200 saturate-0
       />
-      {highlightSlugs && highlightSlugs.length > 0 && (
+      {spriteSupported && weaponId && (
+        <div
+          className={`absolute inset-0 transition-opacity duration-200 ${spriteReady ? "opacity-100" : "opacity-0"}`}
+        >
+          <WeaponSpriteCanvas
+            weaponId={weaponId}
+            weaponName={alt}
+            attachments={badges ?? []}
+            onReady={markSpriteReady}
+            onError={markSpriteUnavailable}
+          />
+        </div>
+      )}
+      {!spriteReady && highlightSlugs && highlightSlugs.length > 0 && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {highlightSlugs.map((slug) => {
             const region = getAttachmentHighlightRegion(weaponId, slug);
@@ -106,7 +142,7 @@ export function WeaponImage({
           })}
         </div>
       )}
-      {badges && badges.length > 0 && (
+      {!spriteReady && badges && badges.length > 0 && (
         <div className="absolute inset-0 pointer-events-none">
           {badges.map((badge, index) => {
             const position = getAttachmentBadgePosition(weaponId, badge.typeSlug, index, badges.length);
@@ -129,8 +165,10 @@ export function WeaponImage({
                   ].join(" ")}
                   style={{ left: `${position.x}%`, top: `${position.y}%` }}
                 >
-                  {badge.iconUrl ? (
-                    <img src={badge.iconUrl} alt={badge.label} className="w-full h-full object-contain p-1" />
+                  {badge.isApex ? (
+                    <Puzzle aria-hidden="true" className="size-5 text-white/80" />
+                  ) : badge.iconUrl ? (
+                    <img src={badge.iconUrl} alt={badge.label} loading="lazy" decoding="async" className="w-full h-full object-contain p-1" />
                   ) : (
                     <span className="text-[9px] font-semibold text-white/70 leading-none">
                       {badge.label.slice(0, 2).toUpperCase()}

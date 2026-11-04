@@ -55,6 +55,8 @@ function ShowcaseCard({
         <img
           src={item.imageUrl}
           alt=""
+          loading="lazy"
+          decoding="async"
           className="max-h-full max-w-full object-contain brightness-200 saturate-0 opacity-90"
         />
       </div>

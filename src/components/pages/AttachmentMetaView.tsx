@@ -6,6 +6,8 @@ import { Button } from "@/components/atoms/Button";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { Tag } from "@/components/atoms/Tag";
 import { WeaponImage } from "@/components/molecules/WeaponImage";
+import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
+import { attachmentDisplayName, attachmentImageUrl, isApexAttachment } from "@/lib/attachmentPresentation";
 import { MetaTrendCharts } from "@/components/organisms/MetaTrendCharts";
 import { useMetaData, type MetaWeapon } from "@/hooks/useMetaData";
 import { weaponMetaPath } from "@/lib/routes";
@@ -165,7 +167,11 @@ export function AttachmentMetaView() {
         <div className="relative grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(220px,0.55fr)] md:items-center">
           <div>
             <div className="flex items-center gap-2">
-              {attachment.typeImageUrl ? (
+              {isApexAttachment(attachment) ? (
+                <span className="flex size-9 items-center justify-center rounded-lg bg-white/[0.05]">
+                  <AttachmentIcon attachment={attachment} className="size-5" />
+                </span>
+              ) : attachment.typeImageUrl ? (
                 <span className="flex size-9 items-center justify-center rounded-lg bg-white/[0.05]">
                   <img
                     src={attachment.typeImageUrl}
@@ -181,20 +187,16 @@ export function AttachmentMetaView() {
               <Tag>{attachment.type}</Tag>
             </div>
             <h1 className="mt-4 text-3xl uppercase sm:text-4xl">
-              {attachment.name}
+              {attachmentDisplayName(attachment)}
             </h1>
             <p className="mt-2 text-sm text-teritary">
-              Used in {attachmentLoadouts.length} community loadout
+              Used in {attachmentLoadouts.length} community config
               {attachmentLoadouts.length === 1 ? "" : "s"}
             </p>
           </div>
           <div className="flex absolute left-0 top-0 min-h-36">
-            {attachment.imageUrl ? (
-              <img
-                src={attachment.imageUrl}
-                alt={attachment.name}
-                className="max-h-32 opacity-10 w-full object-contain"
-              />
+            {isApexAttachment(attachment) || attachmentImageUrl(attachment) ? (
+              <AttachmentIcon attachment={attachment} className="size-32 opacity-10" />
             ) : (
               <Paperclip className="size-12 text-white/15" />
             )}
@@ -204,7 +206,7 @@ export function AttachmentMetaView() {
 
       <MetaTrendCharts
         loadouts={attachmentLoadouts}
-        entityName={attachment.name}
+        entityName={attachmentDisplayName(attachment)}
         title="Attachment trends"
         popularityTitle="Attachment popularity"
         popularityDescription=""
@@ -214,7 +216,7 @@ export function AttachmentMetaView() {
         <div>
           <h2 className="text-base font-semibold">Most used on weapons</h2>
           <p className="mt-1 text-sm text-teritary">
-            Ranked by the number of community loadouts using this attachment.
+            Ranked by the number of community configs using this attachment.
           </p>
         </div>
 

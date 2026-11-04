@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { projectId, publicAnonKey } from "../../utils/supabase/info";
+import { isVisibleConfig } from "@/lib/contentVisibility";
 
 export interface MetaWeapon {
   id: string;
@@ -35,6 +36,7 @@ export interface MetaAttachment {
   typeSlug: string;
   typeImageUrl: string | null;
   imageUrl: string | null;
+  stats?: { displayName?: string; imagePath?: string; assetId?: string } | null;
 }
 
 export interface MetaTag {
@@ -99,7 +101,7 @@ export function useMetaData(gameId: string) {
       .then(
         ([loadoutsData, weaponsData, attachmentsData, perksData, tagsData]) => {
           setData({
-            loadouts: loadoutsData.loadouts ?? [],
+            loadouts: (loadoutsData.loadouts ?? []).filter(isVisibleConfig),
             weapons: weaponsData.weapons ?? [],
             attachments: attachmentsData.attachments ?? [],
             perks: perksData.perks ?? [],

@@ -2,24 +2,12 @@ import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from "r
 import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "react-router";
 import { toast } from "sonner";
 import { AuthProvider } from "@/providers/AuthProvider";
-import { Home } from "@/components/pages/Home";
-import { Explore } from "@/components/pages/Explore";
-import { MetaView } from "@/components/pages/MetaView";
-import { CommunityView } from "@/components/pages/CommunityView";
-import { LoadoutBuilder } from "@/components/pages/LoadoutBuilder";
-import { LoadoutPreview } from "@/components/pages/LoadoutPreview";
-import { UserPage } from "@/components/pages/UserPage";
-import { LikedLoadouts } from "@/components/pages/LikedLoadouts";
-import { Settings } from "@/components/pages/Settings";
-import { Join } from "@/components/pages/Join";
-import { AuthCallback } from "@/components/pages/AuthCallback";
-import { PrivacyPolicy } from "@/components/pages/PrivacyPolicy";
-import { TermsOfService } from "@/components/pages/TermsOfService";
 import { NotFound } from "@/components/pages/NotFound";
 import { CookieConsent } from "@/components/organisms/CookieConsent";
 import { Toaster } from "@/components/molecules/Toaster";
 import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "@/lib/games";
 import { explorePath } from "@/lib/routes";
+import { FULL_LOADOUTS_ENABLED } from "@/lib/contentVisibility";
 
 // ComponentTest.tsx is gitignored (a local-only scratch/preview page) -- a
 // normal static import of it breaks the build anywhere the file doesn't
@@ -29,6 +17,19 @@ import { explorePath } from "@/lib/routes";
 const componentTestModules = import.meta.glob<{ ComponentTest: ComponentType }>("../components/pages/ComponentTest.tsx");
 const loadComponentTest = componentTestModules["../components/pages/ComponentTest.tsx"];
 const ComponentTest = loadComponentTest ? lazy(() => loadComponentTest().then((m) => ({ default: m.ComponentTest }))) : null;
+const Home = lazy(() => import("@/components/pages/Home").then((module) => ({ default: module.Home })));
+const Explore = lazy(() => import("@/components/pages/Explore").then((module) => ({ default: module.Explore })));
+const MetaView = lazy(() => import("@/components/pages/MetaView").then((module) => ({ default: module.MetaView })));
+const CommunityView = lazy(() => import("@/components/pages/CommunityView").then((module) => ({ default: module.CommunityView })));
+const LoadoutBuilder = lazy(() => import("@/components/pages/LoadoutBuilder").then((module) => ({ default: module.LoadoutBuilder })));
+const LoadoutPreview = lazy(() => import("@/components/pages/LoadoutPreview").then((module) => ({ default: module.LoadoutPreview })));
+const UserPage = lazy(() => import("@/components/pages/UserPage").then((module) => ({ default: module.UserPage })));
+const LikedLoadouts = lazy(() => import("@/components/pages/LikedLoadouts").then((module) => ({ default: module.LikedLoadouts })));
+const Settings = lazy(() => import("@/components/pages/Settings").then((module) => ({ default: module.Settings })));
+const Join = lazy(() => import("@/components/pages/Join").then((module) => ({ default: module.Join })));
+const AuthCallback = lazy(() => import("@/components/pages/AuthCallback").then((module) => ({ default: module.AuthCallback })));
+const PrivacyPolicy = lazy(() => import("@/components/pages/PrivacyPolicy").then((module) => ({ default: module.PrivacyPolicy })));
+const TermsOfService = lazy(() => import("@/components/pages/TermsOfService").then((module) => ({ default: module.TermsOfService })));
 const WeaponMetaView = lazy(() =>
   import("@/components/pages/WeaponMetaView").then((module) => ({
     default: module.WeaponMetaView,
@@ -61,6 +62,18 @@ function GameRedirect() {
   return <Navigate to={explorePath(target)} replace />;
 }
 
+function RouteLoading() {
+  return (
+    <div
+      className="flex min-h-screen items-center justify-center bg-[#0a0909] px-6 text-center text-sm text-[#bebcbc]"
+      role="status"
+      aria-live="polite"
+    >
+      Loading page…
+    </div>
+  );
+}
+
 function LegacyExploreRedirect() {
   const { gameId } = useParams();
   const location = useLocation();
@@ -75,6 +88,7 @@ function LegacyExploreRedirect() {
 // working instead of 404ing.
 function LegacyLoadoutRedirect() {
   const { gameId, loadoutId } = useParams();
+  if (!FULL_LOADOUTS_ENABLED) return <Navigate to={explorePath(gameId)} replace />;
   return <Navigate to={`/${gameId}/l/${loadoutId}`} replace />;
 }
 
@@ -83,7 +97,7 @@ function LegacyLoadoutRedirect() {
 // doesn't spam it.
 function BetaNotice() {
   useEffect(() => {
-    toast.error("Loadoutize is in beta. Expect rough edges.", {
+    toast.info("Loadoutize is in beta. Expect rough edges.", {
       description: (
         <span className="text-secondary">
           The design is still changing too — spacing, sizes, UX choices and layout will keep shifting.
@@ -98,7 +112,7 @@ function BetaNotice() {
           </a>
         </span>
       ),
-      duration: Infinity,
+      duration: 12000,
       closeButton: true,
     });
   }, []);
@@ -137,7 +151,8 @@ export default function App() {
       <BrowserRouter>
         <ScrollToTop />
         <CookieConsent />
-        <Routes>
+        <Suspense fallback={<RouteLoading />}>
+          <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
@@ -152,9 +167,7 @@ export default function App() {
             <Route
               path="/component-test"
               element={
-                <Suspense fallback={null}>
-                  <ComponentTest />
-                </Suspense>
+                <ComponentTest />
               }
             />
           )}
@@ -172,9 +185,7 @@ export default function App() {
             path="/:gameId/meta/weapons"
             element={
               <GameLock>
-                <Suspense fallback={null}>
-                  <WeaponMetaListView />
-                </Suspense>
+                <WeaponMetaListView />
               </GameLock>
             }
           />
@@ -182,9 +193,7 @@ export default function App() {
             path="/:gameId/meta/weapongroup/:weaponGroup"
             element={
               <GameLock>
-                <Suspense fallback={null}>
-                  <WeaponMetaListView />
-                </Suspense>
+                <WeaponMetaListView />
               </GameLock>
             }
           />
@@ -192,9 +201,7 @@ export default function App() {
             path="/:gameId/meta/weapons/:weaponId"
             element={
               <GameLock>
-                <Suspense fallback={null}>
-                  <WeaponMetaView />
-                </Suspense>
+                <WeaponMetaView />
               </GameLock>
             }
           />
@@ -202,9 +209,7 @@ export default function App() {
             path="/:gameId/meta/attachmentgroup/:attachmentGroup"
             element={
               <GameLock>
-                <Suspense fallback={null}>
-                  <AttachmentMetaListView />
-                </Suspense>
+                <AttachmentMetaListView />
               </GameLock>
             }
           />
@@ -212,9 +217,7 @@ export default function App() {
             path="/:gameId/meta/attachments"
             element={
               <GameLock>
-                <Suspense fallback={null}>
-                  <AttachmentMetaListView />
-                </Suspense>
+                <AttachmentMetaListView />
               </GameLock>
             }
           />
@@ -222,9 +225,7 @@ export default function App() {
             path="/:gameId/meta/attachments/:attachmentId"
             element={
               <GameLock>
-                <Suspense fallback={null}>
-                  <AttachmentMetaView />
-                </Suspense>
+                <AttachmentMetaView />
               </GameLock>
             }
           />
@@ -232,9 +233,7 @@ export default function App() {
             path="/:gameId/meta/perks"
             element={
               <GameLock>
-                <Suspense fallback={null}>
-                  <PerkMetaListView />
-                </Suspense>
+                <PerkMetaListView />
               </GameLock>
             }
           />
@@ -258,7 +257,7 @@ export default function App() {
             path="/:gameId/l/:loadoutId"
             element={
               <GameLock>
-                <LoadoutPreview />
+                {FULL_LOADOUTS_ENABLED ? <LoadoutPreview /> : <Navigate to="/explore" replace />}
               </GameLock>
             }
           />
@@ -272,7 +271,8 @@ export default function App() {
             }
           />
           <Route path="*" element={<NotFound />} />
-        </Routes>
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </AuthProvider>
   );

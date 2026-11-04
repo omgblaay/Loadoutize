@@ -7,6 +7,8 @@ import { Input } from "@/components/atoms/Input";
 import { RatingRing } from "@/components/atoms/RatingRing";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { useMetaData, type MetaAttachment } from "@/hooks/useMetaData";
+import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
+import { attachmentDisplayName } from "@/lib/attachmentPresentation";
 import { MIN_RATING_VOTES } from "@/lib/metaMetrics";
 import {
   attachmentGroupMetaPath,
@@ -98,7 +100,7 @@ export function AttachmentMetaListView() {
         (a, b) =>
           b.count - a.count ||
           (b.avgRating ?? -1) - (a.avgRating ?? -1) ||
-          a.attachment.name.localeCompare(b.attachment.name),
+          attachmentDisplayName(a.attachment).localeCompare(attachmentDisplayName(b.attachment)),
       );
   }, [attachmentGroup, attachments, loadouts]);
 
@@ -106,7 +108,7 @@ export function AttachmentMetaListView() {
     const query = search.trim().toLowerCase();
     if (!query) return attachmentMetrics;
     return attachmentMetrics.filter(({ attachment }) =>
-      [attachment.name, attachment.type].some((value) =>
+      [attachment.name, attachmentDisplayName(attachment), attachment.type].some((value) =>
         value.toLowerCase().includes(query),
       ),
     );
@@ -149,7 +151,9 @@ export function AttachmentMetaListView() {
 
       <header className="flex items-start gap-4">
         <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.03]">
-          {typeImageUrl ? (
+          {attachmentGroup?.toLowerCase() === "apex" ? (
+            <AttachmentIcon attachment={{ name: "APEX", type: "APEX" }} className="size-6" />
+          ) : typeImageUrl ? (
             <img
               src={typeImageUrl}
               alt=""
@@ -232,18 +236,10 @@ export function AttachmentMetaListView() {
                     </span>
                     <span className="flex min-w-0 items-center gap-4">
                       <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-black/20 p-2">
-                        {metric.attachment.imageUrl ? (
-                          <img
-                            src={metric.attachment.imageUrl}
-                            alt=""
-                            className="max-h-full max-w-full object-contain"
-                          />
-                        ) : (
-                          <Paperclip className="size-4 text-white/20" />
-                        )}
+                        <AttachmentIcon attachment={metric.attachment} className="size-8" />
                       </span>
                       <span className="truncate font-mono text-sm uppercase">
-                        {metric.attachment.name}
+                        {attachmentDisplayName(metric.attachment)}
                       </span>
                     </span>
                     <span className="truncate text-sm text-secondary">

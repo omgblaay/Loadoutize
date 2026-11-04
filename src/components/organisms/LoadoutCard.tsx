@@ -16,6 +16,7 @@ import { FireCardEffect } from "@/components/atoms/FireCardEffect";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { VIDEO_PLATFORM_META } from "@/lib/video";
 import { explorePath } from "@/lib/routes";
+import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
 
 const MAX_ATTACHMENT_ICONS = 10;
 
@@ -140,13 +141,17 @@ export function LoadoutCard({
             weapons.length === 0
           }
           weaponId={primaryWeaponId}
+          enableSpritePreview={loadout.gameId === "mw4"}
           showSkeleton
+          imageLoading={index < 3 ? "eager" : "lazy"}
           badges={attachmentIcons.map(
             (a): WeaponImageBadge => ({
               key: a.id,
+              assetId: a.stats?.assetId,
               typeSlug: a.typeSlug || a.type || "",
-              label: a.name,
-              iconUrl: a.imageUrl,
+              label: a.stats?.displayName ?? a.name,
+              iconUrl: a.imageUrl ?? a.stats?.imagePath,
+              isApex: a.type.toLowerCase() === "apex",
             }),
           )}
         />
@@ -174,11 +179,7 @@ export function LoadoutCard({
               key={a.id}
               className="bg-gradient-to-b from-white/0 from-[60%] to-white/[0.08] opacity-80 p-2 border w-full border-white/12 h-14 flex items-center justify-center"
             >
-              <img
-                src={a.imageUrl ?? undefined}
-                alt={a.name}
-                className="max-size-6 object-contain"
-              />
+              <AttachmentIcon attachment={a} className="size-6" />
             </div>
           ))}
         </div>

@@ -344,7 +344,7 @@ export function Settings() {
       <CompactPageHeader
         title="Settings"
         actions={
-          <Button size="sm" onClick={saveProfile} disabled={saving}>
+          <Button size="sm" onClick={saveProfile} disabled={saving} aria-busy={saving}>
             {saving ? "Saving…" : "Save changes"}
           </Button>
         }
@@ -388,24 +388,27 @@ export function Settings() {
               PNG, JPEG, WEBP, or GIF. Max 5MB (2MB for GIFs).
             </p>
             {avatarError && (
-              <p className="text-[12px] text-[#ef9696]">{avatarError}</p>
+              <p className="text-[12px] text-[#ef9696]" role="alert">{avatarError}</p>
             )}
           </div>
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+            <label htmlFor="settings-name" className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
               Name
             </label>
             <input
+              id="settings-name"
               ref={nameInputRef}
               type="text"
+              autoComplete="name"
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
                 if (nameError) setNameError("");
               }}
               aria-invalid={!!nameError}
+              aria-describedby={nameError ? "settings-name-error" : undefined}
               className={cn(
                 "h-12 rounded-xl border px-4 text-[14px]  placeholder:text-[#8d898a] outline-none transition-colors",
                 nameError
@@ -414,16 +417,18 @@ export function Settings() {
               )}
             />
             {nameError && (
-              <p className="text-[12px] text-[#ef9696]">{nameError}</p>
+              <p id="settings-name-error" className="text-[12px] text-[#ef9696]" role="alert">{nameError}</p>
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+            <label htmlFor="settings-nickname" className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
               Nickname
             </label>
             <input
+              id="settings-nickname"
               ref={nicknameInputRef}
               type="text"
+              autoComplete="username"
               value={nickname}
               onChange={(e) => {
                 setNickname(e.target.value.toLowerCase());
@@ -431,6 +436,7 @@ export function Settings() {
               }}
               pattern="[a-z0-9_-]{3,20}"
               aria-invalid={!!nicknameError}
+              aria-describedby="settings-nickname-help"
               className={cn(
                 "h-12 rounded-xl border px-4 text-[14px] font-mono  placeholder:text-[#8d898a] placeholder:font-sans outline-none transition-colors",
                 nicknameError
@@ -439,19 +445,20 @@ export function Settings() {
               )}
             />
             {nicknameError ? (
-              <p className="text-[12px] text-[#ef9696]">{nicknameError}</p>
+              <p id="settings-nickname-help" className="text-[12px] text-[#ef9696]" role="alert">{nicknameError}</p>
             ) : (
-              <p className="text-[12px] text-[#8d898a]">
+              <p id="settings-nickname-help" className="text-[12px] text-[#8d898a]">
                 Your public profile: /u/{nickname || "…"}
               </p>
             )}
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+            <span id="settings-role-label" className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
               You are a...
-            </label>
+            </span>
             <FilterPillGroup
+              aria-labelledby="settings-role-label"
               type="single"
               value={roleTag}
               onValueChange={(v) => v && setRoleTag(v as RoleTag)}
@@ -466,12 +473,13 @@ export function Settings() {
 
           {LINK_FIELDS.map(({ key, label, icon: Icon }) => (
             <div key={key} className="flex flex-col gap-2">
-              <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+              <label htmlFor={`settings-${key}`} className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
                 {label}
               </label>
               <div className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 flex items-center gap-2 focus-within:border-white/30 transition-colors">
                 <Icon className="w-4 h-4 shrink-0" />
                 <input
+                  id={`settings-${key}`}
                   type="text"
                   value={links[key] ?? ""}
                   onChange={(e) =>
@@ -484,7 +492,7 @@ export function Settings() {
             </div>
           ))}
 
-          <Button onClick={saveProfile} disabled={saving}>
+          <Button onClick={saveProfile} disabled={saving} aria-busy={saving}>
             {saving ? "Saving…" : "Save profile"}
           </Button>
         </div>
@@ -494,11 +502,13 @@ export function Settings() {
         <h2>Password</h2>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+            <label htmlFor="settings-new-password" className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
               New password
             </label>
             <input
+              id="settings-new-password"
               type="password"
+              autoComplete="new-password"
               value={newPassword}
               onChange={(e) => {
                 setNewPassword(e.target.value);
@@ -507,6 +517,7 @@ export function Settings() {
               minLength={PASSWORD_MIN_LENGTH}
               placeholder={`Minimum ${PASSWORD_MIN_LENGTH} characters`}
               aria-invalid={!!passwordError}
+              aria-describedby={passwordError ? "settings-password-error" : undefined}
               className={cn(
                 "h-12 rounded-xl border px-4 text-[14px]  placeholder:text-[#8d898a] outline-none transition-colors",
                 passwordError
@@ -518,11 +529,15 @@ export function Settings() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+            <label htmlFor="settings-confirm-password" className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
               Confirm new password
             </label>
             <input
+              id="settings-confirm-password"
               type="password"
+              autoComplete="new-password"
+              aria-invalid={Boolean(confirmNewPassword && confirmNewPassword !== newPassword)}
+              aria-describedby={confirmNewPassword && confirmNewPassword !== newPassword ? "settings-confirm-password-error" : undefined}
               value={confirmNewPassword}
               onChange={(e) => {
                 setConfirmNewPassword(e.target.value);
@@ -533,19 +548,20 @@ export function Settings() {
               className="h-12 rounded-xl border px-4 text-[14px]  placeholder:text-[#8d898a] outline-none transition-colors bg-white/[0.04] border-white/[0.07] focus:border-white/30"
             />
             {confirmNewPassword && confirmNewPassword !== newPassword && (
-              <p className="text-[14px] text-[#ef9696]">
+              <p id="settings-confirm-password-error" className="text-[14px] text-[#ef9696]" role="alert">
                 Passwords do not match
               </p>
             )}
           </div>
 
           {passwordError && (
-            <p className="text-[14px] text-[#ef9696]">{passwordError}</p>
+            <p id="settings-password-error" className="text-[14px] text-[#ef9696]" role="alert">{passwordError}</p>
           )}
 
           <Button
             onClick={savePassword}
             disabled={passwordSaving || !newPassword}
+            aria-busy={passwordSaving}
           >
             {passwordSaving ? "Saving…" : "Change password"}
           </Button>
