@@ -200,12 +200,12 @@ export function SideNav({
   return (
     <>
       {/* Full menu, shown in-flow at xl (1280px) and up */}
-      <aside className="hidden xl:flex flex-col gap-6 w-[240px] shrink-0">
+      <aside className={`hidden xl:flex sticky ${isHome ? "top-24 max-h-[calc(100vh-6rem)]" : "top-6 max-h-[calc(100vh-1.5rem)]"} self-start flex-col gap-6 w-[240px] shrink-0 overflow-y-auto`}>
         {fullMenu}
       </aside>
 
       {/* Icon-only rail, sm-xl: nav links as icons, "Best of" as typeShort, no search. Below sm, the bottom bar takes over instead. */}
-      <aside className="hidden sm:flex xl:hidden flex-col items-center gap-4 w-[72px] shrink-0">
+      <aside className={`hidden sm:flex xl:hidden sticky ${isHome ? "top-24 max-h-[calc(100vh-6rem)]" : "top-6 max-h-[calc(100vh-1.5rem)]"} self-start flex-col items-center gap-4 w-[72px] shrink-0 overflow-y-auto`}>
         <AppTooltip content="Show full menu" side="right">
           <button
             onClick={openMenu}
