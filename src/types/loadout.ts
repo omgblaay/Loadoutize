@@ -12,6 +12,7 @@ export interface CardLoadout {
   equipment?: LoadoutEquipment[];
   userName: string;
   authorNickname?: string | null;
+  authorAvatarUrl?: string | null;
   authorLinks?: SocialLinks | null;
   likes: number;
   dislikes: number;

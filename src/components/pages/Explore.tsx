@@ -94,7 +94,7 @@ function ExploreSkeleton() {
 
 export function Explore() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const selectedGame = (() => {
     if (!GAME_SELECTOR_ENABLED) return LOCKED_GAME_ID;
     const requestedGame = searchParams.get("game");
@@ -125,9 +125,10 @@ export function Explore() {
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
 
   useEffect(() => {
+    const weaponParam = searchParams.get("weapon");
     const categoryParam = searchParams.get("category");
-    setActiveCategory(categoryParam);
-    if (categoryParam) setActiveWeaponId(null);
+    setActiveWeaponId(weaponParam);
+    setActiveCategory(weaponParam ? null : categoryParam);
   }, [searchParams]);
 
   useEffect(() => {
@@ -279,11 +280,20 @@ export function Explore() {
     Number(Boolean(activeWeaponId || activeCategory)) +
     Number(activeTagId != null);
   const hasActiveFilters = Boolean(activeFilterCount || searchQuery.trim());
+  const syncWeaponFilterUrl = (weaponId: string | null, category: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("weapon");
+    next.delete("category");
+    if (weaponId) next.set("weapon", weaponId);
+    else if (category) next.set("category", category);
+    setSearchParams(next, { replace: true });
+  };
   const clearFilters = () => {
     setActiveCategory(null);
     setActiveWeaponId(null);
     setActiveTagId(null);
     setSearchQuery("");
+    syncWeaponFilterUrl(null, null);
   };
   const openFilters = () => {
     setDraftCategory(activeCategory);
@@ -295,6 +305,7 @@ export function Explore() {
     setActiveWeaponId(draftWeaponId);
     setActiveCategory(draftWeaponId ? null : draftCategory);
     setActiveTagId(draftTagId);
+    syncWeaponFilterUrl(draftWeaponId, draftWeaponId ? null : draftCategory);
     setFiltersOpen(false);
   };
   const openWeaponPicker = () => {
@@ -444,7 +455,10 @@ export function Explore() {
           {activeWeaponId && (
             <button
               type="button"
-              onClick={() => setActiveWeaponId(null)}
+              onClick={() => {
+                setActiveWeaponId(null);
+                syncWeaponFilterUrl(null, null);
+              }}
               className="h-8 px-3 rounded-full bg-white/[0.08] text-sm text-secondary flex items-center gap-2 hover:bg-white/[0.12]"
             >
               {activeWeapon?.name ?? "Weapon"}
@@ -454,7 +468,10 @@ export function Explore() {
           {activeCategory && (
             <button
               type="button"
-              onClick={() => setActiveCategory(null)}
+              onClick={() => {
+                setActiveCategory(null);
+                syncWeaponFilterUrl(null, null);
+              }}
               className="h-8 px-3 rounded-full bg-white/[0.08] text-sm text-secondary flex items-center gap-2 hover:bg-white/[0.12]"
             >
               {activeCategory}

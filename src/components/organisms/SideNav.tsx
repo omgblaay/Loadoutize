@@ -22,6 +22,7 @@ import {
 import {
   attachmentMetaListPath,
   explorePath,
+  gamePath,
   perkMetaListPath,
   weaponMetaListPath,
 } from "@/lib/routes";
@@ -71,7 +72,7 @@ export function SideNav({
       label: "Best weapons",
       path: weaponMetaListPath(selectedGame),
       icon: Crosshair,
-      active: /^\/[^/]+\/meta\/weapons(?:\/|$)/.test(
+      active: /^\/(?:[^/]+\/)?meta\/weapons(?:\/|$)/.test(
         location.pathname,
       ),
     },
@@ -79,7 +80,7 @@ export function SideNav({
       label: "Best attachments",
       path: attachmentMetaListPath(selectedGame),
       icon: Paperclip,
-      active: /^\/[^/]+\/meta\/(?:attachments|attachmentgroup)(?:\/|$)/.test(
+      active: /^\/(?:[^/]+\/)?meta\/(?:attachments|attachmentgroup)(?:\/|$)/.test(
         location.pathname,
       ),
     },
@@ -131,7 +132,7 @@ export function SideNav({
         </SideNavButton> */}
         <SideNavButton
           state={isMeta ? "active" : "default"}
-          onClick={() => go(`/${selectedGame}/meta`)}
+          onClick={() => go(gamePath(selectedGame, "meta"))}
           {...hoverHandlers("meta")}
         >
           <NavIcon
@@ -144,7 +145,7 @@ export function SideNav({
         </SideNavButton>
         <SideNavButton
           state={isCommunity ? "active" : "default"}
-          onClick={() => go(`/${selectedGame}/community`)}
+          onClick={() => go(gamePath(selectedGame, "community"))}
           {...hoverHandlers("community")}
         >
           <NavIcon
@@ -262,7 +263,7 @@ export function SideNav({
           </SideNavButton> */}
           <SideNavButton
             state={isMeta ? "active" : "default"}
-            onClick={() => go(`/${selectedGame}/meta`)}
+            onClick={() => go(gamePath(selectedGame, "meta"))}
             className="justify-center px-0 w-11"
             tooltip="Meta"
             aria-label="Meta"
@@ -277,7 +278,7 @@ export function SideNav({
           </SideNavButton>
           <SideNavButton
             state={isCommunity ? "active" : "default"}
-            onClick={() => go(`/${selectedGame}/community`)}
+            onClick={() => go(gamePath(selectedGame, "community"))}
             className="justify-center px-0 w-11"
             tooltip="Community"
             aria-label="Community"
@@ -364,7 +365,7 @@ export function SideNav({
             </span>
           </SideNavButton> */}
           <SideNavButton
-            onClick={() => go(`/${selectedGame}/meta`)}
+            onClick={() => go(gamePath(selectedGame, "meta"))}
             aria-label="Meta"
             aria-current={isMeta ? "page" : undefined}
             className={`flex flex-col items-center justify-center gap-0.5 ${isMeta ? "" : "text-[#8d898a]"}`}
@@ -381,7 +382,7 @@ export function SideNav({
             </span>
           </SideNavButton>
           <SideNavButton
-            onClick={() => go(`/${selectedGame}/community`)}
+            onClick={() => go(gamePath(selectedGame, "community"))}
             aria-label="Community"
             aria-current={isCommunity ? "page" : undefined}
             className={`flex flex-col items-center justify-center gap-0.5 ${isCommunity ? "" : "text-[#8d898a]"}`}

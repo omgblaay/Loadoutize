@@ -8,7 +8,7 @@ import { RatingRing } from "@/components/atoms/RatingRing";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { useMetaData, type MetaPerk } from "@/hooks/useMetaData";
 import { MIN_RATING_VOTES } from "@/lib/metaMetrics";
-import { perkMetaListPath } from "@/lib/routes";
+import { gamePath, perkMetaListPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 interface PerkMetric {
@@ -126,7 +126,7 @@ export function PerkMetaListView() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate(`/${gameId}/meta`)}
+          onClick={() => navigate(gamePath(gameId, "meta"))}
         >
           <ArrowLeft className="size-4" />
           Meta dashboard

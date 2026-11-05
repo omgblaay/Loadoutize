@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { ROLE_TAG_META, ROLE_TAG_ORDER, type RoleTag } from "@/lib/roles";
 import { CompactPageHeader } from "@/components/molecules/CompactPageHeader";
 import { isVisibleConfig } from "@/lib/contentVisibility";
+import { gamePath } from "@/lib/routes";
 import {
   SOCIAL_LINK_FIELDS,
   type SocialLinks,
@@ -269,7 +270,7 @@ export function CommunityView() {
     return (
       <AppLayout
         selectedGame={selectedGame}
-        onGameSelect={(id) => navigate(`/${id}/community`)}
+        onGameSelect={(id) => navigate(gamePath(id, "community"))}
       >
         <CommunityViewSkeleton />
       </AppLayout>
@@ -279,7 +280,7 @@ export function CommunityView() {
   return (
     <AppLayout
       selectedGame={selectedGame}
-      onGameSelect={(id) => navigate(`/${id}/community`)}
+      onGameSelect={(id) => navigate(gamePath(id, "community"))}
     >
       <div>
         <h1 className="text-3xl font-semibold flex items-center gap-3">

@@ -10,7 +10,7 @@ import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
 import { attachmentDisplayName, attachmentImageUrl, isApexAttachment } from "@/lib/attachmentPresentation";
 import { MetaTrendCharts } from "@/components/organisms/MetaTrendCharts";
 import { useMetaData, type MetaWeapon } from "@/hooks/useMetaData";
-import { weaponMetaPath } from "@/lib/routes";
+import { gamePath, weaponMetaPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 const META_ACCENT = "#f4f1ea";
@@ -118,7 +118,7 @@ export function AttachmentMetaView() {
     return (
       <AppLayout
         selectedGame={gameId}
-        onGameSelect={(id) => navigate(`/${id}/meta`)}
+        onGameSelect={(id) => navigate(gamePath(id, "meta"))}
       >
         <AttachmentMetaSkeleton />
       </AppLayout>
@@ -129,7 +129,7 @@ export function AttachmentMetaView() {
     return (
       <AppLayout
         selectedGame={gameId}
-        onGameSelect={(id) => navigate(`/${id}/meta`)}
+        onGameSelect={(id) => navigate(gamePath(id, "meta"))}
       >
         <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-12 text-center">
           <h1 className="text-xl font-semibold text-[#fafafa]">
@@ -138,7 +138,7 @@ export function AttachmentMetaView() {
           <p className="mt-2 text-sm text-teritary">
             {error ?? "This attachment could not be found in the current game."}
           </p>
-          <Button className="mt-5" onClick={() => navigate(`/${gameId}/meta`)}>
+          <Button className="mt-5" onClick={() => navigate(gamePath(gameId, "meta"))}>
             Back to Meta
           </Button>
         </div>
@@ -149,13 +149,13 @@ export function AttachmentMetaView() {
   return (
     <AppLayout
       selectedGame={gameId}
-      onGameSelect={(id) => navigate(`/${id}/meta`)}
+      onGameSelect={(id) => navigate(gamePath(id, "meta"))}
     >
       <div>
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate(`/${gameId}/meta`)}
+          onClick={() => navigate(gamePath(gameId, "meta"))}
         >
           <ArrowLeft className="size-4" />
           Meta dashboard

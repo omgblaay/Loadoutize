@@ -13,6 +13,7 @@ import {
 import type { Loadout } from "@/types/loadout";
 import {
   explorePath,
+  gamePath,
   loadoutPath,
   weaponMetaListPath,
   weaponMetaPath,
@@ -141,7 +142,7 @@ export function HomeExplorePreview({
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <Link
-            to={`/${selectedGame}/meta/weapons`}
+            to={weaponMetaListPath(selectedGame)}
             className="font-medium hover:text-teritary text-white flex items-center gap-1 shrink-0"
           >
             <h2 className="text-sm">Top weapons</h2>
@@ -257,7 +258,7 @@ export function HomeExplorePreview({
             <p className="text-teritary">
               No weapon configs published yet. Be the first to create one!
             </p>
-            <Button onClick={() => navigate(`/${selectedGame}/create`)}>
+            <Button onClick={() => navigate(gamePath(selectedGame, "create"))}>
               Create weapon config
             </Button>
           </div>
@@ -281,7 +282,7 @@ export function HomeExplorePreview({
             </p>
             <Button
               variant="outline"
-              onClick={() => navigate(`/${selectedGame}/community`)}
+              onClick={() => navigate(gamePath(selectedGame, "community"))}
               className="group mt-6"
             >
               <Users className="size-4" />
@@ -297,7 +298,7 @@ export function HomeExplorePreview({
                   key={key}
                   type="button"
                   onClick={() =>
-                    navigate(`/${selectedGame}/community?social=${key}`)
+                    navigate(`${gamePath(selectedGame, "community")}?social=${key}`)
                   }
                   className="group relative flex min-h-24 items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.035] p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.065]"
                 >

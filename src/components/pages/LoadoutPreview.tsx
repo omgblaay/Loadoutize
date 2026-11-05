@@ -4,10 +4,18 @@ import { toast } from "sonner";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { getGameColor } from "@/lib/gameColors";
 import { gameMeta } from "@/lib/games";
+import {
+  attachmentMetaPath,
+  explorePath,
+  gamePath,
+  weaponMetaListPath,
+  weaponMetaPath,
+} from "@/lib/routes";
+import { orderedAttachmentEntries } from "@/lib/attachmentOrder";
 import { visibleWeaponCatalog } from "@/lib/weaponCategories";
+import gameLogo from "figma:asset/mw4_logo.png";
 import { useAuth } from "@/providers/AuthProvider";
 import { AppLayout } from "@/components/templates/AppLayout";
-import { useGameName } from "@/hooks/useGameName";
 import { Button } from "@/components/atoms/Button";
 import { Container } from "@/components/atoms/Container";
 import {
@@ -68,7 +76,6 @@ import {
   type SocialLinks,
   type SocialStats,
 } from "@/lib/social";
-import { explorePath } from "@/lib/routes";
 import { isVisibleConfig } from "@/lib/contentVisibility";
 import { ExternalLink } from "lucide-react";
 import {
@@ -380,7 +387,9 @@ export function LoadoutPreview() {
       },
     )
       .then((r) => r.json())
-      .then((data) => setCatalogWeapons(visibleWeaponCatalog<CardWeapon>(data.weapons ?? [])))
+      .then((data) =>
+        setCatalogWeapons(visibleWeaponCatalog<CardWeapon>(data.weapons ?? [])),
+      )
       .catch((error) => console.error("Error fetching weapons:", error));
 
     fetch(
@@ -528,7 +537,6 @@ export function LoadoutPreview() {
   };
 
   const meta = gameMeta[gameId] ?? gameMeta.mw4;
-  const { game: activeGame } = useGameName(gameId);
   const accent = getGameColor(gameId).primary;
 
   const primaryWeapon =
@@ -558,33 +566,39 @@ export function LoadoutPreview() {
   const primaryAttachments = React.useMemo(() => {
     if (!primaryWeapon?.attachments) return [];
 
-    return Object.entries(primaryWeapon.attachments).map(([slot, value]) => {
-      const attachment = attachmentIndex.get(`${slot}:${value}`);
-      return {
-        key: slot,
-        assetId: attachment?.stats?.assetId,
-        typeSlug: attachment?.typeSlug || slot,
-        label: attachment?.stats?.displayName ?? value,
-        iconUrl: attachment?.imageUrl ?? attachment?.stats?.imagePath ?? null,
-        isApex: slot.toLowerCase() === "apex",
-      } satisfies WeaponImageBadge;
-    });
+    return orderedAttachmentEntries(primaryWeapon.attachments).map(
+      ([slot, value]) => {
+        const attachment = attachmentIndex.get(`${slot}:${value}`);
+        return {
+          key: slot,
+          attachmentId: attachment?.id,
+          assetId: attachment?.stats?.assetId,
+          typeSlug: attachment?.typeSlug || slot,
+          label: attachment?.stats?.displayName ?? value,
+          iconUrl: attachment?.imageUrl ?? attachment?.stats?.imagePath ?? null,
+          isApex: slot.toLowerCase() === "apex",
+        };
+      },
+    );
   }, [primaryWeapon, attachmentIndex]);
 
   const secondaryAttachments = React.useMemo(() => {
     if (!secondaryWeapon?.attachments) return [];
 
-    return Object.entries(secondaryWeapon.attachments).map(([slot, value]) => {
-      const attachment = attachmentIndex.get(`${slot}:${value}`);
-      return {
-        key: slot,
-        assetId: attachment?.stats?.assetId,
-        typeSlug: attachment?.typeSlug || slot,
-        label: attachment?.stats?.displayName ?? value,
-        iconUrl: attachment?.imageUrl ?? attachment?.stats?.imagePath ?? null,
-        isApex: slot.toLowerCase() === "apex",
-      } satisfies WeaponImageBadge;
-    });
+    return orderedAttachmentEntries(secondaryWeapon.attachments).map(
+      ([slot, value]) => {
+        const attachment = attachmentIndex.get(`${slot}:${value}`);
+        return {
+          key: slot,
+          attachmentId: attachment?.id,
+          assetId: attachment?.stats?.assetId,
+          typeSlug: attachment?.typeSlug || slot,
+          label: attachment?.stats?.displayName ?? value,
+          iconUrl: attachment?.imageUrl ?? attachment?.stats?.imagePath ?? null,
+          isApex: slot.toLowerCase() === "apex",
+        };
+      },
+    );
   }, [secondaryWeapon, attachmentIndex]);
 
   if (loading) {
@@ -614,7 +628,9 @@ export function LoadoutPreview() {
     (w) => w.id === primaryWeapon?.id,
   );
   const primaryWeaponImage = primaryWeaponCatalog?.imageUrl ?? null;
-  const primaryWeaponBadges = Object.entries(primaryWeapon?.attachments ?? {})
+  const primaryWeaponBadges = orderedAttachmentEntries(
+    primaryWeapon?.attachments,
+  )
     .map(([slot, value]) => {
       const attachment = catalogAttachments.find(
         (a) => a.type === slot && a.name === value,
@@ -633,8 +649,8 @@ export function LoadoutPreview() {
   const secondaryWeaponCatalog = catalogWeapons.find(
     (w) => w.id === secondaryWeapon?.id,
   );
-  const secondaryWeaponBadges = Object.entries(
-    secondaryWeapon?.attachments ?? {},
+  const secondaryWeaponBadges = orderedAttachmentEntries(
+    secondaryWeapon?.attachments,
   )
     .map(([slot, value]) => {
       const attachment = catalogAttachments.find(
@@ -660,34 +676,24 @@ export function LoadoutPreview() {
       onGameSelect={(id) => navigate(explorePath(id))}
       breadcrumb={
         <>
-          <BreadcrumbLink to={explorePath(gameId)}>
-            {activeGame?.logoUrl ? (
-              <img
-                src={activeGame.logoUrl}
-                alt=""
-                className="w-10 h-10 object-contain shrink-0"
-              />
-            ) : (
-              <meta.icon className="w-4 h-4" />
-            )}
-          </BreadcrumbLink>
+          <img
+            src={gameLogo}
+            alt="Modern Warfare 4"
+            className="w-10 h-10 object-contain shrink-0"
+          />
           {primaryWeaponCatalog && (
             <>
               <BreadcrumbSpacer />
               {primaryWeaponCatalog.type ? (
                 <BreadcrumbLink
-                  to={explorePath(gameId, {
-                    category: primaryWeaponCatalog.type,
-                  })}
+                  to={weaponMetaListPath(gameId, primaryWeaponCatalog.type)}
                 >
                   {primaryWeaponCatalog.type || meta.short}
                 </BreadcrumbLink>
               ) : null}
               <BreadcrumbSpacer />
               <BreadcrumbLink
-                to={explorePath(gameId, {
-                  category: primaryWeaponCatalog.name,
-                })}
+                to={weaponMetaPath(gameId, primaryWeaponCatalog.id)}
               >
                 {primaryWeaponCatalog.name}
               </BreadcrumbLink>
@@ -760,7 +766,16 @@ export function LoadoutPreview() {
                   Primary weapon
                 </p>
                 <h2 className="mt-1 font-mono text-base uppercase">
-                  {primaryWeaponCatalog?.name ?? "Not selected"}
+                  {primaryWeaponCatalog ? (
+                    <Link
+                      to={weaponMetaPath(gameId, primaryWeaponCatalog.id)}
+                      className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    >
+                      {primaryWeaponCatalog.name}
+                    </Link>
+                  ) : (
+                    "Not selected"
+                  )}
                 </h2>
               </div>
               {primaryWeaponCatalog?.typeShort && (
@@ -799,10 +814,15 @@ export function LoadoutPreview() {
                 >
                   {primaryWeaponCatalog?.typeShort || meta.short}
                 </Tag>
-                <span className="font-base font-sans  text-teritary">
-                  {" "}
-                  {primaryWeaponCatalog?.name}
-                </span>{" "}
+                {primaryWeaponCatalog && (
+                  <Link
+                    to={weaponMetaPath(gameId, primaryWeaponCatalog.id)}
+                    className="font-sans text-teritary hover:text-[#efedf1] hfocus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  >
+                    {" "}
+                    {primaryWeaponCatalog.name}
+                  </Link>
+                )}{" "}
                 {loadout.name}
               </h1>
             </div>
@@ -887,31 +907,42 @@ export function LoadoutPreview() {
 
           <div className="divide-y-1 divide-solid divide-white/5 w-full">
             {primaryAttachments.map((att) => {
-              const isActive = activeKey === att.key;
-
               return (
-                <button
+                <div
                   key={att.key}
-                  type="button"
                   onPointerEnter={() => setActiveKey(att.key)}
                   onPointerLeave={() => setActiveKey(null)}
                   onFocus={() => setActiveKey(att.key)}
                   onBlur={() => setActiveKey(null)}
-                  className={`flex items-center gap-4 py-3 px-2 -mx-2 w-full rounded-md text-left
-        transition-colors duration-150
-        ${isActive ? "bg-white/[0.06]" : "hover:bg-white/[0.03]"}`}
+                  className="flex items-center gap-4 py-3 w-full text-left"
                 >
                   <div className="w-6 h-6 flex items-center justify-center shrink-0 overflow-hidden">
                     {att.isApex ? (
-                      <Puzzle aria-hidden="true" className="size-5 text-white/70" />
+                      <Puzzle
+                        aria-hidden="true"
+                        className="size-5 text-white/70"
+                      />
                     ) : att.iconUrl ? (
-                      <img src={att.iconUrl} alt="" className="size-full object-contain" />
+                      <img
+                        src={att.iconUrl}
+                        alt=""
+                        className="size-full object-contain"
+                      />
                     ) : null}
                   </div>
-                  <span className="font-medium">{att.label}</span>
+                  {att.attachmentId ? (
+                    <Link
+                      to={attachmentMetaPath(gameId, String(att.attachmentId))}
+                      className="font-medium hover:underline focus-visible:underline outline-offset-4"
+                    >
+                      {att.label}
+                    </Link>
+                  ) : (
+                    <span className="font-medium">{att.label}</span>
+                  )}
                   <span className="text-white/20">•</span>
                   <span className="text-teritary flex-1">{att.typeSlug}</span>
-                </button>
+                </div>
               );
             })}
 
@@ -1007,35 +1038,49 @@ export function LoadoutPreview() {
                 <div className="divide-y-1 divide-solid divide-white/5 w-full">
                   {secondaryAttachments.map((attachment) => {
                     const attachmentKey = `secondary:${attachment.key}`;
-                    const isActive = activeKey === attachmentKey;
                     return (
-                      <button
+                      <div
                         key={attachment.key}
-                        type="button"
                         onPointerEnter={() => setActiveKey(attachmentKey)}
                         onPointerLeave={() => setActiveKey(null)}
                         onFocus={() => setActiveKey(attachmentKey)}
                         onBlur={() => setActiveKey(null)}
-                        className={cn(
-                          "-mx-2 flex w-full items-center gap-4 rounded-md px-2 py-3 text-left transition-colors duration-150",
-                          isActive
-                            ? "bg-white/[0.06]"
-                            : "hover:bg-white/[0.03]",
-                        )}
+                        className="flex w-full items-center gap-4 py-3 text-left"
                       >
                         <div className="flex size-6 shrink-0 items-center justify-center overflow-hidden">
                           {attachment.isApex ? (
-                            <Puzzle aria-hidden="true" className="size-5 text-white/70" />
+                            <Puzzle
+                              aria-hidden="true"
+                              className="size-5 text-white/70"
+                            />
                           ) : attachment.iconUrl ? (
-                            <img src={attachment.iconUrl} alt="" className="size-full object-contain" />
+                            <img
+                              src={attachment.iconUrl}
+                              alt=""
+                              className="size-full object-contain"
+                            />
                           ) : null}
                         </div>
-                        <span className="font-medium">{attachment.label}</span>
+                        {attachment.attachmentId ? (
+                          <Link
+                            to={attachmentMetaPath(
+                              gameId,
+                              String(attachment.attachmentId),
+                            )}
+                            className="font-medium hover:underline focus-visible:underline outline-offset-4"
+                          >
+                            {attachment.label}
+                          </Link>
+                        ) : (
+                          <span className="font-medium">
+                            {attachment.label}
+                          </span>
+                        )}
                         <span className="text-white/20">•</span>
                         <span className="flex-1 text-teritary">
                           {attachment.typeSlug}
                         </span>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -1263,7 +1308,9 @@ export function LoadoutPreview() {
           {canEdit && (
             <div className="flex items-center gap-3">
               <Button
-                onClick={() => navigate(`/${gameId}/create?edit=${loadoutId}`)}
+                onClick={() =>
+                  navigate(`${gamePath(gameId, "create")}?edit=${loadoutId}`)
+                }
                 variant="secondary"
               >
                 <Edit className="w-4 h-4" />
@@ -1335,14 +1382,31 @@ export function LoadoutPreview() {
                         {catalogWeapon.name}
                       </p>
                       <div className="flex flex-wrap gap-1.5">
-                        {Object.values(weapon.attachments ?? {}).map((name) => (
-                          <span
-                            key={name}
-                            className="rounded-md border border-white/[0.08] bg-black/20 px-2 py-1 text-[10px] text-secondary"
-                          >
-                            {name}
-                          </span>
-                        ))}
+                        {orderedAttachmentEntries(weapon.attachments).map(
+                          ([slot, name]) => {
+                            const attachment = attachmentIndex.get(
+                              `${slot}:${name}`,
+                            );
+                            const className =
+                              "rounded-md border border-white/[0.08] bg-black/20 px-2 py-1 text-[10px] text-secondary";
+                            return attachment ? (
+                              <Link
+                                key={slot}
+                                to={attachmentMetaPath(
+                                  gameId,
+                                  String(attachment.id),
+                                )}
+                                className={`${className} hover:underline focus-visible:underline`}
+                              >
+                                {attachment.stats?.displayName ?? name}
+                              </Link>
+                            ) : (
+                              <span key={slot} className={className}>
+                                {name}
+                              </span>
+                            );
+                          },
+                        )}
                       </div>
                     </div>
                   ) : (

@@ -54,7 +54,7 @@ export function AppLayout({
   const ActiveIcon = activeMeta?.icon ?? Globe;
   const isHome = location.pathname === "/home";
   const isExplore = location.pathname === "/explore";
-  const isMeta = /^\/[^/]+\/meta(?:\/|$)/.test(location.pathname);
+  const isMeta = /^\/(?:[^/]+\/)?meta(?:\/|$)/.test(location.pathname);
   const isCommunity = location.pathname.endsWith("/community");
 
   const activeLogoUrl = activeGame?.logoUrl ?? null;

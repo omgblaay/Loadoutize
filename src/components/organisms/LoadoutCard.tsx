@@ -17,6 +17,7 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { VIDEO_PLATFORM_META } from "@/lib/video";
 import { explorePath } from "@/lib/routes";
 import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
+import { AppTooltip } from "@/components/atoms/Tooltip";
 
 const MAX_ATTACHMENT_ICONS = 10;
 
@@ -64,6 +65,10 @@ export function LoadoutCard({
     voteCount >= 5 &&
     loadout.ratingPercent != null &&
     loadout.ratingPercent >= 90;
+  const authorLabel = [
+    loadout.userName,
+    loadout.authorNickname ? `@${loadout.authorNickname}` : null,
+  ].filter(Boolean).join(" ") || "Community member";
 
   const card = (
     <Link
@@ -126,6 +131,15 @@ export function LoadoutCard({
             {loadout.description}
           </p>
         </div>
+        <AppTooltip content={authorLabel} side="top">
+          <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/[0.08] text-xs font-semibold text-white" role="img" aria-label={authorLabel}>
+            {loadout.authorAvatarUrl ? (
+              <img src={loadout.authorAvatarUrl} alt="" className="size-full object-cover" loading="lazy" />
+            ) : (
+              loadout.userName?.[0]?.toUpperCase() ?? "U"
+            )}
+          </span>
+        </AppTooltip>
       </div>
       <div className="h-full flex items-center mt-4 mb-6 mx-10 justify-center relative">
         <WeaponImage

@@ -46,7 +46,7 @@ import {
   getRecaptchaToken,
   RecaptchaNotice,
 } from "@/components/molecules/Recaptcha";
-import { explorePath } from "@/lib/routes";
+import { explorePath, gamePath, loadoutPath } from "@/lib/routes";
 import { FULL_LOADOUTS_ENABLED } from "@/lib/contentVisibility";
 import {
   QRCodeCanvas,
@@ -655,11 +655,7 @@ export function LoadoutBuilder() {
       if (response.ok) {
         const { loadout } = await response.json();
         if (editId) {
-          navigate(
-            loadout.contentType === "full_loadout"
-              ? `/${gameId}/l/${loadout.id}`
-              : `/${gameId}/weapon/${loadout.id}`,
-          );
+          navigate(loadoutPath(gameId, loadout.id, loadout.contentType));
         } else {
           setCreatedLoadoutId(loadout.id);
         }
@@ -682,8 +678,8 @@ export function LoadoutBuilder() {
 
   const createdLoadoutPath = createdLoadoutId
     ? contentType === "full_loadout"
-      ? `/${gameId}/l/${createdLoadoutId}`
-      : `/${gameId}/weapon/${createdLoadoutId}`
+      ? loadoutPath(gameId, createdLoadoutId, "full_loadout")
+      : loadoutPath(gameId, createdLoadoutId)
     : "";
   const createdLoadoutUrl = createdLoadoutPath
     ? new URL(createdLoadoutPath, window.location.origin).toString()
@@ -859,7 +855,7 @@ export function LoadoutBuilder() {
     return (
       <AppLayout
         selectedGame={gameId}
-        onGameSelect={(id) => navigate(`/${id}/create`)}
+        onGameSelect={(id) => navigate(gamePath(id, "create"))}
         breadcrumb={
           <>
             <BreadcrumbLink to={explorePath(gameId)}>
@@ -950,7 +946,7 @@ export function LoadoutBuilder() {
     return (
       <AppLayout
         selectedGame={gameId}
-        onGameSelect={(id) => navigate(`/${id}/create`)}
+        onGameSelect={(id) => navigate(gamePath(id, "create"))}
         breadcrumb={
           <>
             <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>
@@ -1020,7 +1016,7 @@ export function LoadoutBuilder() {
   return (
     <AppLayout
       selectedGame={gameId}
-      onGameSelect={(id) => navigate(`/${id}/create`)}
+      onGameSelect={(id) => navigate(gamePath(id, "create"))}
       breadcrumb={
         <>
           <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>

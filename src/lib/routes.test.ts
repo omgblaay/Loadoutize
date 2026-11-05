@@ -5,6 +5,7 @@ import {
   attachmentMetaListPath,
   attachmentMetaPath,
   explorePath,
+  gamePath,
   loadoutPath,
   perkMetaListPath,
   weaponMetaListPath,
@@ -23,21 +24,22 @@ describe("route builders", () => {
   });
 
   it("encodes dynamic meta path segments", () => {
-    expect(weaponMetaPath("mw4", "M4 / Custom")).toBe("/mw4/meta/weapons/M4%20%2F%20Custom");
-    expect(attachmentMetaPath("mw4", "optic/red dot")).toBe("/mw4/meta/attachments/optic%2Fred%20dot");
-    expect(attachmentGroupMetaPath("mw4", "Rear Grip")).toBe("/mw4/meta/attachmentgroup/Rear%20Grip");
+    expect(weaponMetaPath("mw4", "M4 / Custom")).toBe("/meta/weapons/M4%20%2F%20Custom");
+    expect(attachmentMetaPath("mw4", "optic/red dot")).toBe("/meta/attachments/optic%2Fred%20dot");
+    expect(attachmentGroupMetaPath("mw4", "Rear Grip")).toBe("/meta/attachmentgroup/Rear%20Grip");
   });
 
   it("builds list paths", () => {
-    expect(weaponMetaListPath("mw4")).toBe("/mw4/meta/weapons");
-    expect(weaponMetaListPath("mw4", "Assault Rifles")).toBe("/mw4/meta/weapons?category=Assault%20Rifles");
-    expect(attachmentMetaListPath("mw4")).toBe("/mw4/meta/attachments");
-    expect(perkMetaListPath("mw4")).toBe("/mw4/meta/perks");
+    expect(gamePath("mw4", "meta")).toBe("/meta");
+    expect(weaponMetaListPath("mw4")).toBe("/meta/weapons");
+    expect(weaponMetaListPath("mw4", "Assault Rifles")).toBe("/meta/weapons?category=Assault%20Rifles");
+    expect(attachmentMetaListPath("mw4")).toBe("/meta/attachments");
+    expect(perkMetaListPath("mw4")).toBe("/meta/perks");
   });
 
   it("selects the loadout path from the content type", () => {
-    expect(loadoutPath("mw4", "123")).toBe("/mw4/weapon/123");
-    expect(loadoutPath("mw4", "123", "weapon_config")).toBe("/mw4/weapon/123");
-    expect(loadoutPath("mw4", "123", "full_loadout")).toBe("/mw4/l/123");
+    expect(loadoutPath("mw4", "123")).toBe("/cfg/123");
+    expect(loadoutPath("mw4", "123", "weapon_config")).toBe("/cfg/123");
+    expect(loadoutPath("mw4", "123", "full_loadout")).toBe("/l/123");
   });
 });

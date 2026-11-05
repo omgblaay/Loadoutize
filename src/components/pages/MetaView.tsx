@@ -31,6 +31,7 @@ import { sortWeaponCategories } from "@/lib/weaponCategories";
 import {
   attachmentGroupMetaPath,
   attachmentMetaPath,
+  gamePath,
   weaponMetaListPath,
   weaponMetaPath,
 } from "@/lib/routes";
@@ -312,7 +313,7 @@ export function MetaView() {
     return (
       <AppLayout
         selectedGame={selectedGame}
-        onGameSelect={(id) => navigate(`/${id}/meta`)}
+        onGameSelect={(id) => navigate(gamePath(id, "meta"))}
       >
         <DashboardSkeleton />
       </AppLayout>
@@ -322,7 +323,7 @@ export function MetaView() {
   return (
     <AppLayout
       selectedGame={selectedGame}
-      onGameSelect={(id) => navigate(`/${id}/meta`)}
+      onGameSelect={(id) => navigate(gamePath(id, "meta"))}
     >
       <header>
         <div className="relative flex flex-col gap-5 sm:flex-row sm:justify-between">

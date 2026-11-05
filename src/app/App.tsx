@@ -6,7 +6,7 @@ import { NotFound } from "@/components/pages/NotFound";
 import { CookieConsent } from "@/components/organisms/CookieConsent";
 import { Toaster } from "@/components/molecules/Toaster";
 import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "@/lib/games";
-import { explorePath, weaponMetaListPath } from "@/lib/routes";
+import { explorePath, loadoutPath, weaponMetaListPath } from "@/lib/routes";
 import { FULL_LOADOUTS_ENABLED } from "@/lib/contentVisibility";
 
 // ComponentTest.tsx is gitignored (a local-only scratch/preview page) -- a
@@ -55,6 +55,7 @@ const PerkMetaListView = lazy(() =>
     default: module.PerkMetaListView,
   })),
 );
+const gameRoutePath = (path: string) => `${GAME_SELECTOR_ENABLED ? "/:gameId" : ""}/${path}`;
 
 function GameRedirect() {
   const { gameId } = useParams();
@@ -88,13 +89,25 @@ function LegacyWeaponGroupRedirect() {
   return <Navigate to={weaponMetaListPath(gameId, weaponGroup)} replace />;
 }
 
+function LegacyConfigRedirect() {
+  const { gameId = LOCKED_GAME_ID, configId = "" } = useParams();
+  return <Navigate to={loadoutPath(gameId, configId)} replace />;
+}
+
 // Loadout links moved from /:gameId/loadout/:id to the shorter /:gameId/l/:id
 // -- this keeps any already-shared /loadout/ link (Discord, QR codes, etc.)
 // working instead of 404ing.
 function LegacyLoadoutRedirect() {
   const { gameId, loadoutId } = useParams();
   if (!FULL_LOADOUTS_ENABLED) return <Navigate to={explorePath(gameId)} replace />;
-  return <Navigate to={`/${gameId}/l/${loadoutId}`} replace />;
+  return <Navigate to={loadoutPath(gameId ?? LOCKED_GAME_ID, loadoutId ?? "", "full_loadout")} replace />;
+}
+
+function LegacyGamePathRedirect() {
+  const { gameId = "" } = useParams();
+  const location = useLocation();
+  const rest = location.pathname.slice(gameId.length + 1) || "/";
+  return <Navigate to={`${rest}${location.search}${location.hash}`} replace />;
 }
 
 // Fires once per full page load (App only mounts once -- route changes don't
@@ -135,15 +148,14 @@ function ScrollToTop() {
   return null;
 }
 
-// While the game selector is disabled, any /:gameId/* route for a game other
-// than LOCKED_GAME_ID redirects to its Modern Warfare 4 equivalent instead of
-// rendering — so switching is off everywhere, not just hidden from the UI.
+// Canonical routes have no gameId while the selector is locked. Keep this
+// guard for any prefixed route rendered under that configuration.
 function GameLock({ children }: { children: ReactNode }) {
   const { gameId } = useParams();
   const location = useLocation();
-  if (!GAME_SELECTOR_ENABLED && gameId !== LOCKED_GAME_ID) {
+  if (!GAME_SELECTOR_ENABLED && gameId && gameId !== LOCKED_GAME_ID) {
     const rest = location.pathname.split("/").slice(2).join("/");
-    return <Navigate to={`/${LOCKED_GAME_ID}${rest ? `/${rest}` : ""}${location.search}`} replace />;
+    return <Navigate to={`/${rest}${location.search}`} replace />;
   }
   return <>{children}</>;
 }
@@ -179,7 +191,7 @@ export default function App() {
           <Route path="/:gameId" element={<GameRedirect />} />
           <Route path="/:gameId/explore" element={<LegacyExploreRedirect />} />
           <Route
-            path="/:gameId/meta"
+            path={gameRoutePath("meta")}
             element={
               <GameLock>
                 <MetaView />
@@ -187,7 +199,7 @@ export default function App() {
             }
           />
           <Route
-            path="/:gameId/meta/weapons"
+            path={gameRoutePath("meta/weapons")}
             element={
               <GameLock>
                 <WeaponMetaListView />
@@ -196,14 +208,10 @@ export default function App() {
           />
           <Route
             path="/:gameId/meta/weapongroup/:weaponGroup"
-            element={
-              <GameLock>
-                <LegacyWeaponGroupRedirect />
-              </GameLock>
-            }
+            element={<LegacyWeaponGroupRedirect />}
           />
           <Route
-            path="/:gameId/meta/weapons/:weaponId"
+            path={gameRoutePath("meta/weapons/:weaponId")}
             element={
               <GameLock>
                 <WeaponMetaView />
@@ -211,7 +219,7 @@ export default function App() {
             }
           />
           <Route
-            path="/:gameId/meta/attachmentgroup/:attachmentGroup"
+            path={gameRoutePath("meta/attachmentgroup/:attachmentGroup")}
             element={
               <GameLock>
                 <AttachmentMetaListView />
@@ -219,7 +227,7 @@ export default function App() {
             }
           />
           <Route
-            path="/:gameId/meta/attachments"
+            path={gameRoutePath("meta/attachments")}
             element={
               <GameLock>
                 <AttachmentMetaListView />
@@ -227,7 +235,7 @@ export default function App() {
             }
           />
           <Route
-            path="/:gameId/meta/attachments/:attachmentId"
+            path={gameRoutePath("meta/attachments/:attachmentId")}
             element={
               <GameLock>
                 <AttachmentMetaView />
@@ -235,7 +243,7 @@ export default function App() {
             }
           />
           <Route
-            path="/:gameId/meta/perks"
+            path={gameRoutePath("meta/perks")}
             element={
               <GameLock>
                 <PerkMetaListView />
@@ -243,7 +251,7 @@ export default function App() {
             }
           />
           <Route
-            path="/:gameId/community"
+            path={gameRoutePath("community")}
             element={
               <GameLock>
                 <CommunityView />
@@ -251,7 +259,7 @@ export default function App() {
             }
           />
           <Route
-            path="/:gameId/create"
+            path={gameRoutePath("create")}
             element={
               <GameLock>
                 <LoadoutBuilder />
@@ -259,7 +267,7 @@ export default function App() {
             }
           />
           <Route
-            path="/:gameId/l/:loadoutId"
+            path={gameRoutePath("l/:loadoutId")}
             element={
               <GameLock>
                 {FULL_LOADOUTS_ENABLED ? <LoadoutPreview /> : <Navigate to="/explore" replace />}
@@ -267,14 +275,18 @@ export default function App() {
             }
           />
           <Route path="/:gameId/loadout/:loadoutId" element={<LegacyLoadoutRedirect />} />
+          <Route path="/:gameId/weapon/:configId" element={<LegacyConfigRedirect />} />
           <Route
-            path="/:gameId/weapon/:configId"
+            path={gameRoutePath("cfg/:configId")}
             element={
               <GameLock>
                 <LoadoutPreview />
               </GameLock>
             }
           />
+          {!GAME_SELECTOR_ENABLED && (
+            <Route path="/:gameId/*" element={<LegacyGamePathRedirect />} />
+          )}
           <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

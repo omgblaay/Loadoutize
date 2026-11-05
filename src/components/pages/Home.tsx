@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/atoms/Button";
 import { NavIcon } from "@/components/atoms/NavIcon";
 import gameLogo from "figma:asset/mw4_logo.png";
-import { explorePath } from "@/lib/routes";
+import { explorePath, gamePath } from "@/lib/routes";
 import { visibleWeaponCatalog } from "@/lib/weaponCategories";
 import { isVisibleConfig } from "@/lib/contentVisibility";
 
@@ -306,7 +306,7 @@ export function Home() {
 
         <button
           type="button"
-          onClick={() => navigate(`/${selectedGame}/meta`)}
+          onClick={() => navigate(gamePath(selectedGame, "meta"))}
           onPointerEnter={() => setHoveredAction("meta")}
           onPointerLeave={() => setHoveredAction(null)}
           onFocus={() => setHoveredAction("meta")}
@@ -339,7 +339,7 @@ export function Home() {
 
         <button
           type="button"
-          onClick={() => navigate(`/${selectedGame}/create`)}
+          onClick={() => navigate(gamePath(selectedGame, "create"))}
           onPointerEnter={() => setHoveredAction("create")}
           onPointerLeave={() => setHoveredAction(null)}
           onFocus={() => setHoveredAction("create")}

@@ -13,6 +13,10 @@ export interface MetaWeapon {
 
 export interface MetaLoadout {
   id: string;
+  gameId?: string;
+  userName?: string;
+  authorAvatarUrl?: string | null;
+  views?: number;
   contentType?: "full_loadout" | "weapon_config";
   name: string;
   description?: string;

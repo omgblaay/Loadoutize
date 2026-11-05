@@ -14,6 +14,7 @@ import {
   attachmentGroupMetaPath,
   attachmentMetaListPath,
   attachmentMetaPath,
+  gamePath,
 } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
@@ -194,7 +195,7 @@ export function AttachmentMetaListView() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate(`/${gameId}/meta`)}
+          onClick={() => navigate(gamePath(gameId, "meta"))}
         >
           <ArrowLeft className="size-4" />
           Meta dashboard

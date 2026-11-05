@@ -28,6 +28,7 @@ import {
 } from "@/components/molecules/Dialog";
 import { Button } from "@/components/atoms/Button";
 import { cn } from "@/lib/utils";
+import { gamePath } from "@/lib/routes";
 
 export function TopNavBar({
   activeLogoUrl,
@@ -131,7 +132,7 @@ export function TopNavBar({
               {" "}
               <Button
                 onClick={() =>
-                  user ? navigate(`/${selectedGame}/create`) : goToJoin()
+                  user ? navigate(gamePath(selectedGame, "create")) : goToJoin()
                 }
                 size="default"
               >

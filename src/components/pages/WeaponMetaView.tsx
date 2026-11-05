@@ -8,10 +8,16 @@ import { Skeleton } from "@/components/atoms/Skeleton";
 import { Button } from "@/components/atoms/Button";
 import { MetaTrendCharts } from "@/components/organisms/MetaTrendCharts";
 import { AttachmentSlotCard } from "@/components/organisms/AttachmentSlotCard";
+import { LoadoutCard } from "@/components/organisms/LoadoutCard";
+import { getGameColor } from "@/lib/gameColors";
+import { gameMeta } from "@/lib/games";
+import type { CardLoadout } from "@/types/loadout";
 import { cn } from "@/lib/utils";
 import {
   attachmentGroupMetaPath,
   attachmentMetaPath,
+  explorePath,
+  gamePath,
   loadoutPath,
   weaponMetaListPath,
 } from "@/lib/routes";
@@ -19,7 +25,6 @@ import { buildWeaponMetrics, ratingTier } from "@/lib/metaMetrics";
 import {
   useMetaData,
   type MetaAttachment,
-  type MetaLoadout,
 } from "@/hooks/useMetaData";
 
 const MIN_RATING_VOTES = 5;
@@ -70,7 +75,7 @@ export function WeaponMetaView() {
     weaponId: string;
   }>();
   const navigate = useNavigate();
-  const { loadouts, weapons, attachments, loading, error } =
+  const { loadouts, weapons, attachments, tags, loading, error } =
     useMetaData(gameId);
   const weapon = weapons.find((candidate) => String(candidate.id) === weaponId);
   const weaponGroupRank = useMemo(() => {
@@ -156,23 +161,31 @@ export function WeaponMetaView() {
       .sort((a, b) => a.type.localeCompare(b.type));
   }, [attachments, weaponLoadouts, weaponId]);
 
-  const topLoadouts = useMemo(
+  const topLoadouts = useMemo<CardLoadout[]>(
     () =>
       [...weaponLoadouts]
         .sort(
           (a, b) =>
+            Number(b.ratingPercent != null && b.likes + b.dislikes >= MIN_RATING_VOTES) -
+              Number(a.ratingPercent != null && a.likes + a.dislikes >= MIN_RATING_VOTES) ||
             (b.ratingPercent ?? -1) - (a.ratingPercent ?? -1) ||
             b.score - a.score,
         )
-        .slice(0, 5),
-    [weaponLoadouts],
+        .slice(0, 6)
+        .map((loadout) => ({
+          ...loadout,
+          gameId: loadout.gameId ?? gameId,
+          userName: loadout.userName ?? "",
+          views: loadout.views ?? 0,
+        })),
+    [gameId, weaponLoadouts],
   );
 
   if (loading) {
     return (
       <AppLayout
         selectedGame={gameId}
-        onGameSelect={(id) => navigate(`/${id}/meta`)}
+        onGameSelect={(id) => navigate(gamePath(id, "meta"))}
       >
         <WeaponMetaSkeleton />
       </AppLayout>
@@ -183,14 +196,14 @@ export function WeaponMetaView() {
     return (
       <AppLayout
         selectedGame={gameId}
-        onGameSelect={(id) => navigate(`/${id}/meta`)}
+        onGameSelect={(id) => navigate(gamePath(id, "meta"))}
       >
         <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-12 text-center">
           <h1 className="text-xl font-semibold ">Weapon data unavailable</h1>
           <p className="mt-2 text-sm text-teritary">
             {error ?? "This weapon could not be found in the current game."}
           </p>
-          <Button className="mt-5" onClick={() => navigate(`/${gameId}/meta`)}>
+          <Button className="mt-5" onClick={() => navigate(gamePath(gameId, "meta"))}>
             Back to Meta
           </Button>
         </div>
@@ -201,13 +214,13 @@ export function WeaponMetaView() {
   return (
     <AppLayout
       selectedGame={gameId}
-      onGameSelect={(id) => navigate(`/${id}/meta`)}
+      onGameSelect={(id) => navigate(gamePath(id, "meta"))}
     >
       <div>
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate(`/${gameId}/meta`)}
+          onClick={() => navigate(gamePath(gameId, "meta"))}
         >
           <ArrowLeft className="size-4" />
           Meta dashboard
@@ -218,7 +231,12 @@ export function WeaponMetaView() {
           <div className="order-2 min-w-0 md:order-1">
             <div className="mt-3 min-w-0">
               <h1 className="text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.9] uppercase tracking-[-0.04em] ">
-                {weapon.name}
+                <Link
+                  to={explorePath(gameId, { weapon: weaponId })}
+                  className="transition-colors hover:text-[#d8d1d7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                >
+                  {weapon.name}
+                </Link>
               </h1>
               {weapon.type && weaponGroupRank != null && (
                 <Link
@@ -306,51 +324,47 @@ export function WeaponMetaView() {
           No concrete attachment data is available for this weapon yet.
         </div>
       )}
-      {topLoadouts.length > 0 && (
-        <section className="">
+      <section className="mt-4 flex flex-col gap-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="mt-4 text-base ">Top {weapon.name} configs</h2>
-            <p className="mb-4 text-base text-teritary">
+            <h2 className="text-base font-semibold">Top {weapon.name} loadouts</h2>
+            <p className="mt-1 text-sm text-teritary">
               Highest-rated community builds using this weapon.
             </p>
           </div>
-          <div className="divide-y divide-white/[0.06] overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-            {topLoadouts.map((loadout: MetaLoadout, index) => (
-              <button
+          <Button variant="outline" size="sm" asChild>
+            <Link to={explorePath(gameId, { weapon: weaponId })}>
+              See all for this weapon
+              <ChevronRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+        {topLoadouts.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {topLoadouts.map((loadout, index) => (
+              <LoadoutCard
                 key={loadout.id}
-                type="button"
-                onClick={() =>
-                  navigate(
-                    loadoutPath(
-                      gameId,
-                      loadout.id,
-                      loadout.contentType ?? "weapon_config",
-                    ),
-                  )
-                }
-                className="group flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-white/[0.035] sm:px-5"
-              >
-                <span className="w-7 shrink-0 font-mono text-xs text-teritary">
-                  #{index + 1}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium ">{loadout.name}</p>
-                  <p className="mt-1 truncate text-xs text-teritary">
-                    {loadout.description || `${weapon.name} community loadout`}
-                  </p>
-                </div>
-                <RatingRing
-                  percent={loadout.ratingPercent}
-                  votes={loadout.likes + loadout.dislikes}
-                  size={42}
-                  fallbackLabel="New"
-                />
-                <ChevronRight className="size-4 shrink-0 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70" />
-              </button>
+                loadout={loadout}
+                weapons={weapons}
+                attachments={attachments}
+                tags={tags}
+                accent={getGameColor(gameId).primary}
+                gameShort={gameMeta[gameId]?.short ?? gameId.toUpperCase()}
+                index={index}
+                to={loadoutPath(
+                  gameId,
+                  loadout.id,
+                  loadout.contentType ?? "weapon_config",
+                )}
+              />
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <p className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-8 text-sm text-teritary">
+            No loadouts for this weapon yet.
+          </p>
+        )}
+      </section>
     </AppLayout>
   );
 }

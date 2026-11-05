@@ -7,7 +7,7 @@ import { ArrowLeft, Heart, Eye, User, Share2, Edit } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
-import { explorePath } from "@/lib/routes";
+import { explorePath, gamePath } from "@/lib/routes";
 
 interface WeaponConfig {
   id: string;
@@ -206,9 +206,7 @@ export function WeaponConfigPreview() {
               {canEdit && (
                 <button
                   onClick={() =>
-                    navigate(
-                      `/${gameId}/explore/weapon-builder?edit=${configId}`,
-                    )
+                    navigate(`${gamePath(gameId, "create")}?edit=${configId}`)
                   }
                   className="flex items-center gap-2 px-4 py-2 text-neutral-900 font-bold transition-opacity hover:opacity-90 bg-[#fafafa]"
                 >

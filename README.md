@@ -89,8 +89,8 @@ Published content uses two explicit types:
 
 | Type | URL | Contents |
 | --- | --- | --- |
-| Full loadout | `/:gameId/l/:loadoutId` | Primary and secondary weapons with attachments, melee, grouped perks, equipment, and an optional in-game code |
-| Weapon configuration | `/:gameId/weapon/:configId` | One weapon and its attachment setup |
+| Full loadout | `/l/:loadoutId` | Primary and secondary weapons with attachments, melee, grouped perks, equipment, and an optional in-game code |
+| Weapon configuration | `/cfg/:configId` | One weapon and its attachment setup |
 
 Reactions are stored relationally. Ratings are calculated from likes and dislikes after `MIN_RATING_VOTES` in [`src/lib/metaMetrics.ts`](src/lib/metaMetrics.ts), while favorites contribute to discovery score without changing the displayed approval percentage. Unqualified builds display as `New`. Tier thresholds include `+` and `-` grades, and `S+` additionally requires `MIN_S_PLUS_VOTES`.
 
@@ -132,21 +132,21 @@ The `@` import alias points to `src/`. The Vite configuration also resolves `fig
 | `/u/:nickname` | Public creator profile |
 | `/join`, `/auth/callback` | Sign-in and OAuth callback |
 | `/liked`, `/settings` | Saved favorites and account settings |
-| `/:gameId/meta` | Meta dashboard |
-| `/:gameId/meta/weapons` | Complete weapon ranking |
-| `/:gameId/meta/weapongroup/:weaponGroup` | Ranking for one weapon group |
-| `/:gameId/meta/weapons/:weaponId` | Weapon breakdown |
-| `/:gameId/meta/attachments` | Complete attachment ranking |
-| `/:gameId/meta/attachmentgroup/:attachmentGroup` | Ranking for one attachment group |
-| `/:gameId/meta/attachments/:attachmentId` | Attachment breakdown |
-| `/:gameId/meta/perks` | Perk ranking |
-| `/:gameId/community` | Creator community |
-| `/:gameId/create` | Full-loadout and weapon-configuration builder |
-| `/:gameId/l/:loadoutId` | Shared full loadout |
-| `/:gameId/weapon/:configId` | Shared weapon configuration |
+| `/meta` | Meta dashboard |
+| `/meta/weapons` | Complete weapon ranking |
+| `/meta/weapons?category=:weaponGroup` | Ranking for one weapon group |
+| `/meta/weapons/:weaponId` | Weapon breakdown |
+| `/meta/attachments` | Complete attachment ranking |
+| `/meta/attachmentgroup/:attachmentGroup` | Ranking for one attachment group |
+| `/meta/attachments/:attachmentId` | Attachment breakdown |
+| `/meta/perks` | Perk ranking |
+| `/community` | Creator community |
+| `/create` | Full-loadout and weapon-configuration builder |
+| `/l/:loadoutId` | Shared full loadout |
+| `/cfg/:configId` | Shared weapon configuration |
 | `/privacy`, `/terms` | Legal pages |
 
-Legacy `/:gameId/explore` and `/:gameId/loadout/:loadoutId` links redirect to the current routes.
+While only MW4 is enabled, legacy `/:gameId/*` links redirect to the unprefixed routes. Game-prefixed URLs return when the multi-game selector is enabled.
 
 ## Deployment
 

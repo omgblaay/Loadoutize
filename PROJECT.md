@@ -73,14 +73,14 @@ See [Architecture](docs/ARCHITECTURE.md) for naming and dependency conventions.
 | `/join`                     | `Join`                            | Combined login/signup, Google OAuth                                   |
 | `/auth/callback`            | `AuthCallback`                    | OAuth redirect handler                                                |
 | `/privacy`, `/terms`        | `PrivacyPolicy`, `TermsOfService` | Legal                                                                 |
-| `/:gameId/explore`          | `GameDashboard`                   | Public loadout feed                                                   |
-| `/:gameId/meta`             | `MetaView`                        | Weapon tier list / meta rankings                                      |
-| `/:gameId/community`        | `CommunityView`                   | Per-game community/members                                            |
-| `/:gameId/create`           | `LoadoutBuilder`                  | Requires auth                                                         |
-| `/:gameId/l/:loadoutId`     | `LoadoutPreview`                  | Single loadout page (public)                                          |
-| `/:gameId/weapon/:configId` | `WeaponConfigPreview`             | Single saved weapon build                                             |
+| `/explore`          | `Explore`                   | Public loadout feed                                                   |
+| `/meta`             | `MetaView`                        | Weapon tier list / meta rankings                                      |
+| `/community`        | `CommunityView`                   | Creator community/members                                             |
+| `/create`           | `LoadoutBuilder`                  | Requires auth                                                         |
+| `/l/:loadoutId`     | `LoadoutPreview`                  | Single loadout page (public)                                          |
+| `/cfg/:configId` | `LoadoutPreview`             | Single saved weapon build                                             |
 
-`/:gameId/loadout/:loadoutId` (an older URL shape) permanently redirects to the shorter `/:gameId/l/:loadoutId`, so previously shared links keep working. All `:gameId` routes pass through a `GameLock` wrapper that redirects to MW4 while the multi-game switcher is disabled.
+Legacy `/:gameId/*` links redirect to the unprefixed routes while only MW4 is enabled. Game-prefixed URLs return when the multi-game switcher is enabled.
 
 ### Auth
 

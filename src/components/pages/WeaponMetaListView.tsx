@@ -10,7 +10,7 @@ import { WeaponImage } from "@/components/molecules/WeaponImage";
 import { useMetaData } from "@/hooks/useMetaData";
 import { buildWeaponMetrics } from "@/lib/metaMetrics";
 import { sortWeaponCategories } from "@/lib/weaponCategories";
-import { weaponMetaListPath, weaponMetaPath } from "@/lib/routes";
+import { gamePath, weaponMetaListPath, weaponMetaPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
 
@@ -142,7 +142,7 @@ export function WeaponMetaListView() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate(`/${gameId}/meta`)}
+          onClick={() => navigate(gamePath(gameId, "meta"))}
         >
           <ArrowLeft className="size-4" />
           Meta dashboard
