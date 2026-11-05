@@ -20,6 +20,7 @@ import type {
 import { Button } from "@/components/atoms/Button";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
+import { visibleWeaponCatalog } from "@/lib/weaponCategories";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Settings as SettingsIcon, Download } from "lucide-react";
 import {
@@ -174,7 +175,7 @@ export function UserPage() {
               (l: Loadout) => l.userId === userId && l.contentType !== "full_loadout",
             ),
             catalog: {
-              weapons: weaponsRes.weapons ?? [],
+              weapons: visibleWeaponCatalog<CardWeapon>(weaponsRes.weapons ?? []),
               attachments: attachmentsRes.attachments ?? [],
               tags: tagsRes.tags ?? [],
             } as GameCatalog,

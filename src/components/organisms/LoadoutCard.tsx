@@ -108,11 +108,6 @@ export function LoadoutCard({
           {" "}{loadout.name}
         </h3> */}
         <div className="flex-1 min-w-0 flex flex-col gap-0 justify-center">
-          <span className="mb-1 font-mono text-[9px] uppercase tracking-[0.12em] text-teritary">
-            {loadout.contentType === "full_loadout"
-              ? "Full loadout"
-              : "Weapon config"}
-          </span>
           <h3 className="text-base font-sans font-semibold">{loadout.name}</h3>
           <p className="text-sm text-teritary truncate">
             {/* {loadout.video && (

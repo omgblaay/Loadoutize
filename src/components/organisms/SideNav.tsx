@@ -71,7 +71,7 @@ export function SideNav({
       label: "Best weapons",
       path: weaponMetaListPath(selectedGame),
       icon: Crosshair,
-      active: /^\/[^/]+\/meta\/(?:weapons|weapongroup)(?:\/|$)/.test(
+      active: /^\/[^/]+\/meta\/weapons(?:\/|$)/.test(
         location.pathname,
       ),
     },

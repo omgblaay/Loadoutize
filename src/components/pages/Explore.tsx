@@ -34,7 +34,7 @@ import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
-import { sortWeaponCategories } from "@/lib/weaponCategories";
+import { sortWeaponCategories, visibleWeaponCatalog } from "@/lib/weaponCategories";
 import { CompactPageHeader } from "@/components/molecules/CompactPageHeader";
 import { Button } from "@/components/atoms/Button";
 import { ResponsiveDialog } from "@/components/molecules/ResponsiveDialog";
@@ -63,17 +63,15 @@ function ExploreSkeleton() {
 
   return (
     <>
-      {/* Header: title + search */}
-      <div className="flex items-center gap-5 w-full flex-wrap">
+      {/* Header */}
+      <div className="flex items-center gap-5 w-full">
         <Skeleton className={cn("h-9 w-32 shrink-0", block)} />
-        <Skeleton
-          className={cn("h-10 flex-1 min-w-[200px] rounded-xl", block)}
-        />
       </div>
 
-      {/* Filter / sort row */}
+      {/* Filter / search / sort row */}
       <div className="flex items-center gap-3 w-full flex-wrap">
         <Skeleton className={cn("h-10 w-24 rounded-xl", block)} />
+        <Skeleton className={cn("order-3 h-10 w-full rounded-xl sm:order-none sm:w-auto sm:min-w-[160px] sm:flex-1", block)} />
         <Skeleton className={cn("h-10 w-28 rounded-xl ml-auto", block)} />
       </div>
 
@@ -161,7 +159,7 @@ export function Explore() {
       },
     )
       .then((r) => r.json())
-      .then((data) => setWeapons(data.weapons ?? []))
+      .then((data) => setWeapons(visibleWeaponCatalog<CardWeapon>(data.weapons ?? [])))
       .catch((error) => console.error("Error fetching weapons:", error));
 
     fetch(
@@ -327,8 +325,8 @@ export function Explore() {
       selectedGame={selectedGame}
       onGameSelect={(id) => navigate(explorePath(id))}
     >
-      {/* Header: title + search */}
-      <div className="flex items-center gap-5 w-full flex-wrap">
+      {/* Header */}
+      <div className="flex items-center gap-5 w-full">
         <h1 className="text-3xl font-semibold bg-clip-text shrink-0 flex items-center gap-3">
           <NavIcon
             icon="explore"
@@ -339,11 +337,6 @@ export function Explore() {
           />
           Explore
         </h1>
-        <SearchBar
-          isExplore={false}
-          value={searchQuery}
-          onChange={setSearchQuery}
-        />
       </div>
       <CompactPageHeader
         title={
@@ -361,7 +354,7 @@ export function Explore() {
       />
 
       <div className="flex items-center gap-3 w-full flex-wrap">
-        <div className="flex-1 flex items-center gap-3 flex-wrap min-w-0">
+        <div className="flex items-center gap-3 shrink-0">
           <Button
             variant="outline"
             className="h-10 px-3.5"
@@ -375,17 +368,16 @@ export function Explore() {
               </span>
             )}
           </Button>
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="text-destructive hover:text-red-500"
-            >
-              Clear filters
-            </button>
-          )}
         </div>
-        <div className="relative">
+        <div className="order-3 w-full min-w-0 sm:order-none sm:w-auto sm:min-w-[160px] sm:flex-1">
+          <SearchBar
+            isExplore={false}
+            value={searchQuery}
+            onChange={setSearchQuery}
+            className="h-10"
+          />
+        </div>
+        <div className="relative ml-auto shrink-0">
           <button
             onClick={() => setSortMenuOpen((v) => !v)}
             aria-expanded={sortMenuOpen}
@@ -432,6 +424,16 @@ export function Explore() {
           )}
         </div>
       </div>
+
+      {hasActiveFilters && (
+        <button
+          type="button"
+          onClick={clearFilters}
+          className="self-start text-sm text-destructive hover:text-red-500"
+        >
+          Clear filters
+        </button>
+      )}
 
       {/* Applied filter chips */}
       {(activeWeaponId || activeCategory || activeTagId != null) && (

@@ -14,7 +14,7 @@ import type { Loadout } from "@/types/loadout";
 import {
   explorePath,
   loadoutPath,
-  weaponGroupMetaPath,
+  weaponMetaListPath,
   weaponMetaPath,
 } from "@/lib/routes";
 import {
@@ -64,8 +64,8 @@ const TOP_WEAPON_CATEGORIES = [
   },
   {
     name: "Sniper Rifles",
-    short: "SNP",
-    aliases: ["snp", "sniper", "sniper rifle", "sniper rifles"],
+    short: "SR",
+    aliases: ["sr", "snp", "sniper", "sniper rifle", "sniper rifles"],
   },
 ] as const;
 
@@ -163,7 +163,7 @@ export function HomeExplorePreview({
                 <button
                   type="button"
                   onClick={() =>
-                    navigate(weaponGroupMetaPath(selectedGame, categoryName))
+                    navigate(weaponMetaListPath(selectedGame, categoryName))
                   }
                   className="group/category flex w-full items-center gap-3 border-b border-white/[0.07] px-4 py-3 text-left transition-colors hover:bg-white/[0.035]"
                 >

@@ -13,7 +13,7 @@ import {
   attachmentGroupMetaPath,
   attachmentMetaPath,
   loadoutPath,
-  weaponGroupMetaPath,
+  weaponMetaListPath,
 } from "@/lib/routes";
 import { buildWeaponMetrics, ratingTier } from "@/lib/metaMetrics";
 import {
@@ -222,7 +222,7 @@ export function WeaponMetaView() {
               </h1>
               {weapon.type && weaponGroupRank != null && (
                 <Link
-                  to={weaponGroupMetaPath(gameId, weapon.type)}
+                  to={weaponMetaListPath(gameId, weapon.type)}
                   className="group mt-3 inline-flex items-center gap-1.5 text-sm text-secondary transition-colors hover:"
                 >
                   Top {weaponGroupRank} in {weapon.type}

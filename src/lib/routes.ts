@@ -24,12 +24,9 @@ export function weaponMetaPath(gameId: string, weaponId: string) {
   return `/${gameId}/meta/weapons/${encodeURIComponent(weaponId)}`;
 }
 
-export function weaponMetaListPath(gameId: string) {
-  return `/${gameId}/meta/weapons`;
-}
-
-export function weaponGroupMetaPath(gameId: string, weaponGroup: string) {
-  return `/${gameId}/meta/weapongroup/${encodeURIComponent(weaponGroup)}`;
+export function weaponMetaListPath(gameId: string, category?: string) {
+  const path = `/${gameId}/meta/weapons`;
+  return category ? `${path}?category=${encodeURIComponent(category)}` : path;
 }
 
 export function attachmentMetaPath(gameId: string, attachmentId: string) {

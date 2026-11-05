@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { ArrowLeft, ChevronRight, Paperclip, Search } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, ChevronDown, ChevronRight, Paperclip, Search } from "lucide-react";
 import { AppLayout } from "@/components/templates/AppLayout";
 import { Button } from "@/components/atoms/Button";
 import { Input } from "@/components/atoms/Input";
@@ -23,6 +23,8 @@ interface AttachmentMetric {
   share: number;
   avgRating: number | null;
 }
+
+type SortKey = "rank" | "attachment" | "slot" | "usage" | "rating";
 
 function isConcreteAttachment(name: string) {
   const normalized = name.trim().toLowerCase();
@@ -50,7 +52,13 @@ export function AttachmentMetaListView() {
   }>();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("rank");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const { loadouts, attachments, loading, error } = useMetaData(gameId);
+  const slots = useMemo(
+    () => Array.from(new Set(attachments.map((attachment) => attachment.type))).sort(),
+    [attachments],
+  );
 
   const attachmentMetrics = useMemo<AttachmentMetric[]>(() => {
     const groupAttachments = attachments.filter(
@@ -113,6 +121,50 @@ export function AttachmentMetaListView() {
       ),
     );
   }, [attachmentMetrics, search]);
+  const rankedIds = useMemo(
+    () => new Map(attachmentMetrics.map((metric, index) => [metric.attachment.id, index + 1])),
+    [attachmentMetrics],
+  );
+  const displayedMetrics = useMemo(() => {
+    const value = (metric: AttachmentMetric): string | number => {
+      switch (sortKey) {
+        case "rank": return rankedIds.get(metric.attachment.id) ?? 0;
+        case "attachment": return attachmentDisplayName(metric.attachment);
+        case "slot": return metric.attachment.type;
+        case "usage": return metric.count;
+        case "rating": return metric.avgRating ?? -1;
+      }
+    };
+    return [...filteredMetrics].sort((a, b) => {
+      const aValue = value(a);
+      const bValue = value(b);
+      const comparison = typeof aValue === "string" && typeof bValue === "string"
+        ? aValue.localeCompare(bValue)
+        : Number(aValue) - Number(bValue);
+      return (sortDirection === "asc" ? 1 : -1) * comparison ||
+        (rankedIds.get(a.attachment.id) ?? 0) - (rankedIds.get(b.attachment.id) ?? 0);
+    });
+  }, [filteredMetrics, rankedIds, sortDirection, sortKey]);
+  const changeSort = (key: SortKey) => {
+    if (key === sortKey) setSortDirection((direction) => direction === "asc" ? "desc" : "asc");
+    else {
+      setSortKey(key);
+      setSortDirection(key === "usage" || key === "rating" ? "desc" : "asc");
+    }
+  };
+  const sortHeader = (key: SortKey, label: string) => (
+    <button
+      type="button"
+      onClick={() => changeSort(key)}
+      aria-label={`Sort by ${label}`}
+      className="inline-flex items-center gap-1 text-left hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+    >
+      {label}
+      {sortKey === key
+        ? sortDirection === "asc" ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" />
+        : <ArrowUpDown className="size-3 opacity-50" />}
+    </button>
+  );
 
   const typeImageUrl = attachmentGroup
     ? attachmentMetrics[0]?.attachment.typeImageUrl
@@ -177,17 +229,37 @@ export function AttachmentMetaListView() {
         </div>
       </header>
 
-      <Input
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        placeholder={
-          attachmentGroup
-            ? `Search ${attachmentGroup.toLowerCase()} attachments...`
-            : "Search attachments or slots..."
-        }
-        aria-label="Search attachments"
-        icon={<Search className="size-5 text-teritary" />}
-      />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="min-w-0 flex-1">
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search attachments or slots..."
+            aria-label="Search attachments"
+            icon={<Search className="size-5 text-teritary" />}
+          />
+        </div>
+        <div className="relative sm:w-56 sm:shrink-0">
+          <select
+            value={attachmentGroup ?? "all"}
+            onChange={(event) =>
+              navigate(
+                event.target.value === "all"
+                  ? attachmentMetaListPath(gameId)
+                  : attachmentGroupMetaPath(gameId, event.target.value),
+              )
+            }
+            aria-label="Filter by attachment slot"
+            className="h-[52px] w-full appearance-none rounded-xl border border-white/[0.18] bg-[#1c191b] pl-4 pr-10 text-sm text-[#fafafa] outline-none hover:border-white/40 focus-visible:ring-2 focus-visible:ring-white/60"
+          >
+            <option value="all">All slots</option>
+            {slots.map((slot) => (
+              <option key={slot} value={slot}>{slot}</option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-teritary" aria-hidden="true" />
+        </div>
+      </div>
 
       {error ? (
         <div className="rounded-2xl border border-red-400/15 bg-red-400/[0.05] p-12 text-center text-secondary">
@@ -201,22 +273,18 @@ export function AttachmentMetaListView() {
         </div>
       ) : (
         <section className="overflow-x-auto rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-          <div className="min-w-[720px]">
-            <div className="grid grid-cols-[3rem_minmax(240px,1.5fr)_minmax(140px,0.8fr)_7rem_7rem_2rem] items-center gap-4 border-b border-white/[0.08] bg-white/[0.025] px-5 py-3 text-[11px] uppercase tracking-[0.08em] text-teritary">
-              <span>Rank</span>
-              <span>Attachment</span>
-              <span>Slot</span>
-              <span>Usage</span>
-              <span className="text-center">Avg. rating</span>
+          <div className="min-w-[800px]">
+            <div className="grid grid-cols-[3rem_minmax(300px,1.5fr)_minmax(140px,0.8fr)_7rem_7rem_2rem] items-center gap-4 border-b border-white/[0.08] bg-white/[0.025] px-5 py-3 text-[11px] uppercase tracking-[0.08em] text-teritary">
+              {sortHeader("rank", "Rank")}
+              {sortHeader("attachment", "Attachment")}
+              {sortHeader("slot", "Slot")}
+              {sortHeader("usage", "Usage")}
+              <span className="flex justify-center">{sortHeader("rating", "Avg. rating")}</span>
               <span />
             </div>
             <div className="divide-y divide-white/[0.06]">
-              {filteredMetrics.map((metric) => {
-                const rank =
-                  attachmentMetrics.findIndex(
-                    (candidate) =>
-                      candidate.attachment.id === metric.attachment.id,
-                  ) + 1;
+              {displayedMetrics.map((metric) => {
+                const rank = rankedIds.get(metric.attachment.id);
                 return (
                   <button
                     key={metric.attachment.id}
@@ -229,14 +297,14 @@ export function AttachmentMetaListView() {
                         ),
                       )
                     }
-                    className="group grid w-full grid-cols-[3rem_minmax(240px,1.5fr)_minmax(140px,0.8fr)_7rem_7rem_2rem] items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.035]"
+                    className="group grid w-full grid-cols-[3rem_minmax(300px,1.5fr)_minmax(140px,0.8fr)_7rem_7rem_2rem] items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.035]"
                   >
                     <span className="font-mono text-xs text-teritary">
                       #{rank}
                     </span>
                     <span className="flex min-w-0 items-center gap-4">
-                      <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-black/20 p-2">
-                        <AttachmentIcon attachment={metric.attachment} className="size-8" />
+                      <span className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-black/20 p-2">
+                        <AttachmentIcon attachment={metric.attachment} className="size-12" />
                       </span>
                       <span className="truncate font-mono text-sm uppercase">
                         {attachmentDisplayName(metric.attachment)}

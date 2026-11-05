@@ -6,7 +6,7 @@ import { NotFound } from "@/components/pages/NotFound";
 import { CookieConsent } from "@/components/organisms/CookieConsent";
 import { Toaster } from "@/components/molecules/Toaster";
 import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "@/lib/games";
-import { explorePath } from "@/lib/routes";
+import { explorePath, weaponMetaListPath } from "@/lib/routes";
 import { FULL_LOADOUTS_ENABLED } from "@/lib/contentVisibility";
 
 // ComponentTest.tsx is gitignored (a local-only scratch/preview page) -- a
@@ -81,6 +81,11 @@ function LegacyExploreRedirect() {
   const params = Object.fromEntries(new URLSearchParams(location.search));
   delete params.game;
   return <Navigate to={explorePath(target, params)} replace />;
+}
+
+function LegacyWeaponGroupRedirect() {
+  const { gameId = LOCKED_GAME_ID, weaponGroup = "" } = useParams();
+  return <Navigate to={weaponMetaListPath(gameId, weaponGroup)} replace />;
 }
 
 // Loadout links moved from /:gameId/loadout/:id to the shorter /:gameId/l/:id
@@ -193,7 +198,7 @@ export default function App() {
             path="/:gameId/meta/weapongroup/:weaponGroup"
             element={
               <GameLock>
-                <WeaponMetaListView />
+                <LegacyWeaponGroupRedirect />
               </GameLock>
             }
           />

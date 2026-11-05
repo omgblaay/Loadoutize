@@ -21,6 +21,7 @@ import { Button } from "@/components/atoms/Button";
 import { NavIcon } from "@/components/atoms/NavIcon";
 import gameLogo from "figma:asset/mw4_logo.png";
 import { explorePath } from "@/lib/routes";
+import { visibleWeaponCatalog } from "@/lib/weaponCategories";
 import { isVisibleConfig } from "@/lib/contentVisibility";
 
 interface Game {
@@ -189,7 +190,7 @@ export function Home() {
         { headers: { Authorization: `Bearer ${publicAnonKey}` } },
       );
       const data = await response.json();
-      if (data.weapons) setWeapons(data.weapons);
+      if (data.weapons) setWeapons(visibleWeaponCatalog<CardWeapon>(data.weapons));
     } catch (error) {
       console.error("Error fetching weapons:", error);
     }

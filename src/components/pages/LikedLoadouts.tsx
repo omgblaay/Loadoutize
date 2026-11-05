@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { explorePath, loadoutPath } from "@/lib/routes";
+import { visibleWeaponCatalog } from "@/lib/weaponCategories";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -168,7 +169,7 @@ export function LikedLoadouts() {
             gameId,
             loadouts: ((loadoutsRes.loadouts ?? []) as Loadout[]).filter((l) => l.liked && l.contentType !== "full_loadout"),
             catalog: {
-              weapons: weaponsRes.weapons ?? [],
+              weapons: visibleWeaponCatalog<CardWeapon>(weaponsRes.weapons ?? []),
               attachments: attachmentsRes.attachments ?? [],
               tags: tagsRes.tags ?? [],
             } as GameCatalog,

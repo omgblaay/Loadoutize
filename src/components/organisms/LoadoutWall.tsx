@@ -3,6 +3,7 @@ import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { LOCKED_GAME_ID } from "@/lib/games";
 import { RatingRing } from "@/components/atoms/RatingRing";
 import { Tag } from "@/components/atoms/Tag";
+import { visibleWeaponCatalog } from "@/lib/weaponCategories";
 
 interface ShowcaseLoadout {
   id: string;
@@ -118,7 +119,7 @@ export function LoadoutWall() {
     ])
       .then(([loadoutsData, weaponsData]) => {
         const weaponById = new Map<string, any>(
-          (weaponsData.weapons ?? []).map((w: any) => [w.id, w]),
+          visibleWeaponCatalog(weaponsData.weapons ?? []).map((w: any) => [w.id, w]),
         );
         const built: ShowcaseLoadout[] = (loadoutsData.loadouts ?? [])
           .map((l: any): ShowcaseLoadout | null => {

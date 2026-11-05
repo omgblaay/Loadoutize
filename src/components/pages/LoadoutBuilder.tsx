@@ -38,7 +38,7 @@ import {
 import { ResponsiveDialog } from "@/components/molecules/ResponsiveDialog";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
-import { sortWeaponCategories } from "@/lib/weaponCategories";
+import { sortWeaponCategories, visibleWeaponCatalog } from "@/lib/weaponCategories";
 import { detectVideoPlatform, VIDEO_PLATFORM_META } from "@/lib/video";
 import { Container } from "@/components/atoms/Container";
 import { Button } from "@/components/atoms/Button";
@@ -462,11 +462,7 @@ export function LoadoutBuilder() {
       );
       const data = await response.json();
       if (data.weapons) {
-        setWeapons(
-          (data.weapons as Weapon[]).filter((weapon) =>
-            gameId !== "mw4" || (weapon.type !== "Melee / equipment" && !weapon.id.startsWith("rex_me_")),
-          ),
-        );
+        setWeapons(visibleWeaponCatalog(data.weapons as Weapon[]));
       }
     } catch (error) {
       console.error("Error fetching weapons:", error);

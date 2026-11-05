@@ -7,7 +7,6 @@ import {
   explorePath,
   loadoutPath,
   perkMetaListPath,
-  weaponGroupMetaPath,
   weaponMetaListPath,
   weaponMetaPath,
 } from "./routes";
@@ -25,13 +24,13 @@ describe("route builders", () => {
 
   it("encodes dynamic meta path segments", () => {
     expect(weaponMetaPath("mw4", "M4 / Custom")).toBe("/mw4/meta/weapons/M4%20%2F%20Custom");
-    expect(weaponGroupMetaPath("mw4", "Assault Rifles")).toBe("/mw4/meta/weapongroup/Assault%20Rifles");
     expect(attachmentMetaPath("mw4", "optic/red dot")).toBe("/mw4/meta/attachments/optic%2Fred%20dot");
     expect(attachmentGroupMetaPath("mw4", "Rear Grip")).toBe("/mw4/meta/attachmentgroup/Rear%20Grip");
   });
 
   it("builds list paths", () => {
     expect(weaponMetaListPath("mw4")).toBe("/mw4/meta/weapons");
+    expect(weaponMetaListPath("mw4", "Assault Rifles")).toBe("/mw4/meta/weapons?category=Assault%20Rifles");
     expect(attachmentMetaListPath("mw4")).toBe("/mw4/meta/attachments");
     expect(perkMetaListPath("mw4")).toBe("/mw4/meta/perks");
   });

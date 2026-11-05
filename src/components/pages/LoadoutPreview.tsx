@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { getGameColor } from "@/lib/gameColors";
 import { gameMeta } from "@/lib/games";
+import { visibleWeaponCatalog } from "@/lib/weaponCategories";
 import { useAuth } from "@/providers/AuthProvider";
 import { AppLayout } from "@/components/templates/AppLayout";
 import { useGameName } from "@/hooks/useGameName";
@@ -379,7 +380,7 @@ export function LoadoutPreview() {
       },
     )
       .then((r) => r.json())
-      .then((data) => setCatalogWeapons(data.weapons ?? []))
+      .then((data) => setCatalogWeapons(visibleWeaponCatalog<CardWeapon>(data.weapons ?? [])))
       .catch((error) => console.error("Error fetching weapons:", error));
 
     fetch(
