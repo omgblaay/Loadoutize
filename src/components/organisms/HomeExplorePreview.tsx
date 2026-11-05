@@ -319,7 +319,7 @@ export function HomeExplorePreview({
         </div>
       </section>
 
-      <section className="relative overflow-hidden rounded-2xl border border-white/[0.09] p-6 sm:p-8">
+      <section className="relative overflow-hidden ">
         <div className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full opacity-15 blur-[90px]" />
 
         <div className="relative flex gap-8">

@@ -69,7 +69,7 @@ export function TopNavBar({
   return (
     <div
       className={cn(
-        "w-full backdrop-blur-md bg-[rgba(6,5,9,0.6)] border-b border-white/[0.16] z-40",
+        "w-full backdrop-blur-md border-b border-white/[0.05] z-40",
         sticky && "sticky top-0",
       )}
     >
@@ -202,7 +202,8 @@ export function TopNavBar({
                   <DialogHeader>
                     <DialogTitle>Log out?</DialogTitle>
                     <DialogDescription>
-                      You'll need to sign back in to create or edit weapon configs.
+                      You'll need to sign back in to create or edit weapon
+                      configs.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>

@@ -190,7 +190,8 @@ export function Home() {
         { headers: { Authorization: `Bearer ${publicAnonKey}` } },
       );
       const data = await response.json();
-      if (data.weapons) setWeapons(visibleWeaponCatalog<CardWeapon>(data.weapons));
+      if (data.weapons)
+        setWeapons(visibleWeaponCatalog<CardWeapon>(data.weapons));
     } catch (error) {
       console.error("Error fetching weapons:", error);
     }
@@ -280,19 +281,19 @@ export function Home() {
           />
           <div className="relative flex h-full flex-col">
             <div className="flex items-start justify-between gap-4">
-              <span className="flex size-11 items-center justify-center rounded-xl border border-white/[0.1] bg-black/25">
+              <span>
                 <NavIcon
                   icon="explore"
-                  flat={<Globe className="size-5" />}
+                  flat={<Globe className="size-10 opacity-30" />}
                   active={false}
                   hovered={hoveredAction === "explore"}
-                  size={24}
+                  size={32}
                 />
               </span>
               <ChevronRight className="size-5 text-teritary transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white" />
             </div>
             <div className="mt-auto pt-7">
-              <p className="text-xl font-semibold text-white">
+              <p className="text-lg font-semibold text-white">
                 Explore configs
               </p>
               {/* <p className="mt-2 text-sm leading-6 text-teritary">
@@ -318,19 +319,17 @@ export function Home() {
           />
           <div className="relative flex h-full flex-col">
             <div className="flex items-start justify-between gap-4">
-              <span className="flex size-11 items-center justify-center rounded-xl border border-white/[0.1] bg-black/25">
-                <NavIcon
-                  icon="meta"
-                  flat={<Crown className="size-5" />}
-                  active={false}
-                  hovered={hoveredAction === "meta"}
-                  size={24}
-                />
-              </span>
+              <NavIcon
+                icon="meta"
+                flat={<Crown className="size-10 opacity-30" />}
+                active={false}
+                hovered={hoveredAction === "meta"}
+                size={32}
+              />
               <ChevronRight className="size-5 text-teritary transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white" />
             </div>
             <div className="mt-auto pt-7">
-              <p className="text-xl font-semibold text-white">Explore meta</p>
+              <p className="text-lg font-semibold text-white">Explore meta</p>
               {/* <p className="mt-2 text-sm leading-6 text-teritary">
                   See the weapons and attachments climbing the community rankings.
                 </p> */}
@@ -350,13 +349,11 @@ export function Home() {
           <div aria-hidden="true" className="bg-[#151314] absolute inset-0 " />
           <div className="relative flex h-full flex-col">
             <div className="flex items-start justify-between gap-4">
-              <span className="flex size-11 items-center justify-center rounded-xl border border-black/10 bg-black/10">
-                <Plus className="size-6 transition-transform duration-300 group-hover:rotate-90" />
-              </span>
+              <Plus className="size-10 transition-transform duration-300 group-hover:rotate-90" />
               <ChevronRight className="size-5 opacity-55 transition-transform duration-300 group-hover:translate-x-1 group-hover:opacity-100" />
             </div>
             <div className="mt-auto pt-7">
-              <p className="text-xl font-semibold">Create new</p>
+              <p className="text-lg font-semibold">Create new</p>
               {/* <p className="mt-2 text-sm leading-6 opacity-70">
                 Configure a weapon, add your notes, and share it with the
                 community.
