@@ -171,7 +171,9 @@ export function Home() {
           }),
         ),
       );
-      setLoadouts(results.flatMap((data) => data.loadouts ?? []).filter(isVisibleConfig));
+      setLoadouts(
+        results.flatMap((data) => data.loadouts ?? []).filter(isVisibleConfig),
+      );
     } catch (error) {
       console.error("Error fetching loadouts:", error);
       setLoadoutsError(true);
@@ -235,8 +237,8 @@ export function Home() {
 
   return (
     <AppLayout selectedGame={selectedGame} onGameSelect={setSelectedGame}>
-      <section className="relative overflow-hidden py-8 sm:py-12">
-        <div className="max-w-3xl">
+      <section className="relative overflow-hidden ">
+        <div className="max-w-[70rem]">
           <div className="flex min-w-0 flex-col items-start">
             <img
               src={gameLogo}
@@ -250,12 +252,11 @@ export function Home() {
               Loadoutize Meta Vault
             </p> */}
             <p className="mt-5 max-w-xl text-base leading-7 text-secondary sm:text-lg">
-              Discover community-built MW4 weapon configs. Compare ratings
-              and the live meta. Follow creator setups, and share weapon codes
-              or downloadable QR codes.
+              Discover community-built MW4 weapon configs. Compare ratings and
+              the live meta. Follow creator setups, and share weapon codes or
+              downloadable QR codes.
             </p>
           </div>
-
         </div>
       </section>
 
@@ -270,7 +271,7 @@ export function Home() {
           onPointerLeave={() => setHoveredAction(null)}
           onFocus={() => setHoveredAction("explore")}
           onBlur={() => setHoveredAction(null)}
-          className="group relative min-h-[180px] overflow-hidden rounded-2xl border border-white/[0.1]  p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="group relative overflow-hidden rounded-2xl border border-white/[0.1]  p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
           <div
             aria-hidden="true"
@@ -293,10 +294,10 @@ export function Home() {
               <p className="text-xl font-semibold text-white">
                 Explore configs
               </p>
-              <p className="mt-2 text-sm leading-6 text-teritary">
+              {/* <p className="mt-2 text-sm leading-6 text-teritary">
                 Find community builds, creator setups, and your next favorite
                 weapon.
-              </p>
+              </p> */}
             </div>
           </div>
         </button>
@@ -308,7 +309,7 @@ export function Home() {
           onPointerLeave={() => setHoveredAction(null)}
           onFocus={() => setHoveredAction("meta")}
           onBlur={() => setHoveredAction(null)}
-          className="group relative min-h-[180px] overflow-hidden rounded-2xl border border-white/[0.1] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="group relative overflow-hidden rounded-2xl border border-white/[0.1] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
           <div
             aria-hidden="true"
@@ -329,9 +330,9 @@ export function Home() {
             </div>
             <div className="mt-auto pt-7">
               <p className="text-xl font-semibold text-white">Explore meta</p>
-              <p className="mt-2 text-sm leading-6 text-teritary">
-                See the weapons and attachments climbing the community rankings.
-              </p>
+              {/* <p className="mt-2 text-sm leading-6 text-teritary">
+                  See the weapons and attachments climbing the community rankings.
+                </p> */}
             </div>
           </div>
         </button>
@@ -343,7 +344,7 @@ export function Home() {
           onPointerLeave={() => setHoveredAction(null)}
           onFocus={() => setHoveredAction("create")}
           onBlur={() => setHoveredAction(null)}
-          className="group relative min-h-[180px] overflow-hidden rounded-2xl border border-white/[0.1] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          className="group relative overflow-hidden rounded-2xl border border-white/[0.1] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
           <div aria-hidden="true" className="bg-[#151314] absolute inset-0 " />
           <div className="relative flex h-full flex-col">
@@ -355,22 +356,33 @@ export function Home() {
             </div>
             <div className="mt-auto pt-7">
               <p className="text-xl font-semibold">Create new</p>
-              <p className="mt-2 text-sm leading-6 opacity-70">
+              {/* <p className="mt-2 text-sm leading-6 opacity-70">
                 Configure a weapon, add your notes, and share it with the
                 community.
-              </p>
+              </p> */}
             </div>
           </div>
         </button>
       </section>
 
       {loadoutsError ? (
-        <section role="alert" className="rounded-2xl border border-white/[0.1] bg-white/[0.02] px-6 py-10 text-center">
+        <section
+          role="alert"
+          className="rounded-2xl border border-white/[0.1] bg-white/[0.02] px-6 py-10 text-center"
+        >
           <h2 className="text-xl text-white">Weapon configs are unavailable</h2>
-          <p className="mt-2 text-secondary">We couldn't load community builds. Please try again.</p>
+          <p className="mt-2 text-secondary">
+            We couldn't load community builds. Please try again.
+          </p>
           <Button
             className="mt-5"
-            onClick={() => fetchLoadouts(GAME_SELECTOR_ENABLED ? games.map((game) => game.id) : [LOCKED_GAME_ID])}
+            onClick={() =>
+              fetchLoadouts(
+                GAME_SELECTOR_ENABLED
+                  ? games.map((game) => game.id)
+                  : [LOCKED_GAME_ID],
+              )
+            }
           >
             Try again
           </Button>

@@ -222,6 +222,48 @@ export function HomeExplorePreview({
         </div>
       </section>
 
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-3">
+          <Link
+            to={explorePath(selectedGame)}
+            className="font-medium hover:text-teritary text-white flex items-center gap-1 shrink-0"
+          >
+            <h2 className="text-sm">Top Weapon Configs</h2>
+            <ChevronRight className="size-4" />
+          </Link>
+        </div>
+        {topLoadouts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            {topLoadouts.map((l, i) => (
+              <LoadoutCard
+                key={l.id}
+                loadout={l}
+                weapons={weapons}
+                attachments={attachments}
+                tags={tags}
+                accent={accent}
+                gameShort={gameShort}
+                index={i}
+                to={loadoutPath(
+                  l.gameId,
+                  l.id,
+                  l.contentType ?? "weapon_config",
+                )}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-6 py-10 text-center sm:py-16">
+            <p className="text-teritary">
+              No weapon configs published yet. Be the first to create one!
+            </p>
+            <Button onClick={() => navigate(`/${selectedGame}/create`)}>
+              Create weapon config
+            </Button>
+          </div>
+        )}
+      </div>
+
       <section className="relative mt-4  isolate overflow-hidden rounded-3xl border border-white/[0.1] bg-[#121011] p-5 sm:p-7 lg:p-8">
         <div
           aria-hidden="true"
@@ -276,48 +318,6 @@ export function HomeExplorePreview({
           </div>
         </div>
       </section>
-
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-3">
-          <Link
-            to={explorePath(selectedGame)}
-            className="font-medium hover:text-teritary text-white flex items-center gap-1 shrink-0"
-          >
-            <h2 className="text-sm">Top Weapon Configs</h2>
-            <ChevronRight className="size-4" />
-          </Link>
-        </div>
-        {topLoadouts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-            {topLoadouts.map((l, i) => (
-              <LoadoutCard
-                key={l.id}
-                loadout={l}
-                weapons={weapons}
-                attachments={attachments}
-                tags={tags}
-                accent={accent}
-                gameShort={gameShort}
-                index={i}
-                to={loadoutPath(
-                  l.gameId,
-                  l.id,
-                  l.contentType ?? "weapon_config",
-                )}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-6 py-10 text-center sm:py-16">
-            <p className="text-teritary">
-              No weapon configs published yet. Be the first to create one!
-            </p>
-            <Button onClick={() => navigate(`/${selectedGame}/create`)}>
-              Create weapon config
-            </Button>
-          </div>
-        )}
-      </div>
 
       <section className="relative overflow-hidden rounded-2xl border border-white/[0.09] p-6 sm:p-8">
         <div className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full opacity-15 blur-[90px]" />

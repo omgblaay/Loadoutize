@@ -83,12 +83,12 @@ export function SideNav({
         location.pathname,
       ),
     },
-    {
-      label: "Best perks",
-      path: perkMetaListPath(selectedGame),
-      icon: Shield,
-      active: location.pathname === perkMetaListPath(selectedGame),
-    },
+    // {
+    //   label: "Best perks",
+    //   path: perkMetaListPath(selectedGame),
+    //   icon: Shield,
+    //   active: location.pathname === perkMetaListPath(selectedGame),
+    // },
   ];
 
   const fullMenu = (
@@ -166,7 +166,6 @@ export function SideNav({
             key={path}
             state={active ? "active" : "default"}
             onClick={() => go(path)}
-            className="text-secondary text-xs"
           >
             <Icon className="size-4 shrink-0" />
             {label}
