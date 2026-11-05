@@ -113,7 +113,7 @@ export function WeaponMetaListView() {
       type="button"
       onClick={() => changeSort(key)}
       aria-label={`Sort by ${label}`}
-      className="inline-flex items-center gap-1 text-left hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+      className="inline-flex items-center gap-1 font-sans text-[11px] font-normal uppercase tracking-[0.08em] text-teritary text-left hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
     >
       {label}
       {sortKey === key
@@ -240,7 +240,7 @@ export function WeaponMetaListView() {
                           alt={metric.weapon.name}
                         />
                       </span>
-                      <span className="truncate font-mono text-sm uppercase ">
+                      <span className="truncate font-sans text-sm uppercase">
                         {metric.weapon.name}
                       </span>
                     </span>
