@@ -713,9 +713,7 @@ app.get("/make-server-6db475c7/games/:gameId/attachments", async (c) => {
     if (error) throw error;
 
     const urlById = await resolveImageUrls((data ?? []).flatMap((a: any) => [a.image, a.type_image]));
-    const attachments = (data ?? [])
-      .filter((a: any) => a.stats?.composable !== false || a.type_slug === 'apex')
-      .map((a: any) => ({
+    const attachments = (data ?? []).map((a: any) => ({
       id: a.id,
       name: a.name,
       description: a.description,

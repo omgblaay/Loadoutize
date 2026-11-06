@@ -18,7 +18,9 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/atoms/Button";
+import { SignInRequiredDialog } from "@/components/molecules/SignInRequiredDialog";
 import { NavIcon } from "@/components/atoms/NavIcon";
+import { useAuth } from "@/providers/AuthProvider";
 import gameLogo from "figma:asset/mw4_logo.png";
 import { explorePath, gamePath } from "@/lib/routes";
 import { visibleWeaponCatalog } from "@/lib/weaponCategories";
@@ -95,6 +97,8 @@ export function Home() {
   const [hoveredAction, setHoveredAction] = useState<
     "explore" | "meta" | "create" | null
   >(null);
+  const [signInRequiredOpen, setSignInRequiredOpen] = useState(false);
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -339,7 +343,11 @@ export function Home() {
 
         <button
           type="button"
-          onClick={() => navigate(gamePath(selectedGame, "create"))}
+          onClick={() =>
+            user
+              ? navigate(gamePath(selectedGame, "create"))
+              : setSignInRequiredOpen(true)
+          }
           onPointerEnter={() => setHoveredAction("create")}
           onPointerLeave={() => setHoveredAction(null)}
           onFocus={() => setHoveredAction("create")}
@@ -397,6 +405,11 @@ export function Home() {
           gameName={activeName}
         />
       )}
+      <SignInRequiredDialog
+        open={signInRequiredOpen}
+        onOpenChange={setSignInRequiredOpen}
+        returnTo={gamePath(selectedGame, "create")}
+      />
     </AppLayout>
   );
 }

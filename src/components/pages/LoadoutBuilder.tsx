@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { WeaponCard } from "@/components/organisms/WeaponCard";
 import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
+import { AttachmentGroupIcon } from "@/components/atoms/AttachmentGroupIcon";
 import {
   WeaponImage,
   type WeaponImageBadge,
@@ -38,7 +39,16 @@ import {
 import { ResponsiveDialog } from "@/components/molecules/ResponsiveDialog";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
-import { sortWeaponCategories, visibleWeaponCatalog } from "@/lib/weaponCategories";
+import {
+  sortWeaponCategories,
+  visibleWeaponCatalog,
+} from "@/lib/weaponCategories";
+import {
+  applyBuilderRelations,
+  getBuilderApexRelation,
+  type BuilderRelationAsset,
+} from "@/lib/weaponBuilderRelations";
+import { normalizePreviewSlot } from "@/lib/weaponSpritePreview";
 import { detectVideoPlatform, VIDEO_PLATFORM_META } from "@/lib/video";
 import { Container } from "@/components/atoms/Container";
 import { Button } from "@/components/atoms/Button";
@@ -78,7 +88,13 @@ interface Attachment {
   imageUrl?: string | null;
   weaponIds?: string[] | null;
   displayName?: string;
-  stats?: { assetId?: string; weaponIds?: string[]; displayName?: string; builderSelectable?: boolean; imagePath?: string } | null;
+  stats?: {
+    assetId?: string;
+    weaponIds?: string[];
+    displayName?: string;
+    builderSelectable?: boolean;
+    imagePath?: string;
+  } | null;
 }
 
 interface Perk {
@@ -125,7 +141,11 @@ interface LoadoutWeaponRef {
 
 const WEAPON_SLOTS: { id: WeaponSlot; label: string; description: string }[] = [
   { id: "primary", label: "Primary", description: "Main weapon" },
-  { id: "secondary", label: "Secondary", description: "Sidearm and attachments" },
+  {
+    id: "secondary",
+    label: "Secondary",
+    description: "Sidearm and attachments",
+  },
   { id: "melee", label: "Melee", description: "Close-range backup" },
 ];
 
@@ -150,7 +170,8 @@ const allowsAnyAttachment = (type: string) =>
 
 const MIN_REQUIRED_ATTACHMENTS = 1;
 const MAX_STANDARD_ATTACHMENTS = 5;
-const isApexAttachmentType = (type: string) => type.trim().toLowerCase() === "apex";
+const isApexAttachmentType = (type: string) =>
+  type.trim().toLowerCase() === "apex";
 const ANY_ATTACHMENT_VALUE = "__any__";
 
 function FinishActionLabel({
@@ -194,7 +215,9 @@ function AttachmentPickerList({
 }) {
   const [query, setQuery] = useState("");
   const filtered = options.filter((att) =>
-    (att.displayName ?? att.name).toLowerCase().includes(query.trim().toLowerCase()),
+    (att.displayName ?? att.name)
+      .toLowerCase()
+      .includes(query.trim().toLowerCase()),
   );
 
   return (
@@ -247,7 +270,11 @@ function AttachmentPickerList({
           onClick={onDeselect}
           className="h-11 px-4 rounded-xl border border-[#d4183d]/30 flex items-center justify-between text-[14px] text-[#ef9696] hover:border-[#d4183d]/60 transition-colors"
         >
-          Clear {selected === ANY_ATTACHMENT_VALUE ? "Any" : options.find((option) => option.name === selected)?.displayName ?? selected}
+          Clear{" "}
+          {selected === ANY_ATTACHMENT_VALUE
+            ? "Any"
+            : (options.find((option) => option.name === selected)
+                ?.displayName ?? selected)}
           <X className="w-4 h-4" />
         </button>
       )}
@@ -377,10 +404,10 @@ export function LoadoutBuilder() {
     !FULL_LOADOUTS_ENABLED
       ? "weapon_config"
       : requestedType === "full_loadout" || requestedType === "weapon_config"
-      ? requestedType
-      : editId
-        ? "weapon_config"
-        : null,
+        ? requestedType
+        : editId
+          ? "weapon_config"
+          : null,
   );
   const [loadoutNameError, setLoadoutNameError] = useState("");
   const [loadoutDescription, setLoadoutDescription] = useState("");
@@ -390,6 +417,11 @@ export function LoadoutBuilder() {
   const [weapons, setWeapons] = useState<Weapon[]>([]);
   const [selectedWeapons, setSelectedWeapons] = useState<SelectedWeapon[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [relationAssets, setRelationAssets] = useState<BuilderRelationAsset[]>(
+    [],
+  );
+  const [relationRulesReady, setRelationRulesReady] = useState(false);
+  const [relationRulesFailed, setRelationRulesFailed] = useState(false);
   const [availablePerks, setAvailablePerks] = useState<Perk[]>([]);
   const [selectedPerks, setSelectedPerks] = useState<string[]>([]);
   const [availableEquipment, setAvailableEquipment] = useState<Equipment[]>([]);
@@ -445,6 +477,26 @@ export function LoadoutBuilder() {
     if (gameId) {
       fetchWeapons();
       fetchAttachments();
+      setRelationRulesReady(gameId !== "mw4");
+      setRelationRulesFailed(false);
+      if (gameId === "mw4") {
+        fetch("/weapon-preview/weapon-builder/catalog.json")
+          .then((response) => {
+            if (!response.ok)
+              throw new Error("Could not load weapon builder rules");
+            return response.json();
+          })
+          .then((catalog: { assets: BuilderRelationAsset[] }) => {
+            setRelationAssets(catalog.assets);
+            setRelationRulesReady(true);
+          })
+          .catch((error) => {
+            console.error("Error fetching weapon builder rules:", error);
+            setRelationRulesFailed(true);
+          });
+      } else {
+        setRelationAssets([]);
+      }
       fetchPerks();
       fetchEquipment();
       fetchTags();
@@ -481,12 +533,19 @@ export function LoadoutBuilder() {
       if (data.attachments) {
         setAttachments(
           (data.attachments as Attachment[])
-            .filter((attachment) => attachment.stats?.builderSelectable !== false)
+            .filter(
+              (attachment) => attachment.stats?.builderSelectable !== false,
+            )
             .map((attachment) => ({
               ...attachment,
-              weaponIds: attachment.weaponIds ?? attachment.stats?.weaponIds ?? null,
-              displayName: attachment.displayName ?? attachment.stats?.displayName ?? attachment.name,
-              imageUrl: attachment.imageUrl ?? attachment.stats?.imagePath ?? null,
+              weaponIds:
+                attachment.weaponIds ?? attachment.stats?.weaponIds ?? null,
+              displayName:
+                attachment.displayName ??
+                attachment.stats?.displayName ??
+                attachment.name,
+              imageUrl:
+                attachment.imageUrl ?? attachment.stats?.imagePath ?? null,
             })),
         );
       }
@@ -575,6 +634,19 @@ export function LoadoutBuilder() {
   };
 
   const saveLoadout = async () => {
+    if (!relationRulesReady) {
+      toast.error(
+        relationRulesFailed
+          ? "Weapon rules could not load"
+          : "Weapon rules are still loading",
+        {
+          description: relationRulesFailed
+            ? "Refresh the page and try again."
+            : "Wait for the builder rules to load before saving.",
+        },
+      );
+      return;
+    }
     const nameMissing = !loadoutName.trim();
     const attachmentsMissing =
       selectedAttachmentCount < MIN_REQUIRED_ATTACHMENTS;
@@ -585,9 +657,7 @@ export function LoadoutBuilder() {
     setLoadoutNameError(nameMissing ? "A loadout name is required." : "");
     setAttachmentError(attachmentsMissing);
     setVideoError(
-      videoInvalid
-        ? "Video must be a TikTok, Instagram, or YouTube link"
-        : "",
+      videoInvalid ? "Video must be a TikTok, Instagram, or YouTube link" : "",
     );
 
     if (nameMissing) {
@@ -628,9 +698,13 @@ export function LoadoutBuilder() {
         weapons: selectedWeapons.map((weapon) => ({
           ...weapon,
           attachments: Object.fromEntries(
-            Object.entries(weapon.attachments).filter(
-              ([, name]) => name !== ANY_ATTACHMENT_VALUE,
-            ),
+            Object.entries(
+              applyBuilderRelations(
+                weapon.attachments,
+                attachments,
+                relationAssets,
+              ),
+            ).filter(([, name]) => name !== ANY_ATTACHMENT_VALUE),
           ),
         })),
         perks: selectedPerks,
@@ -753,15 +827,41 @@ export function LoadoutBuilder() {
     slot: string,
     attachmentName: string,
   ) => {
-    const currentWeapon = selectedWeapons.find((weapon) => weapon.id === weaponId);
+    const currentWeapon = selectedWeapons.find(
+      (weapon) => weapon.id === weaponId,
+    );
+    const relation = getBuilderApexRelation(
+      currentWeapon?.attachments ?? {},
+      attachments,
+      relationAssets,
+    );
+    if (attachmentName && relation?.lockedSlots.has(normalizePreviewSlot(slot)))
+      return;
     if (
       attachmentName &&
       !isApexAttachmentType(slot) &&
       !currentWeapon?.attachments[slot] &&
       selectedAttachmentCount >= MAX_STANDARD_ATTACHMENTS
     ) {
-      toast.info("You can select up to five standard attachments. APEX is optional and does not count toward this limit.");
+      toast.info(
+        "You can select up to five standard attachments. APEX is optional and does not count toward this limit.",
+      );
       return;
+    }
+    if (attachmentName && isApexAttachmentType(slot) && currentWeapon) {
+      const next = applyBuilderRelations(
+        { ...currentWeapon.attachments, [slot]: attachmentName },
+        attachments,
+        relationAssets,
+      );
+      const removed = Object.keys(currentWeapon.attachments).filter(
+        (type) => type !== slot && !(type in next),
+      );
+      if (removed.length > 0) {
+        toast.info("APEX updated this build", {
+          description: `Removed incompatible ${removed.join(", ")} attachment${removed.length === 1 ? "" : "s"}.`,
+        });
+      }
     }
     setSelectedWeapons((prev) =>
       prev.map((w) => {
@@ -772,9 +872,21 @@ export function LoadoutBuilder() {
         } else {
           next[slot] = attachmentName;
         }
-        return { ...w, attachments: next };
+        return {
+          ...w,
+          attachments: applyBuilderRelations(next, attachments, relationAssets),
+        };
       }),
     );
+  };
+
+  const clearWeaponAttachments = (weaponId: string) => {
+    setSelectedWeapons((current) =>
+      current.map((weapon) =>
+        weapon.id === weaponId ? { ...weapon, attachments: {} } : weapon,
+      ),
+    );
+    setOpenAttachmentType(null);
   };
 
   const togglePerk = (perk: Perk) => {
@@ -788,10 +900,7 @@ export function LoadoutBuilder() {
           .filter((candidate) => candidate.slot === perk.slot)
           .map((candidate) => candidate.name),
       );
-      return [
-        ...current.filter((name) => !namesInGroup.has(name)),
-        perk.name,
-      ];
+      return [...current.filter((name) => !namesInGroup.has(name)), perk.name];
     });
   };
 
@@ -849,6 +958,28 @@ export function LoadoutBuilder() {
     setPendingWeaponRefs(null);
   }, [weapons, pendingWeaponRefs]);
 
+  useEffect(() => {
+    if (relationAssets.length === 0 || attachments.length === 0) return;
+    setSelectedWeapons((current) => {
+      let changed = false;
+      const next = current.map((weapon) => {
+        const normalized = applyBuilderRelations(
+          weapon.attachments,
+          attachments,
+          relationAssets,
+        );
+        if (
+          Object.keys(normalized).length ===
+          Object.keys(weapon.attachments).length
+        )
+          return weapon;
+        changed = true;
+        return { ...weapon, attachments: normalized };
+      });
+      return changed ? next : current;
+    });
+  }, [attachments, relationAssets]);
+
   const meta = gameMeta[gameId] ?? gameMeta.mw4;
 
   if (loading) {
@@ -873,17 +1004,24 @@ export function LoadoutBuilder() {
 
   const selectedWeapon =
     selectedWeapons.find((weapon) => weapon.slot === activeWeaponSlot) ?? null;
+  const selectedApexRelation = selectedWeapon
+    ? getBuilderApexRelation(
+        selectedWeapon.attachments,
+        attachments,
+        relationAssets,
+      )
+    : null;
   const attachmentsByType = attachments
-    .filter((attachment) =>
-      !selectedWeapon || !attachment.weaponIds || attachment.weaponIds.includes(selectedWeapon.id),
+    .filter(
+      (attachment) =>
+        !selectedWeapon ||
+        !attachment.weaponIds ||
+        attachment.weaponIds.includes(selectedWeapon.id),
     )
-    .reduce<Record<string, Attachment[]>>(
-    (acc, a) => {
+    .reduce<Record<string, Attachment[]>>((acc, a) => {
       (acc[a.type] ??= []).push(a);
       return acc;
-    },
-    {},
-  );
+    }, {});
   const attachmentTypes = Object.keys(attachmentsByType);
 
   const weaponTypes = sortWeaponCategories(
@@ -912,7 +1050,8 @@ export function LoadoutBuilder() {
     : [];
 
   const filteredWeapons = weapons.filter((weapon) => {
-    const category = `${weapon.type ?? ""} ${weapon.typeShort ?? ""}`.toLowerCase();
+    const category =
+      `${weapon.type ?? ""} ${weapon.typeShort ?? ""}`.toLowerCase();
     if (contentType === "full_loadout") {
       if (activeWeaponSlot === "secondary" && !category.includes("pistol"))
         return false;
@@ -941,6 +1080,14 @@ export function LoadoutBuilder() {
     }
     return true;
   });
+  const groupedWeapons = weaponTypes
+    .map((type) => {
+      const items = filteredWeapons.filter(
+        (weapon) => weapon.typeShort === type || weapon.type === type,
+      );
+      return { type, label: items[0]?.type ?? type, items };
+    })
+    .filter((group) => group.items.length > 0);
 
   if (!contentType) {
     return (
@@ -949,7 +1096,9 @@ export function LoadoutBuilder() {
         onGameSelect={(id) => navigate(gamePath(id, "create"))}
         breadcrumb={
           <>
-            <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>
+            <BreadcrumbLink to={explorePath(gameId)}>
+              {meta.short}
+            </BreadcrumbLink>
             <BreadcrumbSpacer />
             <span>Choose creation type</span>
           </>
@@ -964,8 +1113,8 @@ export function LoadoutBuilder() {
               What are you sharing?
             </h1>
             <p className="mt-3 leading-7 text-secondary">
-              Publish a complete class setup or focus on one finely tuned
-              weapon configuration.
+              Publish a complete class setup or focus on one finely tuned weapon
+              configuration.
             </p>
           </header>
 
@@ -980,8 +1129,8 @@ export function LoadoutBuilder() {
               </span>
               <h2 className="mt-14 text-2xl uppercase">Full loadout</h2>
               <p className="mt-3 max-w-md text-sm leading-6 text-teritary">
-                Primary and secondary builds, melee, perks, throwable,
-                tactical, and field upgrade—all in one shareable setup.
+                Primary and secondary builds, melee, perks, throwable, tactical,
+                and field upgrade—all in one shareable setup.
               </p>
               <span className="mt-6 flex items-center gap-2 text-sm text-secondary">
                 Build complete loadout
@@ -999,8 +1148,8 @@ export function LoadoutBuilder() {
               </span>
               <h2 className="mt-14 text-2xl uppercase">Weapon config</h2>
               <p className="mt-3 max-w-md text-sm leading-6 text-teritary">
-                Share one weapon and its attachments without building an
-                entire class around it.
+                Share one weapon and its attachments without building an entire
+                class around it.
               </p>
               <span className="mt-6 flex items-center gap-2 text-sm text-secondary">
                 Configure one weapon
@@ -1066,9 +1215,9 @@ export function LoadoutBuilder() {
       </div>
 
       <Container>
-        <h2 className="text-[16px] font-semibold">
+        {/* <h2 className="text-[16px] font-semibold">
           {contentType === "full_loadout" ? "Loadout details" : "Weapon config details"}
-        </h2>
+        </h2> */}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label
@@ -1091,8 +1240,14 @@ export function LoadoutBuilder() {
                 }
               }}
               aria-invalid={Boolean(loadoutNameError)}
-              aria-describedby={loadoutNameError ? "loadout-name-error" : undefined}
-              placeholder={contentType === "full_loadout" ? "Enter a name for this loadout" : "Enter a name for this weapon config"}
+              aria-describedby={
+                loadoutNameError ? "loadout-name-error" : undefined
+              }
+              placeholder={
+                contentType === "full_loadout"
+                  ? "Enter a name for this loadout"
+                  : "Enter a name for this weapon config"
+              }
               className={cn(
                 "h-12 rounded-xl border px-4 text-[14px] placeholder:text-[#8d898a] outline-none transition-colors",
                 loadoutNameError
@@ -1108,7 +1263,10 @@ export function LoadoutBuilder() {
           </div>
           {tags.length > 0 && (
             <div>
-              <span id="loadout-tag-label" className="block text-[12px] pb-2 tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+              <span
+                id="loadout-tag-label"
+                className="block text-[12px] pb-2 tracking-[0.5px] uppercase text-[#8d898a] font-semibold"
+              >
                 Tag
               </span>
               <ToggleGroup
@@ -1133,7 +1291,10 @@ export function LoadoutBuilder() {
             </div>
           )}
           <div className="flex flex-col gap-2">
-            <label htmlFor="loadout-description" className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+            <label
+              htmlFor="loadout-description"
+              className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold"
+            >
               Description (optional)
             </label>
             <textarea
@@ -1146,7 +1307,10 @@ export function LoadoutBuilder() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="loadout-code" className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold">
+            <label
+              htmlFor="loadout-code"
+              className="text-[12px] tracking-[0.5px] uppercase text-[#8d898a] font-semibold"
+            >
               In-game loadout code (optional)
             </label>
             <input
@@ -1196,13 +1360,18 @@ export function LoadoutBuilder() {
                   setVideoError("");
                 }}
                 aria-invalid={Boolean(videoError)}
-                aria-describedby={videoError ? "loadout-video-error" : undefined}
+                aria-describedby={
+                  videoError ? "loadout-video-error" : undefined
+                }
                 placeholder="Paste a TikTok, Instagram, or YouTube link"
                 className="flex-1 bg-transparent text-[14px]  placeholder:text-[#8d898a] outline-none"
               />
             </div>
             {videoError && (
-              <p id="loadout-video-error" className="text-[12px] text-[#ef9696]">
+              <p
+                id="loadout-video-error"
+                className="text-[12px] text-[#ef9696]"
+              >
                 {videoError}
               </p>
             )}
@@ -1217,11 +1386,20 @@ export function LoadoutBuilder() {
         )}
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className={cn("text-base", attachmentError && "text-[#ef9696]")}>Weapons</h2>
+          <div className="flex items-center gap-3">
+            <h2
+              className={cn("text-base", attachmentError && "text-[#ef9696]")}
+            >
+              Weapon Config
+            </h2>
+          </div>
           {attachmentError && (
             <p className="text-xs text-[#ef9696]" role="alert">
-              Choose {MIN_REQUIRED_ATTACHMENTS - selectedAttachmentCount} more attachment
-              {MIN_REQUIRED_ATTACHMENTS - selectedAttachmentCount === 1 ? "" : "s"}
+              Choose {MIN_REQUIRED_ATTACHMENTS - selectedAttachmentCount} more
+              attachment
+              {MIN_REQUIRED_ATTACHMENTS - selectedAttachmentCount === 1
+                ? ""
+                : "s"}
             </p>
           )}
         </div>
@@ -1263,43 +1441,83 @@ export function LoadoutBuilder() {
         )}
 
         {selectedWeapon && !pickingWeapon ? (
-          <>
-            <div className="flex flex-col items-center gap-3 pb-2">
-              <WeaponImage
-                imageUrl={selectedWeapon.imageUrl}
-                variant="small"
-                alt={selectedWeapon.name}
-                weaponId={selectedWeapon.id}
-                badges={selectedWeaponBadges}
-                enableSpritePreview={gameId === "mw4"}
-                highlightSlugs={selectedWeaponBadges.map(
-                  (badge) => badge.typeSlug,
+          <div className="grid items-start gap-6 lg:grid-cols-2 xl:gap-8">
+            <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-6">
+              <div className="flex min-h-48 items-center justify-center">
+                <WeaponImage
+                  imageUrl={selectedWeapon.imageUrl}
+                  variant="large"
+                  alt={selectedWeapon.name}
+                  weaponId={selectedWeapon.id}
+                  badges={selectedWeaponBadges}
+                  enableSpritePreview={gameId === "mw4"}
+                  highlightSlugs={selectedWeaponBadges.map(
+                    (badge) => badge.typeSlug,
+                  )}
+                />
+              </div>
+              <div className="min-w-0 flex items-center gap-3">
+                {selectedWeapon.typeShort && (
+                  <Tag>{selectedWeapon.typeShort}</Tag>
                 )}
-              />
-              <span className="text-xs uppercase tracking-[0.12em] text-teritary">
-                {activeWeaponSlot}
-              </span>
-              {selectedWeapon.name}
-              <Button variant="outline" onClick={() => setPickingWeapon(true)}>
-                Change weapon
-              </Button>
+                <p className="truncate flex-1 text-base font-medium">
+                  {selectedWeapon.name}
+                </p>
+                {selectedWeapon && !pickingWeapon && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-teritary"
+                    onClick={() => setPickingWeapon(true)}
+                  >
+                    Change weapon
+                  </Button>
+                )}
+              </div>
             </div>
 
-            <h2 className="text-xs">Attachments</h2>
+            <div className="flex min-w-0 flex-col gap-3">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-xs">Attachments</h2>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-teritary"
+                  disabled={
+                    Object.keys(selectedWeapon.attachments).length === 0
+                  }
+                  aria-label={`Clear all attachments for ${selectedWeapon.name}`}
+                  onClick={() => clearWeaponAttachments(selectedWeapon.id)}
+                >
+                  Clear
+                </Button>
+              </div>
 
-            {attachmentTypes.length === 0 ? (
-              <p className="text-teritary">
-                No attachments configured for this game yet.
-              </p>
-            ) : (
-              <div className="flex flex-col gap-1.5">
-                {attachmentTypes.map((type) => {
-                  const typeImageUrl = attachmentsByType[type][0]?.typeImageUrl;
-                  const selectedName = selectedWeapon.attachments[type];
-                  const isAnySelected = selectedName === ANY_ATTACHMENT_VALUE;
-                  return (
-                    <div key={type} className="flex flex-col">
-                      {/* <div className="flex items-center gap-1">
+              {attachmentTypes.length === 0 ? (
+                <p className="text-teritary">
+                  No attachments configured for this game yet.
+                </p>
+              ) : (
+                <div className="flex flex-col gap-1.5">
+                  {attachmentTypes.map((type) => {
+                    const typeImageUrl =
+                      attachmentsByType[type][0]?.typeImageUrl;
+                    const selectedName = selectedWeapon.attachments[type];
+                    const isAnySelected = selectedName === ANY_ATTACHMENT_VALUE;
+                    const selectedAttachment = attachmentsByType[type].find(
+                      (attachment) => attachment.name === selectedName,
+                    );
+                    const selectedImageUrl =
+                      selectedAttachment?.imageUrl ??
+                      selectedAttachment?.stats?.imagePath;
+                    const lockedSlot = selectedApexRelation?.lockedSlots.get(
+                      normalizePreviewSlot(type),
+                    );
+                    return (
+                      <div key={type} className="flex flex-col">
+                        {/* <div className="flex items-center gap-1">
                         <div>
                           {typeImageUrl ? (
                             <img src={typeImageUrl} alt="" className="size-5 opacity-80 object-contain" />
@@ -1311,61 +1529,106 @@ export function LoadoutBuilder() {
                           {type}
                         </p>
                       </div> */}
-                      <button
-                        type="button"
-                        onClick={() => setOpenAttachmentType(type)}
-                        className={cn(
-                          "h-12 px-4 rounded-xl border border-white/[0.12] flex items-center gap-2 text-left transition-colors hover:border-white/40",
-                          selectedName && "bg-white/5",
-                          attachmentError &&
-                            !selectedName &&
-                            "border-destructive/50 bg-destructive/[0.06] hover:border-destructive",
-                        )}
-                        aria-invalid={attachmentError && !selectedName}
-                      >
-                        <div className="flex gap-2 flex-1 flex-row">
-                          {isAnySelected ? (
-                            <span className="flex size-5 items-center justify-center font-mono text-xs text-teritary">
-                              ∞
-                            </span>
-                          ) : !selectedName ? (
-                            <Plus className="size-5 opacity-50" />
-                          ) : null}
-
-                          {typeImageUrl ? (
-                            <img
-                              src={typeImageUrl}
-                              alt=""
-                              className="size-5 opacity-80 object-contain"
-                            />
-                          ) : null}
-
-                          {isAnySelected ? (
-                            <>
-                              Any
-                              <span className="text-teritary font-normal">
-                                {type}
-                              </span>
-                            </>
-                          ) : selectedName ? (
-                            <>
-                              {attachmentsByType[type].find((attachment) => attachment.name === selectedName)?.displayName ?? selectedName}
-                              <span className="text-teritary font-normal">
-                                {type}
-                              </span>
-                            </>
-                          ) : (
-                            <span className="text-teritary">Add {type}</span>
+                        <button
+                          type="button"
+                          onClick={() => setOpenAttachmentType(type)}
+                          disabled={Boolean(lockedSlot)}
+                          className={cn(
+                            "h-12 px-4 rounded-xl border border-white/[0.12] flex items-center gap-2 text-left transition-colors hover:border-white/40",
+                            lockedSlot &&
+                              "cursor-not-allowed border-white/[0.07] text-teritary hover:border-white/[0.07]",
+                            selectedName && "bg-white/5",
+                            attachmentError &&
+                              !selectedName &&
+                              !lockedSlot &&
+                              "border-destructive/50 bg-destructive/[0.06] hover:border-destructive",
                           )}
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-teritary shrink-0" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </>
+                          aria-invalid={
+                            attachmentError && !selectedName && !lockedSlot
+                          }
+                          title={
+                            lockedSlot
+                              ? `${type} is controlled by ${selectedApexRelation?.apexName}`
+                              : undefined
+                          }
+                        >
+                          <div className="flex gap-2 flex-1 flex-row">
+                            {lockedSlot ? (
+                              <span
+                                className="size-5 text-center text-teritary"
+                                aria-hidden="true"
+                              >
+                                ×
+                              </span>
+                            ) : isAnySelected ? (
+                              <span className="flex size-5 items-center justify-center font-mono text-xs text-teritary">
+                                ∞
+                              </span>
+                            ) : null}
+
+                            {!lockedSlot &&
+                            selectedAttachment &&
+                            selectedImageUrl ? (
+                              <img
+                                src={selectedImageUrl}
+                                alt=""
+                                className="size-9 shrink-0 object-contain"
+                              />
+                            ) : !lockedSlot && selectedAttachment ? (
+                              <AttachmentIcon
+                                attachment={selectedAttachment}
+                                className="size-8"
+                              />
+                            ) : (
+                              <AttachmentGroupIcon
+                                type={type}
+                                imageUrl={typeImageUrl}
+                              />
+                            )}
+
+                            {lockedSlot ? (
+                              <span className="min-w-0 truncate">
+                                {lockedSlot.includedPart
+                                  ? `Included: ${lockedSlot.includedPart}`
+                                  : lockedSlot.included
+                                    ? `Included with ${selectedApexRelation?.apexName}`
+                                    : `${type} unavailable`}
+                                {!lockedSlot.included && (
+                                  <span className="ml-2 text-xs text-teritary">
+                                    {selectedApexRelation?.apexName}
+                                  </span>
+                                )}
+                              </span>
+                            ) : isAnySelected ? (
+                              <>
+                                Any
+                                <span className="text-teritary font-normal">
+                                  {type}
+                                </span>
+                              </>
+                            ) : selectedName ? (
+                              <>
+                                {selectedAttachment?.displayName ??
+                                  selectedName}
+                                <span className="text-teritary font-normal">
+                                  {type}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-teritary">Add {type}</span>
+                            )}
+                          </div>
+                          {!lockedSlot && (
+                            <ChevronRight className="w-4 h-4 text-teritary shrink-0" />
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
         ) : (
           <>
             {weaponSearchOpen && (
@@ -1424,23 +1687,33 @@ export function LoadoutBuilder() {
                 No weapons match your filters.
               </p>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredWeapons.map((weapon) => {
-                  const isSelected = selectedWeapons.some(
-                    (w) => w.id === weapon.id,
-                  );
-                  return (
-                    <WeaponCard
-                      key={weapon.id}
-                      weapon={weapon}
-                      selected={isSelected}
-                      onSelect={() => {
-                        toggleWeapon(weapon);
-                        setPickingWeapon(false);
-                      }}
-                    />
-                  );
-                })}
+              <div className="flex flex-col gap-10">
+                {groupedWeapons.map((group) => (
+                  <section key={group.type} className="flex flex-col gap-6">
+                    <div className="flex items-center gap-4">
+                      <h3 className="text-xs">{group.label}</h3>
+                      <div className="h-px flex-1 bg-white/[0.08]" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+                      {group.items.map((weapon) => {
+                        const isSelected = selectedWeapons.some(
+                          (selected) => selected.id === weapon.id,
+                        );
+                        return (
+                          <WeaponCard
+                            key={weapon.id}
+                            weapon={weapon}
+                            selected={isSelected}
+                            onSelect={() => {
+                              toggleWeapon(weapon);
+                              setPickingWeapon(false);
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </section>
+                ))}
               </div>
             )}
           </>
@@ -1522,10 +1795,7 @@ export function LoadoutBuilder() {
                         key={equipment.id}
                         type="button"
                         onClick={() => {
-                          selectEquipment(
-                            openEquipmentSlot,
-                            equipment.name,
-                          );
+                          selectEquipment(openEquipmentSlot, equipment.name);
                           setOpenEquipmentSlot(null);
                         }}
                         className={cn(
@@ -1585,10 +1855,12 @@ export function LoadoutBuilder() {
         <div className="flex flex-col gap-5">
           <div>
             <p className="text-base leading-6 ">
-              Choose at least one standard attachment before finishing your weapon config.
+              Choose at least one standard attachment before finishing your
+              weapon config.
             </p>
             <p className="mt-2 text-sm leading-6 text-teritary">
-              Select up to five standard attachments. APEX is optional and does not count toward that limit.
+              Select up to five standard attachments. APEX is optional and does
+              not count toward that limit.
             </p>
           </div>
 
@@ -1640,11 +1912,14 @@ export function LoadoutBuilder() {
 
             <div>
               <h3 className="text-xl font-semibold ">
-                Your {contentType === "full_loadout" ? "loadout" : "weapon config"} was created successfully
+                Your{" "}
+                {contentType === "full_loadout" ? "loadout" : "weapon config"}{" "}
+                was created successfully
               </h3>
               <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-teritary">
                 Download its QR code to share the build anywhere, or jump
-                straight to your published {contentType === "full_loadout" ? "loadout" : "weapon config"}.
+                straight to your published{" "}
+                {contentType === "full_loadout" ? "loadout" : "weapon config"}.
               </p>
             </div>
 
@@ -1672,7 +1947,8 @@ export function LoadoutBuilder() {
                 type="button"
                 onClick={() => navigate(createdLoadoutPath)}
               >
-                View {contentType === "full_loadout" ? "loadout" : "weapon config"}
+                View{" "}
+                {contentType === "full_loadout" ? "loadout" : "weapon config"}
               </Button>
               <Button
                 type="button"
@@ -1842,7 +2118,6 @@ export function LoadoutBuilder() {
           <FinishActionLabel saving={saving} editing={Boolean(editId)} />
         </Button>
       </div>
-
     </AppLayout>
   );
 }
