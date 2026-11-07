@@ -377,8 +377,12 @@ export function LoadoutPreview() {
   useEffect(() => {
     if (gameId === "mw4") {
       fetch("/weapon-preview/weapon-builder/catalog.json")
-        .then((response) => response.json())
-        .then((catalog: { assets: BuilderRelationAsset[] }) => setRelationAssets(catalog.assets))
+        .then((response) => {
+          if (!response.ok) throw new Error("Could not load attachment names");
+          return response.json();
+        })
+        .then((catalog: { assets: BuilderRelationAsset[] }) =>
+          setRelationAssets(Array.isArray(catalog.assets) ? catalog.assets : []))
         .catch((error) => console.error("Error fetching attachment names:", error));
     } else {
       setRelationAssets([]);
