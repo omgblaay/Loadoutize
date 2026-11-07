@@ -72,7 +72,10 @@ export function WeaponSpriteCanvas({
           ...weapon,
           weapon: weapon.id,
           assets: library.assets,
-          placement_overrides: placements[weapon.id] ?? {},
+          placement_overrides: {
+            ...(weapon.default_placement_overrides as PlacementOverrides[string] | undefined),
+            ...(placements[weapon.id] ?? {}),
+          },
         };
         const state = {
           ...factoryBuild(catalog),

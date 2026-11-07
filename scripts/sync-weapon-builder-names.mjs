@@ -21,18 +21,24 @@ try {
     SET name = n.internal_name,
         stats = coalesce(a.stats, '{}'::jsonb) || jsonb_build_object(
           'displayName', n.display_name,
+          'subtypeLabel', n.subtype_label,
+          'weaponDisplayNames', n.weapon_display_names,
           'composable', n.composable,
           'builderSelectable', n.builder_selectable,
           'weaponIds', n.weapon_ids)
     FROM jsonb_to_recordset($1::jsonb) AS n(asset_id text, internal_name text,
-      display_name text, composable boolean, builder_selectable boolean, weapon_ids jsonb)
+    display_name text, subtype_label text, weapon_display_names jsonb, composable boolean, builder_selectable boolean, weapon_ids jsonb)
     WHERE a.game_id = 'mw4' AND a.stats->>'assetId' = n.asset_id`,
     [JSON.stringify(catalog.assets.map((asset) => {
       const weaponIds = builderWeaponIds(asset, catalog);
       return {
       asset_id: asset.id,
       internal_name: asset.internal_title,
-      display_name: asset.display_name || asset.title,
+      display_name: asset.slot === "laser" && asset.families.length === 0 && asset.subtype_label
+        ? asset.subtype_label
+        : asset.display_name || asset.title,
+      subtype_label: asset.subtype_label ?? null,
+      weapon_display_names: asset.weapon_display_names ?? {},
       composable: asset.composable === true,
       builder_selectable: weaponIds.length > 0,
       weapon_ids: weaponIds,
@@ -40,9 +46,8 @@ try {
   if (weapons.rowCount !== catalog.weapons.length || attachments.rowCount !== catalog.assets.length) {
     throw new Error(`Unexpected update counts: ${weapons.rowCount} weapons, ${attachments.rowCount} attachments`);
   }
-  const removed = await client.query("DELETE FROM public.attachments WHERE game_id = 'mw4' AND stats->>'builderSelectable' = 'false'");
   await client.query("COMMIT");
-  console.log(`Updated ${weapons.rowCount} weapon names and ${attachments.rowCount} asset labels; removed ${removed.rowCount} assets not selectable in the builder`);
+  console.log(`Updated ${weapons.rowCount} weapon names and ${attachments.rowCount} asset labels; non-selectable source assets retained`);
 } catch (error) {
   await client.query("ROLLBACK").catch(() => {});
   throw error;

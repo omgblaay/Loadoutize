@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import {
   choosePreviewAsset,
   createPreviewBuild,
@@ -42,6 +43,51 @@ const assets: SpriteAsset[] = [
 ];
 
 describe("weapon sprite preview mapping", () => {
+  it("keeps Striga underbarrels only on its Dreadline 80 barrel", () => {
+    const catalog = JSON.parse(readFileSync("public/weapon-preview/weapon-builder/catalog.json", "utf8"));
+    const striga = catalog.weapons.find((item: SpriteWeapon) => item.id === "rex_sm_pmike63") as SpriteWeapon;
+    const underbarrel = { typeSlug: "underbarrel", label: "FSS FIRELINE GRIP", assetId: "rex_grip_ang" };
+    const guard = { typeSlug: "guard", label: "guard", assetId: "rex_guard_pmike63" };
+    expect(createPreviewBuild(striga, catalog.assets, [underbarrel, guard]).parts).not.toHaveProperty("underbarrel");
+    const dreadline = { typeSlug: "barrel", label: "Ballistarc Dreadline 80", assetId: "rex_bar_hvy_pmike63" };
+    const build = createPreviewBuild(striga, catalog.assets, [dreadline, underbarrel, guard]);
+    expect(build.parts.underbarrel).toBe("rex_grip_ang");
+    expect(build.parts.guard).toBeUndefined();
+  });
+  it("keeps WZ.55 Striga muzzles facing and mounted left", () => {
+    const catalog = JSON.parse(readFileSync("public/weapon-preview/weapon-builder/catalog.json", "utf8"));
+    const striga = catalog.weapons.find((item: SpriteWeapon) => item.id === "rex_sm_pmike63") as SpriteWeapon;
+    const profile = striga.profile as typeof striga.profile & { muzzle_right?: boolean };
+    const muzzle = profile.placements.muzzle as { point: number[]; anchor: number[] };
+    const barrel = profile.placements.barrel as { point: number[] };
+    expect(profile.muzzle_right).toBeUndefined();
+    expect(muzzle.anchor[0]).toBeGreaterThan(0.9);
+    expect(muzzle.point[0]).toBeLessThan(barrel.point[0] + 10);
+  });
+  it("selects and locks No Stock for the VEL 46 APEX preview", () => {
+    const catalog = JSON.parse(readFileSync("public/weapon-preview/weapon-builder/catalog.json", "utf8"));
+    const vel = catalog.weapons.find((item: SpriteWeapon) => item.id === "rex_sm_mpapa7") as SpriteWeapon;
+    const build = createPreviewBuild(vel, catalog.assets, [
+      { typeSlug: "apex", label: "VEL 46 Snap", assetId: "rex_pgrip_aim_mpapa7" },
+      { typeSlug: "stock", label: "EXP Defiant Stock", assetId: "rex_stock_hvy_mpapa7" },
+    ]);
+    expect(build.parts.stock).toBe("rex_stockno_mpapa7");
+    expect(build.autoParts.stock).toBe("apex:rex_pgrip_aim_mpapa7");
+    expect(build.parts.receiver).toBe("rex_rec_mpapa7_quickdraw");
+  });
+  it("uses the i muzzle set for WZ.55 Striga", () => {
+    const striga: SpriteWeapon = {
+      id: "rex_sm_pmike63", family: "pmike63", base_src: "base.png", assets: [],
+      profile: { placements: { muzzle: {} } },
+    };
+    const muzzles: SpriteAsset[] = [
+      { id: "rex_comp_vert_f", slot: "muzzle", src: "f.png", families: [], composable: true },
+      { id: "rex_comp_vert_i", slot: "muzzle", src: "i.png", families: [], composable: true },
+    ];
+    expect(choosePreviewAsset(striga, muzzles, {
+      typeSlug: "muzzle", label: "L980-S Comp",
+    })?.id).toBe("rex_comp_vert_i");
+  });
   it("resolves imported MW4 weapon IDs and legacy aliases", () => {
     expect(getWeaponPreviewRef("m4")).toBe("rex_ar_mike4");
     expect(getWeaponPreviewRef("ISO")).toBe("rex_sm_spier9");
@@ -91,5 +137,27 @@ describe("weapon sprite preview mapping", () => {
     );
     expect(build.parts).toEqual({ apex: "apex-pdw", magazine: "magazine-pdw", receiver: "receiver-pdw" });
     expect(build.autoParts.magazine).toBe("apex:apex-pdw");
+  });
+
+  it("uses the Skybreaker receiver and keeps its three movable slots", () => {
+    const catalog = JSON.parse(readFileSync("public/weapon-preview/weapon-builder/catalog.json", "utf8"));
+    const han = catalog.weapons.find((item: SpriteWeapon) => item.id === "rex_ar_kilo2") as SpriteWeapon;
+    const skybreaker = catalog.assets.find((item: SpriteAsset) => item.id === "rex_apex_kilo2_skybreaker") as SpriteAsset;
+    expect(Object.keys(skybreaker.slot_mounts ?? {}).sort()).toEqual(["magazine", "muzzle", "rear_grip"]);
+    const build = createPreviewBuild(han, catalog.assets, [
+      { typeSlug: "apex", label: "Han X20 Skybreaker", assetId: skybreaker.id },
+      { typeSlug: "magazine", label: "45 Round Mag", assetId: "rex_xmag_kilo2" },
+      { typeSlug: "reargrip", label: "Hanbit H86 Grip", assetId: "rex_pgrip_ass_kilo2" },
+      { typeSlug: "muzzle", label: "B16 Helical", assetId: "rex_breach_c" },
+      { typeSlug: "barrel", label: "Short", assetId: "rex_bar_sht_kilo2" },
+    ]);
+    expect(build.parts.receiver).toBe("rex_rec_kilo2_airburst");
+    expect(build.parts.magazine).toBe("rex_xmag_kilo2");
+    expect(build.parts.rear_grip).toBe("rex_pgrip_ass_kilo2");
+    expect(build.parts.muzzle).toBe("rex_breach_c");
+    expect(build.parts.barrel).toBeUndefined();
+    expect(build.autoParts.barrel).toBe(`apex:${skybreaker.id}`);
+    expect(build.autoParts.optic).toBe(`apex:${skybreaker.id}`);
+    expect(build.autoParts.stock).toBe(`apex:${skybreaker.id}`);
   });
 });

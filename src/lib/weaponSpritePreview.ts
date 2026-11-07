@@ -18,6 +18,7 @@ export interface SpriteAsset {
   default_parts?: Record<string, string>;
   dependencies?: Record<string, string>;
   locked_slots?: string[];
+  slot_mounts?: Record<string, { source: string; u: number; v: number; dx?: number; dy?: number }>;
 }
 
 export interface SpriteWeapon {
@@ -50,6 +51,7 @@ const SLOT_ALIASES: Record<string, string> = {
   ammo: "ammunition",
   mag: "magazine",
   reargrip: "rear_grip",
+  ironsights: "iron_sights",
 };
 
 const MUZZLE_SET_BY_FAMILY: Record<string, string> = {
@@ -65,7 +67,7 @@ const MUZZLE_SET_BY_FAMILY: Record<string, string> = {
   tango73: "d",
   bmike3: "g",
   mpapa7: "f",
-  pmike63: "f",
+  pmike63: "i",
   psierra41: "i",
   spier9: "f",
   xsm1: "i",
@@ -211,6 +213,10 @@ export function createPreviewBuild(
   for (const attachment of attachments) {
     const asset = choosePreviewAsset(weapon, assets, attachment);
     if (asset) parts[asset.slot] = asset.id;
+  }
+  if (weapon.family === "pmike63") {
+    delete parts.guard;
+    if (parts.barrel !== "rex_bar_hvy_pmike63") delete parts.underbarrel;
   }
 
   const conversion = byId.get(parts.apex);

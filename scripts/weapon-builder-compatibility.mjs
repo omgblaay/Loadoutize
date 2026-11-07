@@ -3,10 +3,15 @@ const sniperUnderbarrels = new Set([
   "rex_grip_ang", "rex_grip_ang_short", "rex_grip_vert",
   "rex_grip_vert_short", "rex_grip_bipod01",
 ]);
+const han86ExtraOptics = new Set([
+  "rex_arscope_airburst", "rex_arscope_hybrid01_le", "rex_arscope_vz01_zoom2",
+  "rex_fourx_hybcant01_le", "rex_fourx_therm01_sp", "rex_fourx_therm02",
+  "rex_holo02_jugg",
+]);
 const muzzleSetByFamily = {
   mike4: "a", akilo: "b", kilo2: "c", kilo437: "d", xar1: "i",
   uxray: "b", findia: "h", golf28: "h", recho: "c", tango73: "d",
-  bmike3: "g", mpapa7: "f", pmike63: "f", psierra41: "i",
+  bmike3: "g", mpapa7: "f", pmike63: "i", psierra41: "i",
   spier9: "f", xsm1: "i", limax: "h",
 };
 const muzzleIdsByFamily = {
@@ -18,6 +23,7 @@ function sharedCompatible(weapon, asset, library) {
   if (asset.families.length) return false;
   const type = weapon.id.split("_")[1];
   const id = asset.id;
+  if (asset.slot === "ammunition") return weapon.shared_assets?.includes(id) || false;
   if (asset.slot === "muzzle") {
     if (id.includes("_broken")) return false;
     const ids = muzzleIdsByFamily[weapon.family];
@@ -57,11 +63,17 @@ function sharedCompatible(weapon, asset, library) {
 }
 
 export function builderWeaponIds(asset, library) {
+  if (["iron_sights", "other"].includes(asset.slot)) return [];
+  // These assets reuse the same large-weapon laser icon as the canonical entry.
+  // They are texture aliases, not extra selectable choices in the game menu.
+  if (["rex_laserir_lrg", "rex_laserhip_lrg03_dim_sp", "rex_laserhip_lrg03_sp"].includes(asset.id)) return [];
   if ([asset.id, asset.title, asset.display_name, asset.internal_title].some((name) => /broken/i.test(name || ""))) return [];
   if (asset.dependency_only || asset.slot === "receiver") return [];
   return library.weapons
     .filter((weapon) => weapon.group !== "Melee / equipment" && !weapon.id.startsWith("rex_me_"))
     .filter((weapon) => {
+      if (weapon.id === "rex_ar_kilo2" && asset.slot === "optic" && han86ExtraOptics.has(asset.id)) return false;
+      if (weapon.id === "rex_ar_kilo2" && ["rex_stock_ass_kilo2_sp", "rex_pgrip_kilo2_gl"].includes(asset.id)) return false;
       if (weapon.family === "sierra100" && (asset.slot === "underbarrel" || (asset.slot === "magazine" && !Object.values(weapon.factory_parts || {}).includes(asset.id)))) return false;
       if (Object.values(weapon.factory_parts || {}).includes(asset.id)) return false;
       return weapon.assets.includes(asset.id) || sharedCompatible(weapon, asset, library);

@@ -3,9 +3,11 @@ import { getAttachmentHighlightRegion } from "@/lib/weaponAttachmentHighlightReg
 import { AppTooltip } from "@/components/atoms/Tooltip";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { WeaponSpriteCanvas } from "@/components/molecules/WeaponSpriteCanvas";
+import { WeaponPreviewSmoke } from "@/components/molecules/WeaponPreviewSmoke";
 import { getWeaponPreviewRef } from "@/lib/weaponSpritePreview";
 import { Puzzle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router";
 
 export interface WeaponImageBadge {
   key: string;
@@ -15,6 +17,7 @@ export interface WeaponImageBadge {
   label: string;
   iconUrl?: string | null;
   isApex?: boolean;
+  to?: string;
 }
 
 const BADGE_SIZE_CLASSES: Record<"small" | "large" | "default", string> = {
@@ -36,6 +39,8 @@ export function WeaponImage({
   loading = false,
   imageLoading = "eager",
   enableSpritePreview = false,
+  showPreviewBackground = false,
+  ovalBadgeLabels = false,
 }: {
   imageUrl?: string | null;
   variant?: "small" | "large";
@@ -46,6 +51,10 @@ export function WeaponImage({
   imageLoading?: "eager" | "lazy";
   /** Uses the calibrated MW4 sprite compositor when a verified weapon recipe exists. */
   enableSpritePreview?: boolean;
+  /** Shows the cropped white smoke behind the assembled weapon preview. */
+  showPreviewBackground?: boolean;
+  /** Shows labeled attachment callouts around the weapon on desktop. */
+  ovalBadgeLabels?: boolean;
   alt?: string;
   /** weapons.id, used to look up per-weapon badge position overrides. */
   weaponId?: string;
@@ -63,7 +72,9 @@ export function WeaponImage({
     enableSpritePreview && getWeaponPreviewRef(weaponId),
   );
   const spriteAttachmentKey =
-    badges?.map((badge) => `${badge.typeSlug}:${badge.assetId ?? badge.label}`).join("|") ?? "";
+    badges
+      ?.map((badge) => `${badge.typeSlug}:${badge.assetId ?? badge.label}`)
+      .join("|") ?? "";
   const markSpriteReady = useCallback(() => setSpriteReady(true), []);
   const markSpriteUnavailable = useCallback(() => setSpriteReady(false), []);
 
@@ -98,19 +109,22 @@ export function WeaponImage({
       {isLoading && (
         <Skeleton className="absolute inset-0 z-20 aspect-2/1 rounded-md !bg-[#171417]" />
       )}
+      {showPreviewBackground && spriteSupported && spriteReady && (
+        <WeaponPreviewSmoke />
+      )}
       <img
         src={imageUrl ?? undefined}
         alt={alt}
         loading={imageLoading}
         decoding="async"
-        className={`w-full aspect-2/1 transition-opacity duration-200 ${isLoading || spriteReady ? "opacity-0" : "opacity-100"}`}
+        className={`relative z-[1] w-full aspect-2/1 transition-opacity duration-200 ${isLoading || spriteReady ? "opacity-0" : "opacity-100"}`}
         onLoad={() => imageUrl && setLoadedImageUrl(imageUrl)}
         onError={() => imageUrl && setFailedImageUrl(imageUrl)}
-      // brightness-200 saturate-0
+        // brightness-200 saturate-0
       />
       {spriteSupported && weaponId && (
         <div
-          className={`absolute inset-0 transition-opacity duration-200 ${spriteReady ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 z-[2] transition-opacity duration-200 ${spriteReady ? "opacity-100" : "opacity-0"}`}
         >
           <WeaponSpriteCanvas
             weaponId={weaponId}
@@ -142,12 +156,88 @@ export function WeaponImage({
           })}
         </div>
       )}
-      {!spriteReady && badges && badges.length > 0 && (
-        <div className="absolute inset-0 pointer-events-none">
+      {(!spriteReady || ovalBadgeLabels) && badges && badges.length > 0 && (
+        <div
+          className={`${ovalBadgeLabels ? "pointer-events-none absolute inset-0 hidden lg:block" : "pointer-events-none absolute inset-0"}`}
+        >
           {badges.map((badge, index) => {
-            const position = getAttachmentBadgePosition(weaponId, badge.typeSlug, index, badges.length);
+            const basePosition = getAttachmentBadgePosition(
+              weaponId,
+              badge.typeSlug,
+              index,
+              badges.length,
+            );
+            const position = ovalBadgeLabels
+              ? {
+                  x: 50 + (basePosition.x - 50) * 1.65,
+                  y: 50 + (basePosition.y - 50) * 1.65,
+                }
+              : basePosition;
             const isActive = activeBadgeKey === badge.key;
             const isDimmed = activeBadgeKey != null && !isActive;
+
+            const transform =
+              position.x <= 18
+                ? "translate(-96%, -50%)"
+                : position.x >= 82
+                  ? "translate(-4%, -50%)"
+                  : position.y <= 18
+                    ? "translate(-50%, -96%)"
+                    : position.y >= 82
+                      ? "translate(-50%, -4%)"
+                      : position.x < 50
+                        ? "translate(-96%, -50%)"
+                        : "translate(-4%, -50%)";
+            const content = ovalBadgeLabels ? (
+              <div className="flex w-[200px] items-center gap-2 rounded-lg border border-white/5 bg-[#151315]/95 py-1.5 pl-1.5 pr-3 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-sm">
+                <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
+                  {badge.isApex ? (
+                    <Puzzle
+                      aria-hidden="true"
+                      className="size-4 text-white/75"
+                    />
+                  ) : badge.iconUrl ? (
+                    <img
+                      src={badge.iconUrl}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="size-full object-contain p-1"
+                    />
+                  ) : (
+                    <span className="text-sm font-semibold text-white/70">
+                      {badge.label.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-1 min-w-0 flex-col leading-tight">
+                  <span className="truncate text-sm font-medium text-white">
+                    {badge.label}
+                  </span>
+                  <span className="truncate text-[9px] uppercase tracking-[0.1em] text-white/50">
+                    {badge.typeSlug}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex size-full items-center justify-center">
+                {badge.isApex ? (
+                  <Puzzle aria-hidden="true" className="size-5 text-white/80" />
+                ) : badge.iconUrl ? (
+                  <img
+                    src={badge.iconUrl}
+                    alt={badge.label}
+                    loading="lazy"
+                    decoding="async"
+                    className="size-full object-contain p-1"
+                  />
+                ) : (
+                  <span className="text-sm font-semibold text-white/70 leading-none">
+                    {badge.label.slice(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </div>
+            );
 
             return (
               <AppTooltip key={badge.key} content={badge.label}>
@@ -155,24 +245,27 @@ export function WeaponImage({
                   onPointerEnter={() => onBadgeHover?.(badge.key)}
                   onPointerLeave={() => onBadgeHover?.(null)}
                   className={[
-                    "absolute -translate-x-1/2 -translate-y-1/2 rounded-sm flex items-center justify-center overflow-hidden  pointer-events-auto",
-                    "transition-[opacity,transform,border-color,box-shadow] duration-200 ease-out",
-                    badgeSizeClass,
-                    isActive
-                      ? "z-10 scale-125 bg-black border-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]"
-                      : "bg-black/80 border-white/25",
+                    "absolute flex items-center justify-center pointer-events-auto transition-[opacity,transform,border-color,box-shadow] duration-200 ease-out",
+                    ovalBadgeLabels
+                      ? "z-10"
+                      : `-translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border ${badgeSizeClass} ${isActive ? "z-10 scale-125 bg-black border-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]" : "bg-black/80 border-white/25"}`,
                     isDimmed ? "opacity-30" : "opacity-100",
                   ].join(" ")}
-                  style={{ left: `${position.x}%`, top: `${position.y}%` }}
+                  style={{
+                    left: `${position.x}%`,
+                    top: `${position.y}%`,
+                    ...(ovalBadgeLabels ? { transform } : {}),
+                  }}
                 >
-                  {badge.isApex ? (
-                    <Puzzle aria-hidden="true" className="size-5 text-white/80" />
-                  ) : badge.iconUrl ? (
-                    <img src={badge.iconUrl} alt={badge.label} loading="lazy" decoding="async" className="w-full h-full object-contain p-1" />
+                  {badge.to && ovalBadgeLabels ? (
+                    <Link
+                      to={badge.to}
+                      className="pointer-events-auto rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    >
+                      {content}
+                    </Link>
                   ) : (
-                    <span className="text-[9px] font-semibold text-white/70 leading-none">
-                      {badge.label.slice(0, 2).toUpperCase()}
-                    </span>
+                    content
                   )}
                 </div>
               </AppTooltip>

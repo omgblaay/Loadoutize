@@ -7,7 +7,11 @@ import { Skeleton } from "@/components/atoms/Skeleton";
 import { Tag } from "@/components/atoms/Tag";
 import { WeaponImage } from "@/components/molecules/WeaponImage";
 import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
-import { attachmentDisplayName, attachmentImageUrl, isApexAttachment } from "@/lib/attachmentPresentation";
+import {
+  attachmentDisplayName,
+  attachmentImageUrl,
+  isApexAttachment,
+} from "@/lib/attachmentPresentation";
 import { MetaTrendCharts } from "@/components/organisms/MetaTrendCharts";
 import { useMetaData, type MetaWeapon } from "@/hooks/useMetaData";
 import { gamePath, weaponMetaPath } from "@/lib/routes";
@@ -138,7 +142,10 @@ export function AttachmentMetaView() {
           <p className="mt-2 text-sm text-teritary">
             {error ?? "This attachment could not be found in the current game."}
           </p>
-          <Button className="mt-5" onClick={() => navigate(gamePath(gameId, "meta"))}>
+          <Button
+            className="mt-5"
+            onClick={() => navigate(gamePath(gameId, "meta"))}
+          >
             Back to Meta
           </Button>
         </div>
@@ -167,11 +174,7 @@ export function AttachmentMetaView() {
         <div className="relative grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(220px,0.55fr)] md:items-center">
           <div>
             <div className="flex items-center gap-2">
-              {isApexAttachment(attachment) ? (
-                <span className="flex size-9 items-center justify-center rounded-lg bg-white/[0.05]">
-                  <AttachmentIcon attachment={attachment} className="size-5" />
-                </span>
-              ) : attachment.typeImageUrl ? (
+              {isApexAttachment(attachment) ? null : attachment.typeImageUrl ? (
                 <span className="flex size-9 items-center justify-center rounded-lg bg-white/[0.05]">
                   <img
                     src={attachment.typeImageUrl}
@@ -179,11 +182,7 @@ export function AttachmentMetaView() {
                     className="size-5 object-contain opacity-70"
                   />
                 </span>
-              ) : (
-                <span className="flex size-9 items-center justify-center rounded-lg bg-white/[0.05]">
-                  <Paperclip className="size-4 text-teritary" />
-                </span>
-              )}
+              ) : null}
               <Tag>{attachment.type}</Tag>
             </div>
             <h1 className="mt-4 text-3xl uppercase sm:text-4xl">
@@ -194,9 +193,12 @@ export function AttachmentMetaView() {
               {attachmentLoadouts.length === 1 ? "" : "s"}
             </p>
           </div>
-          <div className="flex absolute left-0 top-0 min-h-36">
+          <div className="flex absolute right-0 top-0 min-h-36">
             {isApexAttachment(attachment) || attachmentImageUrl(attachment) ? (
-              <AttachmentIcon attachment={attachment} className="size-32 opacity-10" />
+              <AttachmentIcon
+                attachment={attachment}
+                className="size-32 opacity-10"
+              />
             ) : (
               <Paperclip className="size-12 text-white/15" />
             )}

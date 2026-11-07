@@ -1,5 +1,5 @@
 // Reusable Canvas renderer. Part positions and masks are calibrated 2D estimates.
-export const SLOT_LABELS = {muzzle:'Muzzle',barrel:'Barrel',optic:'Optic',underbarrel:'Underbarrel',magazine:'Magazine',rear_grip:'Rear grip',stock:'Stock',laser:'Laser / light',comb:'Comb',apex:'APEX',ammunition:'Ammunition',bolt:'Bolt',trigger:'Trigger',hammer:'Hammer',guard:'Guard',receiver:'Receiver',cylinder:'Cylinder',iron_sights:'Iron sights',other:'Other'};
+export const SLOT_LABELS = {muzzle:'Muzzle',barrel:'Barrel',optic:'Optic',underbarrel:'Underbarrel',magazine:'Magazine',rear_grip:'Rear grip',stock:'Stock',laser:'Laser / light',comb:'Comb',apex:'APEX',ammunition:'Ammunition',bolt:'Bolt',trigger:'Trigger',hammer:'Hammer',guard:'Guard',receiver:'Receiver',cylinder:'Cylinder'};
 // Rear grips must remain above both the receiver assembly and magazines. Some
 // magazine card sprites include a white upper body which otherwise hides the
 // selected grip even though the grip is the foreground component in game.
@@ -81,14 +81,24 @@ function loadImage(src){if(imageCache.has(src))return imageCache.get(src);const 
 function canvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
 function rotatedPoint(x,y,angle){const c=Math.cos(angle),s=Math.sin(angle);return [x*c-y*s,x*s+y*c];}
 export class WeaponSpriteCompositor{
-  constructor(catalog){this.catalog=catalog;this.assets=new Map(catalog.assets.map(a=>[a.id,a]));this.images=new Map();this.tintCache=new Map();}
+  constructor(catalog){this.catalog=catalog;this.assets=new Map(catalog.assets.map(a=>[a.id,a]));this.images=new Map();this.tintCache=new Map();this.referenceMounts=new Map();}
+  referenceMount(slot){
+    if(this.referenceMounts.has(slot))return this.referenceMounts.get(slot);
+    // Factory geometry is the reference even if a user moved the current
+    // receiver or barrel. That movement must carry its mounted parts along.
+    const baselineCatalog={...this.catalog,placement_overrides:{},slot_mounts:{}};
+    const baseline=new WeaponSpriteCompositor(baselineCatalog);
+    const placement=baseline.placement(factoryBuild(baselineCatalog),slot);
+    this.referenceMounts.set(slot,placement);
+    return placement;
+  }
   order(){
     // Pistol magazines sit inside the frame/grip. Paint them first so every
     // other component can occlude them, including replacement grips.
     if(this.catalog.group==='Pistols'||this.catalog.weapon?.startsWith('rex_pi_'))return ['magazine',...ORDER.filter(slot=>slot!=='magazine')];
     return ORDER;
   }
-  async ensure(state){const ids=[...Object.values(this.catalog.factory_parts||{}),...Object.values(state?.parts||{})],assets=[...new Set(ids)].map(id=>this.assets.get(id)).filter(Boolean);await Promise.all(assets.map(async a=>this.images.set(a.id,await loadImage(a.src))));return this;}
+  async ensure(state){const ids=[...Object.values(this.catalog.factory_parts||{}),...Object.values(state?.parts||{})],assets=[...new Set(ids)].map(id=>this.assets.get(id)).filter(a=>a?.src);await Promise.all(assets.map(async a=>this.images.set(a.id,await loadImage(a.src))));return this;}
   async load(state){
     // Component recipes never load the flattened weapon card. It is retained
     // only as research metadata and as the fallback for genuinely base-only
@@ -110,10 +120,17 @@ export class WeaponSpriteCompositor{
     return {cut,point:[barrel.x+q[0],barrel.y+q[1]]};
   }
   placement(state,slot){
+    if(this.catalog.family==='pmike63'){
+      const dreadline=state.parts?.barrel==='rex_bar_hvy_pmike63';
+      if(slot==='guard'&&dreadline)return null;
+      if(slot==='underbarrel'&&!dreadline)return null;
+    }
     // Lasers are retained in the build as icon-only choices. They must not
     // affect the composed preview, its camera bounds, guides or hit testing.
     if(slot==='laser')return null;
     if(slot==='rear_grip'&&this.catalog.family==='mike4'&&this.part(state,'stock')?.id==='rex_stock_mike4_pdw')return null;
+    if(slot==='rear_grip'&&this.catalog.family==='bmike3'&&this.part(state,'stock')?.id!=='rex_stockno_bmike3')return null;
+    if(slot==='comb'&&this.catalog.family==='bmike3'&&this.part(state,'stock')?.id==='rex_stockno_bmike3')return null;
     // MOSCAR has no separate magazine layer in its default configuration.
     if(slot==='magazine'&&this.catalog.family==='moscar'&&!state.parts.magazine)return null;
     // MOSCAR's stock sprites supply its visible body. The automatic receiver
@@ -122,7 +139,13 @@ export class WeaponSpriteCompositor{
     // This stock also includes the barrel; keep its selection for restoration.
     if(slot==='barrel'&&this.catalog.family==='moscar'&&this.part(state,'stock')?.id==='rex_stockno_lgt_moscar')return null;
     const asset=this.part(state,slot),registered=this.catalog.profile.asset_placements?.[asset?.id],preset=registered||this.catalog.profile.placements[slot];if(!asset||!asset.composable||!preset)return null;
-    const b=asset.bbox,saved=this.catalog.placement_overrides?.[asset.id]||{},t=state.transforms[slot]||saved;
+    const conversion=this.assets.get(state.parts.apex),variantMount=conversion?.slot_mounts?.[slot];
+    const b=asset.bbox,baseSaved=this.catalog.placement_overrides?.[asset.id]||{};
+    const variantSaved=variantMount?this.catalog.placement_overrides?.[`${asset.id}@${conversion.id}`]||{}:{};
+    // Ordinary positional edits belong to the factory assembly. A conversion
+    // may keep an attachment's size/rotation, but receives its own x/y edits.
+    const saved=variantMount?{...baseSaved,dx:0,dy:0,...variantSaved}:baseSaved;
+    const t=state.transforms[slot]||saved;
     // DECHO's factory structural sprites register correctly, but its small
     // accessories are authored at a different source scale/offset than the
     // other pistols. Apply family corrections before user overrides.
@@ -180,6 +203,18 @@ export class WeaponSpriteCompositor{
       // fixed Y recovered from the factory receiver.
       point=[211,barrel?barrel.bounds[1]+4:77];
     }
+    if(slot==='optic'&&this.catalog.family==='fmgolf'){
+      const guard=this.placement(state,'guard');
+      if(guard){
+        // Mount on the selected guard, including its placement adjustments.
+        // The optic's bottom edge overlaps the guard's top by two canvas units.
+        const defaults=this.catalog.default_placement_overrides?.[asset.id]||{dx:-24,dy:-24};
+        point=[
+          (guard.bounds[0]+guard.bounds[2])/2-(defaults.dx||0),
+          guard.bounds[1]+2-(1-anchor[1])*height-(defaults.dy||0)
+        ];
+      }
+    }
     if(!registered&&(slot==='stock'||slot==='muzzle'))anchor[1]=asset.connector_y??anchor[1];
     if(slot==='underbarrel'&&asset.id.includes('_ub_'))anchor=[.75,.03];
     if(slot==='muzzle'){
@@ -197,7 +232,37 @@ export class WeaponSpriteCompositor{
           }
         }
     }
-    const x=point[0]+(tuning.dx||0)+(t.dx||0),y=point[1]+(tuning.dy||0)+(t.dy||0),angle=((tuning.rotation||0)+(t.rotation||0))*Math.PI/180;
+    // A slot mount is calibrated once against the factory part, then follows
+    // the selected receiver, barrel or guard as that part changes or moves.
+    // Optics use the receiver mount by default; weapon-specific rail rules
+    // above remain in force until a mount is saved for that weapon.
+    const configuredMount=this.catalog.slot_mounts?.[slot];
+    const mount=configuredMount||(slot==='optic'&&this.catalog.family!=='fmgolf'&&
+      this.catalog.family!=='psierra41'?{source:this.catalog.factory_parts?.receiver?'receiver':'barrel'}:null);
+    if(mount?.source&&mount.source!==slot&&['receiver','barrel','guard'].includes(mount.source)){
+      const reference=this.referenceMount(mount.source),current=this.placement(state,mount.source);
+      if(reference&&current){
+        const [l,t,r,b]=reference.bounds,[cl,ct,cr,cb]=current.bounds;
+        const u=(point[0]-l)/Math.max(1,r-l),v=(point[1]-t)/Math.max(1,b-t);
+        point=[cl+u*(cr-cl)+(mount.dx||0),ct+v*(cb-ct)+(mount.dy||0)];
+      }else if(configuredMount){point=[point[0]+(mount.dx||0),point[1]+(mount.dy||0)];}
+    }
+    // Conversion-specific mounts take precedence over the weapon's ordinary
+    // slot mount. The receiver variant supplies the local coordinate frame.
+    if(variantMount?.source&&variantMount.source!==slot){
+      const source=this.placement(state,variantMount.source);
+      if(source){
+        const [l,top,r,bottom]=source.bounds;
+        point=[l+(r-l)*variantMount.u+(variantMount.dx||0),
+          top+(bottom-top)*variantMount.v+(variantMount.dy||0)];
+      }
+    }
+    // The barrel establishes the muzzle socket. A correction saved for one
+    // barrel moves every compatible muzzle there without shifting other barrel
+    // variants (or an APEX receiver's independent muzzle mount).
+    const barrel=slot==='muzzle'&&!variantMount?this.part(state,'barrel'):null;
+    const barrelOffset=barrel?this.catalog.barrel_muzzle_offsets?.[barrel.id]:null;
+    const x=point[0]+(barrelOffset?.dx||0)+(tuning.dx||0)+(t.dx||0),y=point[1]+(barrelOffset?.dy||0)+(tuning.dy||0)+(t.dy||0),angle=((tuning.rotation||0)+(t.rotation||0))*Math.PI/180;
     const corners=[[0,0],[width,0],[width,height],[0,height]].map(([cx,cy])=>{const q=rotatedPoint(cx-anchor[0]*width,cy-anchor[1]*height,angle);return [x+q[0],y+q[1]];});
     const bounds=[Math.min(...corners.map(c=>c[0])),Math.min(...corners.map(c=>c[1])),Math.max(...corners.map(c=>c[0])),Math.max(...corners.map(c=>c[1]))];
     return {slot,asset,x,y,width,height,angle,anchor,bounds,registered:!!registered};

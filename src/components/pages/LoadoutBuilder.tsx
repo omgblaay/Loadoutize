@@ -45,7 +45,27 @@ import {
 } from "@/lib/weaponCategories";
 import {
   applyBuilderRelations,
+  builderAttachmentDisplayName,
   getBuilderApexRelation,
+  HAN86_UNDERBARREL_IDS,
+  han86AllowsUnderbarrel,
+  M4_MUZZLE_IDS,
+  m4AllowsMuzzle,
+  AR_OPTIC_IDS,
+  arAllowsOptic,
+  SMG_OPTIC_IDS,
+  smgAllowsOptic,
+  AR_LASER_IDS,
+  arAllowsLaser,
+  SMG_I_MUZZLE_IDS,
+  SMG_I_WEAPONS,
+  smgIAllowsMuzzle,
+  VEL_AMMUNITION_IDS,
+  velAllowsAmmunition,
+  SMG_UNDERBARREL_IDS_BY_WEAPON,
+  smgAllowsUnderbarrel,
+  rezi12NoStockBlocksComb,
+  strigaDreadlineSelected,
   type BuilderRelationAsset,
 } from "@/lib/weaponBuilderRelations";
 import { normalizePreviewSlot } from "@/lib/weaponSpritePreview";
@@ -88,10 +108,12 @@ interface Attachment {
   imageUrl?: string | null;
   weaponIds?: string[] | null;
   displayName?: string;
+  subtypeLabel?: string | null;
   stats?: {
     assetId?: string;
     weaponIds?: string[];
     displayName?: string;
+    subtypeLabel?: string;
     builderSelectable?: boolean;
     imagePath?: string;
   } | null;
@@ -215,9 +237,8 @@ function AttachmentPickerList({
 }) {
   const [query, setQuery] = useState("");
   const filtered = options.filter((att) =>
-    (att.displayName ?? att.name)
-      .toLowerCase()
-      .includes(query.trim().toLowerCase()),
+    [att.displayName ?? att.name, att.subtypeLabel]
+      .some((value) => value?.toLowerCase().includes(query.trim().toLowerCase())),
   );
 
   return (
@@ -293,14 +314,17 @@ function AttachmentPickerList({
                 type="button"
                 onClick={() => onSelect(att.name)}
                 className={cn(
-                  "flex items-center gap-3 h-12 px-3 rounded-lg text-left text-[14px] transition-colors shrink-0",
+                  "flex items-center gap-3 min-h-14 px-3 py-2 rounded-lg text-left text-[14px] transition-colors shrink-0",
                   isSelected
                     ? "bg-[#fafafa] text-[#161414]"
                     : " hover:bg-white/[0.05]",
                 )}
               >
                 <AttachmentIcon attachment={att} className="size-6" />
-                <span className="flex-1">{att.displayName ?? att.name}</span>
+                <span className="flex-1 min-w-0">
+                  <span className="block truncate">{att.displayName ?? att.name}</span>
+                  {att.subtypeLabel && att.subtypeLabel !== att.displayName && <span className="block truncate text-xs text-teritary">{att.subtypeLabel}</span>}
+                </span>
                 {isSelected && <Check className="w-4 h-4 shrink-0" />}
               </button>
             );
@@ -534,7 +558,10 @@ export function LoadoutBuilder() {
         setAttachments(
           (data.attachments as Attachment[])
             .filter(
-              (attachment) => attachment.stats?.builderSelectable !== false,
+              (attachment) => attachment.stats?.builderSelectable !== false &&
+                !(gameId === "mw4" && ["iron_sights", "other"].includes(
+                  normalizePreviewSlot(attachment.typeSlug || attachment.type),
+                )),
             )
             .map((attachment) => ({
               ...attachment,
@@ -544,6 +571,7 @@ export function LoadoutBuilder() {
                 attachment.displayName ??
                 attachment.stats?.displayName ??
                 attachment.name,
+              subtypeLabel: attachment.stats?.subtypeLabel ?? null,
               imageUrl:
                 attachment.imageUrl ?? attachment.stats?.imagePath ?? null,
             })),
@@ -703,6 +731,7 @@ export function LoadoutBuilder() {
                 weapon.attachments,
                 attachments,
                 relationAssets,
+                weapon.id,
               ),
             ).filter(([, name]) => name !== ANY_ATTACHMENT_VALUE),
           ),
@@ -835,7 +864,10 @@ export function LoadoutBuilder() {
       attachments,
       relationAssets,
     );
-    if (attachmentName && relation?.lockedSlots.has(normalizePreviewSlot(slot)))
+    if (attachmentName && (relation?.lockedSlots.has(normalizePreviewSlot(slot)) ||
+      (normalizePreviewSlot(slot) === "comb" && rezi12NoStockBlocksComb(currentWeapon?.attachments ?? {}, attachments, weaponId)) ||
+      (normalizePreviewSlot(slot) === "underbarrel" && weaponId === "rex_sm_pmike63" &&
+        !strigaDreadlineSelected(currentWeapon?.attachments ?? {}, attachments, weaponId))))
       return;
     if (
       attachmentName &&
@@ -853,6 +885,7 @@ export function LoadoutBuilder() {
         { ...currentWeapon.attachments, [slot]: attachmentName },
         attachments,
         relationAssets,
+        weaponId,
       );
       const removed = Object.keys(currentWeapon.attachments).filter(
         (type) => type !== slot && !(type in next),
@@ -874,7 +907,7 @@ export function LoadoutBuilder() {
         }
         return {
           ...w,
-          attachments: applyBuilderRelations(next, attachments, relationAssets),
+          attachments: applyBuilderRelations(next, attachments, relationAssets, weaponId),
         };
       }),
     );
@@ -967,6 +1000,7 @@ export function LoadoutBuilder() {
           weapon.attachments,
           attachments,
           relationAssets,
+          weapon.id,
         );
         if (
           Object.keys(normalized).length ===
@@ -1011,17 +1045,136 @@ export function LoadoutBuilder() {
         relationAssets,
       )
     : null;
+  const reziCombBlocked = selectedWeapon
+    ? rezi12NoStockBlocksComb(selectedWeapon.attachments, attachments, selectedWeapon.id)
+    : false;
+  const strigaUnderbarrelBlocked = selectedWeapon?.id === "rex_sm_pmike63" &&
+    !strigaDreadlineSelected(selectedWeapon.attachments, attachments, selectedWeapon.id);
+  const subtypeByAssetId = new Map(relationAssets.map((asset) => [asset.id, asset.subtype_label]));
+  const assetsById = new Map(relationAssets.map((asset) => [asset.id, asset]));
   const attachmentsByType = attachments
+    .map((attachment) => ({
+      ...attachment,
+      displayName: gameId === "mw4"
+        ? builderAttachmentDisplayName(
+            attachment.stats?.assetId,
+            selectedWeapon?.id,
+            assetsById,
+            attachment.displayName ?? attachment.name,
+          )
+        : attachment.displayName,
+      subtypeLabel: subtypeByAssetId.get(attachment.stats?.assetId ?? "") ?? attachment.subtypeLabel,
+    }))
     .filter(
-      (attachment) =>
-        !selectedWeapon ||
-        !attachment.weaponIds ||
-        attachment.weaponIds.includes(selectedWeapon.id),
+      (attachment) => {
+        if (!selectedWeapon) return true;
+        if (selectedWeapon.id === "rex_sm_pmike63" &&
+          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "guard") return false;
+        if (selectedWeapon.id === "rex_ar_kilo2" &&
+          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "underbarrel") {
+          return han86AllowsUnderbarrel(attachment.stats?.assetId);
+        }
+        if (selectedWeapon.id === "rex_ar_mike4" &&
+          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "muzzle") {
+          return m4AllowsMuzzle(attachment.stats?.assetId);
+        }
+        if (selectedWeapon.id.startsWith("rex_ar_") &&
+          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "optic") {
+          return arAllowsOptic(attachment.stats?.assetId);
+        }
+        if (selectedWeapon.id.startsWith("rex_sm_") &&
+          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "optic") {
+          return smgAllowsOptic(attachment.stats?.assetId);
+        }
+        if (selectedWeapon.id.startsWith("rex_ar_") &&
+          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "laser") {
+          return arAllowsLaser(attachment.stats?.assetId);
+        }
+        if (SMG_I_WEAPONS.has(selectedWeapon.id) &&
+          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "muzzle") {
+          return smgIAllowsMuzzle(attachment.stats?.assetId);
+        }
+        if (selectedWeapon.id === "rex_sm_mpapa7" &&
+          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "ammunition") {
+          return velAllowsAmmunition(attachment.stats?.assetId);
+        }
+        if (SMG_UNDERBARREL_IDS_BY_WEAPON[selectedWeapon.id] &&
+          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "underbarrel") {
+          return smgAllowsUnderbarrel(selectedWeapon.id, attachment.stats?.assetId);
+        }
+        return !attachment.weaponIds || attachment.weaponIds.includes(selectedWeapon.id);
+      },
     )
     .reduce<Record<string, Attachment[]>>((acc, a) => {
       (acc[a.type] ??= []).push(a);
       return acc;
     }, {});
+  if (selectedWeapon?.id === "rex_ar_kilo2") {
+    const order = new Map<string, number>(HAN86_UNDERBARREL_IDS.map((id, index) => [id, index]));
+    for (const [type, choices] of Object.entries(attachmentsByType)) {
+      if (normalizePreviewSlot(type) !== "underbarrel") continue;
+      choices.sort((a, b) =>
+        (order.get(a.stats?.assetId ?? "") ?? 99) - (order.get(b.stats?.assetId ?? "") ?? 99));
+    }
+  }
+  if (selectedWeapon?.id === "rex_ar_mike4") {
+    const order = new Map<string, number>(M4_MUZZLE_IDS.map((id, index) => [id, index]));
+    for (const [type, choices] of Object.entries(attachmentsByType)) {
+      if (normalizePreviewSlot(type) !== "muzzle") continue;
+      choices.sort((a, b) =>
+        (order.get(a.stats?.assetId ?? "") ?? 99) - (order.get(b.stats?.assetId ?? "") ?? 99));
+    }
+  }
+  if (selectedWeapon?.id.startsWith("rex_ar_")) {
+    for (const [type, choices] of Object.entries(attachmentsByType)) {
+      const slot = normalizePreviewSlot(type);
+      const ordered = slot === "optic" ? AR_OPTIC_IDS :
+        slot === "laser" ? AR_LASER_IDS : null;
+      if (!ordered) continue;
+      const order = new Map<string, number>(ordered.map((id, index) => [id, index]));
+      choices.sort((a, b) =>
+        (order.get(a.stats?.assetId ?? "") ?? 99) - (order.get(b.stats?.assetId ?? "") ?? 99));
+    }
+  }
+  if (selectedWeapon?.id.startsWith("rex_sm_")) {
+    const order = new Map<string, number>(SMG_OPTIC_IDS.map((id, index) => [id, index]));
+    for (const [type, choices] of Object.entries(attachmentsByType)) {
+      if (normalizePreviewSlot(type) !== "optic") continue;
+      choices.sort((a, b) =>
+        (order.get(a.stats?.assetId ?? "") ?? 99) - (order.get(b.stats?.assetId ?? "") ?? 99));
+    }
+  }
+  if (selectedWeapon && SMG_I_WEAPONS.has(selectedWeapon.id)) {
+    const order = new Map<string, number>(SMG_I_MUZZLE_IDS.map((id, index) => [id, index]));
+    for (const [type, choices] of Object.entries(attachmentsByType)) {
+      if (normalizePreviewSlot(type) !== "muzzle") continue;
+      choices.sort((a, b) =>
+        (order.get(a.stats?.assetId ?? "") ?? 99) - (order.get(b.stats?.assetId ?? "") ?? 99));
+    }
+  }
+  if (selectedWeapon?.id === "rex_sm_mpapa7") {
+    const order = new Map<string, number>(VEL_AMMUNITION_IDS.map((id, index) => [id, index]));
+    for (const [type, choices] of Object.entries(attachmentsByType)) {
+      if (normalizePreviewSlot(type) !== "ammunition") continue;
+      choices.sort((a, b) =>
+        (order.get(a.stats?.assetId ?? "") ?? 99) - (order.get(b.stats?.assetId ?? "") ?? 99));
+    }
+  }
+  if (selectedWeapon && SMG_UNDERBARREL_IDS_BY_WEAPON[selectedWeapon.id]) {
+    const order = new Map<string, number>(SMG_UNDERBARREL_IDS_BY_WEAPON[selectedWeapon.id]
+      .map((id, index) => [id, index]));
+    for (const [type, choices] of Object.entries(attachmentsByType)) {
+      if (normalizePreviewSlot(type) !== "underbarrel") continue;
+      choices.sort((a, b) =>
+        (order.get(a.stats?.assetId ?? "") ?? 99) - (order.get(b.stats?.assetId ?? "") ?? 99));
+    }
+  }
+  const isMw4Firearm = gameId === "mw4" && Boolean(selectedWeapon) &&
+    !/launcher|melee/i.test(`${selectedWeapon?.type ?? ""} ${selectedWeapon?.typeShort ?? ""}`);
+  if (isMw4Firearm) {
+    attachmentsByType.Ammunition ??= [];
+    attachmentsByType.APEX ??= [];
+  }
   const attachmentTypes = Object.keys(attachmentsByType);
 
   const weaponTypes = sortWeaponCategories(
@@ -1451,6 +1604,7 @@ export function LoadoutBuilder() {
                   weaponId={selectedWeapon.id}
                   badges={selectedWeaponBadges}
                   enableSpritePreview={gameId === "mw4"}
+                  showPreviewBackground
                   highlightSlugs={selectedWeaponBadges.map(
                     (badge) => badge.typeSlug,
                   )}
@@ -1502,6 +1656,7 @@ export function LoadoutBuilder() {
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {attachmentTypes.map((type) => {
+                    const hasOptions = attachmentsByType[type].length > 0;
                     const typeImageUrl =
                       attachmentsByType[type][0]?.typeImageUrl;
                     const selectedName = selectedWeapon.attachments[type];
@@ -1514,7 +1669,16 @@ export function LoadoutBuilder() {
                       selectedAttachment?.stats?.imagePath;
                     const lockedSlot = selectedApexRelation?.lockedSlots.get(
                       normalizePreviewSlot(type),
-                    );
+                    ) ?? (reziCombBlocked && normalizePreviewSlot(type) === "comb"
+                      ? { slot: "comb" }
+                      : strigaUnderbarrelBlocked && normalizePreviewSlot(type) === "underbarrel"
+                        ? { slot: "underbarrel" }
+                      : undefined);
+                    const lockSource = reziCombBlocked && normalizePreviewSlot(type) === "comb"
+                      ? "No Stock"
+                      : strigaUnderbarrelBlocked && normalizePreviewSlot(type) === "underbarrel"
+                        ? "Ballistarc Dreadline 80 barrel"
+                      : selectedApexRelation?.apexName;
                     return (
                       <div key={type} className="flex flex-col">
                         {/* <div className="flex items-center gap-1">
@@ -1532,24 +1696,26 @@ export function LoadoutBuilder() {
                         <button
                           type="button"
                           onClick={() => setOpenAttachmentType(type)}
-                          disabled={Boolean(lockedSlot)}
+                          disabled={Boolean(lockedSlot) || !hasOptions}
                           className={cn(
                             "h-12 px-4 rounded-xl border border-white/[0.12] flex items-center gap-2 text-left transition-colors hover:border-white/40",
                             lockedSlot &&
                               "cursor-not-allowed border-white/[0.07] text-teritary hover:border-white/[0.07]",
+                            !hasOptions && "cursor-not-allowed text-teritary",
                             selectedName && "bg-white/5",
                             attachmentError &&
                               !selectedName &&
                               !lockedSlot &&
+                              hasOptions &&
                               "border-destructive/50 bg-destructive/[0.06] hover:border-destructive",
                           )}
                           aria-invalid={
-                            attachmentError && !selectedName && !lockedSlot
+                            attachmentError && !selectedName && !lockedSlot && hasOptions
                           }
                           title={
                             lockedSlot
-                              ? `${type} is controlled by ${selectedApexRelation?.apexName}`
-                              : undefined
+                              ? `${type} is controlled by ${lockSource}`
+                              : !hasOptions ? `No compatible ${type.toLowerCase()} recovered` : undefined
                           }
                         >
                           <div className="flex gap-2 flex-1 flex-row">
@@ -1591,14 +1757,16 @@ export function LoadoutBuilder() {
                                 {lockedSlot.includedPart
                                   ? `Included: ${lockedSlot.includedPart}`
                                   : lockedSlot.included
-                                    ? `Included with ${selectedApexRelation?.apexName}`
+                                    ? `Included with ${lockSource}`
                                     : `${type} unavailable`}
                                 {!lockedSlot.included && (
                                   <span className="ml-2 text-xs text-teritary">
-                                    {selectedApexRelation?.apexName}
+                                    {lockSource}
                                   </span>
                                 )}
                               </span>
+                            ) : !hasOptions ? (
+                              <span className="text-teritary">{type}: no recovered options</span>
                             ) : isAnySelected ? (
                               <>
                                 Any
@@ -1607,13 +1775,17 @@ export function LoadoutBuilder() {
                                 </span>
                               </>
                             ) : selectedName ? (
-                              <>
-                                {selectedAttachment?.displayName ??
-                                  selectedName}
-                                <span className="text-teritary font-normal">
-                                  {type}
+                              <span className="min-w-0 flex flex-col items-start">
+                                <span className="max-w-full truncate">
+                                  {selectedAttachment?.displayName ?? selectedName}
                                 </span>
-                              </>
+                                <span className="max-w-full truncate text-xs text-teritary font-normal">
+                                  {selectedAttachment?.subtypeLabel &&
+                                  selectedAttachment.subtypeLabel !== selectedAttachment.displayName
+                                    ? `${type} · ${selectedAttachment.subtypeLabel}`
+                                    : type}
+                                </span>
+                              </span>
                             ) : (
                               <span className="text-teritary">Add {type}</span>
                             )}

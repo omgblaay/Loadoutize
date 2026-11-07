@@ -8,40 +8,51 @@ export interface BadgePosition {
 /** Ellipse radius (percent of the image box) that badges are spread around. */
 const OVAL_RADIUS = { x: 50, y: 55 };
 
-/** Point on the oval at `percent` of the way around it (0-100), starting at the top (0%) and going clockwise. */
-function ovalPositionAtPercent(percent: number, radius: { x: number; y: number } = OVAL_RADIUS): BadgePosition {
-  const angle = (percent / 100) * Math.PI * 2 - Math.PI / 2;
+/** 0° is the left edge; positive angles travel upward across the oval. */
+function ovalPositionAtDegrees(degrees: number, radius: { x: number; y: number } = OVAL_RADIUS): BadgePosition {
+  const angle = (degrees / 180) * Math.PI;
   return {
-    x: 50 + Math.cos(angle) * radius.x,
-    y: 50 + Math.sin(angle) * radius.y,
+    x: 50 - Math.cos(angle) * radius.x,
+    y: 50 - Math.sin(angle) * radius.y,
   };
 }
 
 /**
  * Generic slot -> position layout: every attachment slot sits at a fixed
  * spot on an oval hugging the image box, rather than being pinned to where
- * that part actually sits on the weapon. Each slug's percent (0-100% of the
- * way around the oval, clockwise from the top) is set by hand below, so
- * slots aren't forced to be evenly spaced -- tune a slug's number to nudge
- * just that one. Applied to every weapon unless a per-weapon override exists
- * below. Keyed by attachment_types.slug.
+ * that part actually sits on the weapon. Angles begin at 0° on the left and
+ * travel over the top, down the right side, and around the bottom. Applied to
+ * every weapon unless a per-weapon override exists below.
  */
-const OVAL_ANGLE_PERCENT: Record<string, number> = {
-  optic: 5,
-  stock: 15,
-  reargrip: 28,
-  ammo: 37,
-  mag: 44,
-  apex: 50,
-  underbarrel: 58,
-  barrel: 85,
-  muzzle: 70,
-  laser: 95,
+const OVAL_ANGLE_DEGREES: Record<string, number> = {
+  muzzle: 0,
+  laser: 32,
+  barrel: 64,
+  optic: 96,
+  stock: 128,
+  guard: 160,
+  reargrip: 192,
+  magazine: 224,
+  apex: 270,
+  underbarrel: 300,
+  trigger: 330,
 };
 
-export const defaultAttachmentBadgePositions: Record<string, BadgePosition> = Object.fromEntries(
-  Object.entries(OVAL_ANGLE_PERCENT).map(([slug, percent]) => [slug, ovalPositionAtPercent(percent)]),
-);
+const SLOT_ALIASES: Record<string, string> = {
+  ammo: "magazine",
+  mag: "magazine",
+  handguard: "guard",
+};
+
+const normalizeSlot = (slug: string) => slug.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+export const defaultAttachmentBadgePositions: Record<string, BadgePosition> =
+  Object.fromEntries(
+    Object.entries(OVAL_ANGLE_DEGREES).map(([slug, degrees]) => [
+      slug,
+      ovalPositionAtDegrees(degrees),
+    ]),
+  );
 
 
 /**
@@ -82,9 +93,11 @@ export function getAttachmentBadgePosition(
   const override = weaponId ? weaponAttachmentBadgeOverrides[weaponId]?.[typeSlug] : undefined;
   if (override) return override;
 
-  const generic = defaultAttachmentBadgePositions[typeSlug];
+  const normalizedSlug = normalizeSlot(typeSlug);
+  const canonicalSlug = SLOT_ALIASES[normalizedSlug] ?? normalizedSlug;
+  const generic = defaultAttachmentBadgePositions[canonicalSlug];
   if (generic) return generic;
 
-  const percent = (fallbackIndex / Math.max(fallbackTotal, 1)) * 100;
-  return ovalPositionAtPercent(percent, FALLBACK_RADIUS);
+  const degrees = (fallbackIndex / Math.max(fallbackTotal, 1)) * 360;
+  return ovalPositionAtDegrees(degrees, FALLBACK_RADIUS);
 }
