@@ -1219,8 +1219,22 @@ export function LoadoutPreview() {
 
               {/* Description */}
               {loadout.description && (
-                <blockquote className="text-secondary text-base">
-                  {loadout.description}
+                <blockquote className="text-secondary text-base whitespace-pre-wrap break-words">
+                  {loadout.description.split(/(https:\/\/[^\s]+)/g).map((part, index) =>
+                    part.startsWith("https://") ? (
+                      <a
+                        key={index}
+                        href={part}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="break-all underline underline-offset-4 hover:text-white"
+                      >
+                        {part}
+                      </a>
+                    ) : (
+                      <React.Fragment key={index}>{part}</React.Fragment>
+                    ),
+                  )}
                 </blockquote>
               )}
             </div>
