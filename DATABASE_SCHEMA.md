@@ -37,7 +37,7 @@ straight from Supabase Storage, with no runtime dependency on Directus.
    Collection → "Use Existing Table" for each of: `games`,
    `weapon_categories`, `weapons`, `attachment_types`, `attachments`,
    `perks`, `equipment`, `classes`, `specializations`, `tags`,
-   `tag_weapon_categories`, `loadout_weapons`, `loadout_weapon_attachments`,
+   `tag_weapon_categories`, `loadouts`, `loadout_weapons`, `loadout_weapon_attachments`,
    `loadout_perks`, `loadout_equipment`, `loadout_reactions`.
    Every free-text column in this schema (`name`, `slug`, `description`,
    `user_id`, `user_name`, `type`, ...) is a Postgres `text` type, which
@@ -49,6 +49,11 @@ straight from Supabase Storage, with no runtime dependency on Directus.
    treatment below), primary keys, or `tags.color` (color picker). For each table's
    `image` column, set the field interface to Directus's built-in
    Image/File type so uploads and thumbnail previews work in the admin UI.
+   Run `node scripts/configure-directus-relation-fields.mjs --apply` after
+   registering the collections. This configures every registered FK as a
+   Select Dropdown (M2O), or a File/Image picker for `directus_files` FKs.
+   It also hides the two legacy JSON category pointers now replaced by
+   `weapon_categories.game_id` and `weapons.weapon_category_id`.
    For each foreign-key column (e.g. `attachments.attachment_type_id`,
    `attachments.game_id`, `weapons.weapon_category_id`, `weapon_categories.
    game_id`), set the field interface to **Select Dropdown (M2O)** — Directus
@@ -61,6 +66,11 @@ straight from Supabase Storage, with no runtime dependency on Directus.
    collection by the game of the currently selected Attachment Type) — this
    scopes the games offered to whichever game the selected Attachment Type
    belongs to, so editors can't pick a mismatched game for an attachment.
+   `loadouts.tag_id` is required and must be registered as a relation to
+   `tags`, using **Select Dropdown (M2O)** with `{{name}}` as its display
+   template and a filter of `game_id equals $CURRENT.game_id`. Run
+   `node scripts/configure-directus-loadout-tag.mjs --apply` after Directus
+   boots to configure the existing foreign key in Data Studio.
    For `tags.color`, set the interface to Directus's built-in **Color**
    picker. Mark `tag_weapon_categories` hidden (Settings on that
    collection) — it's only the junction table backing `tags`' M2M "allowed

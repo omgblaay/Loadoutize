@@ -79,3 +79,24 @@ describe("barrel-specific muzzle position", () => {
     expect(factoryAfter.y).toBeCloseTo(factoryBarrel.y);
   });
 });
+
+describe("Kastov 762 composed preview framing", () => {
+  it("fits the assembled parts without inheriting the wider flattened image bounds", () => {
+    const weapon = library.weapons.find((item) => item.id === "rex_ar_akilo");
+    const calibration = JSON.parse(readFileSync("public/weapon-preview/weapon-builder/source-calibration.json", "utf8"));
+    const catalog = { ...weapon, weapon: weapon.id, assets: library.assets, placement_overrides: calibration.placementOverrides[weapon.id] };
+    const renderer = new WeaponSpriteCompositor(catalog);
+    const state = factoryBuild(catalog);
+    const view = renderer.viewport(state);
+
+    expect(view.width).toBeLessThan(weapon.base_bbox[2] - weapon.base_bbox[0]);
+    for (const slot of renderer.order()) {
+      const part = renderer.placement(state, slot);
+      if (!part) continue;
+      expect(part.bounds[0]).toBeGreaterThanOrEqual(view.x);
+      expect(part.bounds[1]).toBeGreaterThanOrEqual(view.y);
+      expect(part.bounds[2]).toBeLessThanOrEqual(view.x + view.width);
+      expect(part.bounds[3]).toBeLessThanOrEqual(view.y + view.height);
+    }
+  });
+});

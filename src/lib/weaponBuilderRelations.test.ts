@@ -51,6 +51,27 @@ describe("weapon builder relations", () => {
     expect(builderAttachmentDisplayName("missing-asset", "rex_ar_kilo2", assets, "Old API label"))
       .toBe("Old API label");
   });
+  it("uses unique in-game names for shared parts on different weapons", () => {
+    const assets = new Map(catalog.assets.map((asset) => [asset.id, asset]));
+    expect(builderAttachmentDisplayName("rex_comp_vert_b", "rex_ar_akilo", assets, "comp vert b"))
+      .toBe("EXP R3000-V");
+    expect(builderAttachmentDisplayName("rex_comp_bal_d", "rex_ar_kilo437", assets, "comp bal d"))
+      .toBe("FTAC Dominion");
+    expect(builderAttachmentDisplayName("rex_bipod01", "rex_br_ngsierra", assets, "BIPOD"))
+      .toBe("SQ-ST-68 Bipod");
+    expect(builderAttachmentDisplayName("rex_minireddot01", "rex_br_ngsierra", assets, "minireddot01"))
+      .toBe("Slimline Elite");
+    expect(builderAttachmentDisplayName("rex_holo03_mike4_v04", "rex_ar_mike4", assets, "holo03 mike4"))
+      .toBe("SZ Helios Holo");
+    expect(builderAttachmentDisplayName("rex_drum_kilo2", "rex_ar_kilo2", assets, "drum kilo2"))
+      .toBe("60 Round Drum");
+    expect(builderAttachmentDisplayName("rex_ub_gl_mike4", "rex_ar_mike4", assets, "ub gl mike4"))
+      .toBe("Miri 40mm");
+    expect(builderAttachmentDisplayName("rex_apex_menu_akilo_1601", "rex_ar_akilo", assets, "apex menu akilo"))
+      .toBe("Kastov 545");
+    expect(builderAttachmentDisplayName("rex_bar_lgt_kilo2", "rex_ar_kilo2", assets, "bar lgt kilo2"))
+      .toBe('SA K556 16"');
+  });
   it("offers Striga underbarrels only with Ballistarc Dreadline 80 and hides guard selection", () => {
     const parts = [
       { name: "Ballistarc Dreadline 80", type: "Barrel", stats: { assetId: "rex_bar_hvy_pmike63" } },

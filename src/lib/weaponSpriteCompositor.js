@@ -108,8 +108,8 @@ export class WeaponSpriteCompositor{
   }
   part(state,slot){const locked=String(state.autoParts?.[slot]||'').startsWith('apex:'),id=state.parts[slot]||(!locked&&this.catalog.factory_parts?.[slot]);const asset=this.assets.get(id);return asset?.controller_only?null:asset;}
   barrelMount(state,barrel){
-    // The PMIKE63 barrel faces right; the automatic source probe assumes a
-    // left muzzle. Keep its full layer until a right-edge cut is calibrated.
+    // The source probe gives the left muzzle socket for left-facing barrels.
+    // Right-facing profiles need a separate right-edge cut calibration.
     if(!barrel?.asset.muzzle_mount||this.catalog.profile.muzzle_right)return null;
     const [l,t,r,b]=barrel.asset.bbox,meta=barrel.asset.muzzle_mount;
     const edit=state.transforms?.barrel||this.catalog.placement_overrides?.[barrel.asset.id]||{};
@@ -272,7 +272,7 @@ export class WeaponSpriteCompositor{
     // expand it whenever a selected component extends beyond that silhouette.
     // This avoids the old per-part zoom jitter while still keeping long muzzles,
     // stocks, barrels and drums inside the preview instead of clipping them.
-    const b=[...this.catalog.base_bbox];
+    const b=[...(this.catalog.component_base&&this.catalog.preview_bbox||this.catalog.base_bbox)];
     for(const slot of this.order()){const p=this.placement(state,slot);if(p){b[0]=Math.min(b[0],p.bounds[0]);b[1]=Math.min(b[1],p.bounds[1]);b[2]=Math.max(b[2],p.bounds[2]);b[3]=Math.max(b[3],p.bounds[3]);}}
     const w=Math.max(b[2]-b[0]+34,(b[3]-b[1]+32)*2),h=w/2;
     return {x:(b[0]+b[2]-w)/2,y:(b[1]+b[3]-h)/2,width:w,height:h};

@@ -1,7 +1,6 @@
-import { Paperclip, Puzzle } from "lucide-react";
 import {
+  attachmentDisplayName,
   attachmentImageUrl,
-  isApexAttachment,
   type PresentableAttachment,
 } from "@/lib/attachmentPresentation";
 import { cn } from "@/lib/utils";
@@ -13,12 +12,12 @@ export function AttachmentIcon({
   attachment: PresentableAttachment;
   className?: string;
 }) {
-  if (isApexAttachment(attachment)) {
-    return <Puzzle aria-hidden="true" className={cn("size-5 shrink-0", className)} />;
-  }
   const imageUrl = attachmentImageUrl(attachment);
   if (imageUrl) {
     return <img src={imageUrl} alt="" loading="lazy" className={cn("size-5 shrink-0 object-contain", className)} />;
   }
-  return <Paperclip aria-hidden="true" className={cn("size-5 shrink-0 text-teritary", className)} />;
+  return <span aria-label={`${attachmentDisplayName(attachment)} image unavailable`}
+    className={cn("inline-flex size-5 shrink-0 items-center justify-center text-[10px] font-semibold text-teritary", className)}>
+    {attachmentDisplayName(attachment).slice(0, 2).toUpperCase()}
+  </span>;
 }

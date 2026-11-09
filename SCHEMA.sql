@@ -324,7 +324,7 @@ CREATE TABLE loadouts (
   content_type TEXT NOT NULL DEFAULT 'weapon_config'
     CHECK (content_type IN ('full_loadout', 'weapon_config')),
   description TEXT,
-  tag_id INTEGER REFERENCES tags(id) ON DELETE SET NULL,
+  tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE RESTRICT,
   views INTEGER DEFAULT 0,
   is_public BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

@@ -255,20 +255,25 @@ async function resolveImageUrls(imageIds: (string | null)[]): Promise<Map<string
   const urlById = new Map<string, string>();
   if (ids.length === 0) return urlById;
 
-  const { data: files, error } = await supabase
+  // A whole game's attachment catalog can contain hundreds of distinct file
+  // IDs. Passing them all to one PostgREST `in` filter exceeds the URL limit
+  // and makes every image URL disappear from the response.
+  const batchSize = 100;
+  const batches = Array.from({ length: Math.ceil(ids.length / batchSize) }, (_, index) =>
+    ids.slice(index * batchSize, (index + 1) * batchSize));
+  const results = await Promise.all(batches.map((batch) => supabase
     .from('directus_files')
     .select('id, filename_disk')
-    .in('id', ids);
+    .in('id', batch)));
 
-  if (error) {
-    // directus_files won't exist until Directus has booted at least once --
-    // treat that as "no images yet" rather than failing the whole request.
-    console.log(`Could not resolve image URLs (has Directus booted yet?): ${error.message}`);
-    return urlById;
-  }
-
-  for (const file of files ?? []) {
-    urlById.set(file.id, `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/${file.filename_disk}`);
+  for (const { data: files, error } of results) {
+    if (error) {
+      console.log(`Could not resolve a batch of image URLs: ${error.message}`);
+      continue;
+    }
+    for (const file of files ?? []) {
+      urlById.set(file.id, `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/${file.filename_disk}`);
+    }
   }
   return urlById;
 }
@@ -656,17 +661,13 @@ app.get("/make-server-6db475c7/games/:gameId/weapons", async (c) => {
     const gameId = c.req.param("gameId");
     const { data, error } = await supabase
       .from('weapons')
-      .select('id, name, image, weapon_category')
+      .select('id, name, image, weapon_category_id')
       .eq('game_id', gameId)
       .order('name', { ascending: true });
     if (error) throw error;
 
-    // weapon_category is a Directus many-to-any pointer (`{ key, collection }`)
-    // rather than a plain FK column, so PostgREST can't auto-embed it the way
-    // resolveImageUrls embeds directus_files -- resolve weapon_categories rows
-    // for the referenced keys separately instead.
     const categoryIds = [...new Set(
-      (data ?? []).map((w: any) => w.weapon_category?.key).filter((id: any) => id != null)
+      (data ?? []).map((w: any) => w.weapon_category_id).filter((id: any) => id != null)
     )];
     const { data: categoryRows, error: catError } = categoryIds.length
       ? await supabase.from('weapon_categories').select('id, name, short_version').in('id', categoryIds)
@@ -682,7 +683,7 @@ app.get("/make-server-6db475c7/games/:gameId/weapons", async (c) => {
       rex_me_swimfists: 'rex_me_climbfists',
     };
     const weapons = (data ?? []).map((w: any) => {
-      const category = categoryById.get(w.weapon_category?.key);
+      const category = categoryById.get(w.weapon_category_id);
       return {
         id: w.id,
         name: w.name,
@@ -720,7 +721,7 @@ app.get("/make-server-6db475c7/games/:gameId/attachments", async (c) => {
       stats: a.stats,
       type: a.type_name,
       typeSlug: a.type_slug,
-      imageUrl: a.image ? urlById.get(a.image) ?? null : a.stats?.imagePath ?? null,
+      imageUrl: a.image ? urlById.get(a.image) ?? null : null,
       weaponIds: a.stats?.weaponIds ?? null,
       typeImageUrl: a.type_image ? urlById.get(a.type_image) ?? null : null,
     }));
@@ -1436,9 +1437,10 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
       return c.json({ error: "reCAPTCHA verification failed -- please try again" }, 400);
     }
 
-    let tagId = body.tagId ?? null;
-    if (tagId != null && !(await isTagAllowedForWeapons(gameId, tagId, weapons))) {
-      tagId = null;
+    const tagId = body.tagId;
+    if (!Number.isInteger(tagId) || tagId <= 0 ||
+      !(await isTagAllowedForWeapons(gameId, tagId, weapons))) {
+      return c.json({ error: 'Choose a valid tag for this loadout' }, 400);
     }
 
     const { video, error: videoError } = await resolveVideo(body.videoUrl);
@@ -1515,9 +1517,10 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
       return c.json({ error: "You can only edit your own loadouts" }, 403);
     }
 
-    let tagId = body.tagId ?? null;
-    if (tagId != null && !(await isTagAllowedForWeapons(gameId, tagId, weapons))) {
-      tagId = null;
+    const tagId = body.tagId;
+    if (!Number.isInteger(tagId) || tagId <= 0 ||
+      !(await isTagAllowedForWeapons(gameId, tagId, weapons))) {
+      return c.json({ error: 'Choose a valid tag for this loadout' }, 400);
     }
 
     const { video, error: videoError } = await resolveVideo(body.videoUrl);

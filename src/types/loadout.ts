@@ -55,6 +55,7 @@ export interface CardAttachment {
   type: string | null;
   typeSlug?: string | null;
   imageUrl?: string | null;
+  typeImageUrl?: string | null;
   stats?: { assetId?: string; displayName?: string; imagePath?: string } | null;
 }
 

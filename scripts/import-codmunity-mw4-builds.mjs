@@ -102,9 +102,16 @@ try {
   const allAttachments = (await db.query(
     "select id,name,type_name,stats from public.attachments_with_images where game_id='mw4'",
   )).rows;
+  const tagIds = new Map((await db.query(
+    "select id,name from public.tags where game_id='mw4'",
+  )).rows.map((row) => [row.name, row.id]));
 
   const results = [];
   for (const build of builds) {
+    const tagName = build.style === "Versatile" ? "Balanced" :
+      build.style === "Sniper" ? "Long-range" : null;
+    const tagId = tagIds.get(tagName);
+    if (!tagId) throw new Error(`Missing tag for ${build.style}`);
     const weapon = weapons.get(build.weaponId);
     if (!weapon) throw new Error(`Missing weapon ${build.weaponId}`);
     if (weapon.name !== build.weapon) {
@@ -126,14 +133,14 @@ try {
     const description = `Recreated from CODMunity's MW4 Multiplayer ${build.style.toLowerCase()} build (checked 7 Nov 2026). Source: ${build.source}`;
     if (existing) {
       await db.query(
-        "update public.loadouts set name=$1,description=$2,game_loadout_code=$3,content_type='weapon_config',is_public=true,updated_at=now() where id=$4",
-        [`${build.weapon} · CODMunity ${build.style}`, description, build.code, loadoutId],
+        "update public.loadouts set name=$1,description=$2,game_loadout_code=$3,tag_id=$4,content_type='weapon_config',is_public=true,updated_at=now() where id=$5",
+        [`${build.weapon} · CODMunity ${build.style}`, description, build.code, tagId, loadoutId],
       );
       await db.query("delete from public.loadout_weapons where loadout_id=$1", [loadoutId]);
     } else {
       await db.query(
-        "insert into public.loadouts (id,game_id,user_id,user_name,name,description,game_loadout_code,content_type,is_public) values ($1,'mw4',$2,$3,$4,$5,$6,'weapon_config',true)",
-        [loadoutId, owner.id, owner.name, `${build.weapon} · CODMunity ${build.style}`, description, build.code],
+        "insert into public.loadouts (id,game_id,user_id,user_name,name,description,game_loadout_code,tag_id,content_type,is_public) values ($1,'mw4',$2,$3,$4,$5,$6,$7,'weapon_config',true)",
+        [loadoutId, owner.id, owner.name, `${build.weapon} · CODMunity ${build.style}`, description, build.code, tagId],
       );
     }
 

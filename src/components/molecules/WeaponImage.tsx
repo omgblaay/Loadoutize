@@ -5,7 +5,6 @@ import { Skeleton } from "@/components/atoms/Skeleton";
 import { WeaponSpriteCanvas } from "@/components/molecules/WeaponSpriteCanvas";
 import { WeaponPreviewSmoke } from "@/components/molecules/WeaponPreviewSmoke";
 import { getWeaponPreviewRef } from "@/lib/weaponSpritePreview";
-import { Puzzle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 
@@ -191,12 +190,7 @@ export function WeaponImage({
             const content = ovalBadgeLabels ? (
               <div className="flex w-[200px] items-center gap-2 rounded-lg border border-white/5 bg-[#151315]/95 py-1.5 pl-1.5 pr-3 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-sm">
                 <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
-                  {badge.isApex ? (
-                    <Puzzle
-                      aria-hidden="true"
-                      className="size-4 text-white/75"
-                    />
-                  ) : badge.iconUrl ? (
+                  {badge.iconUrl ? (
                     <img
                       src={badge.iconUrl}
                       alt=""
@@ -221,9 +215,7 @@ export function WeaponImage({
               </div>
             ) : (
               <div className="flex size-full items-center justify-center">
-                {badge.isApex ? (
-                  <Puzzle aria-hidden="true" className="size-5 text-white/80" />
-                ) : badge.iconUrl ? (
+                {badge.iconUrl ? (
                   <img
                     src={badge.iconUrl}
                     alt={badge.label}

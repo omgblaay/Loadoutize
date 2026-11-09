@@ -78,22 +78,22 @@ try {
   }
 
   await client.query("INSERT INTO public.games (id, name, slug, has_weapon_categories, has_attachments, has_perks, has_classes) VALUES ('mw4', 'Modern Warfare 4', 'mw4', true, true, false, false)");
-  await client.query(`INSERT INTO public.weapon_categories (name, slug, short_version, display_order, game)
-    SELECT c.name, c.slug, c.short, c.ord, json_build_object('key', 'mw4', 'collection', 'games')
+  await client.query(`INSERT INTO public.weapon_categories (name, slug, short_version, display_order, game_id)
+    SELECT c.name, c.slug, c.short, c.ord, 'mw4'
     FROM jsonb_to_recordset($1::jsonb) AS c(name text, slug text, short text, ord int)`,
     [JSON.stringify(categories.map(({ name, slug, short, order }) => ({ name, slug, short, ord: order })))]);
   await client.query(`INSERT INTO public.attachment_types (game_id, name, slug, display_order)
     SELECT 'mw4', t.name, t.slug, t.ord
     FROM jsonb_to_recordset($1::jsonb) AS t(name text, slug text, ord int)`,
     [JSON.stringify(types.map(({ name, slug, order }) => ({ name, slug, ord: order })))]);
-  await client.query(`INSERT INTO public.weapons (id, game_id, name, weapon_category)
-    SELECT w.id, 'mw4', w.name, json_build_object('key', c.id, 'collection', 'weapon_categories')
+  await client.query(`INSERT INTO public.weapons (id, game_id, name, weapon_category_id)
+    SELECT w.id, 'mw4', w.name, c.id
     FROM jsonb_to_recordset($1::jsonb) AS w(id text, name text, category text)
-    JOIN public.weapon_categories c ON c.name = w.category AND c.game->>'key' = 'mw4'`,
+    JOIN public.weapon_categories c ON c.name = w.category AND c.game_id = 'mw4'`,
     [JSON.stringify(weapons)]);
   await client.query(`INSERT INTO public.attachments (game_id, attachment_type_id, name, stats)
     SELECT 'mw4', t.id, a.name,
-      jsonb_build_object('assetId', a.asset_id, 'imagePath', a.image_path,
+      jsonb_build_object('assetId', a.asset_id,
         'weaponIds', a.weapon_ids, 'composable', a.composable,
         'families', a.families, 'evidence', a.evidence)
     FROM jsonb_to_recordset($1::jsonb) AS a(asset_id text, name text, slot text,

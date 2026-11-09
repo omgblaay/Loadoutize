@@ -10,6 +10,43 @@ export type { NavIconKey };
 // cached by the module loader.
 const Scene3D = React.lazy(() => import("@/components/atoms/icons3d/Scene3D"));
 
+let webglAvailable: boolean | undefined;
+
+function canRender3D(): boolean {
+  if (webglAvailable !== undefined) return webglAvailable;
+  if (typeof document === "undefined") return false;
+
+  try {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("webgl2") || canvas.getContext("webgl");
+    webglAvailable = !!context;
+    context?.getExtension("WEBGL_lose_context")?.loseContext();
+  } catch {
+    webglAvailable = false;
+  }
+  return webglAvailable;
+}
+
+class WebGLBoundary extends React.Component<
+  { children: React.ReactNode; onError: () => void },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch() {
+    webglAvailable = false;
+    this.props.onError();
+  }
+
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
+
 /**
  * Flat lucide icon at rest; crossfades into a small rotating 3D render of
  * the same icon when active or hovered. The flat icon shrinks out exactly as
@@ -46,6 +83,11 @@ export function NavIcon({
         prefersReducedMotion ? 0 : 220,
       );
       return () => window.clearTimeout(timeout);
+    }
+
+    if (!canRender3D()) {
+      setMounted3d(false);
+      return;
     }
 
     const host = hostRef.current;
@@ -97,9 +139,11 @@ export function NavIcon({
             pointerEvents: "none",
           }}
         >
-          <React.Suspense fallback={null}>
-            <Scene3D icon={icon} />
-          </React.Suspense>
+          <WebGLBoundary onError={() => setMounted3d(false)}>
+            <React.Suspense fallback={null}>
+              <Scene3D icon={icon} />
+            </React.Suspense>
+          </WebGLBoundary>
         </span>
       )}
     </span>

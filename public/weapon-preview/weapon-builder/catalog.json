@@ -16,6 +16,12 @@
         491.0,
         207.0
       ],
+      "preview_bbox": [
+        59.0,
+        64.0,
+        450.0,
+        173.0
+      ],
       "base_width": 512,
       "base_height": 256,
       "assets": [
@@ -28550,7 +28556,18 @@
         "rex_ar_kilo437": "Schlager 7X",
         "rex_ar_mike4": "Schlager 7X",
         "rex_ar_xar1": "Schlager 7X",
-        "rex_ar_cromeo": "Schlager 7X"
+        "rex_ar_cromeo": "Schlager 7X",
+        "rex_br_asierra12": "Schlager 7X",
+        "rex_br_ngsierra": "Schlager 7X",
+        "rex_br_uxray": "Schlager 7X",
+        "rex_dm_findia": "Schlager 7X",
+        "rex_dm_golf28": "Schlager 7X",
+        "rex_dm_moscar": "Schlager 7X",
+        "rex_lm_recho": "Schlager 7X",
+        "rex_lm_tango73": "Schlager 7X",
+        "rex_sn_limax": "Schlager 7X",
+        "rex_sn_sierra100": "Schlager 7X",
+        "rex_sn_svictor98": "Schlager 7X"
       }
     },
     {
@@ -28600,7 +28617,17 @@
         "rex_ar_kilo437": "Locus PX3 Canted",
         "rex_ar_mike4": "Locus PX3 Canted",
         "rex_ar_xar1": "Locus PX3 Canted",
-        "rex_ar_cromeo": "Locus PX3 Canted"
+        "rex_ar_cromeo": "Locus PX3 Canted",
+        "rex_br_asierra12": "Locus PX3 Canted",
+        "rex_br_ngsierra": "Locus PX3 Canted",
+        "rex_br_uxray": "Locus PX3 Canted",
+        "rex_dm_findia": "Locus PX3 Canted",
+        "rex_dm_golf28": "Locus PX3 Canted",
+        "rex_lm_recho": "Locus PX3 Canted",
+        "rex_lm_tango73": "Locus PX3 Canted",
+        "rex_sn_limax": "Locus PX3 Canted",
+        "rex_sn_sierra100": "Locus PX3 Canted",
+        "rex_sn_svictor98": "Locus PX3 Canted"
       }
     },
     {
@@ -28654,7 +28681,18 @@
         "rex_ar_kilo437": "Schlager Dogfight GI",
         "rex_ar_mike4": "Schlager Dogfight GI",
         "rex_ar_xar1": "Schlager Dogfight GI",
-        "rex_ar_cromeo": "Schlager Dogfight GI"
+        "rex_ar_cromeo": "Schlager Dogfight GI",
+        "rex_br_asierra12": "Schlager Dogfight GI",
+        "rex_br_ngsierra": "Schlager Dogfight GI",
+        "rex_br_uxray": "Schlager Dogfight GI",
+        "rex_dm_findia": "Schlager Dogfight GI",
+        "rex_dm_golf28": "Schlager Dogfight GI",
+        "rex_dm_moscar": "Schlager Dogfight GI",
+        "rex_lm_recho": "Schlager Dogfight GI",
+        "rex_lm_tango73": "Schlager Dogfight GI",
+        "rex_sn_limax": "Schlager Dogfight GI",
+        "rex_sn_sierra100": "Schlager Dogfight GI",
+        "rex_sn_svictor98": "Schlager Dogfight GI"
       }
     },
     {
@@ -28685,7 +28723,18 @@
         "rex_ar_kilo437": "RVX9 Thermo",
         "rex_ar_mike4": "RVX9 Thermo",
         "rex_ar_xar1": "RVX9 Thermo",
-        "rex_ar_cromeo": "RVX9 Thermo"
+        "rex_ar_cromeo": "RVX9 Thermo",
+        "rex_br_asierra12": "RVX9 Thermo",
+        "rex_br_ngsierra": "RVX9 Thermo",
+        "rex_br_uxray": "RVX9 Thermo",
+        "rex_dm_findia": "RVX9 Thermo",
+        "rex_dm_golf28": "RVX9 Thermo",
+        "rex_dm_moscar": "RVX9 Thermo",
+        "rex_lm_recho": "RVX9 Thermo",
+        "rex_lm_tango73": "RVX9 Thermo",
+        "rex_sn_limax": "RVX9 Thermo",
+        "rex_sn_sierra100": "RVX9 Thermo",
+        "rex_sn_svictor98": "RVX9 Thermo"
       }
     },
     {
@@ -28716,7 +28765,18 @@
         "rex_ar_kilo437": "VLK Rize-40",
         "rex_ar_mike4": "VLK Rize-40",
         "rex_ar_xar1": "VLK Rize-40",
-        "rex_ar_cromeo": "VLK Rize-40"
+        "rex_ar_cromeo": "VLK Rize-40",
+        "rex_br_asierra12": "VLK Rize-40",
+        "rex_br_ngsierra": "VLK Rize-40",
+        "rex_br_uxray": "VLK Rize-40",
+        "rex_dm_findia": "VLK Rize-40",
+        "rex_dm_golf28": "VLK Rize-40",
+        "rex_dm_moscar": "VLK Rize-40",
+        "rex_lm_recho": "VLK Rize-40",
+        "rex_lm_tango73": "VLK Rize-40",
+        "rex_sn_limax": "VLK Rize-40",
+        "rex_sn_sierra100": "VLK Rize-40",
+        "rex_sn_svictor98": "VLK Rize-40"
       }
     },
     {
@@ -28740,7 +28800,25 @@
       "display_name": "VLK Rize-40",
       "name_status": "public_reference",
       "name_evidence": "optic_capability_and_factory_weapon_match_public_description",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_ar_akilo": "VLK Rize-40",
+        "rex_ar_kilo2": "VLK Rize-40",
+        "rex_ar_kilo437": "VLK Rize-40",
+        "rex_ar_mike4": "VLK Rize-40",
+        "rex_ar_xar1": "VLK Rize-40",
+        "rex_br_asierra12": "VLK Rize-40",
+        "rex_br_ngsierra": "VLK Rize-40",
+        "rex_br_uxray": "VLK Rize-40",
+        "rex_dm_findia": "VLK Rize-40",
+        "rex_dm_golf28": "VLK Rize-40",
+        "rex_dm_moscar": "VLK Rize-40",
+        "rex_lm_recho": "VLK Rize-40",
+        "rex_lm_tango73": "VLK Rize-40",
+        "rex_sn_limax": "VLK Rize-40",
+        "rex_sn_sierra100": "VLK Rize-40",
+        "rex_sn_svictor98": "VLK Rize-40"
+      }
     },
     {
       "id": "rex_bar_akilo",
@@ -29093,7 +29171,10 @@
       "subtype_label": "Heavy Barrel",
       "subtype_evidence": "internal_subtype_token",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_golf28": "LM Class 6 HBL"
+      }
     },
     {
       "id": "rex_bar_hvy_hotel45",
@@ -31861,7 +31942,10 @@
       "subtype_label": "Short Barrel",
       "subtype_evidence": "internal_subtype_token",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_golf28": "Bruen Ironhide 76"
+      }
     },
     {
       "id": "rex_bar_sht_kilo2",
@@ -32597,7 +32681,7 @@
     },
     {
       "id": "rex_barbip_asierra12",
-      "title": "Oden Sentinel — bipod barrel",
+      "title": "Oden Sentinel \u2014 bipod barrel",
       "slot": "barrel",
       "src": "../mw4-attachments/images/rex_barbip_asierra12-75cbd9cbecb18dd9.png",
       "bbox": [
@@ -32618,7 +32702,7 @@
         "method": "sprite_review"
       },
       "internal_title": "barbip asierra12",
-      "display_name": "Oden Sentinel — bipod barrel",
+      "display_name": "Oden Sentinel \u2014 bipod barrel",
       "name_status": "derived_component",
       "name_evidence": "descriptive_component_label_from_official_Oden_Sentinel_bundle_not_separate_localized_name",
       "name_source_url": "https://www.callofduty.com/blog/2026/10/call-of-duty-modern-warfare-4-launch-multiplayer-operators-weapons-equipment-create-a-class"
@@ -32793,7 +32877,10 @@
       },
       "internal_title": "barsil golf28",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_golf28": "Bruen Reaper-X"
+      }
     },
     {
       "id": "rex_barsil_kilo2",
@@ -32926,7 +33013,20 @@
       "name_status": "confirmed",
       "name_evidence": "user_screenshot_icon_match",
       "weapon_display_names": {
-        "rex_ar_kilo2": "AA54 V.3 Bipod"
+        "rex_ar_kilo2": "AA54 V.3 Bipod",
+        "rex_ar_akilo": "AA54 V.3 Bipod",
+        "rex_ar_kilo437": "AA54 V.3 Bipod",
+        "rex_ar_mike4": "AA54 V.3 Bipod",
+        "rex_br_asierra12": "AA54 V.3 Bipod",
+        "rex_br_uxray": "AA54 V.3 Bipod",
+        "rex_dm_findia": "AA54 V.3 Bipod",
+        "rex_dm_moscar": "AA54 V.3 Bipod",
+        "rex_lm_sierrax": "AA54 V.3 Bipod",
+        "rex_br_ngsierra": "SQ-ST-68 Bipod",
+        "rex_dm_golf28": "Bruen BR 21 Bipod",
+        "rex_lm_recho": "APOC Bipod",
+        "rex_sn_limax": "Bipod",
+        "rex_sn_svictor98": "KG-7 Bipod"
       }
     },
     {
@@ -33023,7 +33123,10 @@
       "composable": true,
       "internal_title": "bipod golf28",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_golf28": "Bruen BR 21 Bipod"
+      }
     },
     {
       "id": "rex_bipod_limax",
@@ -33680,7 +33783,12 @@
       "connector_y": 0.494921514312096,
       "internal_title": "breach b",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sn_svictor98": "770 Underbite",
+        "rex_ar_akilo": "770 Underbite",
+        "rex_br_uxray": "TV Bitelock"
+      }
     },
     {
       "id": "rex_breach_c",
@@ -33703,7 +33811,9 @@
       "name_status": "confirmed",
       "name_evidence": "user_screenshot_icon_match",
       "weapon_display_names": {
-        "rex_ar_kilo2": "B16 Helical"
+        "rex_ar_kilo2": "B16 Helical",
+        "rex_br_ngsierra": "TV Bitelock",
+        "rex_lm_recho": "BRCH-9 v.2"
       }
     },
     {
@@ -33724,7 +33834,11 @@
       "connector_y": 0.4995399579390115,
       "internal_title": "breach d",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_kilo437": "B16 Helical",
+        "rex_lm_tango73": "770 Underbite"
+      }
     },
     {
       "id": "rex_breach_decho",
@@ -33792,7 +33906,11 @@
       "connector_y": 0.5,
       "internal_title": "breach f",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_mpapa7": "Hanbit Chevron",
+        "rex_sm_spier9": "Hanbit Chevron"
+      }
     },
     {
       "id": "rex_breach_g",
@@ -33812,7 +33930,10 @@
       "connector_y": 0.49022852639873915,
       "internal_title": "breach g",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sh_bmike3": "Mugi-X VIR0"
+      }
     },
     {
       "id": "rex_breach_h",
@@ -33832,7 +33953,12 @@
       "connector_y": 0.49625668449197863,
       "internal_title": "breach h",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_findia": "TV Bitelock",
+        "rex_dm_golf28": "TV Bitelock",
+        "rex_sn_limax": "Cronen JAB-60"
+      }
     },
     {
       "id": "rex_breach_hotel45",
@@ -33881,7 +34007,8 @@
       "name_status": "unresolved",
       "weapon_display_names": {
         "rex_sm_pmike63": "XRK Rampage",
-        "rex_sm_psierra41": "XRK Rampage"
+        "rex_sm_psierra41": "XRK Rampage",
+        "rex_ar_xar1": "B16 Helical"
       }
     },
     {
@@ -34394,7 +34521,12 @@
       "connector_y": 0.4939942238414516,
       "internal_title": "comp bal b",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sn_svictor98": "Field Tac 1.4 Comp",
+        "rex_ar_akilo": "Field Tac 1.4 Comp",
+        "rex_br_uxray": "HET-S6 Comp"
+      }
     },
     {
       "id": "rex_comp_bal_c",
@@ -34417,7 +34549,9 @@
       "name_status": "confirmed",
       "name_evidence": "user_screenshot_icon_match",
       "weapon_display_names": {
-        "rex_ar_kilo2": "Corvus LVL-40"
+        "rex_ar_kilo2": "Corvus LVL-40",
+        "rex_br_ngsierra": "HET-S6 Comp",
+        "rex_lm_recho": "K41A2 Comp"
       }
     },
     {
@@ -34438,7 +34572,11 @@
       "connector_y": 0.4986121932216595,
       "internal_title": "comp bal d",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_kilo437": "FTAC Dominion",
+        "rex_lm_tango73": "Field Tac 1.4 Comp"
+      }
     },
     {
       "id": "rex_comp_bal_decho",
@@ -34484,7 +34622,10 @@
       "connector_y": 0.47539778286517653,
       "internal_title": "comp bal e",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_pi_kilo5": "BAL-XC Gen. 0"
+      }
     },
     {
       "id": "rex_comp_bal_f",
@@ -34504,7 +34645,11 @@
       "connector_y": 0.49295774647887325,
       "internal_title": "comp bal f",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_mpapa7": "TA TacPro-56",
+        "rex_sm_spier9": "TA TacPro-56"
+      }
     },
     {
       "id": "rex_comp_bal_g",
@@ -34524,7 +34669,10 @@
       "connector_y": 0.5,
       "internal_title": "comp bal g",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sh_bmike3": "TA Ribcage Gen.1"
+      }
     },
     {
       "id": "rex_comp_bal_h",
@@ -34548,7 +34696,12 @@
       "display_name": "TA TacPro-56",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_dm_findia": "HET-S6 Comp",
+        "rex_dm_golf28": "HET-S6 Comp",
+        "rex_sn_limax": "BL-A5 Comp"
+      }
     },
     {
       "id": "rex_comp_bal_hotel45",
@@ -34601,7 +34754,8 @@
       "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
       "weapon_display_names": {
         "rex_sm_pmike63": "Full Port Comp",
-        "rex_sm_psierra41": "Full Port Comp"
+        "rex_sm_psierra41": "Full Port Comp",
+        "rex_ar_xar1": "FTAC Dominion"
       }
     },
     {
@@ -34697,7 +34851,12 @@
       "connector_y": 0.49382716049382713,
       "internal_title": "comp hoz b",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sn_svictor98": "FT Hyperport 408",
+        "rex_ar_akilo": "FT Hyperport 408",
+        "rex_br_uxray": "Bruen R12 Gen. 4"
+      }
     },
     {
       "id": "rex_comp_hoz_c",
@@ -34719,7 +34878,8 @@
       "display_name": null,
       "name_status": "unresolved",
       "weapon_display_names": {
-        "rex_ar_kilo2": "FTAC Dominion"
+        "rex_ar_kilo2": "FTAC Dominion",
+        "rex_lm_recho": "Matuzek Ironcall 31"
       }
     },
     {
@@ -34744,7 +34904,11 @@
       "display_name": "Matuzek Ironcall 31",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_ar_kilo437": "Corvus LVL-40",
+        "rex_lm_tango73": "FT Hyperport 408"
+      }
     },
     {
       "id": "rex_comp_hoz_decho",
@@ -34790,7 +34954,10 @@
       "connector_y": 0.4947414548641542,
       "internal_title": "comp hoz e",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_pi_kilo5": "Chevron 90 Comp"
+      }
     },
     {
       "id": "rex_comp_hoz_f",
@@ -34810,7 +34977,11 @@
       "connector_y": 0.4935901234567901,
       "internal_title": "comp hoz f",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_mpapa7": "212 LC40 Comp",
+        "rex_sm_spier9": "212 LC40 Comp"
+      }
     },
     {
       "id": "rex_comp_hoz_g",
@@ -34830,7 +35001,10 @@
       "connector_y": 0.5005190311418686,
       "internal_title": "comp hoz g",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sh_bmike3": "GW Slashtop V1"
+      }
     },
     {
       "id": "rex_comp_hoz_h",
@@ -34850,7 +35024,12 @@
       "connector_y": 0.4980143291666246,
       "internal_title": "comp hoz h",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_findia": "Bruen R12 Gen. 4",
+        "rex_dm_golf28": "Bruen R12 Gen. 4",
+        "rex_sn_limax": "LM Deadstop-99"
+      }
     },
     {
       "id": "rex_comp_hoz_hotel45",
@@ -34899,7 +35078,8 @@
       "name_status": "unresolved",
       "weapon_display_names": {
         "rex_sm_pmike63": "1/2x28 Dual Port",
-        "rex_sm_psierra41": "1/2x28 Dual Port"
+        "rex_sm_psierra41": "1/2x28 Dual Port",
+        "rex_ar_xar1": "Corvus LVL-40"
       }
     },
     {
@@ -35043,7 +35223,12 @@
       "connector_y": 0.49299797309747556,
       "internal_title": "comp vert b",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sn_svictor98": "EXP R3000-V",
+        "rex_ar_akilo": "EXP R3000-V",
+        "rex_br_uxray": "Octa-63 Comp"
+      }
     },
     {
       "id": "rex_comp_vert_c",
@@ -35066,7 +35251,9 @@
       "name_status": "confirmed",
       "name_evidence": "user_screenshot_icon_match",
       "weapon_display_names": {
-        "rex_ar_kilo2": "ZLR Reverb90"
+        "rex_ar_kilo2": "ZLR Reverb90",
+        "rex_br_ngsierra": "Octa-63 Comp",
+        "rex_lm_recho": "Bryson Bullhide 90"
       }
     },
     {
@@ -35091,7 +35278,11 @@
       "display_name": "Bryson Bullhide 90",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_ar_kilo437": "ZLR Reverb90",
+        "rex_lm_tango73": "EXP R3000-V"
+      }
     },
     {
       "id": "rex_comp_vert_decho",
@@ -35163,7 +35354,11 @@
       "display_name": "TA Honeypot 670",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_sm_mpapa7": "Haebang ORC70",
+        "rex_sm_spier9": "Haebang ORC70"
+      }
     },
     {
       "id": "rex_comp_vert_g",
@@ -35207,7 +35402,12 @@
       "connector_y": 0.4950655532530417,
       "internal_title": "comp vert h",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_findia": "Octa-63 Comp",
+        "rex_dm_golf28": "Octa-63 Comp",
+        "rex_sn_limax": "TA Honeypot 670"
+      }
     },
     {
       "id": "rex_comp_vert_hotel45",
@@ -35256,7 +35456,8 @@
       "name_status": "unresolved",
       "weapon_display_names": {
         "rex_sm_pmike63": "L980-S Comp",
-        "rex_sm_psierra41": "L980-S Comp"
+        "rex_sm_psierra41": "L980-S Comp",
+        "rex_ar_xar1": "ZLR Reverb90"
       }
     },
     {
@@ -35959,7 +36160,10 @@
       "composable": true,
       "internal_title": "drum kilo2",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_kilo2": "60 Round Drum"
+      }
     },
     {
       "id": "rex_drum_kilo437",
@@ -36028,7 +36232,10 @@
       "composable": true,
       "internal_title": "drum mpapa7",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_mpapa7": "60 Round Drum"
+      }
     },
     {
       "id": "rex_drum_ngsierra",
@@ -36049,7 +36256,10 @@
       "composable": true,
       "internal_title": "drum ngsierra",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_ngsierra": "60 Round Drum"
+      }
     },
     {
       "id": "rex_drum_pmike63",
@@ -36093,7 +36303,10 @@
       "composable": true,
       "internal_title": "drum spier9",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_spier9": "50 Round Drum Mag"
+      }
     },
     {
       "id": "rex_drum_uxray",
@@ -36114,7 +36327,10 @@
       "composable": true,
       "internal_title": "drum uxray",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_uxray": "50 Round Drum Mag"
+      }
     },
     {
       "id": "rex_drum_xar1",
@@ -36208,7 +36424,11 @@
       "display_name": "Usenko 308-1L",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_sn_svictor98": "Usenko 308-1L",
+        "rex_br_uxray": "Matuzek Blackveil"
+      }
     },
     {
       "id": "rex_flash_c",
@@ -36231,7 +36451,9 @@
       "name_status": "confirmed",
       "name_evidence": "user_screenshot_icon_match",
       "weapon_display_names": {
-        "rex_ar_kilo2": "TZL-110 V1"
+        "rex_ar_kilo2": "TZL-110 V1",
+        "rex_br_ngsierra": "Matuzek Blackveil",
+        "rex_lm_recho": "VGD-11 Flash"
       }
     },
     {
@@ -36252,7 +36474,11 @@
       "connector_y": 0.48554560704093414,
       "internal_title": "flash d",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_kilo437": "TZL-110 V1",
+        "rex_lm_tango73": "Usenko 308-1L"
+      }
     },
     {
       "id": "rex_flash_decho",
@@ -36322,7 +36548,11 @@
       "connector_y": 0.49230769230769234,
       "internal_title": "flash f",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_mpapa7": "TA Lightning R3M",
+        "rex_sm_spier9": "TA Lightning R3M"
+      }
     },
     {
       "id": "rex_flash_g",
@@ -36342,7 +36572,10 @@
       "connector_y": 0.49206349206349204,
       "internal_title": "flash g",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sh_bmike3": "SA One Tap"
+      }
     },
     {
       "id": "rex_flash_h",
@@ -36366,7 +36599,12 @@
       "display_name": "TA Lightning R3M",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_dm_findia": "Matuzek Blackveil",
+        "rex_dm_golf28": "Matuzek Blackveil",
+        "rex_sn_limax": "DS Op-67M Flash"
+      }
     },
     {
       "id": "rex_flash_hotel45",
@@ -36415,7 +36653,8 @@
       "name_status": "unresolved",
       "weapon_display_names": {
         "rex_sm_pmike63": "RX-5 Overstrike",
-        "rex_sm_psierra41": "RX-5 Overstrike"
+        "rex_sm_psierra41": "RX-5 Overstrike",
+        "rex_ar_xar1": "TZL-110 V1"
       }
     },
     {
@@ -36569,7 +36808,10 @@
       "display_name": "XT-100",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_pi_kilo5": "Hanbit 2BA-00"
+      }
     },
     {
       "id": "rex_flashlgt_pstl01_kilo5",
@@ -36617,7 +36859,10 @@
       "display_name": "FJX EVR7",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_sh_xsh1": "Corio 4DV-3"
+      }
     },
     {
       "id": "rex_fourx01",
@@ -36653,7 +36898,22 @@
         "rex_sm_spier9": "Cronen R808",
         "rex_sm_xsm1": "Cronen R808",
         "rex_ar_cromeo": "Cronen R808",
-        "rex_sm_fmgolf": "Cronen R808"
+        "rex_sm_fmgolf": "Cronen R808",
+        "rex_br_asierra12": "Cronen R808",
+        "rex_br_ngsierra": "Cronen R808",
+        "rex_br_uxray": "Cronen R808",
+        "rex_dm_findia": "Cronen R808",
+        "rex_dm_golf28": "Cronen R808",
+        "rex_dm_moscar": "Cronen R808",
+        "rex_lm_recho": "Cronen R808",
+        "rex_lm_sierrax": "Cronen R808",
+        "rex_lm_tango73": "Cronen R808",
+        "rex_pi_decho": "Cronen R808",
+        "rex_sh_bmike3": "Cronen R808",
+        "rex_sh_xsh1": "Cronen R808",
+        "rex_sn_limax": "Cronen R808",
+        "rex_sn_sierra100": "Cronen R808",
+        "rex_sn_svictor98": "Cronen R808"
       }
     },
     {
@@ -36677,7 +36937,10 @@
       "display_name": "Cronen R808",
       "name_status": "public_reference",
       "name_evidence": "identical_shared_optic_or_laser_texture_alias",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_dm_golf28": "Cronen R808"
+      }
     },
     {
       "id": "rex_fourx01_pmike63",
@@ -36702,7 +36965,10 @@
       "display_name": "Cronen R808",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_sm_pmike63": "Cronen R808"
+      }
     },
     {
       "id": "rex_fourx01_rpapa8",
@@ -36761,7 +37027,22 @@
         "rex_sm_spier9": "GL K230",
         "rex_sm_xsm1": "GL K230",
         "rex_ar_cromeo": "GL K230",
-        "rex_sm_fmgolf": "GL K230"
+        "rex_sm_fmgolf": "GL K230",
+        "rex_br_asierra12": "GL K230",
+        "rex_br_ngsierra": "GL K230",
+        "rex_br_uxray": "GL K230",
+        "rex_dm_findia": "GL K230",
+        "rex_dm_golf28": "GL K230",
+        "rex_dm_moscar": "GL K230",
+        "rex_lm_recho": "GL K230",
+        "rex_lm_sierrax": "GL K230",
+        "rex_lm_tango73": "GL K230",
+        "rex_pi_decho": "GL K230",
+        "rex_sh_bmike3": "GL K230",
+        "rex_sh_xsh1": "GL K230",
+        "rex_sn_limax": "GL K230",
+        "rex_sn_sierra100": "GL K230",
+        "rex_sn_svictor98": "GL K230"
       }
     },
     {
@@ -36798,7 +37079,20 @@
         "rex_sm_spier9": "Corio Bisect",
         "rex_sm_xsm1": "Corio Bisect",
         "rex_ar_cromeo": "Corio Bisect",
-        "rex_sm_fmgolf": "Corio Bisect"
+        "rex_sm_fmgolf": "Corio Bisect",
+        "rex_br_asierra12": "Corio Bisect",
+        "rex_br_ngsierra": "Corio Bisect",
+        "rex_br_uxray": "Corio Bisect",
+        "rex_dm_findia": "Corio Bisect",
+        "rex_dm_golf28": "Corio Bisect",
+        "rex_lm_recho": "Corio Bisect",
+        "rex_lm_sierrax": "Corio Bisect",
+        "rex_lm_tango73": "Corio Bisect",
+        "rex_sh_bmike3": "Corio Bisect",
+        "rex_sh_xsh1": "Corio Bisect",
+        "rex_sn_limax": "Corio Bisect",
+        "rex_sn_sierra100": "Corio Bisect",
+        "rex_sn_svictor98": "Corio Bisect"
       }
     },
     {
@@ -36854,7 +37148,21 @@
         "rex_sm_spier9": "SZ Lonewolf Flip",
         "rex_sm_xsm1": "SZ Lonewolf Flip",
         "rex_ar_cromeo": "SZ Lonewolf Flip",
-        "rex_sm_fmgolf": "SZ Lonewolf Flip"
+        "rex_sm_fmgolf": "SZ Lonewolf Flip",
+        "rex_br_asierra12": "SZ Lonewolf Flip",
+        "rex_br_ngsierra": "SZ Lonewolf Flip",
+        "rex_br_uxray": "SZ Lonewolf Flip",
+        "rex_dm_findia": "SZ Lonewolf Flip",
+        "rex_dm_golf28": "SZ Lonewolf Flip",
+        "rex_dm_moscar": "SZ Lonewolf Flip",
+        "rex_lm_recho": "SZ Lonewolf Flip",
+        "rex_lm_sierrax": "SZ Lonewolf Flip",
+        "rex_lm_tango73": "SZ Lonewolf Flip",
+        "rex_sh_bmike3": "SZ Lonewolf Flip",
+        "rex_sh_xsh1": "SZ Lonewolf Flip",
+        "rex_sn_limax": "SZ Lonewolf Flip",
+        "rex_sn_sierra100": "SZ Lonewolf Flip",
+        "rex_sn_svictor98": "SZ Lonewolf Flip"
       }
     },
     {
@@ -36891,7 +37199,22 @@
         "rex_sm_spier9": "Schlager Night View Pro",
         "rex_sm_xsm1": "Schlager Night View Pro",
         "rex_ar_cromeo": "Schlager Night View Pro",
-        "rex_sm_fmgolf": "Schlager Night View Pro"
+        "rex_sm_fmgolf": "Schlager Night View Pro",
+        "rex_br_asierra12": "Schlager Night View Pro",
+        "rex_br_ngsierra": "Schlager Night View Pro",
+        "rex_br_uxray": "Schlager Night View Pro",
+        "rex_dm_findia": "Schlager Night View Pro",
+        "rex_dm_golf28": "Schlager Night View Pro",
+        "rex_dm_moscar": "Schlager Night View Pro",
+        "rex_lm_recho": "Schlager Night View Pro",
+        "rex_lm_sierrax": "Schlager Night View Pro",
+        "rex_lm_tango73": "Schlager Night View Pro",
+        "rex_pi_decho": "Schlager Night View Pro",
+        "rex_sh_bmike3": "Schlager Night View Pro",
+        "rex_sh_xsh1": "Schlager Night View Pro",
+        "rex_sn_limax": "Schlager Night View Pro",
+        "rex_sn_sierra100": "Schlager Night View Pro",
+        "rex_sn_svictor98": "Schlager Night View Pro"
       }
     },
     {
@@ -36913,7 +37236,34 @@
       "display_name": "Schlager Night View Pro",
       "name_status": "public_reference",
       "name_evidence": "identical_shared_optic_or_laser_texture_alias",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_ar_akilo": "Schlager Night View Pro",
+        "rex_ar_kilo2": "Schlager Night View Pro",
+        "rex_ar_kilo437": "Schlager Night View Pro",
+        "rex_ar_mike4": "Schlager Night View Pro",
+        "rex_ar_xar1": "Schlager Night View Pro",
+        "rex_br_asierra12": "Schlager Night View Pro",
+        "rex_br_ngsierra": "Schlager Night View Pro",
+        "rex_br_uxray": "Schlager Night View Pro",
+        "rex_dm_findia": "Schlager Night View Pro",
+        "rex_dm_golf28": "Schlager Night View Pro",
+        "rex_dm_moscar": "Schlager Night View Pro",
+        "rex_lm_recho": "Schlager Night View Pro",
+        "rex_lm_sierrax": "Schlager Night View Pro",
+        "rex_lm_tango73": "Schlager Night View Pro",
+        "rex_pi_decho": "Schlager Night View Pro",
+        "rex_sh_bmike3": "Schlager Night View Pro",
+        "rex_sh_xsh1": "Schlager Night View Pro",
+        "rex_sm_mpapa7": "Schlager Night View Pro",
+        "rex_sm_pmike63": "Schlager Night View Pro",
+        "rex_sm_psierra41": "Schlager Night View Pro",
+        "rex_sm_spier9": "Schlager Night View Pro",
+        "rex_sm_xsm1": "Schlager Night View Pro",
+        "rex_sn_limax": "Schlager Night View Pro",
+        "rex_sn_sierra100": "Schlager Night View Pro",
+        "rex_sn_svictor98": "Schlager Night View Pro"
+      }
     },
     {
       "id": "rex_fourx_therm02",
@@ -36934,7 +37284,34 @@
       "display_name": "Schlager Night View Pro",
       "name_status": "public_reference",
       "name_evidence": "identical_shared_optic_or_laser_texture_alias",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_ar_akilo": "Schlager Night View Pro",
+        "rex_ar_kilo2": "Schlager Night View Pro",
+        "rex_ar_kilo437": "Schlager Night View Pro",
+        "rex_ar_mike4": "Schlager Night View Pro",
+        "rex_ar_xar1": "Schlager Night View Pro",
+        "rex_br_asierra12": "Schlager Night View Pro",
+        "rex_br_ngsierra": "Schlager Night View Pro",
+        "rex_br_uxray": "Schlager Night View Pro",
+        "rex_dm_findia": "Schlager Night View Pro",
+        "rex_dm_golf28": "Schlager Night View Pro",
+        "rex_dm_moscar": "Schlager Night View Pro",
+        "rex_lm_recho": "Schlager Night View Pro",
+        "rex_lm_sierrax": "Schlager Night View Pro",
+        "rex_lm_tango73": "Schlager Night View Pro",
+        "rex_pi_decho": "Schlager Night View Pro",
+        "rex_sh_bmike3": "Schlager Night View Pro",
+        "rex_sh_xsh1": "Schlager Night View Pro",
+        "rex_sm_mpapa7": "Schlager Night View Pro",
+        "rex_sm_pmike63": "Schlager Night View Pro",
+        "rex_sm_psierra41": "Schlager Night View Pro",
+        "rex_sm_spier9": "Schlager Night View Pro",
+        "rex_sm_xsm1": "Schlager Night View Pro",
+        "rex_sn_limax": "Schlager Night View Pro",
+        "rex_sn_sierra100": "Schlager Night View Pro",
+        "rex_sn_svictor98": "Schlager Night View Pro"
+      }
     },
     {
       "id": "rex_grip_ang",
@@ -36956,7 +37333,28 @@
       "name_status": "confirmed",
       "name_evidence": "user_screenshot_icon_match",
       "weapon_display_names": {
-        "rex_ar_kilo2": "FSS Fireline Grip"
+        "rex_ar_kilo2": "FSS Fireline Grip",
+        "rex_ar_akilo": "FSS Fireline Grip",
+        "rex_ar_kilo437": "FSS Fireline Grip",
+        "rex_ar_mike4": "FSS Fireline Grip",
+        "rex_ar_xar1": "FSS Fireline Grip",
+        "rex_br_asierra12": "FSS Fireline Grip",
+        "rex_br_ngsierra": "FSS Fireline Grip",
+        "rex_br_uxray": "FSS Fireline Grip",
+        "rex_dm_findia": "FSS Fireline Grip",
+        "rex_dm_golf28": "FSS Fireline Grip",
+        "rex_dm_moscar": "FSS Fireline Grip",
+        "rex_sh_bmike3": "FSS Fireline Grip",
+        "rex_sh_xsh1": "FSS Fireline Grip",
+        "rex_sm_mpapa7": "FSS Fireline Grip",
+        "rex_sm_pmike63": "FSS Fireline Grip",
+        "rex_sm_psierra41": "FSS Fireline Grip",
+        "rex_sm_spier9": "FSS Fireline Grip",
+        "rex_sm_xsm1": "FSS Fireline Grip",
+        "rex_sn_limax": "FSS Fireline Grip",
+        "rex_lm_recho": "Bruen Renegade Grip",
+        "rex_lm_sierrax": "Bruen Renegade Grip",
+        "rex_lm_tango73": "Bruen Renegade Grip"
       }
     },
     {
@@ -36980,7 +37378,10 @@
       "m4_size_axis": "width",
       "internal_title": "grip ang mike4 v04",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_mike4": "FSS Fireline Grip"
+      }
     },
     {
       "id": "rex_grip_ang_short",
@@ -37002,7 +37403,25 @@
       "name_status": "confirmed",
       "name_evidence": "user_screenshot_icon_match",
       "weapon_display_names": {
-        "rex_ar_kilo2": "FSS Tac90 Grip"
+        "rex_ar_kilo2": "FSS Tac90 Grip",
+        "rex_ar_akilo": "FSS Tac90 Grip",
+        "rex_ar_kilo437": "FSS Tac90 Grip",
+        "rex_ar_mike4": "FSS Tac90 Grip",
+        "rex_ar_xar1": "FSS Tac90 Grip",
+        "rex_br_asierra12": "FSS Tac90 Grip",
+        "rex_br_ngsierra": "FSS Tac90 Grip",
+        "rex_br_uxray": "FSS Tac90 Grip",
+        "rex_dm_findia": "FSS Tac90 Grip",
+        "rex_dm_golf28": "FSS Tac90 Grip",
+        "rex_dm_moscar": "FSS Tac90 Grip",
+        "rex_sh_bmike3": "FSS Tac90 Grip",
+        "rex_sh_xsh1": "FSS Tac90 Grip",
+        "rex_sm_mpapa7": "FSS Tac90 Grip",
+        "rex_sm_pmike63": "FSS Tac90 Grip",
+        "rex_sm_psierra41": "FSS Tac90 Grip",
+        "rex_sm_spier9": "FSS Tac90 Grip",
+        "rex_sm_xsm1": "FSS Tac90 Grip",
+        "rex_sn_limax": "FSS Tac90 Grip"
       }
     },
     {
@@ -37024,7 +37443,10 @@
       "composable": true,
       "internal_title": "grip ang short spier9 jintae",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_spier9": "FSS Tac90 Grip"
+      }
     },
     {
       "id": "rex_grip_bipod01",
@@ -37046,7 +37468,17 @@
       "name_status": "confirmed",
       "name_evidence": "user_screenshot_icon_match",
       "weapon_display_names": {
-        "rex_ar_kilo2": "FSS Reargrip"
+        "rex_ar_kilo2": "FSS Reargrip",
+        "rex_ar_akilo": "FSS Beargrip",
+        "rex_ar_kilo437": "FSS Beargrip",
+        "rex_ar_mike4": "FSS Beargrip",
+        "rex_br_asierra12": "FSS Beargrip",
+        "rex_br_ngsierra": "FSS Beargrip",
+        "rex_br_uxray": "FSS Beargrip",
+        "rex_dm_findia": "FSS Beargrip",
+        "rex_dm_golf28": "FSS Beargrip",
+        "rex_dm_moscar": "FSS Beargrip",
+        "rex_sn_limax": "FSS Beargrip"
       }
     },
     {
@@ -37118,7 +37550,29 @@
       "name_status": "confirmed",
       "name_evidence": "user_screenshot_icon_match",
       "weapon_display_names": {
-        "rex_ar_kilo2": "Mire-50 Tac Grip"
+        "rex_ar_kilo2": "Mire-50 Tac Grip",
+        "rex_ar_akilo": "Mire-50 Tac Grip",
+        "rex_ar_kilo437": "Mire-50 Tac Grip",
+        "rex_ar_mike4": "Mire-50 Tac Grip",
+        "rex_ar_xar1": "Mire-50 Tac Grip",
+        "rex_br_asierra12": "Mire-50 Tac Grip",
+        "rex_br_ngsierra": "Mire-50 Tac Grip",
+        "rex_br_uxray": "Mire-50 Tac Grip",
+        "rex_dm_findia": "Mire-50 Tac Grip",
+        "rex_dm_golf28": "Mire-50 Tac Grip",
+        "rex_dm_moscar": "Mire-50 Tac Grip",
+        "rex_pi_decho": "Mire-50 Tac Grip",
+        "rex_sh_bmike3": "Mire-50 Tac Grip",
+        "rex_sh_xsh1": "Mire-50 Tac Grip",
+        "rex_sm_pmike63": "Mire-50 Tac Grip",
+        "rex_sm_psierra41": "Mire-50 Tac Grip",
+        "rex_sm_spier9": "Mire-50 Tac Grip",
+        "rex_sm_xsm1": "Mire-50 Tac Grip",
+        "rex_sn_limax": "Mire-50 Tac Grip",
+        "rex_lm_recho": "FTAC Combat Grip",
+        "rex_lm_sierrax": "FTAC Combat Grip",
+        "rex_lm_tango73": "XRK Co-Ride 56",
+        "rex_sm_mpapa7": "V46 Vert-Tac"
       }
     },
     {
@@ -37179,7 +37633,29 @@
       "internal_title": "grip vert short",
       "display_name": "GW DOMI-9",
       "name_status": "confirmed",
-      "name_evidence": "user_screenshot_icon_match"
+      "name_evidence": "user_screenshot_icon_match",
+      "weapon_display_names": {
+        "rex_ar_akilo": "GW Domi-9",
+        "rex_ar_kilo2": "GW Domi-9",
+        "rex_ar_kilo437": "GW Domi-9",
+        "rex_ar_mike4": "GW Domi-9",
+        "rex_ar_xar1": "GW Domi-9",
+        "rex_br_asierra12": "GW Domi-9",
+        "rex_br_ngsierra": "GW Domi-9",
+        "rex_br_uxray": "GW Domi-9",
+        "rex_dm_findia": "GW Domi-9",
+        "rex_dm_golf28": "GW Domi-9",
+        "rex_dm_moscar": "GW Domi-9",
+        "rex_pi_decho": "GW Domi-9",
+        "rex_sh_bmike3": "GW Domi-9",
+        "rex_sh_xsh1": "GW Domi-9",
+        "rex_sm_mpapa7": "GW Domi-9",
+        "rex_sm_pmike63": "GW Domi-9",
+        "rex_sm_psierra41": "GW Domi-9",
+        "rex_sm_spier9": "GW Domi-9",
+        "rex_sm_xsm1": "GW Domi-9",
+        "rex_sn_limax": "GW Domi-9"
+      }
     },
     {
       "id": "rex_grip_vert_short_kilo2_v04",
@@ -37541,7 +38017,22 @@
         "rex_sm_spier9": "SZ Lonewolf Holo",
         "rex_sm_xsm1": "SZ Lonewolf Holo",
         "rex_ar_cromeo": "SZ Lonewolf Holo",
-        "rex_sm_fmgolf": "SZ Lonewolf Holo"
+        "rex_sm_fmgolf": "SZ Lonewolf Holo",
+        "rex_br_asierra12": "SZ Lonewolf Holo",
+        "rex_br_ngsierra": "SZ Lonewolf Holo",
+        "rex_br_uxray": "SZ Lonewolf Holo",
+        "rex_dm_findia": "SZ Lonewolf Holo",
+        "rex_dm_golf28": "SZ Lonewolf Holo",
+        "rex_dm_moscar": "SZ Lonewolf Holo",
+        "rex_lm_recho": "SZ Lonewolf Holo",
+        "rex_lm_sierrax": "SZ Lonewolf Holo",
+        "rex_lm_tango73": "SZ Lonewolf Holo",
+        "rex_pi_decho": "SZ Lonewolf Holo",
+        "rex_pi_swhiskey": "SZ Lonewolf Holo",
+        "rex_sh_bmike3": "SZ Lonewolf Holo",
+        "rex_sh_xsh1": "SZ Lonewolf Holo",
+        "rex_sn_limax": "SZ Lonewolf Holo",
+        "rex_sn_svictor98": "SZ Lonewolf Holo"
       }
     },
     {
@@ -37578,7 +38069,22 @@
         "rex_sm_spier9": "SZ Echelon Holo",
         "rex_sm_xsm1": "SZ Echelon Holo",
         "rex_ar_cromeo": "SZ Echelon Holo",
-        "rex_sm_fmgolf": "SZ Echelon Holo"
+        "rex_sm_fmgolf": "SZ Echelon Holo",
+        "rex_br_asierra12": "SZ Echelon Holo",
+        "rex_br_ngsierra": "SZ Echelon Holo",
+        "rex_br_uxray": "SZ Echelon Holo",
+        "rex_dm_findia": "SZ Echelon Holo",
+        "rex_dm_golf28": "SZ Echelon Holo",
+        "rex_dm_moscar": "SZ Echelon Holo",
+        "rex_lm_recho": "SZ Echelon Holo",
+        "rex_lm_sierrax": "SZ Echelon Holo",
+        "rex_lm_tango73": "SZ Echelon Holo",
+        "rex_pi_decho": "SZ Echelon Holo",
+        "rex_pi_swhiskey": "SZ Echelon Holo",
+        "rex_sh_bmike3": "SZ Echelon Holo",
+        "rex_sh_xsh1": "SZ Echelon Holo",
+        "rex_sn_limax": "SZ Echelon Holo",
+        "rex_sn_svictor98": "SZ Echelon Holo"
       }
     },
     {
@@ -37600,7 +38106,34 @@
       "display_name": "SZ Echelon Holo",
       "name_status": "public_reference",
       "name_evidence": "identical_shared_optic_or_laser_texture_alias",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_ar_akilo": "SZ Echelon Holo",
+        "rex_ar_kilo2": "SZ Echelon Holo",
+        "rex_ar_kilo437": "SZ Echelon Holo",
+        "rex_ar_mike4": "SZ Echelon Holo",
+        "rex_ar_xar1": "SZ Echelon Holo",
+        "rex_br_asierra12": "SZ Echelon Holo",
+        "rex_br_ngsierra": "SZ Echelon Holo",
+        "rex_br_uxray": "SZ Echelon Holo",
+        "rex_dm_findia": "SZ Echelon Holo",
+        "rex_dm_golf28": "SZ Echelon Holo",
+        "rex_dm_moscar": "SZ Echelon Holo",
+        "rex_lm_recho": "SZ Echelon Holo",
+        "rex_lm_sierrax": "SZ Echelon Holo",
+        "rex_lm_tango73": "SZ Echelon Holo",
+        "rex_pi_decho": "SZ Echelon Holo",
+        "rex_pi_swhiskey": "SZ Echelon Holo",
+        "rex_sh_bmike3": "SZ Echelon Holo",
+        "rex_sh_xsh1": "SZ Echelon Holo",
+        "rex_sm_mpapa7": "SZ Echelon Holo",
+        "rex_sm_pmike63": "SZ Echelon Holo",
+        "rex_sm_psierra41": "SZ Echelon Holo",
+        "rex_sm_spier9": "SZ Echelon Holo",
+        "rex_sm_xsm1": "SZ Echelon Holo",
+        "rex_sn_limax": "SZ Echelon Holo",
+        "rex_sn_svictor98": "SZ Echelon Holo"
+      }
     },
     {
       "id": "rex_holo03",
@@ -37632,7 +38165,22 @@
         "rex_sm_spier9": "SZ Helios Holo",
         "rex_sm_xsm1": "SZ Helios Holo",
         "rex_ar_cromeo": "SZ Helios Holo",
-        "rex_sm_fmgolf": "SZ Helios Holo"
+        "rex_sm_fmgolf": "SZ Helios Holo",
+        "rex_br_asierra12": "SZ Helios Holo",
+        "rex_br_ngsierra": "SZ Helios Holo",
+        "rex_br_uxray": "SZ Helios Holo",
+        "rex_dm_findia": "SZ Helios Holo",
+        "rex_dm_golf28": "SZ Helios Holo",
+        "rex_dm_moscar": "SZ Helios Holo",
+        "rex_lm_recho": "SZ Helios Holo",
+        "rex_lm_sierrax": "SZ Helios Holo",
+        "rex_lm_tango73": "SZ Helios Holo",
+        "rex_pi_decho": "SZ Helios Holo",
+        "rex_pi_swhiskey": "SZ Helios Holo",
+        "rex_sh_bmike3": "SZ Helios Holo",
+        "rex_sh_xsh1": "SZ Helios Holo",
+        "rex_sn_limax": "SZ Helios Holo",
+        "rex_sn_svictor98": "SZ Helios Holo"
       }
     },
     {
@@ -37656,7 +38204,10 @@
       "m4_size_axis": "width",
       "internal_title": "holo03 mike4 v04",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_mike4": "SZ Helios Holo"
+      }
     },
     {
       "id": "rex_holo03_tango73_bale",
@@ -37677,7 +38228,10 @@
       "composable": true,
       "internal_title": "holo03 tango73 bale",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_lm_tango73": "SZ Helios Holo"
+      }
     },
     {
       "id": "rex_holo04",
@@ -37709,7 +38263,22 @@
         "rex_sm_spier9": "KV Corsac Holo",
         "rex_sm_xsm1": "KV Corsac Holo",
         "rex_ar_cromeo": "KV Corsac Holo",
-        "rex_sm_fmgolf": "KV Corsac Holo"
+        "rex_sm_fmgolf": "KV Corsac Holo",
+        "rex_br_asierra12": "KV Corsac Holo",
+        "rex_br_ngsierra": "KV Corsac Holo",
+        "rex_br_uxray": "KV Corsac Holo",
+        "rex_dm_findia": "KV Corsac Holo",
+        "rex_dm_golf28": "KV Corsac Holo",
+        "rex_dm_moscar": "KV Corsac Holo",
+        "rex_lm_recho": "KV Corsac Holo",
+        "rex_lm_sierrax": "KV Corsac Holo",
+        "rex_lm_tango73": "KV Corsac Holo",
+        "rex_pi_decho": "KV Corsac Holo",
+        "rex_pi_swhiskey": "KV Corsac Holo",
+        "rex_sh_bmike3": "KV Corsac Holo",
+        "rex_sh_xsh1": "KV Corsac Holo",
+        "rex_sn_limax": "KV Corsac Holo",
+        "rex_sn_svictor98": "KV Corsac Holo"
       }
     },
     {
@@ -37731,7 +38300,10 @@
       "composable": true,
       "internal_title": "holo04 swhiskey",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_pi_swhiskey": "KV Corsac Holo"
+      }
     },
     {
       "id": "rex_holo04_xar1_jangui",
@@ -37752,7 +38324,10 @@
       "composable": true,
       "internal_title": "holo04 xar1 jangui",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_xar1": "KV Corsac Holo"
+      }
     },
     {
       "id": "rex_holo_spier9",
@@ -37810,7 +38385,19 @@
         "rex_sm_spier9": "Bruen THRM-60 Optic",
         "rex_sm_xsm1": "Bruen THRM-60 Optic",
         "rex_ar_cromeo": "Bruen THRM-60 Optic",
-        "rex_sm_fmgolf": "Bruen THRM-60 Optic"
+        "rex_sm_fmgolf": "Bruen THRM-60 Optic",
+        "rex_br_asierra12": "Bruen THRM-60 Optic",
+        "rex_br_ngsierra": "Bruen THRM-60 Optic",
+        "rex_br_uxray": "Bruen THRM-60 Optic",
+        "rex_dm_findia": "Bruen THRM-60 Optic",
+        "rex_dm_golf28": "Bruen THRM-60 Optic",
+        "rex_dm_moscar": "Bruen THRM-60 Optic",
+        "rex_pi_decho": "Bruen THRM-60 Optic",
+        "rex_pi_swhiskey": "Bruen THRM-60 Optic",
+        "rex_sh_bmike3": "Bruen THRM-60 Optic",
+        "rex_sh_xsh1": "Bruen THRM-60 Optic",
+        "rex_sn_limax": "Bruen THRM-60 Optic",
+        "rex_sn_svictor98": "Bruen THRM-60 Optic"
       }
     },
     {
@@ -38658,7 +39245,14 @@
       "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
       "weapon_display_names": {
         "rex_ar_kilo2": "Expedite 21 CFR",
-        "rex_ar_mike4": "Expedite Intra-5b"
+        "rex_ar_mike4": "Expedite Intra-5b",
+        "rex_br_asierra12": "Expedite 21 CFR",
+        "rex_dm_findia": "Expedite 21 CFR",
+        "rex_dm_golf28": "Corio ODSPR+",
+        "rex_dm_moscar": "Expedite 21 CFR",
+        "rex_lm_recho": "Corio ODSPR+",
+        "rex_sn_limax": "Expedite 21 CFR",
+        "rex_sn_svictor98": "Expedite 21 CFR"
       }
     },
     {
@@ -38685,7 +39279,12 @@
       "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
       "weapon_display_names": {
         "rex_ar_kilo2": "Expedite Squad-304",
-        "rex_ar_mike4": "Corio ODSPR+"
+        "rex_ar_mike4": "Corio ODSPR+",
+        "rex_br_asierra12": "Expedite 21 CFR",
+        "rex_dm_findia": "Expedite 21 CFR",
+        "rex_dm_moscar": "Expedite 21 CFR",
+        "rex_sn_limax": "Expedite 21 CFR",
+        "rex_sn_svictor98": "Expedite 21 CFR"
       }
     },
     {
@@ -39800,7 +40399,20 @@
         "rex_sm_spier9": "Slimline Elite",
         "rex_sm_xsm1": "Slimline Elite",
         "rex_ar_cromeo": "Slimline Elite",
-        "rex_sm_fmgolf": "Slimline Elite"
+        "rex_sm_fmgolf": "Slimline Elite",
+        "rex_br_asierra12": "Slimline Elite",
+        "rex_br_ngsierra": "Slimline Elite",
+        "rex_br_uxray": "Slimline Elite",
+        "rex_dm_findia": "Slimline Elite",
+        "rex_dm_golf28": "Slimline Elite",
+        "rex_dm_moscar": "Slimline Elite",
+        "rex_lm_recho": "Slimline Elite",
+        "rex_lm_sierrax": "Slimline Elite",
+        "rex_lm_tango73": "Slimline Elite",
+        "rex_sh_bmike3": "Slimline Elite",
+        "rex_sh_xsh1": "Slimline Elite",
+        "rex_sn_limax": "Slimline Elite",
+        "rex_sn_svictor98": "Slimline Elite"
       }
     },
     {
@@ -39843,7 +40455,10 @@
       "composable": true,
       "internal_title": "minireddot01 asierra12",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_asierra12": "Slimline Elite"
+      }
     },
     {
       "id": "rex_minireddot01_akilo",
@@ -39969,7 +40584,20 @@
         "rex_sm_spier9": "IOTA-D",
         "rex_sm_xsm1": "IOTA-D",
         "rex_ar_cromeo": "IOTA-D",
-        "rex_sm_fmgolf": "IOTA-D"
+        "rex_sm_fmgolf": "IOTA-D",
+        "rex_br_asierra12": "IOTA-D",
+        "rex_br_ngsierra": "IOTA-D",
+        "rex_br_uxray": "IOTA-D",
+        "rex_dm_findia": "IOTA-D",
+        "rex_dm_golf28": "IOTA-D",
+        "rex_dm_moscar": "IOTA-D",
+        "rex_lm_recho": "IOTA-D",
+        "rex_lm_sierrax": "IOTA-D",
+        "rex_lm_tango73": "IOTA-D",
+        "rex_sh_bmike3": "IOTA-D",
+        "rex_sh_xsh1": "IOTA-D",
+        "rex_sn_limax": "IOTA-D",
+        "rex_sn_svictor98": "IOTA-D"
       }
     },
     {
@@ -39995,7 +40623,10 @@
       "display_name": "IOTA-D",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_br_asierra12": "IOTA-D"
+      }
     },
     {
       "id": "rex_minireddot02_akilo",
@@ -40102,7 +40733,20 @@
         "rex_sm_spier9": "ZLR Type C",
         "rex_sm_xsm1": "ZLR Type C",
         "rex_ar_cromeo": "ZLR Type C",
-        "rex_sm_fmgolf": "ZLR Type C"
+        "rex_sm_fmgolf": "ZLR Type C",
+        "rex_br_asierra12": "ZLR Type C",
+        "rex_br_ngsierra": "ZLR Type C",
+        "rex_br_uxray": "ZLR Type C",
+        "rex_dm_findia": "ZLR Type C",
+        "rex_dm_golf28": "ZLR Type C",
+        "rex_dm_moscar": "ZLR Type C",
+        "rex_lm_recho": "ZLR Type C",
+        "rex_lm_sierrax": "ZLR Type C",
+        "rex_lm_tango73": "ZLR Type C",
+        "rex_sh_bmike3": "ZLR Type C",
+        "rex_sh_xsh1": "ZLR Type C",
+        "rex_sn_limax": "ZLR Type C",
+        "rex_sn_svictor98": "ZLR Type C"
       }
     },
     {
@@ -40128,7 +40772,10 @@
       "display_name": "ZLR Type C",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_br_asierra12": "ZLR Type C"
+      }
     },
     {
       "id": "rex_minireddot03_xsm1_kang",
@@ -40151,7 +40798,10 @@
       "display_name": "ZLR Type C",
       "name_status": "public_reference",
       "name_evidence": "identical_shared_optic_or_laser_texture_alias",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_sm_xsm1": "ZLR Type C"
+      }
     },
     {
       "id": "rex_minireddot03_akilo",
@@ -40256,7 +40906,20 @@
         "rex_sm_spier9": "SZ Prima-4 Dot",
         "rex_sm_xsm1": "SZ Prima-4 Dot",
         "rex_ar_cromeo": "SZ Prima-4 Dot",
-        "rex_sm_fmgolf": "SZ Prima-4 Dot"
+        "rex_sm_fmgolf": "SZ Prima-4 Dot",
+        "rex_br_asierra12": "SZ Prima-4 Dot",
+        "rex_br_ngsierra": "SZ Prima-4 Dot",
+        "rex_br_uxray": "SZ Prima-4 Dot",
+        "rex_dm_findia": "SZ Prima-4 Dot",
+        "rex_dm_golf28": "SZ Prima-4 Dot",
+        "rex_dm_moscar": "SZ Prima-4 Dot",
+        "rex_lm_recho": "SZ Prima-4 Dot",
+        "rex_lm_sierrax": "SZ Prima-4 Dot",
+        "rex_lm_tango73": "SZ Prima-4 Dot",
+        "rex_sh_bmike3": "SZ Prima-4 Dot",
+        "rex_sh_xsh1": "SZ Prima-4 Dot",
+        "rex_sn_limax": "SZ Prima-4 Dot",
+        "rex_sn_svictor98": "SZ Prima-4 Dot"
       }
     },
     {
@@ -40278,7 +40941,10 @@
       "composable": true,
       "internal_title": "minireddot04 asierra12",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_asierra12": "SZ Prima-4 Dot"
+      }
     },
     {
       "id": "rex_minireddot04_uxray_lt",
@@ -40299,7 +40965,10 @@
       "composable": true,
       "internal_title": "minireddot04 uxray lt",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_uxray": "SZ Prima-4 Dot"
+      }
     },
     {
       "id": "rex_minireddot_emp",
@@ -41797,7 +42466,10 @@
       "subtype_label": "Skeleton Grip",
       "subtype_evidence": "internal_subtype_token",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_golf28": "Hanbit AGRS-1 Pro"
+      }
     },
     {
       "id": "rex_pgrip_ske_kilo437",
@@ -41972,7 +42644,10 @@
       "subtype_label": "Sniper Grip",
       "subtype_evidence": "internal_subtype_token",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_golf28": "Schlager PLM-S9"
+      }
     },
     {
       "id": "rex_pgrip_snp_kilo437",
@@ -44333,7 +45008,22 @@
         "rex_sm_spier9": "SZ Micro D-3",
         "rex_sm_xsm1": "SZ Micro D-3",
         "rex_ar_cromeo": "SZ Micro D-3",
-        "rex_sm_fmgolf": "SZ Micro D-3"
+        "rex_sm_fmgolf": "SZ Micro D-3",
+        "rex_br_asierra12": "SZ Micro D-3",
+        "rex_br_ngsierra": "SZ Micro D-3",
+        "rex_br_uxray": "SZ Micro D-3",
+        "rex_dm_findia": "SZ Micro D-3",
+        "rex_dm_golf28": "SZ Micro D-3",
+        "rex_dm_moscar": "SZ Micro D-3",
+        "rex_lm_recho": "SZ Micro D-3",
+        "rex_lm_sierrax": "SZ Micro D-3",
+        "rex_lm_tango73": "SZ Micro D-3",
+        "rex_pi_decho": "SZ Micro D-3",
+        "rex_pi_swhiskey": "SZ Micro D-3",
+        "rex_sh_bmike3": "SZ Micro D-3",
+        "rex_sh_xsh1": "SZ Micro D-3",
+        "rex_sn_limax": "SZ Micro D-3",
+        "rex_sn_svictor98": "SZ Micro D-3"
       }
     },
     {
@@ -44359,7 +45049,10 @@
       "display_name": "SZ Micro D-3",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_pi_swhiskey": "SZ Micro D-3"
+      }
     },
     {
       "id": "rex_reflex01_broken",
@@ -44494,7 +45187,22 @@
         "rex_sm_spier9": "VLK Trimmer",
         "rex_sm_xsm1": "VLK Trimmer",
         "rex_ar_cromeo": "VLK Trimmer",
-        "rex_sm_fmgolf": "VLK Trimmer"
+        "rex_sm_fmgolf": "VLK Trimmer",
+        "rex_br_asierra12": "VLK Trimmer",
+        "rex_br_ngsierra": "VLK Trimmer",
+        "rex_br_uxray": "VLK Trimmer",
+        "rex_dm_findia": "VLK Trimmer",
+        "rex_dm_golf28": "VLK Trimmer",
+        "rex_dm_moscar": "VLK Trimmer",
+        "rex_lm_recho": "VLK Trimmer",
+        "rex_lm_sierrax": "VLK Trimmer",
+        "rex_lm_tango73": "VLK Trimmer",
+        "rex_pi_decho": "VLK Trimmer",
+        "rex_pi_swhiskey": "VLK Trimmer",
+        "rex_sh_bmike3": "VLK Trimmer",
+        "rex_sh_xsh1": "VLK Trimmer",
+        "rex_sn_limax": "VLK Trimmer",
+        "rex_sn_svictor98": "VLK Trimmer"
       }
     },
     {
@@ -44531,7 +45239,21 @@
         "rex_sm_spier9": "SZ SRE-7",
         "rex_sm_xsm1": "SZ SRE-7",
         "rex_ar_cromeo": "SZ SRE-7",
-        "rex_sm_fmgolf": "SZ SRE-7"
+        "rex_sm_fmgolf": "SZ SRE-7",
+        "rex_br_asierra12": "SZ SRE-7",
+        "rex_br_ngsierra": "SZ SRE-7",
+        "rex_br_uxray": "SZ SRE-7",
+        "rex_dm_findia": "SZ SRE-7",
+        "rex_dm_golf28": "SZ SRE-7",
+        "rex_dm_moscar": "SZ SRE-7",
+        "rex_lm_recho": "SZ SRE-7",
+        "rex_lm_tango73": "SZ SRE-7",
+        "rex_pi_decho": "SZ SRE-7",
+        "rex_pi_swhiskey": "SZ SRE-7",
+        "rex_sh_bmike3": "SZ SRE-7",
+        "rex_sh_xsh1": "SZ SRE-7",
+        "rex_sn_limax": "SZ SRE-7",
+        "rex_sn_svictor98": "SZ SRE-7"
       }
     },
     {
@@ -44564,7 +45286,22 @@
         "rex_sm_spier9": "FJX 708 PRO",
         "rex_sm_xsm1": "FJX 708 PRO",
         "rex_ar_cromeo": "FJX 708 PRO",
-        "rex_sm_fmgolf": "FJX 708 PRO"
+        "rex_sm_fmgolf": "FJX 708 PRO",
+        "rex_br_asierra12": "FJX 708 PRO",
+        "rex_br_ngsierra": "FJX 708 PRO",
+        "rex_br_uxray": "FJX 708 PRO",
+        "rex_dm_findia": "FJX 708 PRO",
+        "rex_dm_golf28": "FJX 708 PRO",
+        "rex_dm_moscar": "FJX 708 PRO",
+        "rex_lm_recho": "FJX 708 PRO",
+        "rex_lm_sierrax": "FJX 708 PRO",
+        "rex_lm_tango73": "FJX 708 PRO",
+        "rex_pi_decho": "FJX 708 PRO",
+        "rex_pi_swhiskey": "FJX 708 PRO",
+        "rex_sh_bmike3": "FJX 708 PRO",
+        "rex_sh_xsh1": "FJX 708 PRO",
+        "rex_sn_limax": "FJX 708 PRO",
+        "rex_sn_svictor98": "FJX 708 PRO"
       }
     },
     {
@@ -44586,7 +45323,10 @@
       "composable": true,
       "internal_title": "reflex04 swhiskey",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_pi_swhiskey": "FJX 708 PRO"
+      }
     },
     {
       "id": "rex_scope_asierra12",
@@ -44746,7 +45486,12 @@
       "connector_y": 0.497247191011236,
       "internal_title": "sil hvy b",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sn_svictor98": "Gauge-12 Mono",
+        "rex_ar_akilo": "Gauge-12 Mono",
+        "rex_br_uxray": "EXP Undertow Gen. 2"
+      }
     },
     {
       "id": "rex_sil_hvy_c",
@@ -44769,7 +45514,9 @@
       "name_status": "confirmed",
       "name_evidence": "user_screenshot_icon_match",
       "weapon_display_names": {
-        "rex_ar_kilo2": "FSS IS300"
+        "rex_ar_kilo2": "FSS IS300",
+        "rex_br_ngsierra": "EXP Undertow Gen. 2",
+        "rex_lm_recho": "TV Multical-77"
       }
     },
     {
@@ -44794,7 +45541,11 @@
       "display_name": "TV Multical-77",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_ar_kilo437": "FSS IS300",
+        "rex_lm_tango73": "Gauge-12 Mono"
+      }
     },
     {
       "id": "rex_sil_hvy_decho",
@@ -44886,7 +45637,11 @@
       "display_name": "FSS HOC-30",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_sm_mpapa7": "FSS Crackdown",
+        "rex_sm_spier9": "FSS Crackdown"
+      }
     },
     {
       "id": "rex_sil_hvy_g",
@@ -44930,7 +45685,12 @@
       "connector_y": 0.487220564946783,
       "internal_title": "sil hvy h",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_findia": "EXP Undertow Gen. 2",
+        "rex_dm_golf28": "EXP Undertow Gen. 2",
+        "rex_sn_limax": "FSS HOC-30"
+      }
     },
     {
       "id": "rex_sil_hvy_i",
@@ -44953,7 +45713,8 @@
       "name_status": "unresolved",
       "weapon_display_names": {
         "rex_sm_pmike63": "FTAC Silent Recon",
-        "rex_sm_psierra41": "FTAC Silent Recon"
+        "rex_sm_psierra41": "FTAC Silent Recon",
+        "rex_ar_xar1": "FSS IS300"
       }
     },
     {
@@ -45051,7 +45812,11 @@
       "connector_y": 0.4921464572388597,
       "internal_title": "sil lgt b",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_akilo": "Ivanov QR600",
+        "rex_br_uxray": "Meiko 30CAL-SP"
+      }
     },
     {
       "id": "rex_sil_lgt_c",
@@ -45073,7 +45838,8 @@
       "display_name": null,
       "name_status": "unresolved",
       "weapon_display_names": {
-        "rex_ar_kilo2": "FSS IS40"
+        "rex_ar_kilo2": "FSS IS40",
+        "rex_lm_recho": "EXP 450 RTL"
       }
     },
     {
@@ -45098,7 +45864,11 @@
       "display_name": "EXP 450 RTL",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_ar_kilo437": "FSS IS40",
+        "rex_lm_tango73": "Ivanov QR600"
+      }
     },
     {
       "id": "rex_sil_lgt_decho",
@@ -45144,7 +45914,10 @@
       "connector_y": 0.49333333333333335,
       "internal_title": "sil lgt e",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_pi_kilo5": "FTAC Lonestar"
+      }
     },
     {
       "id": "rex_sil_lgt_f",
@@ -45164,7 +45937,11 @@
       "connector_y": 0.49030215067950916,
       "internal_title": "sil lgt f",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_mpapa7": "DEMO Ironshade",
+        "rex_sm_spier9": "DEMO Ironshade"
+      }
     },
     {
       "id": "rex_sil_lgt_g",
@@ -45184,7 +45961,10 @@
       "connector_y": 0.4874266069221261,
       "internal_title": "sil lgt g",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sh_bmike3": "FTAC LTS-707"
+      }
     },
     {
       "id": "rex_sil_lgt_h",
@@ -45204,7 +45984,12 @@
       "connector_y": 0.4834908056486843,
       "internal_title": "sil lgt h",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_findia": "Meiko 30CAL-SP",
+        "rex_dm_golf28": "Meiko 30CAL-SP",
+        "rex_sn_limax": "FSS Moodkiller"
+      }
     },
     {
       "id": "rex_sil_lgt_i",
@@ -45227,7 +46012,8 @@
       "name_status": "unresolved",
       "weapon_display_names": {
         "rex_sm_pmike63": "Haebang BAM70",
-        "rex_sm_psierra41": "Haebang BAM70"
+        "rex_sm_psierra41": "Haebang BAM70",
+        "rex_ar_xar1": "FSS IS40"
       }
     },
     {
@@ -45373,7 +46159,7 @@
     },
     {
       "id": "rex_sil_svictor98",
-      "title": "sil svictor98",
+      "title": "Ivanov QR600",
       "slot": "muzzle",
       "src": "../mw4-attachments/images/rex_sil_svictor98-7b0a12521ae1f60e.png",
       "bbox": [
@@ -45390,7 +46176,7 @@
       "composable": true,
       "connector_y": 0.4412111542730299,
       "internal_title": "sil svictor98",
-      "display_name": null,
+      "display_name": "Ivanov QR600",
       "name_status": "unresolved"
     },
     {
@@ -45442,7 +46228,11 @@
       "display_name": "DS RKT-90",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_sn_svictor98": "DS RKT-90",
+        "rex_br_uxray": "ZLR Cold Echo"
+      }
     },
     {
       "id": "rex_sil_tac_c",
@@ -45465,7 +46255,9 @@
       "name_status": "confirmed",
       "name_evidence": "user_screenshot_icon_match",
       "weapon_display_names": {
-        "rex_ar_kilo2": "XRK Mil-Tac Suppressor"
+        "rex_ar_kilo2": "XRK Mil-Tac Suppressor",
+        "rex_br_ngsierra": "ZLR Cold Echo",
+        "rex_lm_recho": "Schlager Operator-S70"
       }
     },
     {
@@ -45490,7 +46282,11 @@
       "display_name": "Schlager Operator-S70",
       "name_status": "confirmed",
       "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "weapon_display_names": {
+        "rex_ar_kilo437": "XRK Mil-Tac Suppressor",
+        "rex_lm_tango73": "DS RKT-90"
+      }
     },
     {
       "id": "rex_sil_tac_decho",
@@ -45578,7 +46374,11 @@
       "connector_y": 0.4883720930232558,
       "internal_title": "sil tac f",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_mpapa7": "XRK Herder 40",
+        "rex_sm_spier9": "XRK Herder 40"
+      }
     },
     {
       "id": "rex_sil_tac_g",
@@ -45622,7 +46422,12 @@
       "connector_y": 0.48784639746634995,
       "internal_title": "sil tac h",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_findia": "ZLR Cold Echo",
+        "rex_dm_golf28": "ZLR Cold Echo",
+        "rex_sn_limax": "FSS DES-Tac70"
+      }
     },
     {
       "id": "rex_sil_tac_i",
@@ -45649,7 +46454,8 @@
       "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
       "weapon_display_names": {
         "rex_sm_pmike63": "330TC2 Gridlock",
-        "rex_sm_psierra41": "330TC2 Gridlock"
+        "rex_sm_psierra41": "330TC2 Gridlock",
+        "rex_ar_xar1": "XRK Mil-Tac Suppressor"
       }
     },
     {
@@ -45702,7 +46508,7 @@
     },
     {
       "id": "rex_sil_vks_asierra12",
-      "title": "Oden Sentinel — suppressor",
+      "title": "Oden Sentinel \u2014 suppressor",
       "slot": "muzzle",
       "src": "../mw4-attachments/images/rex_sil_vks_asierra12-5c54135336a6130f.png",
       "bbox": [
@@ -45719,7 +46525,7 @@
       "composable": true,
       "connector_y": 0.4857142857142857,
       "internal_title": "sil vks asierra12",
-      "display_name": "Oden Sentinel — suppressor",
+      "display_name": "Oden Sentinel \u2014 suppressor",
       "name_status": "derived_component",
       "name_evidence": "descriptive_component_label_from_official_Oden_Sentinel_bundle_not_separate_localized_name",
       "name_source_url": "https://www.callofduty.com/blog/2026/10/call-of-duty-modern-warfare-4-launch-multiplayer-operators-weapons-equipment-create-a-class"
@@ -46822,7 +47628,10 @@
       "subtype_label": "Heavy Stock",
       "subtype_evidence": "internal_subtype_token",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_golf28": "Bruen Mirelock 565"
+      }
     },
     {
       "id": "rex_stock_hvy_kilo2",
@@ -47436,7 +48245,10 @@
       "subtype_label": "Light Stock",
       "subtype_evidence": "internal_subtype_token",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_golf28": "Schlager HVOX-80"
+      }
     },
     {
       "id": "rex_stock_lgt_kilo2",
@@ -48222,7 +49034,10 @@
       "subtype_label": "Tactical Stock",
       "subtype_evidence": "internal_subtype_token",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_golf28": "LM Scout VX-9"
+      }
     },
     {
       "id": "rex_stock_tac_kilo2",
@@ -49258,7 +50073,10 @@
       "composable": true,
       "internal_title": "trig hvy golf28",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_golf28": "Mil-56.9 Heavy Trigger"
+      }
     },
     {
       "id": "rex_trig_hvy_hotel45",
@@ -49375,7 +50193,10 @@
       "composable": true,
       "internal_title": "trig lgt golf28",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_dm_golf28": "MG-Tac Trigger"
+      }
     },
     {
       "id": "rex_trig_lgt_hotel45",
@@ -49701,7 +50522,10 @@
       "composable": true,
       "internal_title": "ub gl akilo",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_akilo": "Miri 40mm"
+      }
     },
     {
       "id": "rex_ub_gl_asierra12",
@@ -49722,7 +50546,10 @@
       "composable": true,
       "internal_title": "ub gl asierra12",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_asierra12": "Miri 40mm"
+      }
     },
     {
       "id": "rex_ub_gl_kilo2",
@@ -49767,7 +50594,10 @@
       "composable": true,
       "internal_title": "ub gl kilo437",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_kilo437": "Miri 40mm"
+      }
     },
     {
       "id": "rex_ub_gl_mike4",
@@ -49790,7 +50620,10 @@
       "m4_size_axis": "width",
       "internal_title": "ub gl mike4",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_mike4": "Miri 40mm"
+      }
     },
     {
       "id": "rex_ub_gl_mike4_sp",
@@ -49811,7 +50644,10 @@
       "composable": true,
       "internal_title": "ub gl mike4 sp",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_mike4": "Miri 40mm"
+      }
     },
     {
       "id": "rex_ub_gl_ngsierra",
@@ -49832,7 +50668,10 @@
       "composable": true,
       "internal_title": "ub gl ngsierra",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_ngsierra": "Miri 40mm"
+      }
     },
     {
       "id": "rex_ub_gl_std",
@@ -49851,7 +50690,16 @@
       "composable": true,
       "internal_title": "ub gl std",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_akilo": "Miri 40mm",
+        "rex_ar_kilo2": "Miri 40mm",
+        "rex_ar_kilo437": "Miri 40mm",
+        "rex_ar_mike4": "Miri 40mm",
+        "rex_ar_xar1": "Miri 40mm",
+        "rex_br_asierra12": "Miri 40mm",
+        "rex_br_ngsierra": "Miri 40mm"
+      }
     },
     {
       "id": "rex_ub_gl_std_sp",
@@ -49870,7 +50718,16 @@
       "composable": true,
       "internal_title": "ub gl std sp",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_akilo": "Miri 40mm",
+        "rex_ar_kilo2": "Miri 40mm",
+        "rex_ar_kilo437": "Miri 40mm",
+        "rex_ar_mike4": "Miri 40mm",
+        "rex_ar_xar1": "Miri 40mm",
+        "rex_br_asierra12": "Miri 40mm",
+        "rex_br_ngsierra": "Miri 40mm"
+      }
     },
     {
       "id": "rex_ub_gl_xar1",
@@ -49891,7 +50748,10 @@
       "composable": true,
       "internal_title": "ub gl xar1",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_xar1": "Miri 40mm"
+      }
     },
     {
       "id": "rex_ub_gl_cromeo",
@@ -49996,7 +50856,10 @@
       "composable": true,
       "internal_title": "ub sh akilo",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_akilo": "TV Judicator"
+      }
     },
     {
       "id": "rex_ub_sh_asierra12",
@@ -50017,7 +50880,10 @@
       "composable": true,
       "internal_title": "ub sh asierra12",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_asierra12": "TV Judicator"
+      }
     },
     {
       "id": "rex_ub_sh_kilo2",
@@ -50062,7 +50928,10 @@
       "composable": true,
       "internal_title": "ub sh kilo437",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_kilo437": "TV Judicator"
+      }
     },
     {
       "id": "rex_ub_sh_mike4",
@@ -50085,7 +50954,10 @@
       "m4_size_axis": "width",
       "internal_title": "ub sh mike4",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_mike4": "TV Judicator"
+      }
     },
     {
       "id": "rex_ub_sh_ngsierra",
@@ -50106,7 +50978,10 @@
       "composable": true,
       "internal_title": "ub sh ngsierra",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_ngsierra": "TV Judicator"
+      }
     },
     {
       "id": "rex_ub_sh_std",
@@ -50150,7 +51025,10 @@
       "composable": true,
       "internal_title": "ub sh xar1",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_xar1": "TV Judicator"
+      }
     },
     {
       "id": "rex_ub_sh_cromeo",
@@ -50213,7 +51091,10 @@
       "composable": true,
       "internal_title": "xmag akilo",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_akilo": "45 Round Mag 7.62"
+      }
     },
     {
       "id": "rex_xmag_akilo_545",
@@ -50257,7 +51138,10 @@
       "composable": true,
       "internal_title": "xmag asierra12",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_asierra12": "30 Round Mag"
+      }
     },
     {
       "id": "rex_xmag_decho",
@@ -50452,7 +51336,10 @@
       "m4_size_axis": "height",
       "internal_title": "xmag mike4",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_mike4": "45 Round Mag"
+      }
     },
     {
       "id": "rex_xmag_moscar",
@@ -50496,7 +51383,10 @@
       "composable": true,
       "internal_title": "xmag ngsierra",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_ngsierra": "30 Round Mag"
+      }
     },
     {
       "id": "rex_xmag_pmike63",
@@ -50584,7 +51474,10 @@
       "composable": true,
       "internal_title": "xmag spier9",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_spier9": "40 Round Mag"
+      }
     },
     {
       "id": "rex_xmag_svictor98",
@@ -50649,7 +51542,10 @@
       "composable": true,
       "internal_title": "xmag uxray",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_uxray": "35 Round Mag"
+      }
     },
     {
       "id": "rex_xmag_xar1",
@@ -50670,7 +51566,10 @@
       "composable": true,
       "internal_title": "xmag xar1",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_xar1": "40 Round Mag"
+      }
     },
     {
       "id": "rex_xmag_xsm1",
@@ -52216,7 +53115,10 @@
       ],
       "internal_title": "APEX receiver conversion",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_ar_kilo437": "Axion Reaver"
+      }
     },
     {
       "id": "rex_apex_kilo2_skybreaker",
@@ -52348,7 +53250,10 @@
       ],
       "internal_title": "APEX conversion",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_spier9": "ISO Trace"
+      }
     },
     {
       "id": "rex_apex_asierra12",
@@ -52374,7 +53279,10 @@
       "locked_slots": [],
       "internal_title": "APEX conversion",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_asierra12": "Oden Sentinel"
+      }
     },
     {
       "id": "rex_apex_ngsierra",
@@ -52400,7 +53308,10 @@
       "locked_slots": [],
       "internal_title": "APEX conversion",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_ngsierra": "Cronen Maelstrom"
+      }
     },
     {
       "id": "rex_apex_uxray",
@@ -52430,7 +53341,10 @@
       ],
       "internal_title": "APEX conversion",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_br_uxray": "Patriot XMR Volt"
+      }
     },
     {
       "id": "rex_apex_psierra41",
@@ -52462,7 +53376,10 @@
       ],
       "internal_title": "APEX conversion",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_psierra41": "PPSh-41 Ember"
+      }
     },
     {
       "id": "rex_apex_xsm1",
@@ -52488,7 +53405,10 @@
       "locked_slots": [],
       "internal_title": "APEX conversion",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sm_xsm1": "X-58 Void"
+      }
     },
     {
       "id": "rex_apex_sierra100",
@@ -52514,11 +53434,14 @@
       "locked_slots": [],
       "internal_title": "APEX conversion",
       "display_name": null,
-      "name_status": "unresolved"
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sn_sierra100": "Astaroth .57 Infiltrator"
+      }
     },
     {
       "id": "rex_apex_svictor98",
-      "title": "APEX conversion",
+      "title": "KG-7 Drillcharge",
       "slot": "apex",
       "src": "../mw4-attachments/images/rex_bar_svictor98_apex-0ef0231d37f577ea.png",
       "bbox": [
@@ -52547,8 +53470,11 @@
         "barrel"
       ],
       "internal_title": "APEX conversion",
-      "display_name": null,
-      "name_status": "unresolved"
+      "display_name": "KG-7 Drillcharge",
+      "name_status": "unresolved",
+      "weapon_display_names": {
+        "rex_sn_svictor98": "KG-7 Drillcharge"
+      }
     },
     {
       "id": "rex_apex_menu_akilo_1601",
@@ -52570,7 +53496,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "Kastov 545"
+      "internal_title": "Kastov 545",
+      "weapon_display_names": {
+        "rex_ar_akilo": "Kastov 545"
+      }
     },
     {
       "id": "rex_apex_menu_mike4_1602",
@@ -52592,7 +53521,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "M16 Burst"
+      "internal_title": "M16 Burst",
+      "weapon_display_names": {
+        "rex_ar_mike4": "M16 Burst"
+      }
     },
     {
       "id": "rex_apex_menu_golf28_1116",
@@ -52614,7 +53546,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "MAR-9 Auto"
+      "internal_title": "MAR-9 Auto",
+      "weapon_display_names": {
+        "rex_dm_golf28": "MAR-9 Auto"
+      }
     },
     {
       "id": "rex_apex_menu_moscar_1247",
@@ -52636,7 +53571,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "Mosin Harpoon"
+      "internal_title": "Mosin Harpoon",
+      "weapon_display_names": {
+        "rex_dm_moscar": "Mosin Harpoon"
+      }
     },
     {
       "id": "rex_apex_menu_recho_1050",
@@ -52658,7 +53596,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "APOC 338 Praetor"
+      "internal_title": "APOC 338 Praetor",
+      "weapon_display_names": {
+        "rex_lm_recho": "APOC 338 Praetor"
+      }
     },
     {
       "id": "rex_apex_menu_sierrax_939",
@@ -52680,7 +53621,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "FiNN Adverse"
+      "internal_title": "FiNN Adverse",
+      "weapon_display_names": {
+        "rex_lm_sierrax": "FiNN Adverse"
+      }
     },
     {
       "id": "rex_apex_menu_tango73_995",
@@ -52702,7 +53646,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "Type 73 Assault"
+      "internal_title": "Type 73 Assault",
+      "weapon_display_names": {
+        "rex_lm_tango73": "Type 73 Assault"
+      }
     },
     {
       "id": "rex_apex_menu_decho_1546",
@@ -52724,7 +53671,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "GS Magna"
+      "internal_title": "GS Magna",
+      "weapon_display_names": {
+        "rex_pi_decho": "GS Magna"
+      }
     },
     {
       "id": "rex_apex_menu_hotel45_1497",
@@ -52746,7 +53696,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "Krait P68 Commando"
+      "internal_title": "Krait P68 Commando",
+      "weapon_display_names": {
+        "rex_pi_hotel45": "Krait P68 Commando"
+      }
     },
     {
       "id": "rex_apex_menu_kilo5_1464",
@@ -52768,7 +53721,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "Sang Breach"
+      "internal_title": "Sang Breach",
+      "weapon_display_names": {
+        "rex_pi_kilo5": "Sang Breach"
+      }
     },
     {
       "id": "rex_apex_menu_swhiskey_1585",
@@ -52790,7 +53746,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "Mojave .357 Lawless"
+      "internal_title": "Mojave .357 Lawless",
+      "weapon_display_names": {
+        "rex_pi_swhiskey": "Mojave .357 Lawless"
+      }
     },
     {
       "id": "rex_apex_menu_bmike3_837",
@@ -52812,7 +53771,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "Rezi 12 Enforcer"
+      "internal_title": "Rezi 12 Enforcer",
+      "weapon_display_names": {
+        "rex_sh_bmike3": "Rezi 12 Enforcer"
+      }
     },
     {
       "id": "rex_apex_menu_xsh1_888",
@@ -52834,7 +53796,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "Warlord Lumen"
+      "internal_title": "Warlord Lumen",
+      "weapon_display_names": {
+        "rex_sh_xsh1": "Warlord Lumen"
+      }
     },
     {
       "id": "rex_apex_menu_pmike63_679",
@@ -52856,7 +53821,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "Wz.55 Striga Rampage"
+      "internal_title": "Wz.55 Striga Rampage",
+      "weapon_display_names": {
+        "rex_sm_pmike63": "Wz.55 Striga Rampage"
+      }
     },
     {
       "id": "rex_apex_menu_limax_1431",
@@ -52878,7 +53846,10 @@
       "composable": false,
       "controller_only": false,
       "icon_only": true,
-      "internal_title": "Signal Inferno"
+      "internal_title": "Signal Inferno",
+      "weapon_display_names": {
+        "rex_sn_limax": "Signal Inferno"
+      }
     }
   ],
   "slots": [

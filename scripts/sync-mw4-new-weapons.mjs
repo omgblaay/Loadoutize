@@ -64,12 +64,13 @@ try {
       title: file.path.split("/").at(-1).replace(/\.png$/, ""), size: file.size,
     }))), bucket]);
   const insertedWeapons = await db.query(`INSERT INTO public.weapons
-      (id, game_id, name, weapon_category, image)
-    SELECT w.id, 'mw4', w.name, jsonb_build_object('key', c.id, 'collection', 'weapon_categories'),
+      (id, game_id, name, weapon_category_id, image)
+    SELECT w.id, 'mw4', w.name, c.id,
       w.image_id::uuid
     FROM jsonb_to_recordset($1::jsonb) AS w(id text, name text, category text, image_id text)
-    JOIN public.weapon_categories c ON c.name = w.category AND c.game->>'key' = 'mw4'
-    ON CONFLICT (id) DO UPDATE SET image = EXCLUDED.image
+    JOIN public.weapon_categories c ON c.name = w.category AND c.game_id = 'mw4'
+    ON CONFLICT (id) DO UPDATE SET image = EXCLUDED.image,
+      weapon_category_id = EXCLUDED.weapon_category_id
     RETURNING id`, [JSON.stringify(weapons.map((weapon) => ({ id: weapon.id,
       name: weapon.display_name || weapon.title, category: weapon.group,
       image_id: files.get(weapon.base_src).id })))]);
@@ -89,7 +90,7 @@ try {
   const insertedAssets = await db.query(`INSERT INTO public.attachments
       (game_id, attachment_type_id, name, image, stats)
     SELECT 'mw4', t.id, a.name, a.image_id::uuid,
-      jsonb_build_object('assetId', a.asset_id, 'imagePath', a.image_path,
+      jsonb_build_object('assetId', a.asset_id,
         'weaponIds', a.weapon_ids, 'families', a.families,
         'composable', a.composable, 'evidence', a.evidence,
         'displayName', a.display_name, 'subtypeLabel', a.subtype_label,

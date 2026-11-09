@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { WeaponSpriteCompositor, factoryBuild } from "@/lib/weaponSpriteCompositor.js";
 import {
   createPreviewBuild,
   getWeaponPreviewRef,
@@ -6,28 +7,33 @@ import {
   type SpriteLibrary,
   type SpritePreviewAttachment,
 } from "@/lib/weaponSpritePreview";
-import {
-  WeaponSpriteCompositor,
-  factoryBuild,
-} from "@/lib/weaponSpriteCompositor.js";
-
 const CATALOG_URL = "/weapon-preview/weapon-builder/catalog.json";
-const PLACEMENTS_URL = "/weapon-preview/weapon-builder/placement-overrides.json";
+const CALIBRATION_URL = "/weapon-preview/weapon-builder/source-calibration.json";
 
-type PlacementOverrides = Record<string, Record<string, { dx: number; dy: number; scale: number }>>;
-let libraryPromise: Promise<{ library: SpriteLibrary; placements: PlacementOverrides }> | null = null;
+type Position = { dx?: number; dy?: number; scale?: number; rotation?: number };
+type PlacementOverrides = Record<string, Record<string, Position>>;
+type CalibrationOverrides = {
+  placementOverrides: PlacementOverrides;
+  slotMounts: Record<string, Record<string, { source: string; dx: number; dy: number }>>;
+  barrelMuzzleOffsets: Record<string, Record<string, { dx: number; dy: number }>>;
+};
+let libraryPromise: Promise<{
+  library: SpriteLibrary;
+  calibration: CalibrationOverrides;
+}> | null = null;
 
 function loadLibrary() {
-  libraryPromise ??= Promise.all([fetch(CATALOG_URL), fetch(PLACEMENTS_URL)])
-    .then(async ([catalogResponse, placementsResponse]) => {
-      if (!catalogResponse.ok || !placementsResponse.ok) {
+  libraryPromise ??= Promise.all([
+    fetch(CATALOG_URL), fetch(CALIBRATION_URL),
+  ]).then(async ([catalogResponse, calibrationResponse]) => {
+      if (!catalogResponse.ok || !calibrationResponse.ok) {
         throw new Error("Weapon preview calibration is unavailable.");
       }
-      const [catalog, placements] = await Promise.all([
+      const [catalog, calibration] = await Promise.all([
         catalogResponse.json() as Promise<SpriteLibrary>,
-        placementsResponse.json() as Promise<PlacementOverrides>,
+        calibrationResponse.json() as Promise<CalibrationOverrides>,
       ]);
-      return { library: resolveCatalogAssetUrls(catalog, CATALOG_URL), placements };
+      return { library: resolveCatalogAssetUrls(catalog, CATALOG_URL), calibration };
     });
   return libraryPromise;
 }
@@ -62,8 +68,7 @@ export function WeaponSpriteCanvas({
     let cancelled = false;
     onError();
 
-    void loadLibrary()
-      .then(async ({ library, placements }) => {
+    void loadLibrary().then(async ({ library, calibration }) => {
         const weapon = library.weapons.find((item) => item.id === previewRef);
         if (!weapon) throw new Error(`Missing sprite recipe for ${previewRef}.`);
 
@@ -74,7 +79,15 @@ export function WeaponSpriteCanvas({
           assets: library.assets,
           placement_overrides: {
             ...(weapon.default_placement_overrides as PlacementOverrides[string] | undefined),
-            ...(placements[weapon.id] ?? {}),
+            ...(calibration.placementOverrides[weapon.id] ?? {}),
+          },
+          slot_mounts: {
+            ...(weapon.default_slot_mounts as Record<string, unknown> | undefined),
+            ...(calibration.slotMounts[weapon.id] ?? {}),
+          },
+          barrel_muzzle_offsets: {
+            ...(weapon.default_barrel_muzzle_offsets as Record<string, unknown> | undefined),
+            ...(calibration.barrelMuzzleOffsets[weapon.id] ?? {}),
           },
         };
         const state = {

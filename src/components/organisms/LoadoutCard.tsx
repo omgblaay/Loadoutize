@@ -17,9 +17,15 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { VIDEO_PLATFORM_META } from "@/lib/video";
 import { explorePath } from "@/lib/routes";
 import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
+import { projectId } from "../../../utils/supabase/info";
+import { builderAttachmentImageUrl, loadBuilderAttachmentAssets } from "@/lib/builderAttachmentImages";
+import type { BuilderRelationAsset } from "@/lib/weaponBuilderRelations";
 import { AppTooltip } from "@/components/atoms/Tooltip";
 
 const MAX_ATTACHMENT_ICONS = 10;
+// The current MW4 APEX type image in Directus. Prefer typeImageUrl from the
+// API so a later Directus image change takes effect without a frontend edit.
+const MW4_APEX_TYPE_IMAGE_URL = `https://${projectId}.supabase.co/storage/v1/object/public/cms-assets/35bfddeb-afd5-45ff-87f9-84c3775e2dd6.png`;
 
 export function LoadoutCard({
   loadout,
@@ -44,6 +50,19 @@ export function LoadoutCard({
   /** Layers a shader flame effect over the card's edge -- reserve for a single standout card (e.g. the #1 ranked loadout), not whole grids: each instance is its own WebGL context. */
   fire?: boolean;
 }) {
+  const [builderAssets, setBuilderAssets] = React.useState<BuilderRelationAsset[]>([]);
+  React.useEffect(() => {
+    if (loadout.gameId !== "mw4") return;
+    let active = true;
+    loadBuilderAttachmentAssets()
+      .then((assets) => { if (active) setBuilderAssets(assets); })
+      .catch((error) => console.error("Could not load attachment images:", error));
+    return () => { active = false; };
+  }, [loadout.gameId]);
+  const builderAssetsById = React.useMemo(
+    () => new Map(builderAssets.map((asset) => [asset.id, asset])),
+    [builderAssets],
+  );
   const primaryWeaponId = loadout.weapons?.[0]?.id;
   const primaryWeaponData = weapons.find((w) => w.id === primaryWeaponId);
   const primaryWeapon = primaryWeaponData?.name || "SGX 124";
@@ -54,6 +73,19 @@ export function LoadoutCard({
       attachments.find((a) => a.type === type && a.name === name),
     )
     .filter((a): a is CardAttachment => Boolean(a))
+    .map((attachment) => {
+      const isApex = (attachment.typeSlug || attachment.type || "").toLowerCase() === "apex";
+      return {
+        ...attachment,
+        imageUrl: isApex
+          ? attachment.typeImageUrl ||
+            (loadout.gameId === "mw4" ? MW4_APEX_TYPE_IMAGE_URL : null)
+          : attachment.imageUrl ||
+            (loadout.gameId === "mw4"
+              ? builderAttachmentImageUrl(attachment.stats?.assetId, builderAssetsById, attachment.name)
+              : null) || attachment.stats?.imagePath || null,
+      };
+    })
     .slice(0, MAX_ATTACHMENT_ICONS);
   const tag =
     loadout.tagId != null

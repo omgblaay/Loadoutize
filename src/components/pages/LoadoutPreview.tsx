@@ -13,6 +13,7 @@ import {
 } from "@/lib/routes";
 import { orderedAttachmentEntries } from "@/lib/attachmentOrder";
 import { builderAttachmentDisplayName, type BuilderRelationAsset } from "@/lib/weaponBuilderRelations";
+import { builderAttachmentImageUrl, loadBuilderAttachmentAssets } from "@/lib/builderAttachmentImages";
 import { visibleWeaponCatalog } from "@/lib/weaponCategories";
 import gameLogo from "figma:asset/mw4_logo.png";
 import { useAuth } from "@/providers/AuthProvider";
@@ -376,14 +377,9 @@ export function LoadoutPreview() {
 
   useEffect(() => {
     if (gameId === "mw4") {
-      fetch("/weapon-preview/weapon-builder/catalog.json")
-        .then((response) => {
-          if (!response.ok) throw new Error("Could not load attachment names");
-          return response.json();
-        })
-        .then((catalog: { assets: BuilderRelationAsset[] }) =>
-          setRelationAssets(Array.isArray(catalog.assets) ? catalog.assets : []))
-        .catch((error) => console.error("Error fetching attachment names:", error));
+      loadBuilderAttachmentAssets()
+        .then(setRelationAssets)
+        .catch((error) => console.error("Error fetching attachment assets:", error));
     } else {
       setRelationAssets([]);
     }
@@ -577,6 +573,11 @@ export function LoadoutPreview() {
     gameId === "mw4"
       ? builderAttachmentDisplayName(attachment?.stats?.assetId, weaponId, relationAssetsById, attachment?.stats?.displayName ?? fallback)
       : attachment?.stats?.displayName ?? fallback;
+  const attachmentIconUrl = (attachment: CardAttachment | undefined) =>
+    attachment?.imageUrl ||
+    (gameId === "mw4"
+      ? builderAttachmentImageUrl(attachment?.stats?.assetId, relationAssetsById, attachment?.name)
+      : null) || attachment?.stats?.imagePath || null;
 
   const primaryAttachments = React.useMemo(() => {
     if (!primaryWeapon?.attachments) return [];
@@ -590,7 +591,7 @@ export function LoadoutPreview() {
           assetId: attachment?.stats?.assetId,
           typeSlug: attachment?.typeSlug || slot,
           label: attachmentLabel(attachment, primaryWeapon.id, value),
-          iconUrl: attachment?.imageUrl ?? attachment?.stats?.imagePath ?? null,
+          iconUrl: attachmentIconUrl(attachment),
           isApex: slot.toLowerCase() === "apex",
         };
       },
@@ -609,7 +610,7 @@ export function LoadoutPreview() {
           assetId: attachment?.stats?.assetId,
           typeSlug: attachment?.typeSlug || slot,
           label: attachmentLabel(attachment, secondaryWeapon.id, value),
-          iconUrl: attachment?.imageUrl ?? attachment?.stats?.imagePath ?? null,
+          iconUrl: attachmentIconUrl(attachment),
           isApex: slot.toLowerCase() === "apex",
         };
       },
@@ -656,7 +657,7 @@ export function LoadoutPreview() {
         assetId: attachment.stats?.assetId,
         typeSlug: attachment.typeSlug || slot,
         label: attachmentLabel(attachment, primaryWeapon?.id, attachment.name),
-        iconUrl: attachment.imageUrl ?? attachment.stats?.imagePath,
+        iconUrl: attachmentIconUrl(attachment),
         isApex: slot.toLowerCase() === "apex",
         to: attachmentMetaPath(gameId, String(attachment.id)),
       } satisfies WeaponImageBadge;
@@ -678,7 +679,7 @@ export function LoadoutPreview() {
         assetId: attachment.stats?.assetId,
         typeSlug: attachment.typeSlug || slot,
         label: attachmentLabel(attachment, secondaryWeapon?.id, attachment.name),
-        iconUrl: attachment.imageUrl ?? attachment.stats?.imagePath,
+        iconUrl: attachmentIconUrl(attachment),
         isApex: slot.toLowerCase() === "apex",
       } satisfies WeaponImageBadge;
     })
@@ -830,6 +831,66 @@ export function LoadoutPreview() {
         </header>
       )}
 
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/[0.06] pb-4">
+        {(() => {
+          const avatar = (
+            <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] text-xs font-semibold">
+              {loadout.authorAvatarUrl ? (
+                <img
+                  src={loadout.authorAvatarUrl}
+                  alt=""
+                  className="size-full object-cover"
+                />
+              ) : (
+                loadout.userName?.[0]?.toUpperCase() ?? "U"
+              )}
+            </div>
+          );
+          return loadout.authorNickname ? (
+            <Link
+              to={`/u/${loadout.authorNickname}`}
+              aria-label={`View ${loadout.userName ?? loadout.authorNickname}'s profile`}
+              className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              {avatar}
+            </Link>
+          ) : avatar;
+        })()}
+        <div className="flex min-w-0 items-baseline gap-1.5 text-sm">
+          <span className="text-teritary">by</span>
+          {loadout.authorNickname ? (
+            <Link to={`/u/${loadout.authorNickname}`} className="truncate font-medium hover:underline">
+              {loadout.userName} <span className="text-teritary">@{loadout.authorNickname}</span>
+            </Link>
+          ) : (
+            <span className="truncate font-medium">{loadout.userName}</span>
+          )}
+        </div>
+        {loadout.authorLinks &&
+          SOCIAL_LINK_FIELDS.some(({ key }) => loadout.authorLinks![key]) && (
+            <div className="ml-auto flex items-center gap-1">
+              {SOCIAL_LINK_FIELDS.filter(({ key }) => loadout.authorLinks![key]).map(
+                ({ key, label, icon: Icon, url }) => {
+                  const count = formatCount(loadout.authorSocialStats?.[key]);
+                  return (
+                    <Button key={key} asChild variant="ghost" size="sm" className="h-8 px-2">
+                      <a
+                        href={url(loadout.authorLinks![key]!)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={label}
+                      >
+                        <Icon className="size-3.5" />
+                        <span className="text-[10px] text-teritary font-mono">{count ?? "—"}</span>
+                      </a>
+                    </Button>
+                  );
+                },
+              )}
+            </div>
+          )}
+      </div>
+
       <div
         className={cn(
           "grid grid-cols-1 gap-6 items-start",
@@ -930,18 +991,13 @@ export function LoadoutPreview() {
                   className="flex w-full items-center gap-4 py-3 text-left"
                 >
                   <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.035] p-2">
-                    {att.isApex ? (
-                      <Puzzle
-                        aria-hidden="true"
-                        className="size-5 text-white/70"
-                      />
-                    ) : att.iconUrl ? (
+                    {att.iconUrl ? (
                       <img
                         src={att.iconUrl}
                         alt=""
                         className="size-full object-contain"
                       />
-                    ) : null}
+                    ) : <span className="text-xs font-semibold text-white/70">{att.label.slice(0, 2).toUpperCase()}</span>}
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                     {att.attachmentId ? (
@@ -1065,18 +1121,13 @@ export function LoadoutPreview() {
                         className="flex w-full items-center gap-4 py-3 text-left"
                       >
                         <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.035] p-2">
-                          {attachment.isApex ? (
-                            <Puzzle
-                              aria-hidden="true"
-                              className="size-5 text-white/70"
-                            />
-                          ) : attachment.iconUrl ? (
+                          {attachment.iconUrl ? (
                             <img
                               src={attachment.iconUrl}
                               alt=""
                               className="size-full object-contain"
                             />
-                          ) : null}
+                          ) : <span className="text-xs font-semibold text-white/70">{attachment.label.slice(0, 2).toUpperCase()}</span>}
                         </div>
                         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                           {attachment.attachmentId ? (
@@ -1139,105 +1190,34 @@ export function LoadoutPreview() {
           className={cn(
             "flex flex-col gap-4",
             !isFullLoadout && "lg:grid lg:grid-cols-2",
-            isFullLoadout && "md:col-span-2",
+            isFullLoadout && "md:col-span-2 lg:grid lg:grid-cols-2",
           )}
         >
-          {/* Description, reactions, author, in-game code, and video are all
-              one info panel now instead of separate cards -- divide-y draws
-              the hairline between sections (none above the first). */}
-          <Container className="gap-0">
-            <div className="flex flex-col gap-3 pb-5">
-              {/* Author */}
-              <div className="flex flex-wrap items-center text-sm gap-2">
-                {(() => {
-                  const avatar = (
-                    <div className="w-16 h-16 rounded-lg border border-white/10 overflow-hidden flex items-center justify-center  bg-white/[0.04]">
-                      {loadout.authorAvatarUrl ? (
-                        <img
-                          src={loadout.authorAvatarUrl}
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-[12px] font-semibold ">
-                          {loadout.userName?.[0]?.toUpperCase() ?? "U"}
-                        </span>
-                      )}
-                    </div>
-                  );
-                  return loadout.authorNickname ? (
-                    <Link to={`/u/${loadout.authorNickname}`}>{avatar}</Link>
-                  ) : (
-                    avatar
-                  );
-                })()}
-                <div className="flex flex-col gap-2 text-base">
-                  {loadout.authorNickname ? (
-                    <Link
-                      to={`/u/${loadout.authorNickname}`}
-                      className="hover:underline"
+          <Container className="gap-3">
+            <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-teritary">
+              Build notes
+            </h2>
+            {loadout.description ? (
+              <blockquote className="whitespace-pre-wrap break-words text-base leading-relaxed text-secondary">
+                {loadout.description.split(/(https:\/\/[^\s]+)/g).map((part, index) =>
+                  part.startsWith("https://") ? (
+                    <a
+                      key={index}
+                      href={part}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="break-all underline underline-offset-4 hover:text-white"
                     >
-                      {loadout.userName}{" "}
-                      <span className="text-teritary">
-                        @{loadout.authorNickname}
-                      </span>
-                    </Link>
+                      {part}
+                    </a>
                   ) : (
-                    <span>{loadout.userName}</span>
-                  )}
-                  {loadout.authorLinks &&
-                    SOCIAL_LINK_FIELDS.some(
-                      ({ key }) => loadout.authorLinks![key],
-                    ) && (
-                      <div className="flex items-start gap-1 flex-wrap">
-                        {SOCIAL_LINK_FIELDS.filter(
-                          ({ key }) => loadout.authorLinks![key],
-                        ).map(({ key, label, icon: Icon, url }) => {
-                          const count = formatCount(
-                            loadout.authorSocialStats?.[key],
-                          );
-                          return (
-                            <Button key={key} asChild variant="ghost" size="sm">
-                              <a
-                                href={url(loadout.authorLinks![key]!)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label={label}
-                              >
-                                <Icon className="w-3.5 h-3.5" />
-                                <span className="text-[10px] text-teritary font-mono">
-                                  {count ?? "—"}
-                                </span>
-                              </a>
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    )}
-                </div>
-              </div>
-
-              {/* Description */}
-              {loadout.description && (
-                <blockquote className="text-secondary text-base whitespace-pre-wrap break-words">
-                  {loadout.description.split(/(https:\/\/[^\s]+)/g).map((part, index) =>
-                    part.startsWith("https://") ? (
-                      <a
-                        key={index}
-                        href={part}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        className="break-all underline underline-offset-4 hover:text-white"
-                      >
-                        {part}
-                      </a>
-                    ) : (
-                      <React.Fragment key={index}>{part}</React.Fragment>
-                    ),
-                  )}
-                </blockquote>
-              )}
-            </div>
+                    <React.Fragment key={index}>{part}</React.Fragment>
+                  ),
+                )}
+              </blockquote>
+            ) : (
+              <p className="text-sm text-teritary">No description provided.</p>
+            )}
           </Container>
 
           <div className="flex flex-col gap-4">
@@ -1306,8 +1286,6 @@ export function LoadoutPreview() {
                   </>
                 );
               })()}
-          </div>
-
           <Container className="flex flex-row items-center gap-4">
             <QRCodeCanvas
               value={shareUrl}
@@ -1379,6 +1357,7 @@ export function LoadoutPreview() {
               </AlertDialog>
             </div>
           )}
+          </div>
         </div>
       </div>
 

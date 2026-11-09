@@ -114,6 +114,7 @@ export function smgAllowsUnderbarrel(weaponId: string, assetId?: string): boolea
 export interface BuilderRelationAsset {
   id: string;
   slot: string;
+  src?: string;
   title?: string;
   display_name?: string | null;
   subtype_label?: string | null;

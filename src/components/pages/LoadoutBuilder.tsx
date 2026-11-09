@@ -504,7 +504,7 @@ export function LoadoutBuilder() {
       setRelationRulesReady(gameId !== "mw4");
       setRelationRulesFailed(false);
       if (gameId === "mw4") {
-        fetch("/weapon-preview/weapon-builder/catalog.json")
+        fetch("/weapon-preview/weapon-builder/catalog.json?v=20261108-names")
           .then((response) => {
             if (!response.ok)
               throw new Error("Could not load weapon builder rules");
@@ -691,6 +691,13 @@ export function LoadoutBuilder() {
     if (nameMissing) {
       toast.error("Loadout name is missing", {
         description: "Give your loadout a name before finishing.",
+      });
+      return;
+    }
+
+    if (selectedTagId == null || !tags.some((tag) => tag.id === selectedTagId && isTagAllowed(tag))) {
+      toast.error("Choose a tag", {
+        description: "Every loadout needs a tag before it can be saved.",
       });
       return;
     }
@@ -1420,7 +1427,7 @@ export function LoadoutBuilder() {
                 id="loadout-tag-label"
                 className="block text-[12px] pb-2 tracking-[0.5px] uppercase text-[#8d898a] font-semibold"
               >
-                Tag
+                Tag *
               </span>
               <ToggleGroup
                 aria-labelledby="loadout-tag-label"
@@ -1617,6 +1624,17 @@ export function LoadoutBuilder() {
                 <p className="truncate flex-1 text-base font-medium">
                   {selectedWeapon.name}
                 </p>
+                {import.meta.env.DEV && (
+                  <Button asChild variant="ghost" size="sm" className="text-teritary">
+                    <a
+                      href={`http://localhost:8767/weapon-builder/?weapon=${encodeURIComponent(selectedWeapon.id)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Calibrate preview
+                    </a>
+                  </Button>
+                )}
                 {selectedWeapon && !pickingWeapon && (
                   <Button
                     type="button"
