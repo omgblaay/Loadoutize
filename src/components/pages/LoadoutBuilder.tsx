@@ -11,6 +11,7 @@ import {
   Search,
   ChevronRight,
   Check,
+  Ban,
   X,
   Download,
   Crosshair,
@@ -261,7 +262,7 @@ function AttachmentPickerList({
               : " hover:bg-white/[0.05]",
           )}
         >
-          <div className="flex size-6 shrink-0 items-center justify-center rounded-md border border-current/20 font-mono text-[10px] font-semibold">
+          <div className="flex size-6 shrink-0 items-center justify-center opacity-50 font-mono text-3xl font-semibold">
             ∞
           </div>
           <span className="min-w-0 flex-1">
@@ -1100,15 +1101,15 @@ export function LoadoutBuilder() {
       <AppLayout
         selectedGame={gameId}
         onGameSelect={(id) => navigate(gamePath(id, "create"))}
-        breadcrumb={
-          <>
-            <BreadcrumbLink to={explorePath(gameId)}>
-              {meta.short}
-            </BreadcrumbLink>
-            <BreadcrumbSpacer />
-            <span className="">{editId ? "Edit Loadout" : "New Loadout"}</span>
-          </>
-        }
+        // breadcrumb={
+        //   <>
+        //     <BreadcrumbLink to={explorePath(gameId)}>
+        //       {meta.short}
+        //     </BreadcrumbLink>
+        //     <BreadcrumbSpacer />
+        //     <span className="">{editId ? "Edit Loadout" : "New Loadout"}</span>
+        //   </>
+        // }
       >
         <LoadoutBuilderSkeleton />
       </AppLayout>
@@ -1373,15 +1374,15 @@ export function LoadoutBuilder() {
       <AppLayout
         selectedGame={gameId}
         onGameSelect={(id) => navigate(gamePath(id, "create"))}
-        breadcrumb={
-          <>
-            <BreadcrumbLink to={explorePath(gameId)}>
-              {meta.short}
-            </BreadcrumbLink>
-            <BreadcrumbSpacer />
-            <span>Choose creation type</span>
-          </>
-        }
+        // breadcrumb={
+        //   <>
+        //     <BreadcrumbLink to={explorePath(gameId)}>
+        //       {meta.short}
+        //     </BreadcrumbLink>
+        //     <BreadcrumbSpacer />
+        //     <span>Choose creation type</span>
+        //   </>
+        // }
       >
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 py-6 sm:py-12">
           <header className="max-w-2xl">
@@ -1445,19 +1446,19 @@ export function LoadoutBuilder() {
     <AppLayout
       selectedGame={gameId}
       onGameSelect={(id) => navigate(gamePath(id, "create"))}
-      breadcrumb={
-        <>
-          <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>
-          <BreadcrumbSpacer />
-          <span className="">
-            {editId
-              ? `Edit ${contentType === "full_loadout" ? "Loadout" : "Weapon Config"}`
-              : contentType === "full_loadout"
-                ? "New Loadout"
-                : "New Weapon Config"}
-          </span>
-        </>
-      }
+      // breadcrumb={
+      //   <>
+      //     <BreadcrumbLink to={explorePath(gameId)}>{meta.short}</BreadcrumbLink>
+      //     <BreadcrumbSpacer />
+      //     <span className="">
+      //       {editId
+      //         ? `Edit ${contentType === "full_loadout" ? "Loadout" : "Weapon Config"}`
+      //         : contentType === "full_loadout"
+      //           ? "New Loadout"
+      //           : "New Weapon Config"}
+      //     </span>
+      //   </>
+      // }
     >
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <Button
@@ -1829,7 +1830,9 @@ export function LoadoutBuilder() {
                           disabled={Boolean(lockedSlot) || !hasOptions}
                           className={cn(
                             "p-4 rounded-xl text-base border border-white/[0.12] flex items-center gap-2 text-left transition-colors hover:border-white/40",
-                            lockedSlot &&
+                            lockedSlot?.included
+                              ? "border-emerald-300/25 bg-emerald-300/[0.06] text-white"
+                              : lockedSlot &&
                               "cursor-not-allowed border-white/[0.07] text-teritary hover:border-white/[0.07]",
                             !hasOptions && "cursor-not-allowed text-teritary",
                             selectedName && "bg-white/5",
@@ -1854,13 +1857,32 @@ export function LoadoutBuilder() {
                           }
                         >
                           <div className="flex gap-2 flex-1 flex-row">
-                            {lockedSlot ? (
-                              <span
-                                className="w-16 text-center text-teritary"
-                                aria-hidden="true"
-                              >
-                                ×
-                              </span>
+                            {lockedSlot?.included ? (
+                              builderAttachmentImageUrl(
+                                lockedSlot.includedAssetId,
+                                assetsById,
+                                lockedSlot.includedPart,
+                              ) ? (
+                                <img
+                                  src={builderAttachmentImageUrl(
+                                    lockedSlot.includedAssetId,
+                                    assetsById,
+                                    lockedSlot.includedPart,
+                                  )!}
+                                  alt=""
+                                  className="size-10 shrink-0 object-contain"
+                                />
+                              ) : (
+                                <AttachmentIcon
+                                  attachment={{
+                                    name: lockedSlot.includedPart ?? type,
+                                    type,
+                                  }}
+                                  className="size-10"
+                                />
+                              )
+                            ) : lockedSlot ? (
+                              <Ban className="size-6 shrink-0 text-rose-300/80" aria-hidden="true" />
                             ) : isAnySelected ? (
                               <span className="flex size-5 items-center justify-center font-mono text-3xl text-teritary">
                                 ∞
@@ -1880,20 +1902,31 @@ export function LoadoutBuilder() {
                                 attachment={selectedAttachment}
                                 className="w-8"
                               />
-                            ) : (
-                              <AttachmentGroupIcon
-                                type={type}
-                                imageUrl={typeImageUrl}
-                              />
-                            )}
+                            ) : // <AttachmentGroupIcon
+                            //   type={type}
+                            //   imageUrl={typeImageUrl}
+                            // />
+                            null}
 
                             {lockedSlot ? (
-                              <span className="min-w-0 truncate">
-                                {lockedSlot.includedPart
-                                  ? `Included: ${lockedSlot.includedPart}`
-                                  : lockedSlot.included
-                                    ? `Included with ${lockSource}`
-                                    : `${type} unavailable`}
+                              <span className="flex min-w-0 flex-col leading-tight">
+                                {lockedSlot.includedPart ? (
+                                  <>
+                                    <span className="max-w-full truncate">
+                                      <span className="text-teritary">Included: </span>
+                                      <span className="text-white">{lockedSlot.includedPart}</span>
+                                    </span>
+                                    <span className="max-w-full truncate text-xs text-teritary">
+                                      {type}
+                                      {lockedSlot.includedSubtypeLabel &&
+                                        ` · ${lockedSlot.includedSubtypeLabel}`}
+                                    </span>
+                                  </>
+                                ) : lockedSlot.included ? (
+                                  <span className="text-teritary">Included with {lockSource}</span>
+                                ) : (
+                                  `${type} unavailable`
+                                )}
                                 {!lockedSlot.included && (
                                   <span className="ml-2 text-xs text-teritary">
                                     {lockSource}
@@ -1926,7 +1959,7 @@ export function LoadoutBuilder() {
                                 </span>
                               </span>
                             ) : (
-                              <span className="text-teritary">Add {type}</span>
+                              <span>Add {type}</span>
                             )}
                           </div>
                           {!lockedSlot && (

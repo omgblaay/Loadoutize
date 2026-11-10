@@ -118,6 +118,8 @@ export interface LockedBuilderSlot {
   slot: string;
   included?: boolean;
   includedPart?: string;
+  includedAssetId?: string;
+  includedSubtypeLabel?: string | null;
 }
 
 export interface BuilderApexRelation {
@@ -157,6 +159,8 @@ export function getBuilderApexRelation(
       slot,
       included: true,
       includedPart: part?.display_name || undefined,
+      includedAssetId: part?.id,
+      includedSubtypeLabel: part?.subtype_label,
     });
   }
   return { apexName: recipe.display_name || recipe.title || apexEntry[1], lockedSlots };
