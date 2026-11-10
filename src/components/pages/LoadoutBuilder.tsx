@@ -1328,6 +1328,29 @@ export function LoadoutBuilder() {
         })
         .filter((badge): badge is WeaponImageBadge => badge !== null)
     : [];
+  const filledStandardAttachmentSlots = new Set(
+    selectedWeapon
+      ? Object.entries(selectedWeapon.attachments)
+          .filter(
+            ([slot, name]) =>
+              Boolean(name) &&
+              !isApexAttachmentType(slot) &&
+              !selectedApexRelation?.lockedSlots.has(
+                normalizePreviewSlot(slot),
+              ),
+          )
+          .map(([slot]) => normalizePreviewSlot(slot))
+      : [],
+  );
+  selectedApexRelation?.lockedSlots.forEach((slot, key) => {
+    if (slot.included) filledStandardAttachmentSlots.add(key);
+  });
+  const hasApexSelected = Boolean(
+    selectedWeapon &&
+    Object.entries(selectedWeapon.attachments).some(
+      ([slot, value]) => isApexAttachmentType(slot) && Boolean(value),
+    ),
+  );
 
   const filteredWeapons = weapons.filter((weapon) => {
     const category =
@@ -1760,19 +1783,55 @@ export function LoadoutBuilder() {
             <div className="flex min-w-0 flex-col gap-3">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-xs">Attachments</h2>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-teritary"
-                  disabled={
-                    Object.keys(selectedWeapon.attachments).length === 0
-                  }
-                  aria-label={`Clear all attachments for ${selectedWeapon.name}`}
-                  onClick={() => clearWeaponAttachments(selectedWeapon.id)}
-                >
-                  Clear
-                </Button>
+                <div className="flex items-center gap-3">
+                  <div
+                    role="img"
+                    className="flex items-center gap-1.5"
+                    aria-label={`${Math.min(filledStandardAttachmentSlots.size, MAX_STANDARD_ATTACHMENTS)} of ${MAX_STANDARD_ATTACHMENTS} standard attachments selected${hasApexSelected ? ", APEX selected" : ""}`}
+                  >
+                    {Array.from(
+                      { length: MAX_STANDARD_ATTACHMENTS },
+                      (_, index) => (
+                        <span
+                          key={index}
+                          aria-hidden="true"
+                          className={cn(
+                            "size-3 rounded-[2px] border transition-colors",
+                            index <
+                              Math.min(
+                                filledStandardAttachmentSlots.size,
+                                MAX_STANDARD_ATTACHMENTS,
+                              )
+                              ? "border-yellow-400 bg-yellow-400/80"
+                              : "border-white/25 bg-transparent",
+                          )}
+                        />
+                      ),
+                    )}
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "ml-1 size-3 rotate-45 rounded-[2px] border transition-colors",
+                        hasApexSelected
+                          ? "border-yellow-400 bg-yellow-400/80"
+                          : "border-white/25 bg-transparent",
+                      )}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-teritary"
+                    disabled={
+                      Object.keys(selectedWeapon.attachments).length === 0
+                    }
+                    aria-label={`Clear all attachments for ${selectedWeapon.name}`}
+                    onClick={() => clearWeaponAttachments(selectedWeapon.id)}
+                  >
+                    Clear
+                  </Button>
+                </div>
               </div>
 
               {attachmentTypes.length === 0 ? (
@@ -1833,7 +1892,7 @@ export function LoadoutBuilder() {
                             lockedSlot?.included
                               ? "border-emerald-300/25 bg-emerald-300/[0.06] text-white"
                               : lockedSlot &&
-                              "cursor-not-allowed border-white/[0.07] text-teritary hover:border-white/[0.07]",
+                                  "cursor-not-allowed border-white/[0.07] text-teritary hover:border-white/[0.07]",
                             !hasOptions && "cursor-not-allowed text-teritary",
                             selectedName && "bg-white/5",
                             attachmentError &&
@@ -1864,11 +1923,13 @@ export function LoadoutBuilder() {
                                 lockedSlot.includedPart,
                               ) ? (
                                 <img
-                                  src={builderAttachmentImageUrl(
-                                    lockedSlot.includedAssetId,
-                                    assetsById,
-                                    lockedSlot.includedPart,
-                                  )!}
+                                  src={
+                                    builderAttachmentImageUrl(
+                                      lockedSlot.includedAssetId,
+                                      assetsById,
+                                      lockedSlot.includedPart,
+                                    )!
+                                  }
                                   alt=""
                                   className="size-10 shrink-0 object-contain"
                                 />
@@ -1882,7 +1943,10 @@ export function LoadoutBuilder() {
                                 />
                               )
                             ) : lockedSlot ? (
-                              <Ban className="size-6 shrink-0 text-rose-300/80" aria-hidden="true" />
+                              <Ban
+                                className="size-6 shrink-0 text-rose-300/80"
+                                aria-hidden="true"
+                              />
                             ) : isAnySelected ? (
                               <span className="flex size-5 items-center justify-center font-mono text-3xl text-teritary">
                                 ∞
@@ -1913,8 +1977,12 @@ export function LoadoutBuilder() {
                                 {lockedSlot.includedPart ? (
                                   <>
                                     <span className="max-w-full truncate">
-                                      <span className="text-teritary">Included: </span>
-                                      <span className="text-white">{lockedSlot.includedPart}</span>
+                                      <span className="text-teritary">
+                                        Included:{" "}
+                                      </span>
+                                      <span className="text-white">
+                                        {lockedSlot.includedPart}
+                                      </span>
                                     </span>
                                     <span className="max-w-full truncate text-xs text-teritary">
                                       {type}
@@ -1923,12 +1991,14 @@ export function LoadoutBuilder() {
                                     </span>
                                   </>
                                 ) : lockedSlot.included ? (
-                                  <span className="text-teritary">Included with {lockSource}</span>
+                                  <span className="text-teritary">
+                                    Included with {lockSource}
+                                  </span>
                                 ) : (
                                   `${type} unavailable`
                                 )}
                                 {!lockedSlot.included && (
-                                  <span className="ml-2 text-xs text-teritary">
+                                  <span className="text-xs text-teritary">
                                     {lockSource}
                                   </span>
                                 )}
