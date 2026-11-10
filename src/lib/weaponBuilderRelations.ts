@@ -1,16 +1,5 @@
 import { normalizePreviewSlot } from "./weaponSpritePreview";
 
-export const HAN86_UNDERBARREL_IDS = [
-  "rex_grip_ang",
-  "rex_grip_ang_short",
-  "rex_grip_vert",
-  "rex_grip_vert_short_kilo2_v04",
-  "rex_grip_bipod01",
-  "rex_bipod01",
-  "rex_ub_gl_kilo2",
-  "rex_ub_sh_kilo2",
-] as const;
-
 export const AR_OPTIC_IDS = [
   "rex_minireddot01", "rex_minireddot02", "rex_minireddot03",
   "rex_minireddot04", "rex_reflex01", "rex_reflex02", "rex_reflex03",
@@ -40,25 +29,6 @@ export const VEL_AMMUNITION_IDS = [
   "rex_ammo_4x30_hv", "rex_ammo_4x30_op",
 ] as const;
 
-export const SMG_COMMON_UNDERBARREL_IDS = [
-  "rex_grip_ang", "rex_grip_ang_short", "rex_grip_vert",
-  "rex_grip_vert_short",
-] as const;
-
-export const SMG_UNDERBARREL_IDS_BY_WEAPON: Record<string, readonly string[]> = {
-  rex_sm_pmike63: SMG_COMMON_UNDERBARREL_IDS,
-  rex_sm_psierra41: SMG_COMMON_UNDERBARREL_IDS,
-  rex_sm_spier9: SMG_COMMON_UNDERBARREL_IDS,
-  rex_sm_xsm1: SMG_COMMON_UNDERBARREL_IDS,
-  rex_sm_mpapa7: ["rex_grip_ang", "rex_grip_ang_short", "rex_grip_vert_short", "rex_grip_fld_mpapa7"],
-  rex_sm_fmgolf: ["rex_grip_ass_fmgolf", "rex_grip_erg_fmgolf", "rex_grip_fmgolf", "rex_grip_tac_fmgolf"],
-};
-
-/** Restrict HAN 86 to the eight underbarrels shown in its in-game menu. */
-export function han86AllowsUnderbarrel(assetId?: string): boolean {
-  return Boolean(assetId && HAN86_UNDERBARREL_IDS.some((id) => id === assetId));
-}
-
 /** The 23 optics shared by the assault-rifle class menu. */
 export function arAllowsOptic(assetId?: string): boolean {
   return Boolean(assetId && AR_OPTIC_IDS.some((id) => id === assetId));
@@ -77,10 +47,6 @@ export function velAllowsAmmunition(assetId?: string): boolean {
   return Boolean(assetId && VEL_AMMUNITION_IDS.some((id) => id === assetId));
 }
 
-export function smgAllowsUnderbarrel(weaponId: string, assetId?: string): boolean {
-  return Boolean(assetId && SMG_UNDERBARREL_IDS_BY_WEAPON[weaponId]?.includes(assetId));
-}
-
 export interface BuilderRelationAsset {
   id: string;
   slot: string;
@@ -89,8 +55,10 @@ export interface BuilderRelationAsset {
   display_name?: string | null;
   subtype_label?: string | null;
   muzzle_table?: boolean;
+  underbarrel_table?: boolean;
   weapon_ids?: string[];
   muzzle_order?: number;
+  underbarrel_order?: number;
   image_asset_id?: string;
   locked_slots?: string[];
   dependencies?: Record<string, string>;
@@ -104,6 +72,15 @@ export function mw4MuzzleAllowed(
 ): boolean {
   const tableEntry = assetId ? assetsById.get(assetId) : undefined;
   return Boolean(tableEntry?.muzzle_table && tableEntry.weapon_ids?.includes(weaponId));
+}
+
+export function mw4UnderbarrelAllowed(
+  assetId: string | undefined,
+  weaponId: string,
+  assetsById: Map<string, BuilderRelationAsset>,
+): boolean {
+  const tableEntry = assetId ? assetsById.get(assetId) : undefined;
+  return Boolean(tableEntry?.underbarrel_table && tableEntry.weapon_ids?.includes(weaponId));
 }
 
 /** An attachment asset has one canonical name across every compatible weapon. */

@@ -1,4 +1,8 @@
-import { getAttachmentBadgePosition, getOvalAttachmentBadgePosition, getOvalAttachmentBadgeTransform } from "@/lib/weaponAttachmentBadgePositions";
+import {
+  getAttachmentBadgePosition,
+  getOvalAttachmentBadgePosition,
+  getOvalAttachmentBadgeTransform,
+} from "@/lib/weaponAttachmentBadgePositions";
 import { getAttachmentHighlightRegion } from "@/lib/weaponAttachmentHighlightRegions";
 import { AppTooltip } from "@/components/atoms/Tooltip";
 import { Skeleton } from "@/components/atoms/Skeleton";
@@ -95,7 +99,7 @@ export function WeaponImage({
   const getVariantClasses = () => {
     switch (variant) {
       case "small":
-        return "!w-[250px] max-w-[100rem]";
+        return "!w-[320px] max-w-[100rem]";
       case "large":
         return "w-[100%] max-w-[32rem]";
       default:
@@ -167,9 +171,22 @@ export function WeaponImage({
         >
           {badges.map((badge, index) => {
             const ovalPosition = ovalBadgeLabels
-              ? getOvalAttachmentBadgePosition(weaponId, badge.typeSlug, badge.assetId, index, badges.length)
+              ? getOvalAttachmentBadgePosition(
+                  weaponId,
+                  badge.typeSlug,
+                  badge.assetId,
+                  index,
+                  badges.length,
+                )
               : null;
-            const position = ovalPosition ?? getAttachmentBadgePosition(weaponId, badge.typeSlug, index, badges.length);
+            const position =
+              ovalPosition ??
+              getAttachmentBadgePosition(
+                weaponId,
+                badge.typeSlug,
+                index,
+                badges.length,
+              );
             const isActive = activeBadgeKey === badge.key;
             const isDimmed = activeBadgeKey != null && !isActive;
 
@@ -185,7 +202,9 @@ export function WeaponImage({
                       loading="lazy"
                       decoding="async"
                       className="size-full object-contain p-0.5"
-                      style={badge.isApex ? { filter: APEX_ICON_FILTER } : undefined}
+                      style={
+                        badge.isApex ? { filter: APEX_ICON_FILTER } : undefined
+                      }
                     />
                   ) : (
                     <span className="text-sm font-semibold text-white/70">
@@ -211,7 +230,9 @@ export function WeaponImage({
                     loading="lazy"
                     decoding="async"
                     className="size-full object-contain p-0.5"
-                    style={badge.isApex ? { filter: APEX_ICON_FILTER } : undefined}
+                    style={
+                      badge.isApex ? { filter: APEX_ICON_FILTER } : undefined
+                    }
                   />
                 ) : (
                   <span className="text-sm font-semibold text-white/70 leading-none">
@@ -228,9 +249,13 @@ export function WeaponImage({
                   badge.subtypeLabel ? (
                     <span className="flex flex-col gap-0.5">
                       <span>{badge.label}</span>
-                      <span className="uppercase text-white/60">{badge.subtypeLabel}</span>
+                      <span className="uppercase text-white/60">
+                        {badge.subtypeLabel}
+                      </span>
                     </span>
-                  ) : badge.label
+                  ) : (
+                    badge.label
+                  )
                 }
               >
                 <div

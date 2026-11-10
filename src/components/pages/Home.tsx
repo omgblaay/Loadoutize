@@ -12,7 +12,7 @@ import {
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { AppLayout } from "@/components/templates/AppLayout";
 import type { CardWeapon, CardAttachment, CardTag } from "@/types/loadout";
-import { ChevronRight, Crown, Globe, Plus } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Crown, Globe, Plus } from "lucide-react";
 import { HomeExplorePreview } from "@/components/organisms/HomeExplorePreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/atoms/Skeleton";
@@ -22,6 +22,15 @@ import { SignInRequiredDialog } from "@/components/molecules/SignInRequiredDialo
 import { NavIcon } from "@/components/atoms/NavIcon";
 import { useAuth } from "@/providers/AuthProvider";
 import gameLogo from "figma:asset/mw4_logo.png";
+import extensionIcon from "../../../extension/youtube-loadouts/icon-192.png";
+import chromeIcon from "@/assets/browser-icons/chrome.svg";
+import chromeWebStoreIcon from "@/assets/browser-icons/chrome-web-store.svg";
+import edgeIcon from "@/assets/browser-icons/edge.svg";
+import braveIcon from "@/assets/browser-icons/brave.svg";
+import operaIcon from "@/assets/browser-icons/opera.svg";
+import operaGxIcon from "@/assets/browser-icons/opera-gx.svg";
+import vivaldiIcon from "@/assets/browser-icons/vivaldi.svg";
+import arcIcon from "@/assets/browser-icons/arc.svg";
 import { explorePath, gamePath } from "@/lib/routes";
 import { visibleWeaponCatalog } from "@/lib/weaponCategories";
 import { isVisibleConfig } from "@/lib/contentVisibility";
@@ -31,6 +40,100 @@ interface Game {
   name: string;
   slug: string;
   logoUrl: string | null;
+}
+
+const EXTENSION_BROWSERS = [
+  { name: "Chrome", icon: chromeIcon },
+  { name: "Edge", icon: edgeIcon },
+  { name: "Brave", icon: braveIcon },
+  { name: "Opera", icon: operaIcon },
+  { name: "Opera GX", icon: operaGxIcon },
+  { name: "Vivaldi", icon: vivaldiIcon },
+  { name: "Arc", icon: arcIcon },
+] as const;
+
+function ChromeExtensionPromo({
+  screenshotUrl,
+  extensionUrl,
+}: {
+  screenshotUrl?: string;
+  extensionUrl?: string;
+}) {
+  const details = (
+    <div>
+      <div className="mt-6 border-t border-white/[0.1] pt-4">
+        <ul
+          className="mt-3 flex flex-wrap gap-x-4 items-center gap-y-3 md:grid-cols-3 xl:grid-cols-4"
+          aria-label="Chrome Web Store compatible desktop browsers"
+        >
+          <li>
+            <Button aria-describedby="chrome-store-pending">
+              <img src={chromeWebStoreIcon} alt="" className="size-5" />
+              Get it on Chrome Web Store
+              <ArrowUpRight className="size-4" />
+            </Button>
+          </li>
+          {EXTENSION_BROWSERS.map(({ name, icon }) => (
+            <li
+              key={name}
+              className="flex items-center gap-2 text-sm text-secondary"
+            >
+              <img
+                src={icon}
+                alt=""
+                className="size-5 opacity-50 brightness-0 invert"
+              />
+              <span>{name}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+
+  return (
+    <section
+      aria-labelledby="chrome-extension-title"
+      className={cn(
+        "mt-4 flex-col items-center gap-5 overflow-hidden rounded-2xl border border-white/[0.1] bg-[#151314] p-6 sm:p-8",
+        screenshotUrl
+          ? "lg:grid-cols-2 lg:gap-8"
+          : "sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:gap-8",
+      )}
+    >
+      <div className="flex items-center gap-5">
+        <img
+          src={extensionIcon}
+          alt=""
+          width={56}
+          height={56}
+          className="size-14 shrink-0 mb-4"
+        />
+        <div>
+          <h2
+            id="chrome-extension-title"
+            className="text-xl leading-tight text-white"
+          >
+            Browser extension for YouTube
+          </h2>
+          <p className="text-sm leading-6 text-secondary sm:leading-7">
+            The browser extension shows weapon configs linked to the video
+            you&apos;re watching, right below its title. Open a matching build,
+            or create the first one when none has been shared yet.
+          </p>
+        </div>
+      </div>
+      {details}
+      {screenshotUrl && (
+        <img
+          src={screenshotUrl}
+          alt="Loadoutize extension showing weapon configs below a YouTube video"
+          loading="lazy"
+          className="w-full rounded-xl border border-white/[0.1] object-cover lg:col-start-2 lg:row-span-2 lg:row-start-1"
+        />
+      )}
+    </section>
+  );
 }
 
 function HomeSkeleton() {
@@ -277,35 +380,20 @@ export function Home() {
           onPointerLeave={() => setHoveredAction(null)}
           onFocus={() => setHoveredAction("explore")}
           onBlur={() => setHoveredAction(null)}
-          className="group relative overflow-hidden rounded-2xl border border-white/[0.1]  p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="flex gap-2 relative overflow-hidden rounded-xl border border-white/[0.1] p-4 items-center text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
-          <div
-            aria-hidden="true"
-            className="absolute -right-12 -top-16 size-44 rounded-full opacity-0 blur-3xl transition-opacity duration-300 group-hover:opacity-25"
+          <NavIcon
+            icon="explore"
+            flat={<Globe className="size-6 opacity-30" />}
+            active={false}
+            hovered={hoveredAction === "explore"}
+            size={32}
           />
-          <div className="relative flex h-full flex-col">
-            <div className="flex items-start justify-between gap-4">
-              <span>
-                <NavIcon
-                  icon="explore"
-                  flat={<Globe className="size-10 opacity-30" />}
-                  active={false}
-                  hovered={hoveredAction === "explore"}
-                  size={32}
-                />
-              </span>
-              <ChevronRight className="size-5 text-teritary transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white" />
-            </div>
-            <div className="mt-auto pt-7">
-              <p className="text-lg font-semibold text-white">
-                Explore configs
-              </p>
-              {/* <p className="mt-2 text-sm leading-6 text-teritary">
-                Find community builds, creator setups, and your next favorite
-                weapon.
-              </p> */}
-            </div>
-          </div>
+          <p className="text-base flex-1 font-semibold text-white">
+            Explore configs
+          </p>
+
+          <ChevronRight className="size-5 text-teritary transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white" />
         </button>
 
         <button
@@ -315,30 +403,17 @@ export function Home() {
           onPointerLeave={() => setHoveredAction(null)}
           onFocus={() => setHoveredAction("meta")}
           onBlur={() => setHoveredAction(null)}
-          className="group relative overflow-hidden rounded-2xl border border-white/[0.1] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="flex gap-2 relative overflow-hidden rounded-xl border border-white/[0.1] p-4 items-center text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
-          <div
-            aria-hidden="true"
-            className="absolute -right-12 -top-16 size-44 rounded-full opacity-0 blur-3xl transition-opacity duration-300 group-hover:opacity-25"
+          <NavIcon
+            icon="meta"
+            flat={<Crown className="size-6 opacity-30" />}
+            active={false}
+            hovered={hoveredAction === "meta"}
+            size={32}
           />
-          <div className="relative flex h-full flex-col">
-            <div className="flex items-start justify-between gap-4">
-              <NavIcon
-                icon="meta"
-                flat={<Crown className="size-10 opacity-30" />}
-                active={false}
-                hovered={hoveredAction === "meta"}
-                size={32}
-              />
-              <ChevronRight className="size-5 text-teritary transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white" />
-            </div>
-            <div className="mt-auto pt-7">
-              <p className="text-lg font-semibold text-white">Explore meta</p>
-              {/* <p className="mt-2 text-sm leading-6 text-teritary">
-                  See the weapons and attachments climbing the community rankings.
-                </p> */}
-            </div>
-          </div>
+          <p className="font-semibold text-white">Explore meta</p>
+          <ChevronRight className="size-5 text-teritary transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white" />
         </button>
 
         <button
@@ -352,24 +427,16 @@ export function Home() {
           onPointerLeave={() => setHoveredAction(null)}
           onFocus={() => setHoveredAction("create")}
           onBlur={() => setHoveredAction(null)}
-          className="group relative overflow-hidden rounded-2xl border border-white/[0.1] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          className="flex gap-2 relative overflow-hidden rounded-xl border border-white/[0.1] p-4 items-center text-left transition-all duration-300 hover:-translate-y-1 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
-          <div aria-hidden="true" className="bg-[#151314] absolute inset-0 " />
-          <div className="relative flex h-full flex-col">
-            <div className="flex items-start justify-between gap-4">
-              <Plus className="size-10 transition-transform duration-300 group-hover:rotate-90" />
-              <ChevronRight className="size-5 opacity-55 transition-transform duration-300 group-hover:translate-x-1 group-hover:opacity-100" />
-            </div>
-            <div className="mt-auto pt-7">
-              <p className="text-lg font-semibold">Create new</p>
-              {/* <p className="mt-2 text-sm leading-6 opacity-70">
-                Configure a weapon, add your notes, and share it with the
-                community.
-              </p> */}
-            </div>
-          </div>
+          <Plus className="size-5 transition-transform duration-300 group-hover:rotate-90" />
+          <p className="font-semibold flex-1">Create new</p>
+          <ChevronRight className="size-5 opacity-55 transition-transform duration-300 group-hover:translate-x-1 group-hover:opacity-100" />
         </button>
       </section>
+
+      {/* Add screenshotUrl and extensionUrl when the extension assets are ready. */}
+      <ChromeExtensionPromo />
 
       {loadoutsError ? (
         <section

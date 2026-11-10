@@ -197,7 +197,7 @@ export function HomeExplorePreview({
                           >
                             #{index + 1}
                           </span>
-                          <div className="relative shrink-0 w-20 sm:w-28">
+                          <div className="relative shrink-0 w-24 sm:w-30">
                             <WeaponImage
                               imageUrl={entry.weapon.imageUrl}
                               alt={entry.weapon.name}
@@ -298,7 +298,9 @@ export function HomeExplorePreview({
                   key={key}
                   type="button"
                   onClick={() =>
-                    navigate(`${gamePath(selectedGame, "community")}?social=${key}`)
+                    navigate(
+                      `${gamePath(selectedGame, "community")}?social=${key}`,
+                    )
                   }
                   className="group relative flex min-h-24 items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.035] p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.065]"
                 >

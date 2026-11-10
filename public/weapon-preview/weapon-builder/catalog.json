@@ -57,8 +57,6 @@
         "rex_stock_lgttac_akilo",
         "rex_stock_tac_akilo",
         "rex_stockno_akilo",
-        "rex_ub_gl_akilo",
-        "rex_ub_sh_akilo",
         "rex_xmag_akilo",
         "rex_xmag_akilo_545",
         "rex_apex_menu_akilo_1601",
@@ -69,7 +67,15 @@
         "rex_breach_b",
         "rex_flash_b",
         "rex_sil_lgt_b",
-        "rex_sil_hvy_b"
+        "rex_sil_hvy_b",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_bipod_ngsierra",
+        "rex_ub_gl_akilo",
+        "rex_ub_sh_akilo"
       ],
       "shared_assets": [
         "rex_ammo_762s_ap",
@@ -85,7 +91,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -151,14 +156,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -243,10 +240,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -988,8 +982,6 @@
         "rex_bar_sht_kilo2",
         "rex_barsil_kilo2",
         "rex_drum_kilo2",
-        "rex_grip_vert_broken_kilo2",
-        "rex_grip_vert_short_kilo2_v04",
         "rex_mag_kilo2",
         "rex_mag_kilo2_broken",
         "rex_pgrip_aim_kilo2",
@@ -1008,8 +1000,6 @@
         "rex_stock_kilo2",
         "rex_stock_lgt_kilo2",
         "rex_stock_tac_kilo2",
-        "rex_ub_gl_kilo2",
-        "rex_ub_sh_kilo2",
         "rex_xmag_kilo2",
         "rex_apex_kilo2_skybreaker",
         "rex_comp_vert_a",
@@ -1019,7 +1009,15 @@
         "rex_sil_tac_a",
         "rex_sil_lgt_a__fss_is300",
         "rex_flash_h",
-        "rex_flash_a"
+        "rex_flash_a",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_bipod_ngsierra",
+        "rex_ub_gl_akilo",
+        "rex_ub_sh_akilo"
       ],
       "shared_assets": [
         "rex_ammo_556n_ap",
@@ -1035,7 +1033,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -1101,14 +1098,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -1193,10 +1182,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -1923,8 +1909,6 @@
         "rex_stock_lgt_kilo437",
         "rex_stock_tac_kilo437",
         "rex_stocksaw_kilo437",
-        "rex_ub_gl_kilo437",
-        "rex_ub_sh_kilo437",
         "rex_xmag_kilo437",
         "rex_apex_kilo437",
         "rex_comp_vert_a",
@@ -1934,7 +1918,15 @@
         "rex_sil_tac_a",
         "rex_sil_lgt_a__fss_is300",
         "rex_flash_h",
-        "rex_flash_a"
+        "rex_flash_a",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_bipod_ngsierra",
+        "rex_ub_gl_akilo",
+        "rex_ub_sh_akilo"
       ],
       "shared_assets": [
         "rex_ammo_300blk_ap",
@@ -1950,7 +1942,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -2016,14 +2007,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -2108,10 +2091,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -2734,8 +2714,6 @@
         "rex_bar_lng_mike4",
         "rex_bar_mike4",
         "rex_drum_mike4",
-        "rex_grip_ang_mike4_v04",
-        "rex_grip_mike4_pdw",
         "rex_holo03_mike4_v04",
         "rex_mag_mike4",
         "rex_mag_mike4_pdw",
@@ -2753,9 +2731,6 @@
         "rex_stock_mike4_pdw",
         "rex_stock_tac_mike4",
         "rex_stockno_mike4",
-        "rex_ub_gl_mike4",
-        "rex_ub_gl_mike4_sp",
-        "rex_ub_sh_mike4",
         "rex_xmag_mike4",
         "rex_apex_mike4_pdw",
         "rex_apex_menu_mike4_1602",
@@ -2766,7 +2741,16 @@
         "rex_sil_tac_a",
         "rex_sil_lgt_a__fss_is300",
         "rex_flash_h",
-        "rex_flash_a"
+        "rex_flash_a",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_bipod_ngsierra",
+        "rex_ub_gl_akilo",
+        "rex_ub_sh_akilo",
+        "rex_grip_mike4_pdw"
       ],
       "shared_assets": [
         "rex_ammo_556n_ap",
@@ -2782,7 +2766,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -2848,14 +2831,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -2940,10 +2915,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -3618,8 +3590,6 @@
         "rex_stock_lgt_xar1",
         "rex_stock_tac_xar1",
         "rex_stock_xar1",
-        "rex_ub_gl_xar1",
-        "rex_ub_sh_xar1",
         "rex_xmag_xar1",
         "rex_apex_xar1_hyperburst",
         "rex_apex_xar1_auto",
@@ -3630,7 +3600,13 @@
         "rex_sil_tac_a",
         "rex_sil_lgt_a__fss_is300",
         "rex_flash_h",
-        "rex_flash_a"
+        "rex_flash_a",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_ub_gl_akilo",
+        "rex_ub_sh_akilo"
       ],
       "shared_assets": [
         "rex_ammo_68spc_ap",
@@ -3646,7 +3622,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -3712,14 +3687,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -3804,10 +3771,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -4408,7 +4372,6 @@
         "rex_bar_lng_asierra12",
         "rex_bar_sht_asierra12",
         "rex_barbip_asierra12",
-        "rex_bipod_asierra12",
         "rex_comb_asierra12",
         "rex_comb_erg_asierra12",
         "rex_comb_tac_asierra12",
@@ -4427,8 +4390,6 @@
         "rex_stock_hvy_asierra12",
         "rex_stock_lgt_asierra12",
         "rex_stock_tac_asierra12",
-        "rex_ub_gl_asierra12",
-        "rex_ub_sh_asierra12",
         "rex_xmag_asierra12",
         "rex_apex_asierra12",
         "rex_comp_vert_d",
@@ -4436,7 +4397,15 @@
         "rex_sil_tac_d",
         "rex_sil_tac_e",
         "rex_breach_d",
-        "rex_flash_d"
+        "rex_flash_d",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_bipod_ngsierra",
+        "rex_ub_gl_akilo",
+        "rex_ub_sh_akilo"
       ],
       "shared_assets": [
         "rex_ammo_12x55_ap",
@@ -4452,7 +4421,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -4518,14 +4486,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -4610,10 +4570,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -5171,7 +5128,6 @@
         "rex_bar_lgt_ngsierra",
         "rex_bar_ngsierra",
         "rex_bar_sht_ngsierra",
-        "rex_bipod_ngsierra",
         "rex_brake_ngsierra",
         "rex_comb_erg_ngsierra",
         "rex_comb_hvy_ngsierra",
@@ -5184,9 +5140,6 @@
         "rex_pgrip_tac_ngsierra",
         "rex_rec_ngsierra",
         "rex_rec_ngsierra_apex",
-        "rex_ub_gl_ngsierra",
-        "rex_ub_msl_ngsierra",
-        "rex_ub_sh_ngsierra",
         "rex_xmag_ngsierra",
         "rex_apex_ngsierra",
         "rex_comp_vert_c",
@@ -5195,7 +5148,15 @@
         "rex_sil_hvy_c",
         "rex_breach_c",
         "rex_flash_c",
-        "rex_comp_bal_c__cronen_veil_68_suppressor"
+        "rex_comp_bal_c__cronen_veil_68_suppressor",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_ub_gl_akilo",
+        "rex_ub_sh_akilo",
+        "rex_bipod_ngsierra__sq_st_68_bipod"
       ],
       "shared_assets": [
         "rex_ammo_277f_ap",
@@ -5211,7 +5172,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -5277,14 +5237,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -5369,10 +5321,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -5934,7 +5883,6 @@
         "rex_bar_sht_uxray",
         "rex_bar_uxray",
         "rex_bar_uxray_apex",
-        "rex_bipod_uxray",
         "rex_drum_uxray",
         "rex_mag_uxray",
         "rex_minireddot04_uxray_lt",
@@ -5959,7 +5907,13 @@
         "rex_sil_tac_c",
         "rex_sil_hvy_c",
         "rex_breach_c",
-        "rex_flash_c"
+        "rex_flash_c",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_bipod_ngsierra"
       ],
       "shared_assets": [
         "rex_ammo_762n_ap",
@@ -5975,7 +5929,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -6041,14 +5994,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -6133,10 +6078,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -6757,7 +6699,6 @@
         "rex_bar_sht_findia",
         "rex_barbip_findia",
         "rex_barsil_findia",
-        "rex_bipod_findia",
         "rex_bolt_findia",
         "rex_bolt_hvy_findia",
         "rex_bolt_lgt_findia",
@@ -6786,7 +6727,13 @@
         "rex_sil_tac_c",
         "rex_sil_hvy_c",
         "rex_breach_c",
-        "rex_flash_c"
+        "rex_flash_c",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_bipod_ngsierra"
       ],
       "shared_assets": [
         "rex_ammo_8blk_ap",
@@ -6800,7 +6747,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -6866,14 +6812,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -6958,10 +6896,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -7634,7 +7569,6 @@
         "rex_bar_hvy_golf28",
         "rex_bar_sht_golf28",
         "rex_barsil_golf28",
-        "rex_bipod_golf28",
         "rex_fourx01_golf28_ambush",
         "rex_mag_golf28",
         "rex_pgrip_golf28",
@@ -7660,7 +7594,13 @@
         "rex_sil_tac_c",
         "rex_sil_hvy_c",
         "rex_breach_c",
-        "rex_flash_c"
+        "rex_flash_c",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_bipod_golf28"
       ],
       "shared_assets": [
         "rex_ammo_762n_ap",
@@ -7676,7 +7616,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -7742,14 +7681,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -7834,10 +7765,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -8419,7 +8347,6 @@
         "rex_bar_moscar",
         "rex_bar_sht_moscar",
         "rex_barbull_moscar",
-        "rex_bayonet_moscar",
         "rex_bolt_hvy_moscar",
         "rex_bolt_lgt_moscar",
         "rex_bolt_moscar",
@@ -8449,7 +8376,13 @@
         "rex_breach_b",
         "rex_flash_b",
         "rex_sil_hvy_i",
-        "rex_sil_tac_b"
+        "rex_sil_tac_b",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_bipod_ngsierra"
       ],
       "shared_assets": [
         "rex_ammo_762r_ap",
@@ -8465,7 +8398,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -8531,14 +8463,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -8623,10 +8547,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -10244,7 +10165,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -10310,14 +10230,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -10402,10 +10314,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -10660,9 +10569,6 @@
         "rex_bar_lng_recho",
         "rex_bar_recho",
         "rex_bar_sht_recho",
-        "rex_bipod_barhvy_recho",
-        "rex_bipod_recho",
-        "rex_bipod_recho_apex",
         "rex_mag_recho",
         "rex_pgrip_ass_recho",
         "rex_pgrip_recho",
@@ -10676,7 +10582,6 @@
         "rex_stock_recho",
         "rex_stock_tac_recho",
         "rex_stockno_recho",
-        "rex_ub_msl_recho",
         "rex_xsmag_recho",
         "rex_apex_menu_recho_1050",
         "rex_comp_vert_d",
@@ -10686,7 +10591,10 @@
         "rex_breach_d",
         "rex_flash_d",
         "rex_comp_hoz_d",
-        "rex_sil_hvy_a"
+        "rex_sil_hvy_a",
+        "rex_gripside_ang",
+        "rex_gripside_vert",
+        "rex_bipod_recho"
       ],
       "shared_assets": [
         "rex_ammo_338nm_ap",
@@ -10702,7 +10610,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -10768,14 +10675,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -10860,10 +10759,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -11480,7 +11376,10 @@
         "rex_comp_bal_a",
         "rex_sil_tac_a",
         "rex_sil_lgt_a__fss_is300",
-        "rex_flash_h"
+        "rex_flash_h",
+        "rex_bipod_ngsierra",
+        "rex_gripside_ang",
+        "rex_gripside_vert"
       ],
       "shared_assets": [
         "rex_ammo_556n_ap",
@@ -11496,7 +11395,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -11562,14 +11460,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -11654,10 +11544,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -12252,8 +12139,6 @@
         "rex_bar_lng_tango73",
         "rex_bar_sht_tango73",
         "rex_bar_tango73",
-        "rex_bipod_tango73",
-        "rex_gripside_vert_tango73",
         "rex_holo03_tango73_bale",
         "rex_mag_tango73",
         "rex_mag_tango73_topload",
@@ -12279,7 +12164,9 @@
         "rex_breach_b",
         "rex_flash_b",
         "rex_sil_lgt_b",
-        "rex_sil_hvy_b"
+        "rex_sil_hvy_b",
+        "rex_gripside_ang",
+        "rex_gripside_vert_tango73"
       ],
       "shared_assets": [
         "rex_ammo_762r_ap",
@@ -12295,7 +12182,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -12361,14 +12247,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -12453,10 +12331,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -13178,7 +13053,9 @@
         "rex_trig_lgt_decho",
         "rex_trigger_decho",
         "rex_xmag_decho",
-        "rex_apex_menu_decho_1546"
+        "rex_apex_menu_decho_1546",
+        "rex_grip_vert",
+        "rex_grip_vert_short"
       ],
       "shared_assets": [
         "rex_ammo_50p_ap",
@@ -13194,7 +13071,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -13260,14 +13136,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -13352,10 +13220,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -14007,7 +13872,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -14073,14 +13937,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -14165,10 +14021,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -14749,7 +14602,6 @@
         "rex_trig_hvy_kilo5",
         "rex_trig_kilo5",
         "rex_trig_lgt_kilo5",
-        "rex_ub_sh_kilo5",
         "rex_xmag_kilo5",
         "rex_xmaglrg_kilo5",
         "rex_apex_menu_kilo5_1464",
@@ -14771,7 +14623,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -14837,14 +14688,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -14929,10 +14772,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -15554,7 +15394,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -15620,14 +15459,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -15712,10 +15543,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -16471,7 +16299,11 @@
         "rex_sil_tac_g",
         "rex_sil_hvy_g",
         "rex_breach_g",
-        "rex_flash_g"
+        "rex_flash_g",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short"
       ],
       "shared_assets": [
         "rex_arscope01",
@@ -16482,7 +16314,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -16548,14 +16379,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -16640,10 +16463,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -17277,7 +17097,11 @@
         "rex_stock_ass_xsh1",
         "rex_stock_tac_xsh1",
         "rex_stock_xsh1",
-        "rex_apex_menu_xsh1_888"
+        "rex_apex_menu_xsh1_888",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short"
       ],
       "shared_assets": [
         "rex_arscope01",
@@ -17288,7 +17112,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -17354,14 +17177,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -17446,10 +17261,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -17980,7 +17792,6 @@
         "rex_bar_lng_mpapa7",
         "rex_bar_mpapa7",
         "rex_drum_mpapa7",
-        "rex_grip_fld_mpapa7",
         "rex_mag_mpapa7",
         "rex_pgrip_aim_mpapa7",
         "rex_pgrip_ass_mpapa7",
@@ -18003,7 +17814,11 @@
         "rex_sil_tac_h",
         "rex_sil_hvy_h",
         "rex_breach_h",
-        "rex_flash_h__ta_lightning_r3m"
+        "rex_flash_h__ta_lightning_r3m",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert_short",
+        "rex_grip_fld_mpapa7"
       ],
       "shared_assets": [
         "rex_ammo_4x30_ap",
@@ -18019,7 +17834,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -18085,14 +17899,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -18177,10 +17983,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -18790,7 +18593,11 @@
         "rex_sil_lgt_moscar",
         "rex_sil_hvy_i",
         "rex_breach_i",
-        "rex_flash_i"
+        "rex_flash_i",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short"
       ],
       "shared_assets": [
         "rex_ammo_9p_ap",
@@ -18805,7 +18612,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -18871,14 +18677,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -18963,10 +18761,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -19573,7 +19368,6 @@
         "rex_stock_psierra41",
         "rex_stock_tac_psierra41",
         "rex_stockno_psierra41",
-        "rex_ub_gl_psierra41",
         "rex_xsmag_psierra41",
         "rex_xsmag_psierra41_broken",
         "rex_apex_psierra41",
@@ -19584,7 +19378,11 @@
         "rex_sil_lgt_moscar",
         "rex_sil_hvy_i",
         "rex_breach_i",
-        "rex_flash_i"
+        "rex_flash_i",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short"
       ],
       "shared_assets": [
         "rex_ammo_762t_ap",
@@ -19600,7 +19398,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -19666,14 +19463,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -19758,10 +19547,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -20331,7 +20117,6 @@
         "rex_bar_sht_spier9",
         "rex_bar_spier9",
         "rex_drum_spier9",
-        "rex_grip_ang_short_spier9_jintae",
         "rex_holo_spier9",
         "rex_mag_spier9",
         "rex_pgrip_aim_spier9",
@@ -20355,7 +20140,11 @@
         "rex_sil_tac_h",
         "rex_sil_hvy_h",
         "rex_breach_h",
-        "rex_flash_h__ta_lightning_r3m"
+        "rex_flash_h__ta_lightning_r3m",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short"
       ],
       "shared_assets": [
         "rex_ammo_9m_ap",
@@ -20370,7 +20159,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -20436,14 +20224,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -20528,10 +20308,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -21141,7 +20918,11 @@
         "rex_stock_xsm1",
         "rex_stockno_xsm1",
         "rex_xmag_xsm1",
-        "rex_apex_xsm1"
+        "rex_apex_xsm1",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short"
       ],
       "shared_assets": [
         "rex_ammo_5x21_ap",
@@ -21156,7 +20937,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -21222,14 +21002,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -21314,10 +21086,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -21912,7 +21681,6 @@
         "rex_bar_limax",
         "rex_bar_lng_limax",
         "rex_bar_sht_limax",
-        "rex_bipod_limax",
         "rex_mag_limax",
         "rex_mag_limax_lrgstock_sp",
         "rex_pgrip_aim_limax",
@@ -21936,7 +21704,13 @@
         "rex_sil_tac_f",
         "rex_breach_f",
         "rex_flash_f",
-        "rex_sil_hvy_f"
+        "rex_sil_hvy_f",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_bipod_limax"
       ],
       "shared_assets": [
         "rex_ammo_50b_ap",
@@ -21950,7 +21724,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -22016,14 +21789,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -22108,10 +21873,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -22712,7 +22474,6 @@
         "rex_bar_lng_sierra100",
         "rex_bar_sht_sierra100",
         "rex_bar_sierra100",
-        "rex_bipod_sierra100",
         "rex_mag_sierra100",
         "rex_pgrip_ass_sierra100",
         "rex_pgrip_sierra100",
@@ -22750,7 +22511,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -22816,14 +22576,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -22908,10 +22660,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -23497,7 +23246,6 @@
         "rex_bar_svictor98",
         "rex_bar_svictor98_apex",
         "rex_barbull_svictor98",
-        "rex_bipod_svictor98",
         "rex_bolt_hvy_svictor98",
         "rex_bolt_lgt_svictor98",
         "rex_bolt_svictor98",
@@ -23527,7 +23275,8 @@
         "rex_sil_lgt_b",
         "rex_sil_hvy_b",
         "rex_sil_tac_b",
-        "rex_breach_b__ta_solage_f7"
+        "rex_breach_b__ta_solage_f7",
+        "rex_bipod_svictor98"
       ],
       "shared_assets": [
         "rex_ammo_762r_ap",
@@ -23543,7 +23292,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -23609,14 +23357,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -23701,10 +23441,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -24327,8 +24064,6 @@
       "base_width": 512,
       "base_height": 256,
       "assets": [
-        "rex_ub_gl_cromeo",
-        "rex_ub_sh_cromeo",
         "rex_bar_cromeo",
         "rex_bar_lgt_cromeo",
         "rex_bar_lng_cromeo",
@@ -24361,7 +24096,15 @@
         "rex_sil_tac_a",
         "rex_sil_lgt_a__fss_is300",
         "rex_flash_h",
-        "rex_flash_a"
+        "rex_flash_a",
+        "rex_grip_ang",
+        "rex_grip_ang_short",
+        "rex_grip_vert",
+        "rex_grip_vert_short",
+        "rex_grip_bipod01",
+        "rex_bipod_ngsierra",
+        "rex_ub_gl_akilo",
+        "rex_ub_sh_akilo"
       ],
       "shared_assets": [
         "rex_arscope01",
@@ -24372,7 +24115,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -24438,14 +24180,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -24531,9 +24265,6 @@
         "rex_snscope_therm01",
         "rex_snscope_vz01",
         "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std",
         "rex_ammo_556n_ap",
         "rex_ammo_556n_fr",
         "rex_ammo_556n_hp",
@@ -25197,10 +24928,6 @@
         "rex_comp_hoz_fmgolf",
         "rex_comp_vert_fmgolf",
         "rex_flash_fmgolf",
-        "rex_grip_ass_fmgolf",
-        "rex_grip_erg_fmgolf",
-        "rex_grip_fmgolf",
-        "rex_grip_tac_fmgolf",
         "rex_guard_fmgolf",
         "rex_guard_hvy_fmgolf",
         "rex_guard_lgt_fmgolf",
@@ -25220,7 +24947,10 @@
         "rex_stock_ske_fmgolf",
         "rex_stock_tac_fmgolf",
         "rex_xmag_fmgolf",
-        "rex_apex_fmgolf"
+        "rex_apex_fmgolf",
+        "rex_grip_tac_fmgolf",
+        "rex_grip_fmgolf",
+        "rex_grip_erg_fmgolf"
       ],
       "shared_assets": [
         "rex_arscope01",
@@ -25231,7 +24961,6 @@
         "rex_arscope_therm01",
         "rex_arscope_vz01",
         "rex_arscope_vz01_zoom2",
-        "rex_bipod01",
         "rex_breach_b",
         "rex_breach_c",
         "rex_breach_d",
@@ -25297,14 +25026,6 @@
         "rex_fourx_therm01",
         "rex_fourx_therm01_sp",
         "rex_fourx_therm02",
-        "rex_grip_ang",
-        "rex_grip_ang_short",
-        "rex_grip_bipod01",
-        "rex_grip_vert",
-        "rex_grip_vert_broken",
-        "rex_grip_vert_short",
-        "rex_gripside_ang",
-        "rex_gripside_vert",
         "rex_holo01",
         "rex_holo02",
         "rex_holo02_jugg",
@@ -25389,10 +25110,7 @@
         "rex_snscope_rf01",
         "rex_snscope_therm01",
         "rex_snscope_vz01",
-        "rex_snscope_vz01_zoom2",
-        "rex_ub_gl_std",
-        "rex_ub_gl_std_sp",
-        "rex_ub_sh_std"
+        "rex_snscope_vz01_zoom2"
       ],
       "profile": {
         "placements": {
@@ -32860,336 +32578,6 @@
       "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
     },
     {
-      "id": "rex_bayonet_moscar",
-      "title": "bayonet moscar",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bayonet_moscar-65c7a613dbcac9bc.png",
-      "bbox": [
-        11,
-        110,
-        242,
-        140
-      ],
-      "source_image_hash": "65c7a613dbcac9bc",
-      "families": [
-        "moscar"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bayonet moscar",
-      "display_name": "BAYONET MOSCAR",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_bipod01",
-      "title": "BIPOD",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod01-0d9be6cf9047b7ca.png",
-      "bbox": [
-        101,
-        12,
-        155,
-        243
-      ],
-      "source_image_hash": "0d9be6cf9047b7ca",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "bipod01",
-      "display_name": "BIPOD",
-      "name_status": "confirmed",
-      "name_evidence": "user_screenshot_icon_match",
-      "subtype_label": "BIPOD"
-    },
-    {
-      "id": "rex_bipod_asierra12",
-      "title": "AA54 V.3 Bipod",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_asierra12-7ea36014b928ea32.png",
-      "bbox": [
-        113,
-        13,
-        143,
-        243
-      ],
-      "source_image_hash": "7ea36014b928ea32",
-      "families": [
-        "asierra12"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod asierra12",
-      "subtype_label": "BIPOD",
-      "subtype_evidence": "public_table",
-      "display_name": "AA54 V.3 BIPOD",
-      "name_status": "confirmed",
-      "name_evidence": "public_table_unique_weapon_slot_subtype",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
-    },
-    {
-      "id": "rex_bipod_barhvy_recho",
-      "title": "APOC Bipod",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_barhvy_recho-750b3badd1361902.png",
-      "bbox": [
-        49,
-        15,
-        202,
-        236
-      ],
-      "source_image_hash": "750b3badd1361902",
-      "families": [
-        "recho"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod barhvy recho",
-      "subtype_label": "BIPOD",
-      "subtype_evidence": "public_table",
-      "display_name": "APOC BIPOD",
-      "name_status": "confirmed",
-      "name_evidence": "public_table_unique_weapon_slot_subtype",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
-    },
-    {
-      "id": "rex_bipod_findia",
-      "title": "AA54 V.3 Bipod",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_findia-33d9f2a489fe0ed0.png",
-      "bbox": [
-        58,
-        13,
-        198,
-        243
-      ],
-      "source_image_hash": "33d9f2a489fe0ed0",
-      "families": [
-        "findia"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod findia",
-      "subtype_label": "BIPOD",
-      "subtype_evidence": "public_table",
-      "display_name": "AA54 V.3 BIPOD",
-      "name_status": "confirmed",
-      "name_evidence": "public_table_unique_weapon_slot_subtype",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
-    },
-    {
-      "id": "rex_bipod_golf28",
-      "title": "bipod golf28",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_golf28-4c1354c08f81ebad.png",
-      "bbox": [
-        78,
-        13,
-        178,
-        243
-      ],
-      "source_image_hash": "4c1354c08f81ebad",
-      "families": [
-        "golf28"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod golf28",
-      "display_name": "BRUEN BR 21 BIPOD",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "BIPOD"
-    },
-    {
-      "id": "rex_bipod_limax",
-      "title": "BIPOD",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_limax-0753c082d8683e92.png",
-      "bbox": [
-        111,
-        13,
-        145,
-        243
-      ],
-      "source_image_hash": "0753c082d8683e92",
-      "families": [
-        "limax"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod limax",
-      "display_name": "BIPOD",
-      "name_status": "confirmed",
-      "name_evidence": "user_screenshot_icon_match",
-      "subtype_label": "BIPOD"
-    },
-    {
-      "id": "rex_bipod_ngsierra",
-      "title": "SQ-ST-68 Bipod",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_ngsierra-5c1870ffe0025edb.png",
-      "bbox": [
-        105,
-        13,
-        151,
-        243
-      ],
-      "source_image_hash": "5c1870ffe0025edb",
-      "families": [
-        "ngsierra"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod ngsierra",
-      "subtype_label": "BIPOD",
-      "subtype_evidence": "public_table",
-      "display_name": "SQ-ST-68 BIPOD",
-      "name_status": "confirmed",
-      "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
-    },
-    {
-      "id": "rex_bipod_recho",
-      "title": "APOC Bipod",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_recho-19dff6ea7570e4b4.png",
-      "bbox": [
-        87,
-        13,
-        168,
-        243
-      ],
-      "source_image_hash": "19dff6ea7570e4b4",
-      "families": [
-        "recho"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod recho",
-      "subtype_label": "BIPOD",
-      "subtype_evidence": "public_table",
-      "display_name": "APOC BIPOD",
-      "name_status": "confirmed",
-      "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
-    },
-    {
-      "id": "rex_bipod_recho_apex",
-      "title": "APOC Bipod",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_recho-19dff6ea7570e4b4.png",
-      "bbox": [
-        87,
-        13,
-        168,
-        243
-      ],
-      "source_image_hash": "19dff6ea7570e4b4",
-      "families": [
-        "recho"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod recho apex",
-      "subtype_label": "BIPOD",
-      "subtype_evidence": "public_table",
-      "display_name": "APOC BIPOD",
-      "name_status": "confirmed",
-      "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
-    },
-    {
-      "id": "rex_bipod_sierra100",
-      "title": "BIPOD",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_sierra100-124c133eb12aa278.png",
-      "bbox": [
-        0,
-        0,
-        128,
-        128
-      ],
-      "source_image_hash": "124c133eb12aa278",
-      "families": [
-        "sierra100"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod sierra100",
-      "display_name": "BIPOD",
-      "name_status": "confirmed",
-      "name_evidence": "user_screenshot_icon_match",
-      "subtype_label": "BIPOD"
-    },
-    {
-      "id": "rex_bipod_svictor98",
-      "title": "BIPOD",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_svictor98-7e649bef5984d27e.png",
-      "bbox": [
-        113,
-        12,
-        143,
-        243
-      ],
-      "source_image_hash": "7e649bef5984d27e",
-      "families": [
-        "svictor98"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod svictor98",
-      "display_name": "BIPOD",
-      "name_status": "confirmed",
-      "name_evidence": "user_screenshot_icon_match",
-      "subtype_label": "BIPOD"
-    },
-    {
-      "id": "rex_bipod_tango73",
-      "title": "bipod tango73",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_tango73-2bbc98abb63bcf00.png",
-      "bbox": [
-        115,
-        13,
-        141,
-        243
-      ],
-      "source_image_hash": "2bbc98abb63bcf00",
-      "families": [
-        "tango73"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod tango73",
-      "display_name": "BIPOD TANGO73",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_bipod_uxray",
-      "title": "AA54 V.3 Bipod",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_bipod_uxray-77b636e952df70fd.png",
-      "bbox": [
-        97,
-        13,
-        159,
-        243
-      ],
-      "source_image_hash": "77b636e952df70fd",
-      "families": [
-        "uxray"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "bipod uxray",
-      "subtype_label": "BIPOD",
-      "subtype_evidence": "public_table",
-      "display_name": "AA54 V.3 BIPOD",
-      "name_status": "public_reference",
-      "name_evidence": "public_table_unique_weapon_slot_subtype_format_unverified",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
-    },
-    {
       "id": "rex_bolt_bmike3",
       "source_title": "bolt bmike3",
       "title": "default_bolt",
@@ -37142,329 +36530,6 @@
       "name_evidence": "identical_shared_optic_or_laser_texture_alias",
       "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
       "subtype_label": "4X SCOPE"
-    },
-    {
-      "id": "rex_grip_ang",
-      "title": "FSS FIRELINE GRIP",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_ang-1bcb0c7508d88dd6.png",
-      "bbox": [
-        13,
-        69,
-        243,
-        183
-      ],
-      "source_image_hash": "1bcb0c7508d88dd6",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "grip ang",
-      "display_name": "FSS FIRELINE GRIP",
-      "name_status": "confirmed",
-      "name_evidence": "user_screenshot_icon_match",
-      "subtype_label": "ANGLED GRIP"
-    },
-    {
-      "id": "rex_grip_ang_mike4_v04",
-      "title": "grip ang mike4 v04",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_ang-1bcb0c7508d88dd6.png",
-      "bbox": [
-        13,
-        69,
-        243,
-        183
-      ],
-      "source_image_hash": "1bcb0c7508d88dd6",
-      "families": [
-        "mike4"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "m4_size": 53,
-      "m4_size_axis": "width",
-      "internal_title": "grip ang mike4 v04",
-      "display_name": "FSS FIRELINE GRIP",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "ANGLED GRIP"
-    },
-    {
-      "id": "rex_grip_ang_short",
-      "title": "FSS TAC90 GRIP",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_ang_short-20611655ab82e385.png",
-      "bbox": [
-        12,
-        27,
-        243,
-        226
-      ],
-      "source_image_hash": "20611655ab82e385",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "grip ang short",
-      "display_name": "FSS TAC90 GRIP",
-      "name_status": "confirmed",
-      "name_evidence": "user_screenshot_icon_match",
-      "subtype_label": "ANGLED SHORT GRIP"
-    },
-    {
-      "id": "rex_grip_ang_short_spier9_jintae",
-      "title": "grip ang short spier9 jintae",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_ang_short-20611655ab82e385.png",
-      "bbox": [
-        12,
-        27,
-        243,
-        226
-      ],
-      "source_image_hash": "20611655ab82e385",
-      "families": [
-        "spier9"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "grip ang short spier9 jintae",
-      "display_name": "FSS TAC90 GRIP",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "ANGLED SHORT GRIP"
-    },
-    {
-      "id": "rex_grip_bipod01",
-      "title": "FSS BEARGRIP",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_bipod01-595153acad398204.png",
-      "bbox": [
-        95,
-        13,
-        161,
-        243
-      ],
-      "source_image_hash": "595153acad398204",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "grip bipod01",
-      "display_name": "FSS BEARGRIP",
-      "name_status": "confirmed",
-      "name_evidence": "user_screenshot_icon_match",
-      "subtype_label": "BIPOD GRIP"
-    },
-    {
-      "id": "rex_grip_fld_mpapa7",
-      "title": "grip fld mpapa7",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_fld_mpapa7-064e9d7cc91d40d6.png",
-      "bbox": [
-        94,
-        13,
-        162,
-        243
-      ],
-      "source_image_hash": "064e9d7cc91d40d6",
-      "families": [
-        "mpapa7"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "grip fld mpapa7",
-      "display_name": "V46 VERT-TAC",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "VERTICAL GRIP"
-    },
-    {
-      "id": "rex_grip_mike4_pdw",
-      "title": "Hurricane Grip",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_mike4_pdw-023e3b9696e7e31f.png",
-      "bbox": [
-        13,
-        75,
-        243,
-        178
-      ],
-      "source_image_hash": "023e3b9696e7e31f",
-      "families": [
-        "mike4"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "m4_size": 50,
-      "m4_size_axis": "width",
-      "internal_title": "grip mike4 pdw",
-      "display_name": "HURRICANE GRIP",
-      "name_status": "confirmed",
-      "name_evidence": "public_table_unique_M4_PDW_component",
-      "name_source_url": "https://codmunity.gg/weapon-stats/mw4"
-    },
-    {
-      "id": "rex_grip_vert",
-      "title": "MIRE-50 TAC GRIP",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_vert-555f3eeac9c4d8ba.png",
-      "bbox": [
-        81,
-        13,
-        175,
-        242
-      ],
-      "source_image_hash": "555f3eeac9c4d8ba",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "grip vert",
-      "display_name": "MIRE-50 TAC GRIP",
-      "name_status": "confirmed",
-      "name_evidence": "user_screenshot_icon_match",
-      "subtype_label": "VERTICAL GRIP"
-    },
-    {
-      "id": "rex_grip_vert_broken",
-      "title": "grip vert broken",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_vert_broken-1e5b6293fcb5a36d.png",
-      "bbox": [
-        69,
-        12,
-        187,
-        243
-      ],
-      "source_image_hash": "1e5b6293fcb5a36d",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "grip vert broken",
-      "display_name": "GRIP VERT BROKEN",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_grip_vert_broken_kilo2",
-      "title": "grip vert broken kilo2",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_vert_broken-1e5b6293fcb5a36d.png",
-      "bbox": [
-        69,
-        12,
-        187,
-        243
-      ],
-      "source_image_hash": "1e5b6293fcb5a36d",
-      "families": [
-        "kilo2"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "grip vert broken kilo2",
-      "display_name": "GRIP VERT BROKEN KILO2",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_grip_vert_short",
-      "title": "GW DOMI-9",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_vert_short-2066c6a74a7dca29.png",
-      "bbox": [
-        61,
-        12,
-        195,
-        243
-      ],
-      "source_image_hash": "2066c6a74a7dca29",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "grip vert short",
-      "display_name": "GW DOMI-9",
-      "name_status": "confirmed",
-      "name_evidence": "user_screenshot_icon_match",
-      "subtype_label": "VERTICAL SHORT GRIP"
-    },
-    {
-      "id": "rex_grip_vert_short_kilo2_v04",
-      "title": "grip vert short kilo2 v04",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_vert_short-2066c6a74a7dca29.png",
-      "bbox": [
-        61,
-        12,
-        195,
-        243
-      ],
-      "source_image_hash": "2066c6a74a7dca29",
-      "families": [
-        "kilo2"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "grip vert short kilo2 v04",
-      "display_name": "GW DOMI-9",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "VERTICAL SHORT GRIP"
-    },
-    {
-      "id": "rex_gripside_ang",
-      "title": "gripside ang",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_gripside_ang-2adb9b950d1aa737.png",
-      "bbox": [
-        13,
-        15,
-        244,
-        241
-      ],
-      "source_image_hash": "2adb9b950d1aa737",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "gripside ang",
-      "display_name": "GRIPSIDE ANG",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_gripside_vert",
-      "title": "gripside vert",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_gripside_vert-52b266b3e50f4d43.png",
-      "bbox": [
-        50,
-        14,
-        206,
-        242
-      ],
-      "source_image_hash": "52b266b3e50f4d43",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "gripside vert",
-      "display_name": "GRIPSIDE VERT",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_gripside_vert_tango73",
-      "title": "gripside vert tango73",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_gripside_vert_tango73-3c283433fc6c3df2.png",
-      "bbox": [
-        79,
-        12,
-        177,
-        243
-      ],
-      "source_image_hash": "3c283433fc6c3df2",
-      "families": [
-        "tango73"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "gripside vert tango73",
-      "display_name": "GRIPSIDE VERT TANGO73",
-      "name_status": "unresolved"
     },
     {
       "id": "rex_guard_bmike3",
@@ -49868,550 +48933,6 @@
       "name_status": "unresolved"
     },
     {
-      "id": "rex_ub_gl_akilo",
-      "title": "ub gl akilo",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
-      "bbox": [
-        12,
-        96,
-        242,
-        157
-      ],
-      "source_image_hash": "6c4cf070fd31cf4a",
-      "families": [
-        "akilo"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub gl akilo",
-      "display_name": "MIRI 40MM",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL LAUNCHER"
-    },
-    {
-      "id": "rex_ub_gl_asierra12",
-      "title": "ub gl asierra12",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
-      "bbox": [
-        12,
-        96,
-        242,
-        157
-      ],
-      "source_image_hash": "6c4cf070fd31cf4a",
-      "families": [
-        "asierra12"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub gl asierra12",
-      "display_name": "MIRI 40MM",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL LAUNCHER"
-    },
-    {
-      "id": "rex_ub_gl_kilo2",
-      "title": "ub gl kilo2",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
-      "bbox": [
-        12,
-        96,
-        242,
-        157
-      ],
-      "source_image_hash": "6c4cf070fd31cf4a",
-      "families": [
-        "kilo2"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub gl kilo2",
-      "display_name": "MIRI 40MM",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL LAUNCHER"
-    },
-    {
-      "id": "rex_ub_gl_kilo437",
-      "title": "ub gl kilo437",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
-      "bbox": [
-        12,
-        96,
-        242,
-        157
-      ],
-      "source_image_hash": "6c4cf070fd31cf4a",
-      "families": [
-        "kilo437"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub gl kilo437",
-      "display_name": "MIRI 40MM",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL LAUNCHER"
-    },
-    {
-      "id": "rex_ub_gl_mike4",
-      "title": "ub gl mike4",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
-      "bbox": [
-        12,
-        96,
-        242,
-        157
-      ],
-      "source_image_hash": "6c4cf070fd31cf4a",
-      "families": [
-        "mike4"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "m4_size": 139,
-      "m4_size_axis": "width",
-      "internal_title": "ub gl mike4",
-      "display_name": "MIRI 40MM",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL LAUNCHER"
-    },
-    {
-      "id": "rex_ub_gl_mike4_sp",
-      "title": "ub gl mike4 sp",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
-      "bbox": [
-        12,
-        96,
-        242,
-        157
-      ],
-      "source_image_hash": "6c4cf070fd31cf4a",
-      "families": [
-        "mike4"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub gl mike4 sp",
-      "display_name": "MIRI 40MM",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL LAUNCHER"
-    },
-    {
-      "id": "rex_ub_gl_ngsierra",
-      "title": "ub gl ngsierra",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
-      "bbox": [
-        12,
-        96,
-        242,
-        157
-      ],
-      "source_image_hash": "6c4cf070fd31cf4a",
-      "families": [
-        "ngsierra"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub gl ngsierra",
-      "display_name": "MIRI 40MM",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL LAUNCHER"
-    },
-    {
-      "id": "rex_ub_gl_std",
-      "title": "ub gl std",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
-      "bbox": [
-        12,
-        96,
-        242,
-        157
-      ],
-      "source_image_hash": "6c4cf070fd31cf4a",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "ub gl std",
-      "display_name": "MIRI 40MM",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL LAUNCHER"
-    },
-    {
-      "id": "rex_ub_gl_std_sp",
-      "title": "ub gl std sp",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
-      "bbox": [
-        12,
-        96,
-        242,
-        157
-      ],
-      "source_image_hash": "6c4cf070fd31cf4a",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "ub gl std sp",
-      "display_name": "MIRI 40MM",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL LAUNCHER"
-    },
-    {
-      "id": "rex_ub_gl_xar1",
-      "title": "ub gl xar1",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
-      "bbox": [
-        12,
-        96,
-        242,
-        157
-      ],
-      "source_image_hash": "6c4cf070fd31cf4a",
-      "families": [
-        "xar1"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub gl xar1",
-      "display_name": "MIRI 40MM",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL LAUNCHER"
-    },
-    {
-      "id": "rex_ub_gl_cromeo",
-      "title": "ub gl cromeo",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
-      "bbox": [
-        12,
-        96,
-        242,
-        157
-      ],
-      "source_image_hash": "6c4cf070fd31cf4a",
-      "families": [
-        "cromeo"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub gl cromeo",
-      "display_name": "MIRI 40MM",
-      "name_status": "canonicalized",
-      "name_evidence": "identical_source_image:rex_ub_gl_mike4",
-      "subtype_label": "UNDERBARREL LAUNCHER"
-    },
-    {
-      "id": "rex_ub_gl_psierra41",
-      "title": "ub gl psierra41",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_gl_psierra41-67ec2f5fa17dfff7.png",
-      "bbox": [
-        13,
-        91,
-        243,
-        161
-      ],
-      "source_image_hash": "67ec2f5fa17dfff7",
-      "families": [
-        "psierra41"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub gl psierra41",
-      "display_name": "UB GL PSIERRA41",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_ub_msl_ngsierra",
-      "title": "ub msl ngsierra",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_msl_ngsierra-4bf337d841c645f0.png",
-      "bbox": [
-        13,
-        82,
-        243,
-        171
-      ],
-      "source_image_hash": "4bf337d841c645f0",
-      "families": [
-        "ngsierra"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub msl ngsierra",
-      "display_name": "UB MSL NGSIERRA",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_ub_msl_recho",
-      "title": "ub msl recho",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_msl_recho-2b43ee2b911f352f.png",
-      "bbox": [
-        12,
-        68,
-        243,
-        185
-      ],
-      "source_image_hash": "2b43ee2b911f352f",
-      "families": [
-        "recho"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub msl recho",
-      "display_name": "UB MSL RECHO",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_ub_sh_akilo",
-      "title": "ub sh akilo",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_sh_akilo-0518bff2bb730372.png",
-      "bbox": [
-        13,
-        93,
-        243,
-        160
-      ],
-      "source_image_hash": "0518bff2bb730372",
-      "families": [
-        "akilo"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub sh akilo",
-      "display_name": "TV JUDICATOR",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL SHOTGUN"
-    },
-    {
-      "id": "rex_ub_sh_asierra12",
-      "title": "ub sh asierra12",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_sh_akilo-0518bff2bb730372.png",
-      "bbox": [
-        13,
-        93,
-        243,
-        160
-      ],
-      "source_image_hash": "0518bff2bb730372",
-      "families": [
-        "asierra12"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub sh asierra12",
-      "display_name": "TV JUDICATOR",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL SHOTGUN"
-    },
-    {
-      "id": "rex_ub_sh_kilo2",
-      "title": "ub sh kilo2",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_sh_akilo-0518bff2bb730372.png",
-      "bbox": [
-        13,
-        93,
-        243,
-        160
-      ],
-      "source_image_hash": "0518bff2bb730372",
-      "families": [
-        "kilo2"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub sh kilo2",
-      "display_name": "TV JUDICATOR",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL SHOTGUN"
-    },
-    {
-      "id": "rex_ub_sh_kilo437",
-      "title": "ub sh kilo437",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_sh_akilo-0518bff2bb730372.png",
-      "bbox": [
-        13,
-        93,
-        243,
-        160
-      ],
-      "source_image_hash": "0518bff2bb730372",
-      "families": [
-        "kilo437"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub sh kilo437",
-      "display_name": "TV JUDICATOR",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL SHOTGUN"
-    },
-    {
-      "id": "rex_ub_sh_mike4",
-      "title": "ub sh mike4",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_sh_akilo-0518bff2bb730372.png",
-      "bbox": [
-        13,
-        93,
-        243,
-        160
-      ],
-      "source_image_hash": "0518bff2bb730372",
-      "families": [
-        "mike4"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "m4_size": 126,
-      "m4_size_axis": "width",
-      "internal_title": "ub sh mike4",
-      "display_name": "TV JUDICATOR",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL SHOTGUN"
-    },
-    {
-      "id": "rex_ub_sh_ngsierra",
-      "title": "ub sh ngsierra",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_sh_akilo-0518bff2bb730372.png",
-      "bbox": [
-        13,
-        93,
-        243,
-        160
-      ],
-      "source_image_hash": "0518bff2bb730372",
-      "families": [
-        "ngsierra"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub sh ngsierra",
-      "display_name": "TV JUDICATOR",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL SHOTGUN"
-    },
-    {
-      "id": "rex_ub_sh_std",
-      "title": "TV Judicator",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_sh_akilo-0518bff2bb730372.png",
-      "bbox": [
-        13,
-        93,
-        243,
-        160
-      ],
-      "source_image_hash": "0518bff2bb730372",
-      "families": [],
-      "evidence": "shared_candidate_compatibility_unverified",
-      "composable": true,
-      "internal_title": "ub sh std",
-      "subtype_label": "UNDERBARREL SHOTGUN",
-      "subtype_evidence": "public_table",
-      "display_name": "TV JUDICATOR",
-      "name_status": "confirmed",
-      "name_evidence": "public_table_unique_weapon_slot_subtype_and_localized_length",
-      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv"
-    },
-    {
-      "id": "rex_ub_sh_xar1",
-      "title": "ub sh xar1",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_sh_akilo-0518bff2bb730372.png",
-      "bbox": [
-        13,
-        93,
-        243,
-        160
-      ],
-      "source_image_hash": "0518bff2bb730372",
-      "families": [
-        "xar1"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub sh xar1",
-      "display_name": "TV JUDICATOR",
-      "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping",
-      "subtype_label": "UNDERBARREL SHOTGUN"
-    },
-    {
-      "id": "rex_ub_sh_cromeo",
-      "title": "ub sh cromeo",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_sh_akilo-0518bff2bb730372.png",
-      "bbox": [
-        13,
-        93,
-        243,
-        160
-      ],
-      "source_image_hash": "0518bff2bb730372",
-      "families": [
-        "cromeo"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub sh cromeo",
-      "display_name": "TV JUDICATOR",
-      "name_status": "canonicalized",
-      "name_evidence": "identical_source_image:rex_ub_sh_mike4",
-      "subtype_label": "UNDERBARREL SHOTGUN"
-    },
-    {
-      "id": "rex_ub_sh_kilo5",
-      "title": "ub sh kilo5",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_ub_sh_kilo5-6fcf067e30e1fdd1.png",
-      "bbox": [
-        13,
-        68,
-        243,
-        185
-      ],
-      "source_image_hash": "6fcf067e30e1fdd1",
-      "families": [
-        "kilo5"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "ub sh kilo5",
-      "display_name": "UB SH KILO5",
-      "name_status": "unresolved"
-    },
-    {
       "id": "rex_xmag_akilo",
       "title": "xmag akilo",
       "slot": "magazine",
@@ -51479,90 +50000,6 @@
       "muzzle_order": 58,
       "muzzle_table": true,
       "name_evidence": "user_muzzle_table"
-    },
-    {
-      "id": "rex_grip_ass_fmgolf",
-      "title": "grip ass fmgolf",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_ass_fmgolf-61f8c999ecbb756d.png",
-      "bbox": [
-        49,
-        13,
-        207,
-        243
-      ],
-      "source_image_hash": "61f8c999ecbb756d",
-      "families": [
-        "fmgolf"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "grip ass fmgolf",
-      "display_name": "GRIP ASS FMGOLF",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_grip_erg_fmgolf",
-      "title": "grip erg fmgolf",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_erg_fmgolf-5a51db411b4bc13b.png",
-      "bbox": [
-        13,
-        83,
-        243,
-        170
-      ],
-      "source_image_hash": "5a51db411b4bc13b",
-      "families": [
-        "fmgolf"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "grip erg fmgolf",
-      "display_name": "GRIP ERG FMGOLF",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_grip_fmgolf",
-      "title": "grip fmgolf",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_fmgolf-5379ef1d5651bd3f.png",
-      "bbox": [
-        25,
-        13,
-        231,
-        243
-      ],
-      "source_image_hash": "5379ef1d5651bd3f",
-      "families": [
-        "fmgolf"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "grip fmgolf",
-      "display_name": "GRIP FMGOLF",
-      "name_status": "unresolved"
-    },
-    {
-      "id": "rex_grip_tac_fmgolf",
-      "title": "grip tac fmgolf",
-      "slot": "underbarrel",
-      "src": "../mw4-attachments/images/rex_grip_tac_fmgolf-1e9271a5ad4cb20a.png",
-      "bbox": [
-        107,
-        14,
-        150,
-        243
-      ],
-      "source_image_hash": "1e9271a5ad4cb20a",
-      "families": [
-        "fmgolf"
-      ],
-      "evidence": "weapon_token_reference",
-      "composable": true,
-      "internal_title": "grip tac fmgolf",
-      "display_name": "GRIP TAC FMGOLF",
-      "name_status": "unresolved"
     },
     {
       "id": "rex_guard_fmgolf",
@@ -53341,6 +51778,724 @@
       "image_asset_id": "rex_comp_vert_swhiskey",
       "muzzle_order": 114,
       "muzzle_table": true
+    },
+    {
+      "id": "rex_grip_ang",
+      "title": "fss fireline grip",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_grip_ang-1bcb0c7508d88dd6.png",
+      "bbox": [
+        13,
+        69,
+        243,
+        183
+      ],
+      "source_image_hash": "1bcb0c7508d88dd6",
+      "families": [],
+      "evidence": "shared_candidate_compatibility_unverified",
+      "composable": true,
+      "internal_title": "fss fireline grip",
+      "display_name": "FSS FIRELINE GRIP",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "subtype_label": "ANGLED GRIP",
+      "image_asset_id": "rex_grip_ang",
+      "weapon_ids": [
+        "rex_ar_kilo2",
+        "rex_ar_mike4",
+        "rex_ar_xar1",
+        "rex_ar_akilo",
+        "rex_br_uxray",
+        "rex_br_asierra12",
+        "rex_ar_kilo437",
+        "rex_br_ngsierra",
+        "rex_ar_cromeo",
+        "rex_sm_spier9",
+        "rex_sm_mpapa7",
+        "rex_sm_pmike63",
+        "rex_sm_psierra41",
+        "rex_sm_xsm1",
+        "rex_sh_bmike3",
+        "rex_sh_xsh1",
+        "rex_dm_golf28",
+        "rex_dm_findia",
+        "rex_dm_moscar",
+        "rex_sn_limax"
+      ],
+      "underbarrel_order": 1,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_grip_ang_short",
+      "title": "fss tac90 grip",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_grip_ang_short-20611655ab82e385.png",
+      "bbox": [
+        12,
+        27,
+        243,
+        226
+      ],
+      "source_image_hash": "20611655ab82e385",
+      "families": [],
+      "evidence": "shared_candidate_compatibility_unverified",
+      "composable": true,
+      "internal_title": "fss tac90 grip",
+      "display_name": "FSS TAC90 GRIP",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "subtype_label": "ANGLED SHORT GRIP",
+      "image_asset_id": "rex_grip_ang_short",
+      "weapon_ids": [
+        "rex_ar_kilo2",
+        "rex_ar_mike4",
+        "rex_ar_xar1",
+        "rex_ar_akilo",
+        "rex_br_uxray",
+        "rex_br_asierra12",
+        "rex_ar_kilo437",
+        "rex_br_ngsierra",
+        "rex_ar_cromeo",
+        "rex_sm_spier9",
+        "rex_sm_mpapa7",
+        "rex_sm_pmike63",
+        "rex_sm_psierra41",
+        "rex_sm_xsm1",
+        "rex_sh_bmike3",
+        "rex_sh_xsh1",
+        "rex_dm_golf28",
+        "rex_dm_findia",
+        "rex_dm_moscar",
+        "rex_sn_limax"
+      ],
+      "underbarrel_order": 2,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_grip_vert",
+      "title": "mire-50 tac grip",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_grip_vert-555f3eeac9c4d8ba.png",
+      "bbox": [
+        81,
+        13,
+        175,
+        242
+      ],
+      "source_image_hash": "555f3eeac9c4d8ba",
+      "families": [],
+      "evidence": "shared_candidate_compatibility_unverified",
+      "composable": true,
+      "internal_title": "mire-50 tac grip",
+      "display_name": "MIRE-50 TAC GRIP",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "subtype_label": "VERTICAL GRIP",
+      "image_asset_id": "rex_grip_vert",
+      "weapon_ids": [
+        "rex_ar_kilo2",
+        "rex_ar_mike4",
+        "rex_ar_xar1",
+        "rex_ar_akilo",
+        "rex_br_uxray",
+        "rex_br_asierra12",
+        "rex_ar_kilo437",
+        "rex_br_ngsierra",
+        "rex_ar_cromeo",
+        "rex_sm_spier9",
+        "rex_sm_pmike63",
+        "rex_sm_psierra41",
+        "rex_sm_xsm1",
+        "rex_sh_bmike3",
+        "rex_sh_xsh1",
+        "rex_dm_golf28",
+        "rex_dm_findia",
+        "rex_dm_moscar",
+        "rex_sn_limax",
+        "rex_pi_decho"
+      ],
+      "underbarrel_order": 3,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_grip_vert_short",
+      "title": "gw domi-9",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_grip_vert_short-2066c6a74a7dca29.png",
+      "bbox": [
+        61,
+        12,
+        195,
+        243
+      ],
+      "source_image_hash": "2066c6a74a7dca29",
+      "families": [],
+      "evidence": "shared_candidate_compatibility_unverified",
+      "composable": true,
+      "internal_title": "gw domi-9",
+      "display_name": "GW DOMI-9",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "subtype_label": "VERTICAL SHORT GRIP",
+      "image_asset_id": "rex_grip_vert_short",
+      "weapon_ids": [
+        "rex_ar_kilo2",
+        "rex_ar_mike4",
+        "rex_ar_xar1",
+        "rex_ar_akilo",
+        "rex_br_uxray",
+        "rex_br_asierra12",
+        "rex_ar_kilo437",
+        "rex_br_ngsierra",
+        "rex_ar_cromeo",
+        "rex_sm_spier9",
+        "rex_sm_mpapa7",
+        "rex_sm_pmike63",
+        "rex_sm_psierra41",
+        "rex_sm_xsm1",
+        "rex_sh_bmike3",
+        "rex_sh_xsh1",
+        "rex_dm_golf28",
+        "rex_dm_findia",
+        "rex_dm_moscar",
+        "rex_sn_limax",
+        "rex_pi_decho"
+      ],
+      "underbarrel_order": 4,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_grip_bipod01",
+      "title": "fss beargrip",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_grip_bipod01-595153acad398204.png",
+      "bbox": [
+        95,
+        13,
+        161,
+        243
+      ],
+      "source_image_hash": "595153acad398204",
+      "families": [],
+      "evidence": "shared_candidate_compatibility_unverified",
+      "composable": true,
+      "internal_title": "fss beargrip",
+      "display_name": "FSS BEARGRIP",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "subtype_label": "BIPOD GRIP",
+      "image_asset_id": "rex_grip_bipod01",
+      "weapon_ids": [
+        "rex_ar_kilo2",
+        "rex_ar_mike4",
+        "rex_ar_akilo",
+        "rex_br_uxray",
+        "rex_br_asierra12",
+        "rex_ar_kilo437",
+        "rex_br_ngsierra",
+        "rex_ar_cromeo",
+        "rex_dm_golf28",
+        "rex_dm_findia",
+        "rex_dm_moscar",
+        "rex_sn_limax"
+      ],
+      "underbarrel_order": 5,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_bipod_ngsierra",
+      "title": "aa54 v.3 bipod",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_bipod_ngsierra-5c1870ffe0025edb.png",
+      "bbox": [
+        105,
+        13,
+        151,
+        243
+      ],
+      "source_image_hash": "5c1870ffe0025edb",
+      "families": [
+        "ngsierra"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "aa54 v.3 bipod",
+      "subtype_label": "BIPOD",
+      "subtype_evidence": "public_table",
+      "display_name": "AA54 V.3 BIPOD",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "image_asset_id": "rex_bipod_ngsierra",
+      "weapon_ids": [
+        "rex_ar_kilo2",
+        "rex_ar_mike4",
+        "rex_ar_akilo",
+        "rex_br_uxray",
+        "rex_br_asierra12",
+        "rex_ar_kilo437",
+        "rex_ar_cromeo",
+        "rex_lm_sierrax",
+        "rex_dm_findia",
+        "rex_dm_moscar"
+      ],
+      "underbarrel_order": 6,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_ub_gl_akilo",
+      "title": "miri 40mm",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_ub_gl_akilo-6c4cf070fd31cf4a.png",
+      "bbox": [
+        12,
+        96,
+        242,
+        157
+      ],
+      "source_image_hash": "6c4cf070fd31cf4a",
+      "families": [
+        "akilo"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "miri 40mm",
+      "display_name": "MIRI 40MM",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "subtype_label": "UNDERBARREL LAUNCHER",
+      "image_asset_id": "rex_ub_gl_akilo",
+      "weapon_ids": [
+        "rex_ar_kilo2",
+        "rex_ar_mike4",
+        "rex_ar_xar1",
+        "rex_ar_akilo",
+        "rex_br_asierra12",
+        "rex_ar_kilo437",
+        "rex_br_ngsierra",
+        "rex_ar_cromeo"
+      ],
+      "underbarrel_order": 7,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_ub_sh_akilo",
+      "title": "tv judicator",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_ub_sh_akilo-0518bff2bb730372.png",
+      "bbox": [
+        13,
+        93,
+        243,
+        160
+      ],
+      "source_image_hash": "0518bff2bb730372",
+      "families": [
+        "akilo"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "tv judicator",
+      "display_name": "TV JUDICATOR",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "subtype_label": "UNDERBARREL SHOTGUN",
+      "image_asset_id": "rex_ub_sh_akilo",
+      "weapon_ids": [
+        "rex_ar_kilo2",
+        "rex_ar_mike4",
+        "rex_ar_xar1",
+        "rex_ar_akilo",
+        "rex_br_asierra12",
+        "rex_ar_kilo437",
+        "rex_br_ngsierra",
+        "rex_ar_cromeo"
+      ],
+      "underbarrel_order": 8,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_grip_mike4_pdw",
+      "title": "hurricane grip",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_grip_mike4_pdw-023e3b9696e7e31f.png",
+      "bbox": [
+        13,
+        75,
+        243,
+        178
+      ],
+      "source_image_hash": "023e3b9696e7e31f",
+      "families": [
+        "mike4"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "m4_size": 50,
+      "m4_size_axis": "width",
+      "internal_title": "hurricane grip",
+      "display_name": "HURRICANE GRIP",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "name_source_url": "https://codmunity.gg/weapon-stats/mw4",
+      "subtype_label": "CUSTOM GRIP",
+      "image_asset_id": "rex_grip_mike4_pdw",
+      "weapon_ids": [
+        "rex_ar_mike4"
+      ],
+      "underbarrel_order": 9,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_bipod_ngsierra__sq_st_68_bipod",
+      "title": "sq-st-68 bipod",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_bipod_ngsierra-5c1870ffe0025edb.png",
+      "bbox": [
+        105,
+        13,
+        151,
+        243
+      ],
+      "source_image_hash": "5c1870ffe0025edb",
+      "families": [
+        "ngsierra"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "sq-st-68 bipod",
+      "subtype_label": "BIPOD",
+      "subtype_evidence": "public_table",
+      "display_name": "SQ-ST-68 BIPOD",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "image_asset_id": "rex_bipod_ngsierra",
+      "weapon_ids": [
+        "rex_br_ngsierra"
+      ],
+      "underbarrel_order": 10,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_grip_fld_mpapa7",
+      "title": "v46 vert-tac",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_grip_fld_mpapa7-064e9d7cc91d40d6.png",
+      "bbox": [
+        94,
+        13,
+        162,
+        243
+      ],
+      "source_image_hash": "064e9d7cc91d40d6",
+      "families": [
+        "mpapa7"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "v46 vert-tac",
+      "display_name": "V46 VERT-TAC",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "subtype_label": "VERTICAL GRIP",
+      "image_asset_id": "rex_grip_fld_mpapa7",
+      "weapon_ids": [
+        "rex_sm_mpapa7"
+      ],
+      "underbarrel_order": 11,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_grip_tac_fmgolf",
+      "title": "grip strap",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_grip_tac_fmgolf-1e9271a5ad4cb20a.png",
+      "bbox": [
+        107,
+        14,
+        150,
+        243
+      ],
+      "source_image_hash": "1e9271a5ad4cb20a",
+      "families": [
+        "fmgolf"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "grip strap",
+      "display_name": "GRIP STRAP",
+      "name_status": "user_supplied",
+      "subtype_label": "TACTICAL FOREGRIP",
+      "image_asset_id": "rex_grip_tac_fmgolf",
+      "weapon_ids": [
+        "rex_sm_fmgolf"
+      ],
+      "underbarrel_order": 12,
+      "underbarrel_table": true,
+      "name_evidence": "user_underbarrel_table"
+    },
+    {
+      "id": "rex_grip_fmgolf",
+      "title": "iv-m hand stop",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_grip_fmgolf-5379ef1d5651bd3f.png",
+      "bbox": [
+        25,
+        13,
+        231,
+        243
+      ],
+      "source_image_hash": "5379ef1d5651bd3f",
+      "families": [
+        "fmgolf"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "iv-m hand stop",
+      "display_name": "IV-M HAND STOP",
+      "name_status": "user_supplied",
+      "subtype_label": "ASSAULT FOREGRIP",
+      "image_asset_id": "rex_grip_fmgolf",
+      "weapon_ids": [
+        "rex_sm_fmgolf"
+      ],
+      "underbarrel_order": 13,
+      "underbarrel_table": true,
+      "name_evidence": "user_underbarrel_table"
+    },
+    {
+      "id": "rex_grip_erg_fmgolf",
+      "title": "cqc stop",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_grip_erg_fmgolf-5a51db411b4bc13b.png",
+      "bbox": [
+        13,
+        83,
+        243,
+        170
+      ],
+      "source_image_hash": "5a51db411b4bc13b",
+      "families": [
+        "fmgolf"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "cqc stop",
+      "display_name": "CQC STOP",
+      "name_status": "user_supplied",
+      "subtype_label": "ERGONOMIC FOREGRIP",
+      "image_asset_id": "rex_grip_erg_fmgolf",
+      "weapon_ids": [
+        "rex_sm_fmgolf"
+      ],
+      "underbarrel_order": 14,
+      "underbarrel_table": true,
+      "name_evidence": "user_underbarrel_table"
+    },
+    {
+      "id": "rex_gripside_ang",
+      "title": "bruen renegade grip",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_gripside_ang-2adb9b950d1aa737.png",
+      "bbox": [
+        13,
+        15,
+        244,
+        241
+      ],
+      "source_image_hash": "2adb9b950d1aa737",
+      "families": [],
+      "evidence": "shared_candidate_compatibility_unverified",
+      "composable": true,
+      "internal_title": "bruen renegade grip",
+      "display_name": "BRUEN RENEGADE GRIP",
+      "name_status": "user_supplied",
+      "subtype_label": "ANGLED GRIP",
+      "image_asset_id": "rex_gripside_ang",
+      "weapon_ids": [
+        "rex_lm_sierrax",
+        "rex_lm_tango73",
+        "rex_lm_recho"
+      ],
+      "underbarrel_order": 15,
+      "underbarrel_table": true,
+      "name_evidence": "user_underbarrel_table"
+    },
+    {
+      "id": "rex_gripside_vert",
+      "title": "ftac combar grip",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_gripside_vert-52b266b3e50f4d43.png",
+      "bbox": [
+        50,
+        14,
+        206,
+        242
+      ],
+      "source_image_hash": "52b266b3e50f4d43",
+      "families": [],
+      "evidence": "shared_candidate_compatibility_unverified",
+      "composable": true,
+      "internal_title": "ftac combar grip",
+      "display_name": "FTAC COMBAR GRIP",
+      "name_status": "user_supplied",
+      "subtype_label": "VERTICAL GRIP",
+      "image_asset_id": "rex_gripside_vert",
+      "weapon_ids": [
+        "rex_lm_sierrax",
+        "rex_lm_recho"
+      ],
+      "underbarrel_order": 16,
+      "underbarrel_table": true,
+      "name_evidence": "user_underbarrel_table"
+    },
+    {
+      "id": "rex_gripside_vert_tango73",
+      "title": "xrk co-ride 56",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_gripside_vert_tango73-3c283433fc6c3df2.png",
+      "bbox": [
+        79,
+        12,
+        177,
+        243
+      ],
+      "source_image_hash": "3c283433fc6c3df2",
+      "families": [
+        "tango73"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "xrk co-ride 56",
+      "display_name": "XRK CO-RIDE 56",
+      "name_status": "user_supplied",
+      "subtype_label": "VERTICAL GRIP",
+      "image_asset_id": "rex_gripside_vert_tango73",
+      "weapon_ids": [
+        "rex_lm_tango73"
+      ],
+      "underbarrel_order": 17,
+      "underbarrel_table": true,
+      "name_evidence": "user_underbarrel_table"
+    },
+    {
+      "id": "rex_bipod_recho",
+      "title": "apoc bipod",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_bipod_recho-19dff6ea7570e4b4.png",
+      "bbox": [
+        87,
+        13,
+        168,
+        243
+      ],
+      "source_image_hash": "19dff6ea7570e4b4",
+      "families": [
+        "recho"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "apoc bipod",
+      "subtype_label": "BIPOD",
+      "subtype_evidence": "public_table",
+      "display_name": "APOC BIPOD",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "name_source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBisGdSGfXjhJ3td0B_SiZWXmgUKWJ_Ivca06qjGB5XcDHMO6wlq89SmjWC-Fsp2pnOyuTcWE8ROi1/pub?gid=669440363&single=true&output=csv",
+      "image_asset_id": "rex_bipod_recho",
+      "weapon_ids": [
+        "rex_lm_recho"
+      ],
+      "underbarrel_order": 18,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_bipod_golf28",
+      "title": "bruen br 21 bipod",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_bipod_golf28-4c1354c08f81ebad.png",
+      "bbox": [
+        78,
+        13,
+        178,
+        243
+      ],
+      "source_image_hash": "4c1354c08f81ebad",
+      "families": [
+        "golf28"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "bruen br 21 bipod",
+      "display_name": "BRUEN BR 21 BIPOD",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "subtype_label": "BIPOD",
+      "image_asset_id": "rex_bipod_golf28",
+      "weapon_ids": [
+        "rex_dm_golf28"
+      ],
+      "underbarrel_order": 19,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_bipod_svictor98",
+      "title": "kg-7 bipod",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_bipod_svictor98-7e649bef5984d27e.png",
+      "bbox": [
+        113,
+        12,
+        143,
+        243
+      ],
+      "source_image_hash": "7e649bef5984d27e",
+      "families": [
+        "svictor98"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "kg-7 bipod",
+      "display_name": "KG-7 BIPOD",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "subtype_label": "BIPOD",
+      "image_asset_id": "rex_bipod_svictor98",
+      "weapon_ids": [
+        "rex_sn_svictor98"
+      ],
+      "underbarrel_order": 20,
+      "underbarrel_table": true
+    },
+    {
+      "id": "rex_bipod_limax",
+      "title": "bipod",
+      "slot": "underbarrel",
+      "src": "../mw4-attachments/images/rex_bipod_limax-0753c082d8683e92.png",
+      "bbox": [
+        111,
+        13,
+        145,
+        243
+      ],
+      "source_image_hash": "0753c082d8683e92",
+      "families": [
+        "limax"
+      ],
+      "evidence": "weapon_token_reference",
+      "composable": true,
+      "internal_title": "bipod",
+      "display_name": "BIPOD",
+      "name_status": "user_supplied",
+      "name_evidence": "user_underbarrel_table",
+      "subtype_label": "BIPOD",
+      "image_asset_id": "rex_bipod_limax",
+      "weapon_ids": [
+        "rex_sn_limax"
+      ],
+      "underbarrel_order": 21,
+      "underbarrel_table": true
     }
   ],
   "slots": [

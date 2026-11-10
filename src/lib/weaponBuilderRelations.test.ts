@@ -5,8 +5,7 @@ import {
   builderAttachmentDisplayName,
   getBuilderApexRelation,
   mw4MuzzleAllowed,
-  HAN86_UNDERBARREL_IDS,
-  han86AllowsUnderbarrel,
+  mw4UnderbarrelAllowed,
   AR_OPTIC_IDS,
   arAllowsOptic,
   SMG_OPTIC_IDS,
@@ -15,9 +14,6 @@ import {
   arAllowsLaser,
   VEL_AMMUNITION_IDS,
   velAllowsAmmunition,
-  SMG_COMMON_UNDERBARREL_IDS,
-  SMG_UNDERBARREL_IDS_BY_WEAPON,
-  smgAllowsUnderbarrel,
   strigaDreadlineSelected,
   type BuilderRelationAsset,
 } from "./weaponBuilderRelations";
@@ -85,13 +81,31 @@ describe("weapon builder relations", () => {
   it("keeps the screenshot-verified attachment choice counts", () => {
     expect(SMG_OPTIC_IDS).toHaveLength(18);
     expect(SMG_OPTIC_IDS.every(smgAllowsOptic)).toBe(true);
-    expect(SMG_UNDERBARREL_IDS_BY_WEAPON.rex_sm_pmike63).toEqual(SMG_COMMON_UNDERBARREL_IDS);
     expect(AR_LASER_IDS).toHaveLength(7);
     expect(AR_LASER_IDS.every(arAllowsLaser)).toBe(true);
     expect(AR_OPTIC_IDS).toHaveLength(23);
     expect(AR_OPTIC_IDS.every(arAllowsOptic)).toBe(true);
-    expect(HAN86_UNDERBARREL_IDS).toHaveLength(8);
-    expect(HAN86_UNDERBARREL_IDS.every(han86AllowsUnderbarrel)).toBe(true);
+  });
+  it("uses only the supplied underbarrel rows for each weapon", () => {
+    const rows = readFileSync("data/mw4-underbarrels.tsv", "utf8").trim().split(/\r?\n/).slice(1);
+    const underbarrels = catalog.assets.filter((asset) => asset.slot === "underbarrel");
+    const byId = new Map(catalog.assets.map((asset) => [asset.id, asset]));
+    expect(rows).toHaveLength(21);
+    expect(underbarrels).toHaveLength(rows.length);
+    for (const asset of underbarrels) {
+      const row = rows[(asset.underbarrel_order ?? 0) - 1]?.split("\t");
+      expect([asset.display_name, asset.subtype_label, asset.image_asset_id]).toEqual([
+        row?.[0].toUpperCase(), row?.[1].toUpperCase(), row?.[2],
+      ]);
+    }
+    for (const weapon of catalog.weapons) {
+      const choices = underbarrels.filter((asset) => mw4UnderbarrelAllowed(asset.id, weapon.id, byId));
+      expect(new Set(choices.map((asset) => asset.display_name)).size).toBe(choices.length);
+    }
+    expect(mw4UnderbarrelAllowed("rex_bipod_ngsierra", "rex_ar_kilo2", byId)).toBe(true);
+    expect(mw4UnderbarrelAllowed("rex_bipod_ngsierra", "rex_br_ngsierra", byId)).toBe(false);
+    expect(mw4UnderbarrelAllowed("rex_bipod_ngsierra__sq_st_68_bipod", "rex_br_ngsierra", byId)).toBe(true);
+    expect(mw4UnderbarrelAllowed("rex_grip_ass_fmgolf", "rex_sm_fmgolf", byId)).toBe(false);
   });
   it("uses only the supplied muzzle rows for each weapon", () => {
     const rows = readFileSync("data/mw4-muzzles.tsv", "utf8").trim().split(/\r?\n/).slice(1);

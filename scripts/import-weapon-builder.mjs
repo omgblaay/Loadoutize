@@ -51,7 +51,10 @@ const weapons = catalog.weapons.map((weapon) => ({
   category: weapon.group,
   imagePath: imagePath(weapon.base_src),
 }));
-const attachments = catalog.assets.filter((asset) => asset.slot !== "muzzle" || asset.muzzle_table).map((asset) => ({
+const attachments = catalog.assets.filter((asset) =>
+  (asset.slot !== "muzzle" || asset.muzzle_table) &&
+  (asset.slot !== "underbarrel" || asset.underbarrel_table ||
+    catalog.weapons.some((weapon) => weapon.factory_parts?.underbarrel === asset.id))).map((asset) => ({
   assetId: asset.id,
   name: asset.title,
   displayName: asset.display_name || asset.title,
@@ -59,7 +62,8 @@ const attachments = catalog.assets.filter((asset) => asset.slot !== "muzzle" || 
   slot: asset.slot,
   imagePath: asset.src ? imagePath(asset.src) : null,
   composable: asset.composable === true,
-  weaponIds: asset.slot === "muzzle" ? asset.weapon_ids : owners.get(asset.id),
+  weaponIds: ["muzzle", "underbarrel"].includes(asset.slot) && asset.weapon_ids
+    ? asset.weapon_ids : owners.get(asset.id),
   families: asset.families ?? [],
   evidence: asset.evidence ?? null,
 }));

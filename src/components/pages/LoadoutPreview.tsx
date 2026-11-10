@@ -1189,7 +1189,7 @@ export function LoadoutPreview() {
                 );
                 return (
                   <>
-                    <div className="flex flex-col bg-white/5 p-4 rounded-lg">
+                    <Container>
                       <div className="flex items-center gap-2 text-teritary mb-2">
                         <PlatformIcon className="size-5" />
                         <span className="text-xs tracking-[0.5px] uppercase font-medium">
@@ -1237,7 +1237,7 @@ export function LoadoutPreview() {
                           </a>
                         </div>
                       </div>
-                    </div>
+                    </Container>
                   </>
                 );
               })()}

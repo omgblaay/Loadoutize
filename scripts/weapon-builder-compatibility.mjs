@@ -1,8 +1,4 @@
 // Mirrors the compatibility rules in the source weapon-builder/app.js.
-const sniperUnderbarrels = new Set([
-  "rex_grip_ang", "rex_grip_ang_short", "rex_grip_vert",
-  "rex_grip_vert_short", "rex_grip_bipod01",
-]);
 const han86ExtraOptics = new Set([
   "rex_arscope_airburst", "rex_arscope_hybrid01_le", "rex_arscope_vz01_zoom2",
   "rex_fourx_hybcant01_le", "rex_fourx_therm01_sp", "rex_fourx_therm02",
@@ -24,17 +20,6 @@ function sharedCompatible(weapon, asset, library) {
     if (type === "sn") return common || id.includes("_dmscope") || id.includes("_fourx") || id.includes("_snscope");
     return false;
   }
-  if (asset.slot === "underbarrel") {
-    if (weapon.family === "sierra100") return false;
-    if (type === "sn") {
-      if (sniperUnderbarrels.has(id)) return true;
-      const hasOwnBipod = library.assets.some((item) => weapon.assets.includes(item.id) && item.slot === "underbarrel" && item.id.startsWith("rex_bipod_"));
-      return id === "rex_bipod01" && !hasOwnBipod;
-    }
-    if (["ar", "br", "dm", "lm", "sm", "sh"].includes(type) && /_(grip|gripside)_/.test(id)) return true;
-    if (["ar", "br", "dm", "lm", "sn"].includes(type) && id.includes("_bipod")) return true;
-    return ["ar", "br"].includes(type) && /^rex_ub_(gl|sh)_std/.test(id);
-  }
   if (asset.slot === "laser") {
     if (type === "pi") return id.includes("_pstl");
     if (type === "sm") return id.includes("_sml");
@@ -46,6 +31,9 @@ function sharedCompatible(weapon, asset, library) {
 
 export function builderWeaponIds(asset, library) {
   if (asset.slot === "muzzle") return asset.muzzle_table ? asset.weapon_ids ?? [] : [];
+  if (asset.slot === "underbarrel") return asset.underbarrel_table
+    ? asset.weapon_ids ?? []
+    : library.weapons.filter((weapon) => weapon.factory_parts?.underbarrel === asset.id).map((weapon) => weapon.id);
   if (["iron_sights", "other"].includes(asset.slot)) return [];
   // These assets reuse the same large-weapon laser icon as the canonical entry.
   // They are texture aliases, not extra selectable choices in the game menu.
@@ -57,7 +45,7 @@ export function builderWeaponIds(asset, library) {
     .filter((weapon) => {
       if (weapon.id === "rex_ar_kilo2" && asset.slot === "optic" && han86ExtraOptics.has(asset.id)) return false;
       if (weapon.id === "rex_ar_kilo2" && ["rex_stock_ass_kilo2_sp", "rex_pgrip_kilo2_gl"].includes(asset.id)) return false;
-      if (weapon.family === "sierra100" && (asset.slot === "underbarrel" || (asset.slot === "magazine" && !Object.values(weapon.factory_parts || {}).includes(asset.id)))) return false;
+      if (weapon.family === "sierra100" && asset.slot === "magazine" && !Object.values(weapon.factory_parts || {}).includes(asset.id)) return false;
       if (Object.values(weapon.factory_parts || {}).includes(asset.id)) return false;
       return weapon.assets.includes(asset.id) || sharedCompatible(weapon, asset, library);
     })

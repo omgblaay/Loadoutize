@@ -1,0 +1,22 @@
+display name	sub label	image	for weapons
+fss fireline grip	angled grip	rex_grip_ang	han 86, m4, hyeon burst, kastov 762, patriot xmr, oden, axion, cronen squall, cronen osprey, iso nightshade, vel 46, wz.55 striga, ppsh-41, x-58 nyx, rezi 12, warlord, mar-9, oris 8.6, mosin-nagant, signal 50
+fss tac90 grip	angled short grip	rex_grip_ang_short	han 86, m4, hyeon burst, kastov 762, patriot xmr, oden, axion, cronen squall, cronen osprey, iso nightshade, vel 46, wz.55 striga, ppsh-41, x-58 nyx, rezi 12, warlord, mar-9, oris 8.6, mosin-nagant, signal 50
+mire-50 tac grip	vertical grip	rex_grip_vert	han 86, m4, hyeon burst, kastov 762, patriot xmr, oden, axion, cronen squall, cronen osprey, iso nightshade, wz.55 striga, ppsh-41, x-58 nyx, rezi 12, warlord, mar-9, oris 8.6, mosin-nagant, signal 50, .50 gs
+gw domi-9	vertical short grip	rex_grip_vert_short	han 86, m4, hyeon burst, kastov 762, patriot xmr, oden, axion, cronen squall, cronen osprey, iso nightshade, vel 46, wz.55 striga, ppsh-41, x-58 nyx, rezi 12, warlord, mar-9, oris 8.6, mosin-nagant, signal 50, .50 gs
+fss beargrip	bipod grip	rex_grip_bipod01	han 86, m4, kastov 762, patriot xmr, oden, axion, cronen squall, cronen osprey, mar-9, oris 8.6, mosin-nagant, signal 50
+aa54 v.3 bipod	bipod	rex_bipod_ngsierra	han 86, m4, kastov 762, patriot xmr, oden, axion, cronen osprey, finn lmg, oris 8.6, mosin-nagant
+miri 40mm	underbarrel launcher	rex_ub_gl_akilo	han 86, m4, hyeon burst, kastov 762, oden, axion, cronen squall, cronen osprey
+tv judicator	underbarrel shotgun	rex_ub_sh_akilo	han 86, m4, hyeon burst, kastov 762, oden, axion, cronen squall, cronen osprey
+hurricane grip	custom grip	rex_grip_mike4_pdw	m4
+sq-st-68 bipod	bipod	rex_bipod_ngsierra	cronen squall
+v46 vert-tac	vertical grip	rex_grip_fld_mpapa7	vel 46
+grip strap	tactical foregrip	rex_grip_tac_fmgolf	csg-35
+iv-m hand stop	assault foregrip	rex_grip_fmgolf	csg-35
+cqc stop	ergonomic foregrip	rex_grip_erg_fmgolf	csg-35
+bruen renegade grip	angled grip	rex_gripside_ang	finn lmg, type 73, apoc-338
+ftac combar grip	vertical grip	rex_gripside_vert	finn lmg, apoc-338
+xrk co-ride 56	vertical grip	rex_gripside_vert_tango73	type 73
+apoc bipod	bipod	rex_bipod_recho	apoc-338
+bruen br 21 bipod	bipod	rex_bipod_golf28	mar-9
+kg-7 bipod	bipod	rex_bipod_svictor98	kg-7 vulcan
+bipod	bipod	rex_bipod_limax	signal 50
