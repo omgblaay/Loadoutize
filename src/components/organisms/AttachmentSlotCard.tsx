@@ -38,12 +38,12 @@ export function AttachmentSlotCard({
     <>
       <span className="flex size-6 shrink-0 items-center justify-center">
         {slot.type === "APEX" ? (
-          <AttachmentIcon attachment={{ name: "APEX", type: "APEX" }} className="size-4" />
+          <AttachmentIcon attachment={{ name: "APEX", type: "APEX" }} className="size-5" />
         ) : slot.typeImageUrl ? (
           <img
             src={slot.typeImageUrl}
             alt=""
-            className="size-5 object-contain opacity-70"
+            className="size-6 object-contain opacity-70"
           />
         ) : (
           <Paperclip className="size-4 text-teritary" />
@@ -95,7 +95,7 @@ export function AttachmentSlotCard({
                 >
                   {RANK_MEDALS[index] ?? `#${index + 1}`}
                 </span>
-                <AttachmentIcon attachment={attachment} className="size-7" />
+                <AttachmentIcon attachment={attachment} className="size-9" />
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-sm text-secondary">
                   <span className="truncate">{attachmentDisplayName(attachment)}</span>
                   {attachment.subtypeLabel && (

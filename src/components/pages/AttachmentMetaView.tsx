@@ -179,7 +179,7 @@ export function AttachmentMetaView() {
                   <img
                     src={attachment.typeImageUrl}
                     alt=""
-                    className="size-5 object-contain opacity-70"
+                    className="size-6 object-contain opacity-70"
                   />
                 </span>
               ) : null}
@@ -202,7 +202,7 @@ export function AttachmentMetaView() {
             {isApexAttachment(attachment) || attachmentImageUrl(attachment) ? (
               <AttachmentIcon
                 attachment={attachment}
-                className="size-36"
+                className="size-44"
               />
             ) : (
               <Paperclip className="size-12 text-white/15" />

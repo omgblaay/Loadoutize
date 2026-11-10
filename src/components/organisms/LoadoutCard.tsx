@@ -17,16 +17,13 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { VIDEO_PLATFORM_META } from "@/lib/video";
 import { explorePath } from "@/lib/routes";
 import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
-import { projectId } from "../../../utils/supabase/info";
 import { builderAttachmentImageUrl, loadBuilderAttachmentAssets } from "@/lib/builderAttachmentImages";
+import { apexAttachmentIconUrl } from "@/lib/apexAttachmentIcon";
+import { isApexAttachment } from "@/lib/attachmentPresentation";
 import type { BuilderRelationAsset } from "@/lib/weaponBuilderRelations";
 import { AppTooltip } from "@/components/atoms/Tooltip";
 
 const MAX_ATTACHMENT_ICONS = 10;
-// The current MW4 APEX type image in Directus. Prefer typeImageUrl from the
-// API so a later Directus image change takes effect without a frontend edit.
-const MW4_APEX_TYPE_IMAGE_URL = `https://${projectId}.supabase.co/storage/v1/object/public/cms-assets/35bfddeb-afd5-45ff-87f9-84c3775e2dd6.png`;
-
 export function LoadoutCard({
   loadout,
   weapons,
@@ -78,8 +75,7 @@ export function LoadoutCard({
       return {
         ...attachment,
         imageUrl: isApex
-          ? attachment.typeImageUrl ||
-            (loadout.gameId === "mw4" ? MW4_APEX_TYPE_IMAGE_URL : null)
+          ? apexAttachmentIconUrl(attachment.typeImageUrl, loadout.gameId)
           : attachment.imageUrl ||
             (loadout.gameId === "mw4"
               ? builderAttachmentImageUrl(attachment.stats?.assetId, builderAssetsById, attachment.name)
@@ -221,7 +217,7 @@ export function LoadoutCard({
               key={a.id}
               className="bg-gradient-to-b from-white/0 from-[60%] to-white/[0.08] opacity-80 p-2 border w-full border-white/12 h-14 flex items-center justify-center"
             >
-              <AttachmentIcon attachment={a} className="size-6" />
+              <AttachmentIcon attachment={a} className="size-9" tintApex={isApexAttachment(a)} />
             </div>
           ))}
         </div>

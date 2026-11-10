@@ -928,7 +928,7 @@ export function LoadoutPreview() {
                     onBlur={() => setActiveKey(null)}
                     className="flex w-full items-center gap-4 py-3 text-left"
                   >
-                    <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.035] p-2">
+                    <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] p-1">
                       {att.iconUrl ? (
                         <img
                           src={att.iconUrl}
@@ -1056,7 +1056,7 @@ export function LoadoutPreview() {
                         onBlur={() => setActiveKey(null)}
                         className="flex w-full items-center gap-4 py-3 text-left"
                       >
-                        <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.035] p-2">
+                        <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] p-1">
                           {attachment.iconUrl ? (
                             <img
                               src={attachment.iconUrl}

@@ -205,12 +205,12 @@ export function AttachmentMetaListView() {
       <header className="flex items-start gap-4">
         <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.03]">
           {attachmentGroup?.toLowerCase() === "apex" ? (
-            <AttachmentIcon attachment={{ name: "APEX", type: "APEX" }} className="size-6" />
+            <AttachmentIcon attachment={{ name: "APEX", type: "APEX" }} className="size-8" />
           ) : typeImageUrl ? (
             <img
               src={typeImageUrl}
               alt=""
-              className="size-6 object-contain opacity-75"
+              className="size-8 object-contain opacity-75"
             />
           ) : (
             <Paperclip className="size-5 text-teritary" />
@@ -304,8 +304,8 @@ export function AttachmentMetaListView() {
                       #{rank}
                     </span>
                     <span className="flex min-w-0 items-center gap-4">
-                      <span className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-black/20 p-2">
-                        <AttachmentIcon attachment={metric.attachment} className="size-12" />
+                      <span className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-black/20 p-1">
+                        <AttachmentIcon attachment={metric.attachment} className="size-14" />
                       </span>
                       <span className="flex min-w-0 flex-col gap-0.5">
                         <span className="truncate font-mono text-sm uppercase">

@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/atoms/Skeleton";
 import { WeaponSpriteCanvas } from "@/components/molecules/WeaponSpriteCanvas";
 import { WeaponPreviewSmoke } from "@/components/molecules/WeaponPreviewSmoke";
 import { getWeaponPreviewRef } from "@/lib/weaponSpritePreview";
+import { APEX_ICON_FILTER } from "@/lib/apexAttachmentIcon";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 
@@ -21,9 +22,9 @@ export interface WeaponImageBadge {
 }
 
 const BADGE_SIZE_CLASSES: Record<"small" | "large" | "default", string> = {
-  small: "w-8 h-8",
-  large: "w-11 h-11",
-  default: "w-8 h-8",
+  small: "w-9 h-9",
+  large: "w-12 h-12",
+  default: "w-10 h-10",
 };
 
 export function WeaponImage({
@@ -176,14 +177,15 @@ export function WeaponImage({
             const transform = getOvalAttachmentBadgeTransform(ovalPercent);
             const content = ovalBadgeLabels ? (
               <div className="flex w-[200px] items-center gap-2 rounded-lg border border-white/5 bg-[#151315]/95 py-1.5 pl-1.5 pr-3 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-sm">
-                <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
+                <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full">
                   {badge.iconUrl ? (
                     <img
                       src={badge.iconUrl}
                       alt=""
                       loading="lazy"
                       decoding="async"
-                      className="size-full object-contain p-1"
+                      className="size-full object-contain p-0.5"
+                      style={badge.isApex ? { filter: APEX_ICON_FILTER } : undefined}
                     />
                   ) : (
                     <span className="text-sm font-semibold text-white/70">
@@ -208,7 +210,8 @@ export function WeaponImage({
                     alt={badge.label}
                     loading="lazy"
                     decoding="async"
-                    className="size-full object-contain p-1"
+                    className="size-full object-contain p-0.5"
+                    style={badge.isApex ? { filter: APEX_ICON_FILTER } : undefined}
                   />
                 ) : (
                   <span className="text-sm font-semibold text-white/70 leading-none">

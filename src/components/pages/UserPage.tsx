@@ -174,10 +174,13 @@ export function UserPage() {
           return {
             gameId,
             loadouts: (loadoutsRes.loadouts ?? []).filter(
-              (l: Loadout) => l.userId === userId && l.contentType !== "full_loadout",
+              (l: Loadout) =>
+                l.userId === userId && l.contentType !== "full_loadout",
             ),
             catalog: {
-              weapons: visibleWeaponCatalog<CardWeapon>(weaponsRes.weapons ?? []),
+              weapons: visibleWeaponCatalog<CardWeapon>(
+                weaponsRes.weapons ?? [],
+              ),
               attachments: attachmentsRes.attachments ?? [],
               tags: tagsRes.tags ?? [],
             } as GameCatalog,
@@ -253,15 +256,6 @@ export function UserPage() {
         {/* Profile hero */}
         <Container className="border-0">
           <div className="flex flex-wrap items-start gap-4 sm:gap-5">
-            <button
-              type="button"
-              onClick={() => setQrOpen(true)}
-              aria-label={`Open QR code for @${profile.nickname}`}
-              className="group flex w-20 shrink-0 flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-2 text-[10px] font-medium uppercase tracking-wide text-secondary transition-colors hover:border-white/40 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-            >
-              <QRCodeCanvas value={profileUrl} size={64} className="size-16" />
-              <span className="group-hover:text-white">QR code</span>
-            </button>
             <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
               {profile.avatarUrl ? (
                 <img
@@ -327,13 +321,26 @@ export function UserPage() {
                 Edit profile
               </Button>
             )}
+            <button
+              type="button"
+              onClick={() => setQrOpen(true)}
+              aria-label={`Open QR code for @${profile.nickname}`}
+              className="group flex w-24 shrink-0 flex-col items-center gap-2 rounded-2xl  bg-white/[0.04] p-4 text-[10px] font-medium uppercase tracking-wide text-secondary transition-colors hover:border-white/40 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            >
+              <QRCodeCanvas value={profileUrl} size={64} className="size-16" />
+              <span className="group-hover:text-white">QR code</span>
+            </button>
           </div>
         </Container>
 
         <ResponsiveDialog
           open={qrOpen}
           onOpenChange={setQrOpen}
-          title={isOwnProfile ? "Your profile QR code" : `${profile.name}'s profile QR code`}
+          title={
+            isOwnProfile
+              ? "Your profile QR code"
+              : `${profile.name}'s profile QR code`
+          }
         >
           <div className="flex flex-col items-center gap-5 pt-2">
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
@@ -345,11 +352,19 @@ export function UserPage() {
                   ? "Share this code to open your profile."
                   : `Scan this code to open @${profile.nickname}'s profile.`}
               </p>
-              <p className="mt-2 break-all text-xs text-teritary">{profileUrl}</p>
+              <p className="mt-2 break-all text-xs text-teritary">
+                {profileUrl}
+              </p>
             </div>
-            <Button variant="outline" className="w-full" onClick={downloadBrandedQr}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={downloadBrandedQr}
+            >
               <Download className="size-4" />
-              {isOwnProfile ? "Download your QR code" : "Download QR code for this profile"}
+              {isOwnProfile
+                ? "Download your QR code"
+                : "Download QR code for this profile"}
             </Button>
           </div>
         </ResponsiveDialog>

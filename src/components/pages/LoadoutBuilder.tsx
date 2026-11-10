@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { WeaponCard } from "@/components/organisms/WeaponCard";
 import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
+import { apexAttachmentIconUrl } from "@/lib/apexAttachmentIcon";
 import { AttachmentGroupIcon } from "@/components/atoms/AttachmentGroupIcon";
 import { builderAttachmentImageUrl } from "@/lib/builderAttachmentImages";
 import {
@@ -318,7 +319,7 @@ function AttachmentPickerList({
                     : " hover:bg-white/[0.05]",
                 )}
               >
-                <AttachmentIcon attachment={att} className="size-6" />
+                <AttachmentIcon attachment={att} className="size-8" />
                 <span className="flex-1 min-w-0">
                   <span className="block truncate">{att.displayName ?? att.name}</span>
                   {att.subtypeLabel && att.subtypeLabel !== att.displayName && <span className="block truncate text-xs text-teritary">{att.subtypeLabel}</span>}
@@ -1084,13 +1085,15 @@ export function LoadoutBuilder() {
       subtypeLabel: attachment.subtypeLabel !== undefined
         ? attachment.subtypeLabel
         : subtypeByAssetId.get(attachment.stats?.assetId ?? "") ?? null,
-      imageUrl: attachment.imageUrl ?? (gameId === "mw4"
-        ? builderAttachmentImageUrl(
-            attachment.stats?.assetId,
-            assetsById,
-            attachment.name,
-          )
-        : null),
+      imageUrl: isApexAttachmentType(attachment.type)
+        ? apexAttachmentIconUrl(attachment.typeImageUrl, gameId)
+        : attachment.imageUrl ?? (gameId === "mw4"
+          ? builderAttachmentImageUrl(
+              attachment.stats?.assetId,
+              assetsById,
+              attachment.name,
+            )
+          : null),
     }))
     .filter(
       (attachment) => {
@@ -1763,12 +1766,12 @@ export function LoadoutBuilder() {
                               <img
                                 src={selectedImageUrl}
                                 alt=""
-                                className="size-9 shrink-0 object-contain"
+                                className="size-10 shrink-0 object-contain"
                               />
                             ) : !lockedSlot && selectedAttachment ? (
                               <AttachmentIcon
                                 attachment={selectedAttachment}
-                                className="size-8"
+                                className="size-10"
                               />
                             ) : (
                               <AttachmentGroupIcon

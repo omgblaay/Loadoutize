@@ -145,7 +145,7 @@ export function OvalPlacementTest() {
                         className={`absolute flex w-[200px] items-center gap-2 rounded-lg bg-[#151315]/95 py-1.5 pl-1.5 pr-3 text-left shadow-[0_8px_24px_rgba(0,0,0,0.45)] hover:border-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${isSelected ? "z-20 border border-white/70" : "z-10 border border-white/10"}`}
                         style={{ left: `${position.x}%`, top: `${position.y}%`, transform: getOvalAttachmentBadgeTransform(position.percent) }}
                       >
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/5 text-xs font-semibold text-white/70">{slot.slice(0, 2).toUpperCase()}</span>
+                        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/5 text-sm font-semibold text-white/70">{slot.slice(0, 2).toUpperCase()}</span>
                         <span className="flex min-w-0 flex-col leading-tight">
                           <span className="truncate text-sm font-medium uppercase text-white">{slot === "cylinder" ? "Revolver cylinder" : `${slot} attachment`}</span>
                           <span className="truncate text-[9px] uppercase tracking-[0.1em] text-white/50">{slotLabel(slot)}</span>
