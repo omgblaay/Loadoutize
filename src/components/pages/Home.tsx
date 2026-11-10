@@ -22,7 +22,7 @@ import { SignInRequiredDialog } from "@/components/molecules/SignInRequiredDialo
 import { NavIcon } from "@/components/atoms/NavIcon";
 import { useAuth } from "@/providers/AuthProvider";
 import gameLogo from "figma:asset/mw4_logo.png";
-import extensionIcon from "../../../extension/youtube-loadouts/icon-192.png";
+import extensionIcon from "@/assets/youtube-loadouts-icon-192.png";
 import chromeIcon from "@/assets/browser-icons/chrome.svg";
 import chromeWebStoreIcon from "@/assets/browser-icons/chrome-web-store.svg";
 import edgeIcon from "@/assets/browser-icons/edge.svg";
