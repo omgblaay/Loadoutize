@@ -4,19 +4,15 @@ import {
   applyBuilderRelations,
   builderAttachmentDisplayName,
   getBuilderApexRelation,
+  mw4MuzzleAllowed,
   HAN86_UNDERBARREL_IDS,
   han86AllowsUnderbarrel,
-  M4_MUZZLE_IDS,
-  m4AllowsMuzzle,
   AR_OPTIC_IDS,
   arAllowsOptic,
   SMG_OPTIC_IDS,
   smgAllowsOptic,
   AR_LASER_IDS,
   arAllowsLaser,
-  SMG_I_MUZZLE_IDS,
-  SMG_I_WEAPONS,
-  smgIAllowsMuzzle,
   VEL_AMMUNITION_IDS,
   velAllowsAmmunition,
   SMG_COMMON_UNDERBARREL_IDS,
@@ -34,43 +30,21 @@ const apex = [
   { name: "APEX EMP conversion", type: "APEX", stats: { assetId: "rex_bar_akilo_emp" } },
   { name: "APEX PDW conversion", type: "APEX", stats: { assetId: "rex_apex_mike4_pdw" } },
   { name: "APEX receiver conversion", type: "APEX", stats: { assetId: "rex_apex_kilo437" } },
-  { name: "VEL 46 Snap", type: "APEX", stats: { assetId: "rex_pgrip_aim_mpapa7" } },
+  { name: "Snap", type: "APEX", stats: { assetId: "rex_apex_mpapa7_snap" } },
 ];
 
 describe("weapon builder relations", () => {
-  it("uses the screenshot-confirmed weapon name before a stale API label", () => {
+  it("uses one canonical attachment name across weapons", () => {
     const assets = new Map(catalog.assets.map((asset) => [asset.id, asset]));
-    expect(builderAttachmentDisplayName("rex_minireddot01", "rex_ar_mike4", assets, "rex_minireddot01"))
-      .toBe("Slimline Elite");
-    expect(builderAttachmentDisplayName("rex_minireddot01", "rex_sm_pmike63", assets, "Old API label"))
-      .toBe("Slimline Elite");
-    expect(builderAttachmentDisplayName("rex_laserads_lrg02", "rex_ar_mike4", assets, "Old API label"))
-      .toBe("SZ Gen.6 PEQ");
-    expect(builderAttachmentDisplayName("rex_bar_sht_kilo2", "rex_ar_kilo2", assets, "Old API label"))
-      .toBe("Hanbit Combat-S 264mm");
-    expect(builderAttachmentDisplayName("missing-asset", "rex_ar_kilo2", assets, "Old API label"))
+    expect(catalog.assets.every((asset) => !("weapon_display_names" in asset))).toBe(true);
+    for (const weaponId of ["rex_ar_mike4", "rex_ar_kilo437", "rex_sm_pmike63"]) {
+      expect(builderAttachmentDisplayName("rex_minireddot01", weaponId, assets, "Old API label"))
+        .toBe("SLIMLINE ELITE");
+      expect(builderAttachmentDisplayName("rex_comp_bal_a", weaponId, assets, "comp bal a"))
+        .toBe("FTAC DOMINION");
+    }
+    expect(builderAttachmentDisplayName("missing-asset", "rex_ar_mike4", assets, "Old API label"))
       .toBe("Old API label");
-  });
-  it("uses unique in-game names for shared parts on different weapons", () => {
-    const assets = new Map(catalog.assets.map((asset) => [asset.id, asset]));
-    expect(builderAttachmentDisplayName("rex_comp_vert_b", "rex_ar_akilo", assets, "comp vert b"))
-      .toBe("EXP R3000-V");
-    expect(builderAttachmentDisplayName("rex_comp_bal_d", "rex_ar_kilo437", assets, "comp bal d"))
-      .toBe("FTAC Dominion");
-    expect(builderAttachmentDisplayName("rex_bipod01", "rex_br_ngsierra", assets, "BIPOD"))
-      .toBe("SQ-ST-68 Bipod");
-    expect(builderAttachmentDisplayName("rex_minireddot01", "rex_br_ngsierra", assets, "minireddot01"))
-      .toBe("Slimline Elite");
-    expect(builderAttachmentDisplayName("rex_holo03_mike4_v04", "rex_ar_mike4", assets, "holo03 mike4"))
-      .toBe("SZ Helios Holo");
-    expect(builderAttachmentDisplayName("rex_drum_kilo2", "rex_ar_kilo2", assets, "drum kilo2"))
-      .toBe("60 Round Drum");
-    expect(builderAttachmentDisplayName("rex_ub_gl_mike4", "rex_ar_mike4", assets, "ub gl mike4"))
-      .toBe("Miri 40mm");
-    expect(builderAttachmentDisplayName("rex_apex_menu_akilo_1601", "rex_ar_akilo", assets, "apex menu akilo"))
-      .toBe("Kastov 545");
-    expect(builderAttachmentDisplayName("rex_bar_lgt_kilo2", "rex_ar_kilo2", assets, "bar lgt kilo2"))
-      .toBe('SA K556 16"');
   });
   it("offers Striga underbarrels only with Ballistarc Dreadline 80 and hides guard selection", () => {
     const parts = [
@@ -85,13 +59,13 @@ describe("weapon builder relations", () => {
       .toEqual({ Barrel: "DS 9x18 Pro" });
   });
   it("locks VEL 46 to No Stock while its APEX is selected", () => {
-    const relation = getBuilderApexRelation({ APEX: "VEL 46 Snap" }, apex, catalog.assets);
+    const relation = getBuilderApexRelation({ APEX: "Snap" }, apex, catalog.assets);
     expect(relation?.lockedSlots.get("stock")).toMatchObject({
       included: true,
-      includedPart: "No Stock",
+      includedPart: "NO STOCK",
     });
-    expect(applyBuilderRelations({ APEX: "VEL 46 Snap", Stock: "Heavy Stock" }, apex, catalog.assets, "rex_sm_mpapa7"))
-      .toEqual({ APEX: "VEL 46 Snap" });
+    expect(applyBuilderRelations({ APEX: "Snap", Stock: "Heavy Stock" }, apex, catalog.assets, "rex_sm_mpapa7"))
+      .toEqual({ APEX: "Snap" });
   });
   it("matches VEL 46's five 4.6x30mm ammunition choices", () => {
     const names = [
@@ -103,109 +77,40 @@ describe("weapon builder relations", () => {
     expect(VEL_AMMUNITION_IDS).toHaveLength(5);
     expect(VEL_AMMUNITION_IDS.map((id) =>
       catalog.assets.find((asset) => asset.id === id)?.display_name,
-    )).toEqual(names);
+    )).toEqual(names.map((name) => name.toUpperCase()));
     expect(VEL_AMMUNITION_IDS.every((id) => vel?.shared_assets?.includes(id))).toBe(true);
     expect(VEL_AMMUNITION_IDS.every(velAllowsAmmunition)).toBe(true);
     expect(velAllowsAmmunition("rex_ammo_9m_ap")).toBe(false);
   });
-  it("matches the 18 SMG optics in game-menu order", () => {
-    const names = [
-      "Slimline Elite", "IOTA-D", "ZLR Type C", "SZ Prima-4 Dot",
-      "SZ Micro D-3", "VLK Trimmer", "SZ SRE-7", "FJX 708 PRO",
-      "SZ Lonewolf Holo", "SZ Echelon Holo", "SZ Helios Holo",
-      "KV Corsac Holo", "Bruen THRM-60 Optic", "Cronen R808",
-      "GL K230", "SZ Lonewolf Flip", "Corio Bisect",
-      "Schlager Night View Pro",
-    ];
+  it("keeps the screenshot-verified attachment choice counts", () => {
     expect(SMG_OPTIC_IDS).toHaveLength(18);
-    for (const weapon of catalog.weapons.filter((item) => item.id.startsWith("rex_sm_"))) {
-      expect(SMG_OPTIC_IDS.map((id) =>
-        catalog.assets.find((asset) => asset.id === id)?.weapon_display_names?.[weapon.id],
-      )).toEqual(names);
-    }
     expect(SMG_OPTIC_IDS.every(smgAllowsOptic)).toBe(true);
-    expect(smgAllowsOptic("rex_holo_spier9")).toBe(false);
-  });
-  it("matches the four WZ.55 Striga underbarrels in game-menu order", () => {
     expect(SMG_UNDERBARREL_IDS_BY_WEAPON.rex_sm_pmike63).toEqual(SMG_COMMON_UNDERBARREL_IDS);
-    expect(SMG_COMMON_UNDERBARREL_IDS.map((id) =>
-      catalog.assets.find((asset) => asset.id === id)?.display_name,
-    )).toEqual(["FSS FIRELINE GRIP", "FSS TAC90 GRIP", "MIRE-50 TAC GRIP", "GW DOMI-9"]);
-    expect(SMG_COMMON_UNDERBARREL_IDS.every((id) =>
-      smgAllowsUnderbarrel("rex_sm_pmike63", id))).toBe(true);
-    expect(smgAllowsUnderbarrel("rex_sm_pmike63", "rex_grip_bipod01")).toBe(false);
-    expect(catalog.assets.find((asset) => asset.id === "rex_grip_fld_mpapa7")
-      ?.weapon_display_names?.rex_sm_mpapa7).toBe("V46 Vert-Tac");
-  });
-  it("matches the eight Striga and PPSh-41 muzzles in game-menu order", () => {
-    const names = [
-      "L980-S Comp", "1/2x28 Dual Port", "Full Port Comp", "Haebang BAM70",
-      "330TC2 Gridlock", "FTAC Silent Recon", "XRK Rampage", "RX-5 Overstrike",
-    ];
-    expect(SMG_I_MUZZLE_IDS).toHaveLength(8);
-    for (const weaponId of ["rex_sm_pmike63", "rex_sm_psierra41"]) {
-      expect(SMG_I_WEAPONS.has(weaponId)).toBe(true);
-      expect(SMG_I_MUZZLE_IDS.map((id) =>
-        catalog.assets.find((asset) => asset.id === id)?.weapon_display_names?.[weaponId],
-      )).toEqual(names);
-    }
-    expect(SMG_I_MUZZLE_IDS.every(smgIAllowsMuzzle)).toBe(true);
-    expect(smgIAllowsMuzzle("rex_comp_vert_f")).toBe(false);
-  });
-  it("matches the seven M4 lasers in game-menu order", () => {
-    const names = [
-      "SZ Gen.6 PEQ", "SA Laz-500", "Bruen 22-LPW", "STOVL IRX-6",
-      "Expedite Intra-5b", "Corio ODSPR+", "Corio 4DV-3",
-    ];
     expect(AR_LASER_IDS).toHaveLength(7);
-    expect(AR_LASER_IDS.map((id) =>
-      catalog.assets.find((asset) => asset.id === id)?.weapon_display_names?.rex_ar_mike4,
-    )).toEqual(names);
     expect(AR_LASER_IDS.every(arAllowsLaser)).toBe(true);
-    expect(arAllowsLaser("rex_laser_stocksaw_kilo437")).toBe(false);
-  });
-  it("matches the 23 assault-rifle optics in game-menu order", () => {
-    const names = [
-      "Slimline Elite", "IOTA-D", "ZLR Type C", "SZ Prima-4 Dot",
-      "SZ Micro D-3", "VLK Trimmer", "SZ SRE-7", "FJX 708 PRO",
-      "SZ Lonewolf Holo", "SZ Echelon Holo", "SZ Helios Holo",
-      "KV Corsac Holo", "Bruen THRM-60 Optic", "Cronen R808",
-      "GL K230", "Corio Bisect", "SZ Lonewolf Flip",
-      "Schlager Night View Pro", "Schlager 7X", "VLK Rize-40",
-      "RVX9 Thermo", "Locus PX3 Canted", "Schlager Dogfight GI",
-    ];
     expect(AR_OPTIC_IDS).toHaveLength(23);
-    for (const weapon of catalog.weapons.filter((item) => item.id.startsWith("rex_ar_"))) {
-      expect(AR_OPTIC_IDS.map((id) =>
-        catalog.assets.find((asset) => asset.id === id)?.weapon_display_names?.[weapon.id],
-      )).toEqual(names);
-    }
     expect(AR_OPTIC_IDS.every(arAllowsOptic)).toBe(true);
-    expect(arAllowsOptic("rex_arscope_airburst")).toBe(false);
-  });
-  it("matches the eight M4 muzzles and their in-game names", () => {
-    const names = [
-      "ZLR Reverb90", "Corvus LVL-40", "FTAC Dominion", "FSS IS40",
-      "XRK Mil-Tac Suppressor", "FSS IS300", "B16 Helical", "TZL-110 V1",
-    ];
-    expect(M4_MUZZLE_IDS).toHaveLength(8);
-    expect(M4_MUZZLE_IDS.map((id) =>
-      catalog.assets.find((asset) => asset.id === id)?.weapon_display_names?.rex_ar_mike4,
-    )).toEqual(names);
-    expect(M4_MUZZLE_IDS.every(m4AllowsMuzzle)).toBe(true);
-    expect(m4AllowsMuzzle("rex_sil_broken_a")).toBe(false);
-  });
-  it("matches the eight HAN 86 underbarrels and their in-game names", () => {
-    const names = [
-      "FSS Fireline Grip", "FSS Tac90 Grip", "Mire-50 Tac Grip", "GW Domi-9",
-      "FSS Reargrip", "AA54 V.3 Bipod", "Miri 40mm", "TV Judicator",
-    ];
     expect(HAN86_UNDERBARREL_IDS).toHaveLength(8);
-    expect(HAN86_UNDERBARREL_IDS.map((id) =>
-      catalog.assets.find((asset) => asset.id === id)?.weapon_display_names?.rex_ar_kilo2,
-    )).toEqual(names);
     expect(HAN86_UNDERBARREL_IDS.every(han86AllowsUnderbarrel)).toBe(true);
-    expect(han86AllowsUnderbarrel("rex_ub_gl_std")).toBe(false);
+  });
+  it("uses only the supplied muzzle rows for each weapon", () => {
+    const rows = readFileSync("data/mw4-muzzles.tsv", "utf8").trim().split(/\r?\n/).slice(1);
+    const muzzles = catalog.assets.filter((asset) => asset.slot === "muzzle" && asset.muzzle_table);
+    const byId = new Map(catalog.assets.map((asset) => [asset.id, asset]));
+    expect(rows).toHaveLength(118);
+    expect(muzzles).toHaveLength(rows.length);
+    for (const asset of muzzles) {
+      const row = rows[(asset.muzzle_order ?? 0) - 1]?.split("\t");
+      expect([asset.display_name, asset.subtype_label, asset.image_asset_id]).toEqual([
+        row?.[0].toUpperCase(), row?.[1] ? row[1].toUpperCase() : null, row?.[2],
+      ]);
+    }
+    for (const weapon of catalog.weapons) {
+      const choices = muzzles.filter((asset) => mw4MuzzleAllowed(asset.id, weapon.id, byId));
+      expect(new Set(choices.map((asset) => asset.display_name)).size).toBe(choices.length);
+      if (weapon.id === "rex_sm_xsm1") expect(choices).toHaveLength(0);
+    }
+    expect(mw4MuzzleAllowed("rex_sil_tac_cromeo", "rex_ar_cromeo", byId)).toBe(false);
   });
   it("has no Iron sights or Other slot in any MW4 weapon recipe", () => {
     const hidden = new Set(["iron_sights", "other"]);

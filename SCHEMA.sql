@@ -141,6 +141,8 @@ CREATE TABLE attachments (
   game_id TEXT REFERENCES games(id) ON DELETE CASCADE,
   attachment_type_id INTEGER REFERENCES attachment_types(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
+  display_name TEXT,
+  subtype_label TEXT,
   image UUID,
   description TEXT,
   stats JSONB,
@@ -158,10 +160,14 @@ SELECT
   a.name,
   COALESCE(a.image, at.image) as image,
   a.description,
-  a.stats,
+  COALESCE(a.stats, '{}'::jsonb) || jsonb_strip_nulls(jsonb_build_object(
+    'displayName', a.display_name, 'subtypeLabel', a.subtype_label)) AS stats,
   a.created_at,
   at.name as type_name,
-  at.slug as type_slug
+  at.slug as type_slug,
+  at.image as type_image,
+  a.display_name,
+  a.subtype_label
 FROM attachments a
 LEFT JOIN attachment_types at ON a.attachment_type_id = at.id;
 

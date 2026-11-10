@@ -307,8 +307,15 @@ export function AttachmentMetaListView() {
                       <span className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-black/20 p-2">
                         <AttachmentIcon attachment={metric.attachment} className="size-12" />
                       </span>
-                      <span className="truncate font-mono text-sm uppercase">
-                        {attachmentDisplayName(metric.attachment)}
+                      <span className="flex min-w-0 flex-col gap-0.5">
+                        <span className="truncate font-mono text-sm uppercase">
+                          {attachmentDisplayName(metric.attachment)}
+                        </span>
+                        {metric.attachment.subtypeLabel && (
+                          <span className="truncate text-[11px] uppercase tracking-[0.08em] text-teritary">
+                            {metric.attachment.subtypeLabel}
+                          </span>
+                        )}
                       </span>
                     </span>
                     <span className="truncate text-sm text-secondary">

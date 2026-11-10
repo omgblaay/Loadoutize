@@ -9,6 +9,12 @@ when someone is editing content — the live app reads Postgres directly via
 the edge function in `supabase/functions/server/index.tsx` and serves images
 straight from Supabase Storage, with no runtime dependency on Directus.
 
+Attachment names shown to users are stored in `attachments.display_name` and
+optional `attachments.subtype_label`, both editable Text Input fields in Directus.
+They are not stored in `attachments.stats`. The `attachments_with_images` view
+also projects them into its legacy `stats` response for older deployed API
+versions; the database columns remain authoritative.
+
 ## One-time setup
 
 1. **Create a public Storage bucket.** Supabase Dashboard → Storage →

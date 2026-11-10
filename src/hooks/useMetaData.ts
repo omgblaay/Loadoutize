@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { projectId, publicAnonKey } from "../../utils/supabase/info";
 import { isVisibleConfig } from "@/lib/contentVisibility";
 import { visibleWeaponCatalog } from "@/lib/weaponCategories";
+import { builderAttachmentImageUrl, loadBuilderAttachmentAssets } from "@/lib/builderAttachmentImages";
 
 export interface MetaWeapon {
   id: string;
@@ -37,11 +38,13 @@ export interface MetaLoadout {
 export interface MetaAttachment {
   id: string;
   name: string;
+  displayName?: string | null;
+  subtypeLabel?: string | null;
   type: string;
   typeSlug: string;
   typeImageUrl: string | null;
   imageUrl: string | null;
-  stats?: { displayName?: string; imagePath?: string; assetId?: string } | null;
+  stats?: { displayName?: string; subtypeLabel?: string | null; imagePath?: string; assetId?: string } | null;
 }
 
 export interface MetaTag {
@@ -102,13 +105,23 @@ export function useMetaData(gameId: string) {
       getJson("attachments"),
       getJson("perks"),
       getJson("tags"),
+      gameId === "mw4" ? loadBuilderAttachmentAssets().catch(() => []) : Promise.resolve([]),
     ])
       .then(
-        ([loadoutsData, weaponsData, attachmentsData, perksData, tagsData]) => {
+        ([loadoutsData, weaponsData, attachmentsData, perksData, tagsData, builderAssets]) => {
+          const assetsById = new Map(builderAssets.map((asset) => [asset.id, asset]));
           setData({
             loadouts: (loadoutsData.loadouts ?? []).filter(isVisibleConfig),
             weapons: visibleWeaponCatalog<MetaWeapon>(weaponsData.weapons ?? []),
-            attachments: attachmentsData.attachments ?? [],
+            attachments: (attachmentsData.attachments ?? []).map((attachment: MetaAttachment) => ({
+              ...attachment,
+              subtypeLabel: attachment.subtypeLabel || attachment.stats?.subtypeLabel ||
+                (attachment.stats?.assetId ? assetsById.get(attachment.stats.assetId)?.subtype_label : null) || null,
+              imageUrl: attachment.imageUrl ||
+                (gameId === "mw4"
+                  ? builderAttachmentImageUrl(attachment.stats?.assetId, assetsById, attachment.name)
+                  : null) || attachment.stats?.imagePath || null,
+            })),
             perks: perksData.perks ?? [],
             tags: tagsData.tags ?? [],
           });

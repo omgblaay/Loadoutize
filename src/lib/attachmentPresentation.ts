@@ -1,12 +1,13 @@
 export interface PresentableAttachment {
   name: string;
+  displayName?: string | null;
   type?: string | null;
   imageUrl?: string | null;
   stats?: { displayName?: string; imagePath?: string } | null;
 }
 
 export const attachmentDisplayName = (attachment: PresentableAttachment) =>
-  attachment.stats?.displayName || attachment.name;
+  attachment.displayName || attachment.stats?.displayName || attachment.name;
 
 export const attachmentImageUrl = (attachment: PresentableAttachment) =>
   attachment.imageUrl || attachment.stats?.imagePath || null;

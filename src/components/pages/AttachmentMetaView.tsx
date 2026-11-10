@@ -188,16 +188,21 @@ export function AttachmentMetaView() {
             <h1 className="mt-4 text-3xl uppercase sm:text-4xl">
               {attachmentDisplayName(attachment)}
             </h1>
+            {attachment.subtypeLabel && (
+              <p className="mt-1 text-sm uppercase tracking-[0.1em] text-teritary">
+                {attachment.subtypeLabel}
+              </p>
+            )}
             <p className="mt-2 text-sm text-teritary">
               Used in {attachmentLoadouts.length} community config
               {attachmentLoadouts.length === 1 ? "" : "s"}
             </p>
           </div>
-          <div className="flex absolute right-0 top-0 min-h-36">
+          <div className="flex min-h-36 items-center justify-center md:justify-end">
             {isApexAttachment(attachment) || attachmentImageUrl(attachment) ? (
               <AttachmentIcon
                 attachment={attachment}
-                className="size-32 opacity-10"
+                className="size-36"
               />
             ) : (
               <Paperclip className="size-12 text-white/15" />

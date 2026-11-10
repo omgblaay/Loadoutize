@@ -30,10 +30,11 @@ try {
   await client.query("SET LOCAL statement_timeout = '30s'");
   const named = await client.query(`
     UPDATE public.attachments AS a
-    SET stats = coalesce(a.stats, '{}'::jsonb) || jsonb_build_object('displayName', n.display_name)
+    SET display_name = n.display_name,
+      stats = coalesce(a.stats, '{}'::jsonb) - 'displayName'
     FROM jsonb_to_recordset($1::jsonb) AS n(asset_id text, display_name text)
     WHERE a.game_id = 'mw4' AND a.stats->>'assetId' = n.asset_id
-      AND a.stats->>'displayName' IS DISTINCT FROM n.display_name
+      AND (a.display_name IS DISTINCT FROM n.display_name OR a.stats ? 'displayName')
     RETURNING a.stats->>'assetId' AS asset_id
   `, [JSON.stringify(Object.entries(names).map(([asset_id, display_name]) => ({asset_id, display_name})))]);
   const hiddenRows = await client.query(`
@@ -46,7 +47,7 @@ try {
     RETURNING a.stats->>'assetId' AS asset_id
   `, [hidden]);
   const verified = await client.query(`
-    SELECT stats->>'assetId' AS asset_id, stats->>'displayName' AS display_name,
+    SELECT stats->>'assetId' AS asset_id, display_name,
       stats->>'builderSelectable' AS builder_selectable, stats->'weaponIds' AS weapon_ids
     FROM public.attachments
     WHERE game_id = 'mw4' AND stats->>'assetId' = ANY($1::text[])

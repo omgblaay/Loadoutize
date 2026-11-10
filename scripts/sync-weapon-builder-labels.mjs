@@ -14,7 +14,6 @@ const entries = catalog.assets.map((asset) => ({
     ? asset.subtype_label
     : asset.display_name || asset.title,
   subtype_label: asset.subtype_label ?? null,
-  weapon_display_names: asset.weapon_display_names ?? {},
 }));
 const client = new pg.Client({ connectionString: process.env.SUPABASE_DB_CONNECTION_STRING, connectionTimeoutMillis: 10000 });
 try {
@@ -27,26 +26,28 @@ try {
     SELECT a.stats->>'assetId' AS asset_id
     FROM public.attachments a
     JOIN jsonb_to_recordset($1::jsonb) AS n(
-      asset_id text, display_name text, subtype_label text, weapon_display_names jsonb
+      asset_id text, display_name text, subtype_label text
     ) ON a.stats->>'assetId' = n.asset_id
     WHERE a.game_id = 'mw4' AND (
-      a.stats->>'displayName' IS DISTINCT FROM n.display_name OR
-      a.stats->>'subtypeLabel' IS DISTINCT FROM n.subtype_label OR
-      coalesce(a.stats->'weaponDisplayNames', '{}'::jsonb) IS DISTINCT FROM n.weapon_display_names
+      a.display_name IS DISTINCT FROM n.display_name OR
+      a.subtype_label IS DISTINCT FROM n.subtype_label OR
+      a.stats ? 'displayName' OR a.stats ? 'subtypeLabel' OR
+      a.stats ? 'weaponDisplayNames'
     )`, [payload]);
   console.log(`${changes.rowCount} attachment label records need updating`);
   if (apply) {
     const updated = await client.query(`
-      UPDATE public.attachments a SET stats = coalesce(a.stats, '{}'::jsonb) ||
-        jsonb_build_object('displayName', n.display_name, 'subtypeLabel', n.subtype_label,
-                           'weaponDisplayNames', n.weapon_display_names)
+      UPDATE public.attachments a
+      SET display_name = n.display_name, subtype_label = n.subtype_label,
+        stats = coalesce(a.stats, '{}'::jsonb) - 'displayName' - 'subtypeLabel' - 'weaponDisplayNames'
       FROM jsonb_to_recordset($1::jsonb) AS n(
-        asset_id text, display_name text, subtype_label text, weapon_display_names jsonb
+        asset_id text, display_name text, subtype_label text
       )
       WHERE a.game_id = 'mw4' AND a.stats->>'assetId' = n.asset_id AND (
-        a.stats->>'displayName' IS DISTINCT FROM n.display_name OR
-        a.stats->>'subtypeLabel' IS DISTINCT FROM n.subtype_label OR
-        coalesce(a.stats->'weaponDisplayNames', '{}'::jsonb) IS DISTINCT FROM n.weapon_display_names
+        a.display_name IS DISTINCT FROM n.display_name OR
+        a.subtype_label IS DISTINCT FROM n.subtype_label OR
+        a.stats ? 'displayName' OR a.stats ? 'subtypeLabel' OR
+        a.stats ? 'weaponDisplayNames'
       )`, [payload]);
     if (updated.rowCount !== changes.rowCount) throw new Error("Attachment label update count changed during sync");
     const aliases = await client.query(`

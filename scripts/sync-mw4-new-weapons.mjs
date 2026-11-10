@@ -88,13 +88,12 @@ try {
     evidence: asset.evidence ?? null,
   }));
   const insertedAssets = await db.query(`INSERT INTO public.attachments
-      (game_id, attachment_type_id, name, image, stats)
-    SELECT 'mw4', t.id, a.name, a.image_id::uuid,
+      (game_id, attachment_type_id, name, display_name, subtype_label, image, stats)
+    SELECT 'mw4', t.id, a.name, a.display_name, a.subtype_label, a.image_id::uuid,
       jsonb_build_object('assetId', a.asset_id,
         'weaponIds', a.weapon_ids, 'families', a.families,
         'composable', a.composable, 'evidence', a.evidence,
-        'displayName', a.display_name, 'subtypeLabel', a.subtype_label,
-        'weaponDisplayNames', '{}'::jsonb, 'builderSelectable', true)
+        'builderSelectable', true)
     FROM jsonb_to_recordset($1::jsonb) AS a(asset_id text, name text, slot text,
       image_id text, display_name text, subtype_label text, image_path text,
       weapon_ids jsonb, families jsonb, composable boolean, evidence text)

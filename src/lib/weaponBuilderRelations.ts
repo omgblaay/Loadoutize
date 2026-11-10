@@ -11,17 +11,6 @@ export const HAN86_UNDERBARREL_IDS = [
   "rex_ub_sh_kilo2",
 ] as const;
 
-export const M4_MUZZLE_IDS = [
-  "rex_comp_vert_a",
-  "rex_comp_bal_a",
-  "rex_comp_hoz_a",
-  "rex_sil_lgt_a",
-  "rex_sil_tac_a",
-  "rex_sil_hvy_a",
-  "rex_breach_a",
-  "rex_flash_a",
-] as const;
-
 export const AR_OPTIC_IDS = [
   "rex_minireddot01", "rex_minireddot02", "rex_minireddot03",
   "rex_minireddot04", "rex_reflex01", "rex_reflex02", "rex_reflex03",
@@ -46,20 +35,10 @@ export const AR_LASER_IDS = [
   "rex_flashlgt_lrg01",
 ] as const;
 
-export const SMG_I_MUZZLE_IDS = [
-  "rex_comp_vert_i", "rex_comp_hoz_i", "rex_comp_bal_i",
-  "rex_sil_lgt_i", "rex_sil_tac_i", "rex_sil_hvy_i",
-  "rex_breach_i", "rex_flash_i",
-] as const;
-
 export const VEL_AMMUNITION_IDS = [
   "rex_ammo_4x30_ap", "rex_ammo_4x30_fr", "rex_ammo_4x30_hp",
   "rex_ammo_4x30_hv", "rex_ammo_4x30_op",
 ] as const;
-
-export const SMG_I_WEAPONS = new Set([
-  "rex_sm_pmike63", "rex_sm_psierra41", "rex_sm_xsm1",
-]);
 
 export const SMG_COMMON_UNDERBARREL_IDS = [
   "rex_grip_ang", "rex_grip_ang_short", "rex_grip_vert",
@@ -80,11 +59,6 @@ export function han86AllowsUnderbarrel(assetId?: string): boolean {
   return Boolean(assetId && HAN86_UNDERBARREL_IDS.some((id) => id === assetId));
 }
 
-/** The eight muzzle attachments in the M4's in-game menu. */
-export function m4AllowsMuzzle(assetId?: string): boolean {
-  return Boolean(assetId && M4_MUZZLE_IDS.some((id) => id === assetId));
-}
-
 /** The 23 optics shared by the assault-rifle class menu. */
 export function arAllowsOptic(assetId?: string): boolean {
   return Boolean(assetId && AR_OPTIC_IDS.some((id) => id === assetId));
@@ -97,10 +71,6 @@ export function smgAllowsOptic(assetId?: string): boolean {
 /** The seven laser choices in the assault-rifle class menu. */
 export function arAllowsLaser(assetId?: string): boolean {
   return Boolean(assetId && AR_LASER_IDS.some((id) => id === assetId));
-}
-
-export function smgIAllowsMuzzle(assetId?: string): boolean {
-  return Boolean(assetId && SMG_I_MUZZLE_IDS.some((id) => id === assetId));
 }
 
 export function velAllowsAmmunition(assetId?: string): boolean {
@@ -118,22 +88,33 @@ export interface BuilderRelationAsset {
   title?: string;
   display_name?: string | null;
   subtype_label?: string | null;
-  weapon_display_names?: Record<string, string>;
+  muzzle_table?: boolean;
+  weapon_ids?: string[];
+  muzzle_order?: number;
+  image_asset_id?: string;
   locked_slots?: string[];
   dependencies?: Record<string, string>;
   default_parts?: Record<string, string>;
 }
 
-/** Prefer a weapon-specific in-game label, then the catalog's shared label. */
+export function mw4MuzzleAllowed(
+  assetId: string | undefined,
+  weaponId: string,
+  assetsById: Map<string, BuilderRelationAsset>,
+): boolean {
+  const tableEntry = assetId ? assetsById.get(assetId) : undefined;
+  return Boolean(tableEntry?.muzzle_table && tableEntry.weapon_ids?.includes(weaponId));
+}
+
+/** An attachment asset has one canonical name across every compatible weapon. */
 export function builderAttachmentDisplayName(
   assetId: string | undefined,
-  weaponId: string | undefined,
+  _weaponId: string | undefined,
   assetsById: Map<string, BuilderRelationAsset>,
   fallback: string,
 ): string {
   const asset = assetId ? assetsById.get(assetId) : undefined;
-  return (weaponId && asset?.weapon_display_names?.[weaponId]) ||
-    asset?.display_name || fallback;
+  return asset?.display_name || fallback;
 }
 
 export interface BuilderAttachment {

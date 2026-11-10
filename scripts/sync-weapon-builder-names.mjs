@@ -18,16 +18,14 @@ try {
     display_name: weapon.display_name || `${weapon.title} · ${weapon.id}`,
   })))]);
   const attachments = await client.query(`UPDATE public.attachments a
-    SET name = n.internal_name,
-        stats = coalesce(a.stats, '{}'::jsonb) || jsonb_build_object(
-          'displayName', n.display_name,
-          'subtypeLabel', n.subtype_label,
-          'weaponDisplayNames', n.weapon_display_names,
+    SET name = n.internal_name, display_name = n.display_name,
+        subtype_label = n.subtype_label,
+        stats = (coalesce(a.stats, '{}'::jsonb) - 'displayName' - 'subtypeLabel' - 'weaponDisplayNames') || jsonb_build_object(
           'composable', n.composable,
           'builderSelectable', n.builder_selectable,
           'weaponIds', n.weapon_ids)
     FROM jsonb_to_recordset($1::jsonb) AS n(asset_id text, internal_name text,
-    display_name text, subtype_label text, weapon_display_names jsonb, composable boolean, builder_selectable boolean, weapon_ids jsonb)
+    display_name text, subtype_label text, composable boolean, builder_selectable boolean, weapon_ids jsonb)
     WHERE a.game_id = 'mw4' AND a.stats->>'assetId' = n.asset_id`,
     [JSON.stringify(catalog.assets.map((asset) => {
       const weaponIds = builderWeaponIds(asset, catalog);
@@ -38,7 +36,6 @@ try {
         ? asset.subtype_label
         : asset.display_name || asset.title,
       subtype_label: asset.subtype_label ?? null,
-      weapon_display_names: asset.weapon_display_names ?? {},
       composable: asset.composable === true,
       builder_selectable: weaponIds.length > 0,
       weapon_ids: weaponIds,

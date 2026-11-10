@@ -39,14 +39,13 @@ try {
   const present = new Set(existing.rows.map((row) => row.asset_id));
   const pending = entries.filter((entry) => !present.has(entry.assetId));
   if (pending.length) {
-    await db.query(`INSERT INTO public.attachments (game_id, attachment_type_id, name, image, stats)
-      SELECT 'mw4', t.id, a.name,
+    await db.query(`INSERT INTO public.attachments (game_id, attachment_type_id, name, display_name, subtype_label, image, stats)
+      SELECT 'mw4', t.id, a.name, a.display_name, a.subtype_label,
         (SELECT f.id FROM public.directus_files f
           WHERE f.filename_download = split_part(a.image_path, '/',
             array_length(string_to_array(a.image_path, '/'), 1)) LIMIT 1),
         jsonb_build_object('assetId', a.asset_id,
-          'displayName', a.display_name, 'subtypeLabel', a.subtype_label,
-          'weaponDisplayNames', a.weapon_display_names, 'weaponIds', a.weapon_ids,
+          'weaponIds', a.weapon_ids,
           'composable', a.composable, 'builderSelectable', true,
           'families', a.families, 'evidence', a.evidence)
       FROM jsonb_to_recordset($1::jsonb) AS a(asset_id text, slot text,
@@ -62,14 +61,14 @@ try {
     })))]);
   }
   await db.query(`UPDATE public.attachments a
-    SET stats = a.stats || jsonb_build_object('weaponIds', e.weapon_ids,
-      'displayName', e.display_name,
+    SET display_name = e.display_name,
+      stats = (a.stats - 'displayName' - 'subtypeLabel') || jsonb_build_object('weaponIds', e.weapon_ids,
       'builderSelectable', true)
     FROM jsonb_to_recordset($1::jsonb) AS e(asset_id text, weapon_ids jsonb,
       image_path text, display_name text)
     WHERE a.game_id = 'mw4' AND a.stats->>'assetId' = e.asset_id
       AND (a.stats->'weaponIds' IS DISTINCT FROM e.weapon_ids OR
-        a.stats->>'displayName' IS DISTINCT FROM e.display_name OR
+        a.display_name IS DISTINCT FROM e.display_name OR
         a.stats->'builderSelectable' IS DISTINCT FROM 'true'::jsonb)`,
   [JSON.stringify(entries.map((entry) => ({ asset_id: entry.assetId,
     weapon_ids: entry.weaponIds, image_path: entry.imagePath,

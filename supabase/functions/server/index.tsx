@@ -709,7 +709,7 @@ app.get("/make-server-6db475c7/games/:gameId/attachments", async (c) => {
     const gameId = c.req.param("gameId");
     const { data, error } = await supabase
       .from('attachments_with_images')
-      .select('id, name, description, stats, image, type_name, type_slug, type_image')
+      .select('id, name, display_name, subtype_label, description, stats, image, type_name, type_slug, type_image')
       .eq('game_id', gameId);
     if (error) throw error;
 
@@ -717,6 +717,8 @@ app.get("/make-server-6db475c7/games/:gameId/attachments", async (c) => {
     const attachments = (data ?? []).map((a: any) => ({
       id: a.id,
       name: a.name,
+      displayName: a.display_name,
+      subtypeLabel: a.subtype_label,
       description: a.description,
       stats: a.stats,
       type: a.type_name,
@@ -1125,6 +1127,23 @@ async function resolveVideo(videoUrl: string | null | undefined): Promise<{ vide
   };
 }
 
+function youtubeVideoId(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    let id: string | null = null;
+    if (host === 'youtu.be') id = url.pathname.split('/')[1] ?? null;
+    else if (host === 'youtube.com' || host.endsWith('.youtube.com')) {
+      if (url.pathname === '/watch') id = url.searchParams.get('v');
+      else if (/^\/(shorts|live|embed)\//.test(url.pathname)) id = url.pathname.split('/')[2] ?? null;
+    }
+    return id && /^[A-Za-z0-9_-]{11}$/.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
 interface AuthorProfile {
   nickname: string;
   name: string;
@@ -1363,6 +1382,40 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId/view", async (
   } catch (error) {
     console.log(`Error incrementing views: ${error}`);
     return c.json({ error: "Failed to increment views", details: error.message }, 500);
+  }
+});
+
+// A narrow public lookup for the YouTube extension. The text filter keeps the
+// result set small; parsing the URL afterward prevents substring false matches.
+app.get("/make-server-6db475c7/youtube/loadouts", async (c) => {
+  const videoId = c.req.query('videoId');
+  if (!videoId || !/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
+    return c.json({ error: 'Invalid YouTube video ID' }, 400);
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('loadouts')
+      .select('id, game_id, name, user_name, video, created_at')
+      .eq('game_id', 'mw4')
+      .eq('is_public', true)
+      .eq('content_type', 'weapon_config')
+      .ilike('video->>url', `%${videoId}%`)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    const loadouts = (data ?? [])
+      .filter((loadout: any) => youtubeVideoId(loadout.video?.url) === videoId)
+      .map((loadout: any) => ({
+        id: loadout.id,
+        gameId: loadout.game_id,
+        name: loadout.name,
+        userName: loadout.user_name,
+      }));
+    return c.json({ loadouts });
+  } catch (error) {
+    console.log(`Error finding YouTube loadouts: ${error}`);
+    return c.json({ error: 'Failed to find YouTube loadouts' }, 500);
   }
 });
 

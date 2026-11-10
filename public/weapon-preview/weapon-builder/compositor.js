@@ -80,6 +80,26 @@ const imageCache=new Map();
 function loadImage(src){if(imageCache.has(src))return imageCache.get(src);const promise=new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>{imageCache.delete(src);reject(new Error(`Could not load ${src}`));};im.src=src;});imageCache.set(src,promise);return promise;}
 function canvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
 function rotatedPoint(x,y,angle){const c=Math.cos(angle),s=Math.sin(angle);return [x*c-y*s,x*s+y*c];}
+// The Warlord's dual-tube magazine is part of its factory silhouette, but its
+// rex_mag_xsh1 image was not recovered with the attachment sprites. Rebuild
+// the visible shell tube from the official side-view reference at card scale.
+function drawWarlordShellTube(ctx){
+  const x=58,y=92,width=224,height=19;
+  ctx.save();
+  ctx.fillStyle='rgba(31,34,35,.88)';ctx.fillRect(x,y,width,height);
+  for(let i=0;i<7;i++){
+    const left=x+3+i*31;
+    const body=ctx.createLinearGradient(0,y+3,0,y+height-3);
+    body.addColorStop(0,'#8b6660');body.addColorStop(.55,'#613234');body.addColorStop(1,'#3e2528');
+    ctx.fillStyle=body;ctx.fillRect(left,y+4,26,height-8);
+    ctx.fillStyle='#b9a078';ctx.fillRect(left+25,y+4,4,height-8);
+    ctx.fillStyle='rgba(235,218,189,.45)';ctx.fillRect(left+1,y+4,2,height-8);
+  }
+  ctx.fillStyle='rgba(224,231,226,.28)';ctx.fillRect(x,y+1,width,3);
+  ctx.fillStyle='rgba(231,236,232,.16)';ctx.fillRect(x,y+height-3,width,2);
+  ctx.strokeStyle='rgba(233,236,231,.68)';ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,width-1,height-1);
+  ctx.restore();
+}
 export class WeaponSpriteCompositor{
   constructor(catalog){this.catalog=catalog;this.assets=new Map(catalog.assets.map(a=>[a.id,a]));this.images=new Map();this.tintCache=new Map();this.referenceMounts=new Map();}
   referenceMount(slot){
@@ -125,9 +145,9 @@ export class WeaponSpriteCompositor{
       if(slot==='guard'&&dreadline)return null;
       if(slot==='underbarrel'&&!dreadline)return null;
     }
-    // Lasers are retained in the build as icon-only choices. They must not
-    // affect the composed preview, its camera bounds, guides or hit testing.
-    if(slot==='laser')return null;
+    // Ordinary lasers are icon-only. Warlord Lumen supplies a recovered
+    // full-width XSH1 laser layer that belongs in the composed preview.
+    if(slot==='laser'&&!(this.catalog.family==='xsh1'&&state.parts?.apex==='rex_apex_menu_xsh1_888'&&state.parts?.laser==='rex_laser_xsh1'))return null;
     if(slot==='rear_grip'&&this.catalog.family==='mike4'&&this.part(state,'stock')?.id==='rex_stock_mike4_pdw')return null;
     if(slot==='rear_grip'&&this.catalog.family==='bmike3'&&this.part(state,'stock')?.id!=='rex_stockno_bmike3')return null;
     if(slot==='comb'&&this.catalog.family==='bmike3'&&this.part(state,'stock')?.id==='rex_stockno_bmike3')return null;
@@ -324,6 +344,7 @@ export class WeaponSpriteCompositor{
           ctx.beginPath();ctx.rect(-p.anchor[0]*p.width+cutWidth,-p.anchor[1]*p.height,p.width-cutWidth,p.height);ctx.clip();
         }
         this.drawPart(ctx,p,slot==='receiver'||!selected||conversionPart?'#FFFFFF':state.color,state);ctx.restore();}
+      if(this.catalog.family==='xsh1')drawWarlordShellTube(ctx);
       if(guides){for(const slot of this.order()){const p=this.placement(state,slot);if(!p)continue;const active=slot===selectedSlot;ctx.strokeStyle=active?'#74dfd1':'#93aabd';ctx.lineWidth=1/scale;ctx.setLineDash([3/scale,3/scale]);ctx.strokeRect(p.bounds[0],p.bounds[1],p.bounds[2]-p.bounds[0],p.bounds[3]-p.bounds[1]);ctx.setLineDash([]);ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(p.x,p.y,2/scale,0,Math.PI*2);ctx.fill();}}
       ctx.restore();return {view,scale};
     }

@@ -13,7 +13,7 @@ const builds = [
     parts: [
       ["Muzzle", "FSS Crackdown"], ["Barrel", "VB-46 Series 11"],
       ["Rear Grip", "Sakin Rubber Grip"], ["Ammunition", "4.6x30mm Overpressured"],
-      ["Underbarrel", "FSS Tac90 Grip"], ["APEX", "VEL 46 Snap"],
+      ["Underbarrel", "FSS Tac90 Grip"], ["APEX", "Snap"],
     ],
   },
   {
@@ -74,8 +74,8 @@ const apply = process.argv.includes("--apply");
 
 function displayName(attachment, weaponId) {
   const asset = assets.get(attachment.stats?.assetId);
-  return asset?.weapon_display_names?.[weaponId] || asset?.display_name ||
-    attachment.stats?.displayName || attachment.name;
+  return asset?.display_name ||
+    attachment.display_name || attachment.stats?.displayName || attachment.name;
 }
 
 function newId() {
@@ -100,7 +100,7 @@ try {
     "select id,name from public.attachment_types where game_id='mw4'",
   )).rows.map((row) => [row.name, row.id]));
   const allAttachments = (await db.query(
-    "select id,name,type_name,stats from public.attachments_with_images where game_id='mw4'",
+    "select id,name,display_name,type_name,stats from public.attachments_with_images where game_id='mw4'",
   )).rows;
   const tagIds = new Map((await db.query(
     "select id,name from public.tags where game_id='mw4'",
@@ -165,13 +165,13 @@ try {
         if (prior) attachmentId = prior.id;
         else {
           attachmentId = (await db.query(
-            "insert into public.attachments (game_id,attachment_type_id,name,description,stats) values ('mw4',$1,$2,$3,$4::jsonb) returning id",
-            [typeId, sourceName, `Public MW4 build label from ${build.source}`,
-              JSON.stringify({ displayName: label, weaponIds: [build.weaponId], builderSelectable: true,
+            "insert into public.attachments (game_id,attachment_type_id,name,display_name,description,stats) values ('mw4',$1,$2,$3,$4,$5::jsonb) returning id",
+            [typeId, sourceName, label, `Public MW4 build label from ${build.source}`,
+              JSON.stringify({ weaponIds: [build.weaponId], builderSelectable: true,
                 evidence: "codmunity_public_build_2026_11_07", sourceUrl: build.source })],
           )).rows[0].id;
-          allAttachments.push({ id: attachmentId, name: sourceName, type_name: slot,
-            stats: { displayName: label, weaponIds: [build.weaponId], builderSelectable: true } });
+          allAttachments.push({ id: attachmentId, name: sourceName, display_name: label, type_name: slot,
+            stats: { weaponIds: [build.weaponId], builderSelectable: true } });
         }
       }
       await db.query(

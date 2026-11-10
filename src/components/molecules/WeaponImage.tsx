@@ -1,4 +1,4 @@
-import { getAttachmentBadgePosition } from "@/lib/weaponAttachmentBadgePositions";
+import { getAttachmentBadgePosition, getOvalAttachmentBadgePosition } from "@/lib/weaponAttachmentBadgePositions";
 import { getAttachmentHighlightRegion } from "@/lib/weaponAttachmentHighlightRegions";
 import { AppTooltip } from "@/components/atoms/Tooltip";
 import { Skeleton } from "@/components/atoms/Skeleton";
@@ -14,6 +14,7 @@ export interface WeaponImageBadge {
   /** attachment_types.slug for the equipped attachment, used to place the badge. */
   typeSlug: string;
   label: string;
+  subtypeLabel?: string | null;
   iconUrl?: string | null;
   isApex?: boolean;
   to?: string;
@@ -160,33 +161,16 @@ export function WeaponImage({
           className={`${ovalBadgeLabels ? "pointer-events-none absolute inset-0 hidden lg:block" : "pointer-events-none absolute inset-0"}`}
         >
           {badges.map((badge, index) => {
-            const basePosition = getAttachmentBadgePosition(
-              weaponId,
-              badge.typeSlug,
-              index,
-              badges.length,
-            );
-            const position = ovalBadgeLabels
-              ? {
-                  x: 50 + (basePosition.x - 50) * 1.65,
-                  y: 50 + (basePosition.y - 50) * 1.65,
-                }
-              : basePosition;
+            const ovalPosition = ovalBadgeLabels
+              ? getOvalAttachmentBadgePosition(weaponId, badge.typeSlug, badge.assetId, index, badges.length)
+              : null;
+            const position = ovalPosition ?? getAttachmentBadgePosition(weaponId, badge.typeSlug, index, badges.length);
             const isActive = activeBadgeKey === badge.key;
             const isDimmed = activeBadgeKey != null && !isActive;
 
-            const transform =
-              position.x <= 18
-                ? "translate(-96%, -50%)"
-                : position.x >= 82
-                  ? "translate(-4%, -50%)"
-                  : position.y <= 18
-                    ? "translate(-50%, -96%)"
-                    : position.y >= 82
-                      ? "translate(-50%, -4%)"
-                      : position.x < 50
-                        ? "translate(-96%, -50%)"
-                        : "translate(-4%, -50%)";
+            const ovalPercent = ovalPosition?.percent ?? 0;
+            const ovalAngle = (ovalPercent / 100) * Math.PI * 2;
+            const transform = `translate(${-50 - 50 * Math.cos(ovalAngle)}%, ${-50 - 50 * Math.sin(ovalAngle)}%)`;
             const content = ovalBadgeLabels ? (
               <div className="flex w-[200px] items-center gap-2 rounded-lg border border-white/5 bg-[#151315]/95 py-1.5 pl-1.5 pr-3 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-sm">
                 <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
@@ -209,7 +193,7 @@ export function WeaponImage({
                     {badge.label}
                   </span>
                   <span className="truncate text-[9px] uppercase tracking-[0.1em] text-white/50">
-                    {badge.typeSlug}
+                    {badge.subtypeLabel || badge.typeSlug}
                   </span>
                 </div>
               </div>
@@ -232,7 +216,17 @@ export function WeaponImage({
             );
 
             return (
-              <AppTooltip key={badge.key} content={badge.label}>
+              <AppTooltip
+                key={badge.key}
+                content={
+                  badge.subtypeLabel ? (
+                    <span className="flex flex-col gap-0.5">
+                      <span>{badge.label}</span>
+                      <span className="uppercase text-white/60">{badge.subtypeLabel}</span>
+                    </span>
+                  ) : badge.label
+                }
+              >
                 <div
                   onPointerEnter={() => onBadgeHover?.(badge.key)}
                   onPointerLeave={() => onBadgeHover?.(null)}

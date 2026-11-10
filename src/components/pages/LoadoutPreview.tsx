@@ -570,9 +570,14 @@ export function LoadoutPreview() {
     [relationAssets],
   );
   const attachmentLabel = (attachment: CardAttachment | undefined, weaponId: string | undefined, fallback: string) =>
-    gameId === "mw4"
+    attachment?.displayName ?? (gameId === "mw4"
       ? builderAttachmentDisplayName(attachment?.stats?.assetId, weaponId, relationAssetsById, attachment?.stats?.displayName ?? fallback)
-      : attachment?.stats?.displayName ?? fallback;
+      : attachment?.stats?.displayName ?? fallback);
+  const attachmentSubtypeLabel = (attachment: CardAttachment | undefined) =>
+    attachment?.subtypeLabel || attachment?.stats?.subtypeLabel ||
+    (attachment?.stats?.assetId
+      ? relationAssetsById.get(attachment.stats.assetId)?.subtype_label
+      : null) || null;
   const attachmentIconUrl = (attachment: CardAttachment | undefined) =>
     attachment?.imageUrl ||
     (gameId === "mw4"
@@ -591,6 +596,7 @@ export function LoadoutPreview() {
           assetId: attachment?.stats?.assetId,
           typeSlug: attachment?.typeSlug || slot,
           label: attachmentLabel(attachment, primaryWeapon.id, value),
+          subtypeLabel: attachmentSubtypeLabel(attachment),
           iconUrl: attachmentIconUrl(attachment),
           isApex: slot.toLowerCase() === "apex",
         };
@@ -610,6 +616,7 @@ export function LoadoutPreview() {
           assetId: attachment?.stats?.assetId,
           typeSlug: attachment?.typeSlug || slot,
           label: attachmentLabel(attachment, secondaryWeapon.id, value),
+          subtypeLabel: attachmentSubtypeLabel(attachment),
           iconUrl: attachmentIconUrl(attachment),
           isApex: slot.toLowerCase() === "apex",
         };
@@ -657,6 +664,7 @@ export function LoadoutPreview() {
         assetId: attachment.stats?.assetId,
         typeSlug: attachment.typeSlug || slot,
         label: attachmentLabel(attachment, primaryWeapon?.id, attachment.name),
+        subtypeLabel: attachmentSubtypeLabel(attachment),
         iconUrl: attachmentIconUrl(attachment),
         isApex: slot.toLowerCase() === "apex",
         to: attachmentMetaPath(gameId, String(attachment.id)),
@@ -679,6 +687,7 @@ export function LoadoutPreview() {
         assetId: attachment.stats?.assetId,
         typeSlug: attachment.typeSlug || slot,
         label: attachmentLabel(attachment, secondaryWeapon?.id, attachment.name),
+        subtypeLabel: attachmentSubtypeLabel(attachment),
         iconUrl: attachmentIconUrl(attachment),
         isApex: slot.toLowerCase() === "apex",
       } satisfies WeaponImageBadge;
@@ -1011,7 +1020,7 @@ export function LoadoutPreview() {
                       <span className="font-medium">{att.label}</span>
                     )}
                     <span className="text-[10px] uppercase tracking-[0.12em] text-teritary">
-                      {att.typeSlug}
+                      {att.subtypeLabel || att.typeSlug}
                     </span>
                   </div>
                 </div>
@@ -1146,7 +1155,7 @@ export function LoadoutPreview() {
                             </span>
                           )}
                           <span className="text-[10px] uppercase tracking-[0.12em] text-teritary">
-                            {attachment.typeSlug}
+                            {attachment.subtypeLabel || attachment.typeSlug}
                           </span>
                         </div>
                       </div>
@@ -1412,7 +1421,7 @@ export function LoadoutPreview() {
                                 )}
                                 className={`${className} hover:underline focus-visible:underline`}
                               >
-                                {attachment.stats?.displayName ?? name}
+                                {attachment.displayName ?? attachment.stats?.displayName ?? name}
                               </Link>
                             ) : (
                               <span key={slot} className={className}>

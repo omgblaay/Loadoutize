@@ -52,11 +52,13 @@ export interface CardWeapon {
 export interface CardAttachment {
   id: string;
   name: string;
+  displayName?: string | null;
+  subtypeLabel?: string | null;
   type: string | null;
   typeSlug?: string | null;
   imageUrl?: string | null;
   typeImageUrl?: string | null;
-  stats?: { assetId?: string; displayName?: string; imagePath?: string } | null;
+  stats?: { assetId?: string; displayName?: string; subtypeLabel?: string | null; imagePath?: string } | null;
 }
 
 export interface CardTag {

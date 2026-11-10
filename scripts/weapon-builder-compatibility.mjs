@@ -8,29 +8,11 @@ const han86ExtraOptics = new Set([
   "rex_fourx_hybcant01_le", "rex_fourx_therm01_sp", "rex_fourx_therm02",
   "rex_holo02_jugg",
 ]);
-const muzzleSetByFamily = {
-  mike4: "a", akilo: "b", kilo2: "c", kilo437: "d", xar1: "i",
-  uxray: "b", findia: "h", golf28: "h", recho: "c", tango73: "d",
-  bmike3: "g", mpapa7: "f", pmike63: "i", psierra41: "i",
-  spier9: "f", xsm1: "i", limax: "h",
-};
-const muzzleIdsByFamily = {
-  ngsierra: new Set(["rex_comp_vert_c", "rex_comp_bal_c", "rex_sil_tac_c", "rex_sil_hvy_c", "rex_breach_c", "rex_flash_c"]),
-  kilo5: new Set(["rex_comp_bal_e", "rex_comp_hoz_e", "rex_flash_e", "rex_sil_lgt_e"]),
-};
-
 function sharedCompatible(weapon, asset, library) {
   if (asset.families.length) return false;
   const type = weapon.id.split("_")[1];
   const id = asset.id;
   if (asset.slot === "ammunition") return weapon.shared_assets?.includes(id) || false;
-  if (asset.slot === "muzzle") {
-    if (id.includes("_broken")) return false;
-    const ids = muzzleIdsByFamily[weapon.family];
-    if (ids) return ids.has(id);
-    const set = muzzleSetByFamily[weapon.family];
-    return Boolean(set && id.endsWith(`_${set}`));
-  }
   if (asset.slot === "optic") {
     const common = /_((holo|reflex|minireddot)\d|holo_)/.test(id) && !id.includes("_pstl");
     if (type === "pi") return id.includes("_pstl") || id.includes("_piscope");
@@ -63,6 +45,7 @@ function sharedCompatible(weapon, asset, library) {
 }
 
 export function builderWeaponIds(asset, library) {
+  if (asset.slot === "muzzle") return asset.muzzle_table ? asset.weapon_ids ?? [] : [];
   if (["iron_sights", "other"].includes(asset.slot)) return [];
   // These assets reuse the same large-weapon laser icon as the canonical entry.
   // They are texture aliases, not extra selectable choices in the game menu.

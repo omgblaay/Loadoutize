@@ -51,13 +51,15 @@ const weapons = catalog.weapons.map((weapon) => ({
   category: weapon.group,
   imagePath: imagePath(weapon.base_src),
 }));
-const attachments = catalog.assets.map((asset) => ({
+const attachments = catalog.assets.filter((asset) => asset.slot !== "muzzle" || asset.muzzle_table).map((asset) => ({
   assetId: asset.id,
   name: asset.title,
+  displayName: asset.display_name || asset.title,
+  subtypeLabel: asset.subtype_label ?? null,
   slot: asset.slot,
-  imagePath: imagePath(asset.src),
+  imagePath: asset.src ? imagePath(asset.src) : null,
   composable: asset.composable === true,
-  weaponIds: owners.get(asset.id),
+  weaponIds: asset.slot === "muzzle" ? asset.weapon_ids : owners.get(asset.id),
   families: asset.families ?? [],
   evidence: asset.evidence ?? null,
 }));
@@ -91,16 +93,18 @@ try {
     FROM jsonb_to_recordset($1::jsonb) AS w(id text, name text, category text)
     JOIN public.weapon_categories c ON c.name = w.category AND c.game_id = 'mw4'`,
     [JSON.stringify(weapons)]);
-  await client.query(`INSERT INTO public.attachments (game_id, attachment_type_id, name, stats)
-    SELECT 'mw4', t.id, a.name,
+  await client.query(`INSERT INTO public.attachments (game_id, attachment_type_id, name, display_name, subtype_label, stats)
+    SELECT 'mw4', t.id, a.name, a.display_name, a.subtype_label,
       jsonb_build_object('assetId', a.asset_id,
         'weaponIds', a.weapon_ids, 'composable', a.composable,
         'families', a.families, 'evidence', a.evidence)
-    FROM jsonb_to_recordset($1::jsonb) AS a(asset_id text, name text, slot text,
-      image_path text, weapon_ids jsonb, composable boolean, families jsonb, evidence text)
+    FROM jsonb_to_recordset($1::jsonb) AS a(asset_id text, name text, display_name text,
+      subtype_label text, slot text, image_path text, weapon_ids jsonb,
+      composable boolean, families jsonb, evidence text)
     JOIN public.attachment_types t ON t.game_id = 'mw4' AND t.slug = a.slot`,
     [JSON.stringify(attachments.map((asset) => ({
-      asset_id: asset.assetId, name: asset.name, slot: asset.slot,
+      asset_id: asset.assetId, name: asset.name, display_name: asset.displayName,
+      subtype_label: asset.subtypeLabel, slot: asset.slot,
       image_path: asset.imagePath, weapon_ids: asset.weaponIds,
       composable: asset.composable, families: asset.families, evidence: asset.evidence,
     })))]);

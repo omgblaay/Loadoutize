@@ -23,23 +23,20 @@ try {
   const type = await client.query("SELECT id FROM public.attachment_types WHERE game_id = 'mw4' AND slug = 'apex'");
   if (type.rowCount !== 1) throw new Error("Expected one MW4 APEX attachment type");
   await client.query(`
-    INSERT INTO public.attachments (game_id, attachment_type_id, name, image, stats)
-    SELECT 'mw4', $1, $2,
+    INSERT INTO public.attachments (game_id, attachment_type_id, name, display_name, subtype_label, image, stats)
+    SELECT 'mw4', $1, $2, $6, $7,
       (SELECT id FROM public.directus_files WHERE filename_download = $5 LIMIT 1),
       $3::jsonb
     WHERE NOT EXISTS (
       SELECT 1 FROM public.attachments WHERE game_id = 'mw4' AND stats->>'assetId' = $4
     )`, [type.rows[0].id, asset.internal_title, JSON.stringify({
       assetId: asset.id,
-      displayName: asset.display_name || asset.title,
-      subtypeLabel: asset.subtype_label ?? null,
-      weaponDisplayNames: asset.weapon_display_names ?? {},
       weaponIds: [weapon.id],
       composable: false,
       builderSelectable: true,
       families: asset.families,
       evidence: asset.evidence ?? null,
-    }), asset.id, imagePath.split('/').at(-1)]);
+    }), asset.id, imagePath.split('/').at(-1), asset.display_name || asset.title, asset.subtype_label ?? null]);
   const result = await client.query(`
     SELECT a.stats->'weaponIds' AS weapon_ids
     FROM public.attachments a

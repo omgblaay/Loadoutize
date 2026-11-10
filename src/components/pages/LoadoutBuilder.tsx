@@ -22,6 +22,7 @@ import {
 import { WeaponCard } from "@/components/organisms/WeaponCard";
 import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
 import { AttachmentGroupIcon } from "@/components/atoms/AttachmentGroupIcon";
+import { builderAttachmentImageUrl } from "@/lib/builderAttachmentImages";
 import {
   WeaponImage,
   type WeaponImageBadge,
@@ -47,19 +48,15 @@ import {
   applyBuilderRelations,
   builderAttachmentDisplayName,
   getBuilderApexRelation,
+  mw4MuzzleAllowed,
   HAN86_UNDERBARREL_IDS,
   han86AllowsUnderbarrel,
-  M4_MUZZLE_IDS,
-  m4AllowsMuzzle,
   AR_OPTIC_IDS,
   arAllowsOptic,
   SMG_OPTIC_IDS,
   smgAllowsOptic,
   AR_LASER_IDS,
   arAllowsLaser,
-  SMG_I_MUZZLE_IDS,
-  SMG_I_WEAPONS,
-  smgIAllowsMuzzle,
   VEL_AMMUNITION_IDS,
   velAllowsAmmunition,
   SMG_UNDERBARREL_IDS_BY_WEAPON,
@@ -116,6 +113,7 @@ interface Attachment {
     subtypeLabel?: string;
     builderSelectable?: boolean;
     imagePath?: string;
+    muzzleOrder?: number;
   } | null;
 }
 
@@ -504,7 +502,7 @@ export function LoadoutBuilder() {
       setRelationRulesReady(gameId !== "mw4");
       setRelationRulesFailed(false);
       if (gameId === "mw4") {
-        fetch("/weapon-preview/weapon-builder/catalog.json?v=20261108-names")
+        fetch("/weapon-preview/weapon-builder/catalog.json?v=20261110-muzzles", { cache: "no-cache" })
           .then((response) => {
             if (!response.ok)
               throw new Error("Could not load weapon builder rules");
@@ -534,11 +532,15 @@ export function LoadoutBuilder() {
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-6db475c7/games/${gameId}/weapons`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } },
+        { headers: { Authorization: `Bearer ${publicAnonKey}` }, cache: "no-store" },
       );
       const data = await response.json();
       if (data.weapons) {
-        setWeapons(visibleWeaponCatalog(data.weapons as Weapon[]));
+        setWeapons(visibleWeaponCatalog((data.weapons as Weapon[]).map((weapon) =>
+          gameId === "mw4" && weapon.id === "rex_sm_fmgolf"
+            ? { ...weapon, name: "CSG-35" }
+            : weapon,
+        )));
       }
     } catch (error) {
       console.error("Error fetching weapons:", error);
@@ -569,9 +571,8 @@ export function LoadoutBuilder() {
                 attachment.weaponIds ?? attachment.stats?.weaponIds ?? null,
               displayName:
                 attachment.displayName ??
-                attachment.stats?.displayName ??
-                attachment.name,
-              subtypeLabel: attachment.stats?.subtypeLabel ?? null,
+                attachment.stats?.displayName,
+              subtypeLabel: attachment.subtypeLabel ?? attachment.stats?.subtypeLabel ?? null,
               imageUrl:
                 attachment.imageUrl ?? attachment.stats?.imagePath ?? null,
             })),
@@ -1000,6 +1001,7 @@ export function LoadoutBuilder() {
 
   useEffect(() => {
     if (relationAssets.length === 0 || attachments.length === 0) return;
+    const assetsById = new Map(relationAssets.map((asset) => [asset.id, asset]));
     setSelectedWeapons((current) => {
       let changed = false;
       const next = current.map((weapon) => {
@@ -1009,6 +1011,15 @@ export function LoadoutBuilder() {
           relationAssets,
           weapon.id,
         );
+        if (gameId === "mw4") {
+          for (const [type, name] of Object.entries(normalized)) {
+            if (normalizePreviewSlot(type) !== "muzzle") continue;
+            const attachment = attachments.find((item) => item.type === type && item.name === name);
+            if (!mw4MuzzleAllowed(attachment?.stats?.assetId, weapon.id, assetsById)) {
+              delete normalized[type];
+            }
+          }
+        }
         if (
           Object.keys(normalized).length ===
           Object.keys(weapon.attachments).length
@@ -1019,7 +1030,7 @@ export function LoadoutBuilder() {
       });
       return changed ? next : current;
     });
-  }, [attachments, relationAssets]);
+  }, [attachments, relationAssets, gameId]);
 
   const meta = gameMeta[gameId] ?? gameMeta.mw4;
 
@@ -1062,28 +1073,37 @@ export function LoadoutBuilder() {
   const attachmentsByType = attachments
     .map((attachment) => ({
       ...attachment,
-      displayName: gameId === "mw4"
+      displayName: attachment.displayName ?? (gameId === "mw4"
         ? builderAttachmentDisplayName(
             attachment.stats?.assetId,
             selectedWeapon?.id,
             assetsById,
-            attachment.displayName ?? attachment.name,
+            attachment.name,
           )
-        : attachment.displayName,
-      subtypeLabel: subtypeByAssetId.get(attachment.stats?.assetId ?? "") ?? attachment.subtypeLabel,
+        : attachment.name),
+      subtypeLabel: attachment.subtypeLabel !== undefined
+        ? attachment.subtypeLabel
+        : subtypeByAssetId.get(attachment.stats?.assetId ?? "") ?? null,
+      imageUrl: attachment.imageUrl ?? (gameId === "mw4"
+        ? builderAttachmentImageUrl(
+            attachment.stats?.assetId,
+            assetsById,
+            attachment.name,
+          )
+        : null),
     }))
     .filter(
       (attachment) => {
         if (!selectedWeapon) return true;
+        if (gameId === "mw4" &&
+          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "muzzle") {
+          return mw4MuzzleAllowed(attachment.stats?.assetId, selectedWeapon.id, assetsById);
+        }
         if (selectedWeapon.id === "rex_sm_pmike63" &&
           normalizePreviewSlot(attachment.typeSlug || attachment.type) === "guard") return false;
         if (selectedWeapon.id === "rex_ar_kilo2" &&
           normalizePreviewSlot(attachment.typeSlug || attachment.type) === "underbarrel") {
           return han86AllowsUnderbarrel(attachment.stats?.assetId);
-        }
-        if (selectedWeapon.id === "rex_ar_mike4" &&
-          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "muzzle") {
-          return m4AllowsMuzzle(attachment.stats?.assetId);
         }
         if (selectedWeapon.id.startsWith("rex_ar_") &&
           normalizePreviewSlot(attachment.typeSlug || attachment.type) === "optic") {
@@ -1096,10 +1116,6 @@ export function LoadoutBuilder() {
         if (selectedWeapon.id.startsWith("rex_ar_") &&
           normalizePreviewSlot(attachment.typeSlug || attachment.type) === "laser") {
           return arAllowsLaser(attachment.stats?.assetId);
-        }
-        if (SMG_I_WEAPONS.has(selectedWeapon.id) &&
-          normalizePreviewSlot(attachment.typeSlug || attachment.type) === "muzzle") {
-          return smgIAllowsMuzzle(attachment.stats?.assetId);
         }
         if (selectedWeapon.id === "rex_sm_mpapa7" &&
           normalizePreviewSlot(attachment.typeSlug || attachment.type) === "ammunition") {
@@ -1124,14 +1140,6 @@ export function LoadoutBuilder() {
         (order.get(a.stats?.assetId ?? "") ?? 99) - (order.get(b.stats?.assetId ?? "") ?? 99));
     }
   }
-  if (selectedWeapon?.id === "rex_ar_mike4") {
-    const order = new Map<string, number>(M4_MUZZLE_IDS.map((id, index) => [id, index]));
-    for (const [type, choices] of Object.entries(attachmentsByType)) {
-      if (normalizePreviewSlot(type) !== "muzzle") continue;
-      choices.sort((a, b) =>
-        (order.get(a.stats?.assetId ?? "") ?? 99) - (order.get(b.stats?.assetId ?? "") ?? 99));
-    }
-  }
   if (selectedWeapon?.id.startsWith("rex_ar_")) {
     for (const [type, choices] of Object.entries(attachmentsByType)) {
       const slot = normalizePreviewSlot(type);
@@ -1151,12 +1159,11 @@ export function LoadoutBuilder() {
         (order.get(a.stats?.assetId ?? "") ?? 99) - (order.get(b.stats?.assetId ?? "") ?? 99));
     }
   }
-  if (selectedWeapon && SMG_I_WEAPONS.has(selectedWeapon.id)) {
-    const order = new Map<string, number>(SMG_I_MUZZLE_IDS.map((id, index) => [id, index]));
+  if (selectedWeapon && gameId === "mw4") {
     for (const [type, choices] of Object.entries(attachmentsByType)) {
       if (normalizePreviewSlot(type) !== "muzzle") continue;
       choices.sort((a, b) =>
-        (order.get(a.stats?.assetId ?? "") ?? 99) - (order.get(b.stats?.assetId ?? "") ?? 99));
+        (a.stats?.muzzleOrder ?? 999) - (b.stats?.muzzleOrder ?? 999));
     }
   }
   if (selectedWeapon?.id === "rex_sm_mpapa7") {

@@ -96,8 +96,13 @@ export function AttachmentSlotCard({
                   {RANK_MEDALS[index] ?? `#${index + 1}`}
                 </span>
                 <AttachmentIcon attachment={attachment} className="size-7" />
-                <span className="min-w-0 flex-1 truncate text-sm text-secondary">
-                  {attachmentDisplayName(attachment)}
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-sm text-secondary">
+                  <span className="truncate">{attachmentDisplayName(attachment)}</span>
+                  {attachment.subtypeLabel && (
+                    <span className="truncate text-[10px] uppercase tracking-[0.08em] text-teritary">
+                      {attachment.subtypeLabel}
+                    </span>
+                  )}
                 </span>
                 <span className="shrink-0 text-right">
                   <span className="block font-mono text-xs text-[#fafafa]">

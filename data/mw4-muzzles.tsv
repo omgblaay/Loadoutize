@@ -1,0 +1,119 @@
+display name	sub label	image	for weapons
+zlr reverb90	vertical comp	rex_comp_vert_a	han86, m4, hyeon burst, axion, cronen osprey, finn lmg
+corvus lvl-40	horizontal comp	rex_comp_hoz_a	han86, m4, hyeon burst, axion, cronen osprey, finn lmg
+ftac dominion	balanced comp	rex_comp_bal_a	han86, m4, hyeon burst, axion, cronen osprey, finn lmg
+fss is40	light silencer	rex_sil_lgt_a	han86, m4, hyeon burst, axion, cronen osprey
+xrk mil-tac suppressor	tactical silencer	rex_sil_tac_a	han86, m4, hyeon burst, axion, cronen osprey, finn lmg
+fss is300	heavy silencer	rex_sil_lgt_a	han86, m4, hyeon burst, axion, cronen osprey, finn lmg
+b16 helical	breacher	rex_flash_h	han86, m4, hyeon burst, axion, cronen osprey, finn lmg
+tzl-110 v1	flash hider	rex_flash_a	han86, m4, hyeon burst, axion, cronen osprey
+exp r3000-v	vertical comp	rex_comp_vert_b	kastov 762, type 73, kg-7 vulcan, mosin-nagant
+ft hyperport 408	horizontal comp	rex_comp_hoz_b	kastov 762, type 73, kg-7 vulcan
+field tac 1.4 comp	balanced comp	rex_comp_bal_b	kastov 762, type 73, mosin-nagant, kg-7 vulcan
+ds rkt-90	tactical silencer	rex_sil_hvy_moscar	kastov 762, type 73
+770 underbite	breacher	rex_breach_b	kastov 762, type 73, mosin-nagant, kg-7 vulcan
+usenko 308-1l	flash hider	rex_flash_b	kastov 762, type 73, mosin-nagant, kg-7 vulcan
+ivanov qr600	light silencer	rex_sil_lgt_b	kastov 762, type 73, kg-7 vulcan
+gauge-12 mono	heavy silencer	rex_sil_hvy_b	kastov 762, type 73, kg-7 vulcan
+octa-63 comp	vertical comp	rex_comp_vert_c	patriox xmp, cronen squall, mar-9, oris 8.6
+bruen r12 gen.4	horizontal comp	rex_comp_hoz_c	patriox xmp, mar-9, oris 8.6
+het-s6 comp	balanced comp	rex_comp_bal_c	patriox xmp, cronen squall, mar-9, oris 8.6
+meiko 30cal-sp	light silencer	rex_sil_lgt_c	patriox xmp, mar-9, oris 8.6
+zlr cold echo	tactical silencer	rex_sil_tac_c	patriox xmp, cronen squall, mar-9, oris 8.6
+exp undertow gen.2	heavy silencer	rex_sil_hvy_c	patriox xmp, cronen squall, mar-9, oris 8.6
+tv bitelock	breacher	rex_breach_c	patriox xmp, cronen squall, mar-9, oris 8.6
+mautzek blackveil	flash hider	rex_flash_c	patriox xmp, cronen squall, mar-9, oris 8.6
+bryson bullhide 90	vertical comp	rex_comp_vert_d	Oden, apoc-338
+oden thunder-s	horizontal comp	rex_comp_asierra12	Oden
+k41a2 comp	balanced comp	rex_comp_vert_swhiskey	Oden, apoc-338
+vlk sh-s12	custom silencer	rex_sil_stb_asierra12	Oden
+schlager operator-s70	tactical silencer	rex_sil_tac_d	Oden, apoc-338
+tv multical-77	heavy silencer	rex_sil_tac_e	Oden, apoc-338
+brch-9 v.2	breacher	rex_breach_d	Oden, apoc-338
+vgd-11 flash	flash hider	rex_flash_d	Oden, apoc-338
+sq68 large brake	horizontal comp	rex_brake_ngsierra	cronen squall
+cronen veil-68 suppressor	custom silencer	rex_comp_bal_c	cronen squall
+haebang orc70	vertical comp	rex_comp_vert_h	iso nightshade, vel
+212 lc40 comp	horizontal comp	rex_comp_hoz_h	iso nightshade, vel
+ta tacpro-56	balanced comp	rex_comp_bal_h	iso nightshade, vel
+demo ironshade	light silencer	rex_sil_lgt_h	iso nightshade, vel
+xrk herder 40	tactical silencer	rex_sil_tac_h	iso nightshade, vel
+fss crackdown	heavy silencer	rex_sil_hvy_h	iso nightshade, vel
+hanbit chevron	breacher	rex_breach_h	iso nightshade, vel
+ta lightning r3m	flash hider	rex_flash_h	iso nightshade, vel
+L980-s comp	vertical comp	rex_comp_vert_i	wz.55, ppsh
+1/2x28 dual port	horizontal comp	rex_comp_hoz_i	wz.55, ppsh
+full port comp	balanced comp	rex_comp_bal_i	wz.55, ppsh
+haebang bam70	light silencer	rex_sil_lgt_i	wz.55, ppsh
+330tc2 gridlock	tactical silencer	rex_sil_lgt_moscar	wz.55, ppsh, mosin-nagant
+ftac silent recon	heavy silencer	rex_sil_hvy_i	wz.55, ppsh, mosin-nagant
+xrk rampage	breacher	rex_breach_i	wz.55, ppsh
+rx-5 overstrike	flash hider	rex_flash_i	wz.55, ppsh
+nil-rise 90 comp	vertical comp	rex_comp_vert_fmgolf	csg-35
+zlr tko-35	horizontal comp	rex_comp_hoz_fmgolf	csg-35
+rtr-8 pro	balanced comp	rex_comp_bal_fmgolf	csg-35
+exp forage-lgt	light silencer	rex_sil_lgt_fmgolf	csg-35
+exp forage-tac	tactical silencer	rex_sil_tac_fmgolf	csg-35
+exp forage-hvy	heavy silencer	rex_sil_hvy_fmgolf	csg-35
+mautzek recourse 7	breacher	rex_breach_fmgolf	csg-35
+ocr-9f	flash hider	rex_flash_fmgolf	csg-35
+ds rkt-90		rex_sil_tac_b	mosin-nagant, kg-7 vulcan
+ta solage f7		rex_breach_b	kg-7 vulcan
+ta honeypot 670		rex_flash_b	astaroth .57, signal 50
+lm deadstop-99		rex_sil_svictor98	astaroth .57, signal 50
+bl-a5 comp		rex_comp_bal_f	astaroth .57, signal 50
+fss moodkiller		rex_sil_lgt_f	astaroth .57, signal 50
+fss des-tac70		rex_sil_tac_f	astaroth .57, signal 50
+usenko 900 bl-x		rex_sil_sierra100	astaroth .57
+cronen jab-60		rex_breach_f	astaroth .57, signal 50
+ds op-67m flash		rex_flash_f	astaroth .57, signal 50
+exp v-tac suppressor	custom silencer	rex_sil_sierrax	finn lmg
+ta lodestar 556	flash hider	rex_flash_sierrax	finn lmg
+mautzek ironcall 31	horizontal comp	rex_comp_hoz_d	apoc-338
+exp 450 rtl	light silencer	rex_sil_hvy_a	apoc-338
+usenko KD-L2	horizontal comp	rex_comp_hoz_moscar	mosin-nagant
+FSS HOC-30	heavy silencer	rex_sil_hvy_f	signal 50
+haebang bulsae-10	choke	rex_choke_g	rezi 12
+xrk spine ripper	vertical comp	rex_comp_vert_g	rezi 12
+gw slashtop v1	horizontal comp	rex_comp_hoz_g	rezi 12
+ta ribcage gen. 1	balanced comp	rex_comp_bal_g	rezi 12
+ftac lts-707	light silencer	rex_sil_lgt_g	rezi 12
+sakin omega 13	tactical silencer	rex_sil_tac_g	rezi 12
+exp firelite 12	heavy silencer	rex_sil_hvy_g	rezi 12
+mugi-x viro	breacher	rex_breach_g	rezi 12
+sa one tap	flash hider	rex_flash_g	rezi 12
+wx-600 choke	choke	rex_choke_xsh1	walord
+xrk spine ripper xl	vertical comp	rex_comp_vert_xsh1	walord
+gw slashtop-lb v6	horizontal comp	rex_comp_hoz_xsh1	walord
+ta ribcage-l gen. 4	balanced comp	rex_comp_bal_xsh1	walord
+mugi kalnal-l 12g	light silencer	rex_sil_lgt_xsh1	walord
+mugi kalnal-t 12g	tactical silencer	rex_sil_tac_xsh1	walord
+mugi kalnal-h 12g	heavy silencer	rex_sil_hvy_xsh1	walord
+mugi-x viro xl	breacher	rex_breach_xsh1	walord
+sa one tap v.3	flash hider	rex_flash_xsh1	walord
+nil-p 40 comp	vertical comp	rex_comp_vert_e_kilo5	sang 9mm
+chevron 90 comp	horizontal comp	rex_comp_hoz_e	sang 9mm
+bal-xc gen. 0	balanced comp	rex_comp_bal_e	sang 9mm
+ftac lonestar	light silencer	rex_sil_lgt_e	sang 9mm, krait p68
+expedite drill l4	tactical silencer	rex_sil_tac_e_kilo5	sang 9mm, krait p68
+sfo porto-33	heavy silencer	rex_sil_hvy_e	sang 9mm, krait p68
+xrk savage 40	breacher	rex_breach_e_kilo5	sang 9mm
+p45 flash-m	flash hider	rex_flash_e	sang 9mm
+xrk intra-k	vertical comp	rex_comp_hoz_hotel45	krait p68
+i-comp .45 auto	horizontal comp	rex_comp_vert_hotel45	krait p68
+xrk serverance 68	balanced comp	rex_comp_bal_hotel45	krait p68
+kp68 flash	flash hider	rex_flash_hotel45	krait p68
+demo mallet 68	breacher	rex_breach_hotel45	krait p68
+zlr igni p5	vertical comp	rex_comp_vert_decho	.50 gs
+mugi g30-tac	horizontal comp	rex_comp_hoz_decho	.50 gs
+xrk portmaster v2	balanced comp	rex_comp_bal_decho	.50 gs
+ta svg-50k	light silencer	rex_sil_lgt_decho	.50 gs
+bruen retort .50	tactical silencer	rex_sil_tac_decho	.50 gs
+frac hvy-s50	heavy silencer	rex_sil_hvy_decho	.50 gs
+lm tenderizer	breacher	rex_breach_decho	.50 gs
+pcr90 flash hider	flash hider	rex_flash_decho	.50 gs
+mautzek h357-m comp	vertical comp	rex_comp_vert_swhiskey	mojave .357
+xrk .357 comp	horizontal comp	rex_comp_hoz_swhiskey	mojave .357
+ta dom-35	balanced comp	rex_comp_bal_swhiskey	mojave .357
+mojave flash	flash hider	rex_flash_swhiskey	mojave .357
+.357 blackeye	breacher	rex_breach_swhiskey	mojave .357

@@ -21,10 +21,10 @@ try {
   await db.query("SET LOCAL lock_timeout = '5s'");
   const changed = await db.query(`
     UPDATE public.attachments
-    SET stats = stats || jsonb_build_object('displayName', 'Apex Optic',
-      'builderSelectable', false)
+    SET display_name = 'Apex Optic',
+      stats = (stats - 'displayName') || jsonb_build_object('builderSelectable', false)
     WHERE game_id = 'mw4' AND stats->>'assetId' = $1
-    RETURNING stats->>'displayName' AS display_name,
+    RETURNING display_name,
       stats->>'builderSelectable' AS builder_selectable`, [optic.id]);
   if (changed.rowCount !== 1 || changed.rows[0].display_name !== "Apex Optic" ||
       changed.rows[0].builder_selectable !== "false") {

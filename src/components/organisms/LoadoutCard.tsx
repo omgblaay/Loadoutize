@@ -190,7 +190,7 @@ export function LoadoutCard({
               key: a.id,
               assetId: a.stats?.assetId,
               typeSlug: a.typeSlug || a.type || "",
-              label: a.stats?.displayName ?? a.name,
+              label: a.displayName ?? a.stats?.displayName ?? a.name,
               iconUrl: a.imageUrl ?? a.stats?.imagePath,
               isApex: a.type.toLowerCase() === "apex",
             }),

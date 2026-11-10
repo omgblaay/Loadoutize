@@ -68,11 +68,11 @@ describe("weapon sprite preview mapping", () => {
     const catalog = JSON.parse(readFileSync("public/weapon-preview/weapon-builder/catalog.json", "utf8"));
     const vel = catalog.weapons.find((item: SpriteWeapon) => item.id === "rex_sm_mpapa7") as SpriteWeapon;
     const build = createPreviewBuild(vel, catalog.assets, [
-      { typeSlug: "apex", label: "VEL 46 Snap", assetId: "rex_pgrip_aim_mpapa7" },
+      { typeSlug: "apex", label: "Snap", assetId: "rex_apex_mpapa7_snap" },
       { typeSlug: "stock", label: "EXP Defiant Stock", assetId: "rex_stock_hvy_mpapa7" },
     ]);
     expect(build.parts.stock).toBe("rex_stockno_mpapa7");
-    expect(build.autoParts.stock).toBe("apex:rex_pgrip_aim_mpapa7");
+    expect(build.autoParts.stock).toBe("apex:rex_apex_mpapa7_snap");
     expect(build.parts.receiver).toBe("rex_rec_mpapa7_quickdraw");
   });
   it("uses the i muzzle set for WZ.55 Striga", () => {

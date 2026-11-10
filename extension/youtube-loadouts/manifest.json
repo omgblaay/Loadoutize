@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Loadoutize for YouTube",
+  "version": "0.1.0",
+  "description": "Find Loadoutize weapon configs linked to the YouTube video you're watching.",
+  "icons": { "192": "icon-192.png" },
+  "host_permissions": ["https://yvvuitjsunankrffcpck.supabase.co/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{
+    "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
+    "js": ["content.js"],
+    "css": ["content.css"],
+    "run_at": "document_idle"
+  }]
+}
