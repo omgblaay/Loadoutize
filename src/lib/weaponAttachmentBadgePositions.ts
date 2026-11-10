@@ -107,25 +107,21 @@ export interface OvalBadgePlacement {
 /** Edit these percentages to move every attachment in a slot around the oval. */
 export const ovalAttachmentBadgePlacements: Record<string, OvalBadgePlacement> =
   {
-    muzzle: { percent: 1.5 },
-    laser: { percent: 9 },
-    barrel: { percent: 18 },
-    ironsights: { percent: 22 },
-    optic: { percent: 27 },
-    bolt: { percent: 31 },
-    stock: { percent: 36 },
-    comb: { percent: 40 },
-    guard: { percent: 44 },
-    hammer: { percent: 48 },
-    reargrip: { percent: 53 },
-    cylinder: { percent: 58 },
-    magazine: { percent: 62 },
-    ammunition: { percent: 64 },
-    receiver: { percent: 71 },
-    apex: { percent: 75 },
-    other: { percent: 80 },
-    underbarrel: { percent: 87 },
-    trigger: { percent: 92 },
+    muzzle: { percent: 0.5 },
+    laser: { percent: 6.5 },
+    barrel: { percent: 13 },
+    optic: { percent: 33 },
+    bolt: { percent: 23 },
+    stock: { percent: 41.5 },
+    comb: { percent: 48 },
+    guard: { percent: 48 },
+    reargrip: { percent: 53.5 },
+    cylinder: { percent: 47.5 },
+    magazine: { percent: 67.5 },
+    ammunition: { percent: 59.5 },
+    apex: { percent: 77.5 },
+    underbarrel: { percent: 87.5 },
+    trigger: { percent: 94 },
   };
 
 /** Override a slot or an individual asset ID for one weapon. Asset ID wins. */
@@ -147,6 +143,7 @@ export function getOvalAttachmentBadgePosition(
   assetId: string | undefined,
   fallbackIndex: number,
   fallbackTotal: number,
+  previewPlacement?: Partial<OvalBadgePlacement>,
 ): BadgePosition & { percent: number } {
   const normalizedSlug = normalizeSlot(typeSlug);
   const slot = SLOT_ALIASES[normalizedSlug] ?? normalizedSlug;
@@ -159,6 +156,7 @@ export function getOvalAttachmentBadgePosition(
     ...placement,
     ...overrides?.[slot],
     ...(assetId ? overrides?.[assetId] : undefined),
+    ...previewPlacement,
   };
   const percent = ((adjusted.percent % 100) + 100) % 100;
   const angle = (percent / 100) * Math.PI * 2;
@@ -168,6 +166,11 @@ export function getOvalAttachmentBadgePosition(
     x: 50 - Math.cos(angle) * LABEL_OVAL_RADIUS.x + (adjusted.x ?? 0),
     y: 50 - Math.sin(angle) * LABEL_OVAL_RADIUS.y + (adjusted.y ?? 0),
   };
+}
+
+export function getOvalAttachmentBadgeTransform(percent: number): string {
+  const angle = (percent / 100) * Math.PI * 2;
+  return `translate(${-50 - 50 * Math.cos(angle)}%, ${-50 - 50 * Math.sin(angle)}%)`;
 }
 
 export function getAttachmentBadgePosition(

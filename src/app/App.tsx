@@ -50,6 +50,7 @@ const AttachmentMetaListView = lazy(() =>
     default: module.AttachmentMetaListView,
   })),
 );
+const OvalPlacementTest = lazy(() => import("@/components/pages/OvalPlacementTest").then((module) => ({ default: module.OvalPlacementTest })));
 const PerkMetaListView = lazy(() =>
   import("@/components/pages/PerkMetaListView").then((module) => ({
     default: module.PerkMetaListView,
@@ -188,6 +189,7 @@ export default function App() {
               }
             />
           )}
+          {import.meta.env.DEV && <Route path="/oval-placement-test" element={<OvalPlacementTest />} />}
           <Route path="/:gameId" element={<GameRedirect />} />
           <Route path="/:gameId/explore" element={<LegacyExploreRedirect />} />
           <Route

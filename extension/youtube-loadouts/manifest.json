@@ -6,6 +6,10 @@
   "icons": { "192": "icon-192.png" },
   "host_permissions": ["https://yvvuitjsunankrffcpck.supabase.co/*"],
   "background": { "service_worker": "background.js" },
+  "web_accessible_resources": [{
+    "resources": ["logo.svg"],
+    "matches": ["https://www.youtube.com/*", "https://youtube.com/*"]
+  }],
   "content_scripts": [{
     "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
     "js": ["content.js"],

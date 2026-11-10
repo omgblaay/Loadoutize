@@ -1,4 +1,4 @@
-import { getAttachmentBadgePosition, getOvalAttachmentBadgePosition } from "@/lib/weaponAttachmentBadgePositions";
+import { getAttachmentBadgePosition, getOvalAttachmentBadgePosition, getOvalAttachmentBadgeTransform } from "@/lib/weaponAttachmentBadgePositions";
 import { getAttachmentHighlightRegion } from "@/lib/weaponAttachmentHighlightRegions";
 import { AppTooltip } from "@/components/atoms/Tooltip";
 import { Skeleton } from "@/components/atoms/Skeleton";
@@ -39,6 +39,7 @@ export function WeaponImage({
   loading = false,
   imageLoading = "eager",
   enableSpritePreview = false,
+  fitSpriteToBounds = false,
   showPreviewBackground = false,
   ovalBadgeLabels = false,
 }: {
@@ -51,6 +52,8 @@ export function WeaponImage({
   imageLoading?: "eager" | "lazy";
   /** Uses the calibrated MW4 sprite compositor when a verified weapon recipe exists. */
   enableSpritePreview?: boolean;
+  /** Fit the visible assembled sprite to the image area on compact cards. */
+  fitSpriteToBounds?: boolean;
   /** Shows the cropped white smoke behind the assembled weapon preview. */
   showPreviewBackground?: boolean;
   /** Shows labeled attachment callouts around the weapon on desktop. */
@@ -130,6 +133,7 @@ export function WeaponImage({
             weaponId={weaponId}
             weaponName={alt}
             attachments={badges ?? []}
+            fitToBounds={fitSpriteToBounds}
             onReady={markSpriteReady}
             onError={markSpriteUnavailable}
           />
@@ -169,8 +173,7 @@ export function WeaponImage({
             const isDimmed = activeBadgeKey != null && !isActive;
 
             const ovalPercent = ovalPosition?.percent ?? 0;
-            const ovalAngle = (ovalPercent / 100) * Math.PI * 2;
-            const transform = `translate(${-50 - 50 * Math.cos(ovalAngle)}%, ${-50 - 50 * Math.sin(ovalAngle)}%)`;
+            const transform = getOvalAttachmentBadgeTransform(ovalPercent);
             const content = ovalBadgeLabels ? (
               <div className="flex w-[200px] items-center gap-2 rounded-lg border border-white/5 bg-[#151315]/95 py-1.5 pl-1.5 pr-3 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-sm">
                 <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full">

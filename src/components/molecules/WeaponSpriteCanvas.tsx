@@ -42,12 +42,15 @@ export function WeaponSpriteCanvas({
   weaponId,
   weaponName,
   attachments,
+  fitToBounds = false,
   onReady,
   onError,
 }: {
   weaponId: string;
   weaponName: string;
   attachments: SpritePreviewAttachment[];
+  /** Fill compact previews with the visible assembled weapon and attachments. */
+  fitToBounds?: boolean;
   onReady: () => void;
   onError: () => void;
 }) {
@@ -98,7 +101,59 @@ export function WeaponSpriteCanvas({
         const renderer = new WeaponSpriteCompositor(catalog);
         await renderer.load(state);
         if (cancelled) return;
-        renderer.render(canvas, state);
+        if (fitToBounds) {
+          const source = document.createElement("canvas");
+          source.width = canvas.width;
+          source.height = canvas.height;
+          renderer.render(source, state);
+
+          const context = canvas.getContext("2d");
+          const sourceContext = source.getContext("2d", { willReadFrequently: true });
+          if (!context || !sourceContext) throw new Error("Weapon preview canvas is unavailable.");
+
+          const { data } = sourceContext.getImageData(0, 0, source.width, source.height);
+          let left = source.width;
+          let top = source.height;
+          let right = -1;
+          let bottom = -1;
+          for (let y = 0; y < source.height; y++) {
+            for (let x = 0; x < source.width; x++) {
+              if (data[(y * source.width + x) * 4 + 3] < 8) continue;
+              left = Math.min(left, x);
+              top = Math.min(top, y);
+              right = Math.max(right, x);
+              bottom = Math.max(bottom, y);
+            }
+          }
+
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          if (right >= left && bottom >= top) {
+            const cropX = Math.max(0, left - 2);
+            const cropY = Math.max(0, top - 2);
+            const cropRight = Math.min(source.width, right + 3);
+            const cropBottom = Math.min(source.height, bottom + 3);
+            const cropWidth = cropRight - cropX;
+            const cropHeight = cropBottom - cropY;
+            const inset = 4;
+            const scale = Math.min(
+              (canvas.width - inset * 2) / cropWidth,
+              (canvas.height - inset * 2) / cropHeight,
+            );
+            const width = cropWidth * scale;
+            const height = cropHeight * scale;
+            context.imageSmoothingEnabled = true;
+            context.imageSmoothingQuality = "high";
+            context.drawImage(
+              source,
+              cropX, cropY, cropWidth, cropHeight,
+              (canvas.width - width) / 2, (canvas.height - height) / 2, width, height,
+            );
+          } else {
+            context.drawImage(source, 0, 0);
+          }
+        } else {
+          renderer.render(canvas, state);
+        }
         onReady();
       })
       .catch((error) => {
@@ -110,7 +165,7 @@ export function WeaponSpriteCanvas({
     return () => {
       cancelled = true;
     };
-  }, [attachmentKey, onError, onReady, weaponId]);
+  }, [attachmentKey, fitToBounds, onError, onReady, weaponId]);
 
   return (
     <canvas

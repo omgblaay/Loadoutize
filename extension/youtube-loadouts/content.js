@@ -3,6 +3,7 @@
   let activeVideoId = null;
   let requestNumber = 0;
   let result = null;
+  let lookupError = false;
   let scheduled = false;
 
   function currentVideoId() {
@@ -17,7 +18,7 @@
 
   function render() {
     const title = document.querySelector("ytd-watch-metadata #title");
-    if (!title || !result?.length) {
+    if (!title || !activeVideoId || result === null) {
       removePanel();
       return;
     }
@@ -27,16 +28,54 @@
     removePanel();
     panel = document.createElement("section");
     panel.id = PANEL_ID;
-    panel.setAttribute("aria-label", "Loadoutize weapon configs for this video");
+    panel.setAttribute("aria-label", "Loadoutize for this video");
 
     const heading = document.createElement("div");
     heading.className = "loadoutize-heading";
-    const brand = document.createElement("strong");
-    brand.textContent = "LOADOUTIZE";
+    const brand = document.createElement("img");
+    brand.className = "loadoutize-logo";
+    brand.src = chrome.runtime.getURL("logo.svg");
+    brand.alt = "Loadoutize";
     const count = document.createElement("span");
-    count.textContent = `${result.length} weapon config${result.length === 1 ? "" : "s"} from this video`;
+    count.textContent = lookupError
+      ? "LOOKUP UNAVAILABLE"
+      : result.length
+        ? `${result.length} LOADOUT${result.length === 1 ? "" : "S"} FOUND`
+        : "NO LOADOUT YET";
     heading.append(brand, count);
     panel.append(heading);
+
+    if (!result.length) {
+      const empty = document.createElement("div");
+      empty.className = "loadoutize-empty";
+      const copy = document.createElement("div");
+      copy.className = "loadoutize-empty-copy";
+      const message = document.createElement("p");
+      message.className = "loadoutize-empty-title";
+      message.textContent = lookupError
+        ? "Couldn't check for this video's loadout."
+        : "This video's loadout isn't on Loadoutize yet.";
+      copy.append(message);
+      if (lookupError) {
+        const detail = document.createElement("p");
+        detail.className = "loadoutize-empty-detail";
+        detail.textContent = "Please try again in a moment.";
+        copy.append(detail);
+      }
+      empty.append(copy);
+      if (!lookupError) {
+        const create = document.createElement("a");
+        create.className = "loadoutize-create";
+        create.href = "https://loadoutize.com/create";
+        create.target = "_blank";
+        create.rel = "noopener noreferrer";
+        create.textContent = "Create now";
+        empty.append(create);
+      }
+      panel.append(empty);
+      title.insertAdjacentElement("afterend", panel);
+      return;
+    }
 
     const list = document.createElement("div");
     list.className = "loadoutize-list";
@@ -72,19 +111,27 @@
     if (videoId !== activeVideoId) {
       activeVideoId = videoId;
       result = null;
+      lookupError = false;
       removePanel();
       const request = ++requestNumber;
       if (videoId) {
         chrome.runtime.sendMessage({ type: "LOADOUTIZE_LOOKUP", videoId })
           .then((response) => {
             if (request !== requestNumber || currentVideoId() !== videoId) return;
-            if (response?.error) console.warn("Loadoutize lookup:", response.error);
-            result = response?.loadouts ?? [];
+            lookupError = Boolean(response?.error) || !Array.isArray(response?.loadouts);
+            if (lookupError) console.warn("Loadoutize lookup:", response?.error ?? "Invalid lookup response");
+            result = lookupError ? [] : response.loadouts;
             render();
           })
-          .catch((error) => console.warn("Loadoutize lookup:", error));
+          .catch((error) => {
+            if (request !== requestNumber || currentVideoId() !== videoId) return;
+            console.warn("Loadoutize lookup:", error);
+            lookupError = true;
+            result = [];
+            render();
+          });
       }
-    } else if (result?.length) {
+    } else if (result !== null) {
       render();
     }
   }

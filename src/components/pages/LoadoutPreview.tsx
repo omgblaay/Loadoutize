@@ -55,10 +55,6 @@ import {
   BreadcrumbLink,
   BreadcrumbSpacer,
 } from "@/components/molecules/Breadcrumb";
-import {
-  PixelFireButton,
-  type PixelFireTone,
-} from "@/components/ui/pixel-fire-button";
 import { RatingRing } from "@/components/atoms/RatingRing";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/atoms/Skeleton";
@@ -138,136 +134,60 @@ interface Loadout {
 }
 
 type ReactionType = "like" | "dislike" | "favorite";
+const CONTAINER_TITLE_CLASS = "font-mono text-xs font-medium uppercase tracking-[0.12em] text-teritary";
 
-function FireReactionButton({
-  icon,
-  label,
-  count,
-  active,
-  tone,
-  onClick,
-  className,
+function VoteControl({
+  likes,
+  dislikes,
+  liked,
+  disliked,
+  onLike,
+  onDislike,
 }: {
-  icon: React.ReactNode;
-  label: string;
-  count: number;
-  active: boolean;
-  tone: Extract<PixelFireTone, "green" | "red">;
-  onClick: () => Promise<boolean>;
-  className?: string;
+  likes: number;
+  dislikes: number;
+  liked: boolean;
+  disliked: boolean;
+  onLike: () => Promise<boolean>;
+  onDislike: () => Promise<boolean>;
 }) {
-  const [pending, setPending] = useState(false);
-  const activeTone =
-    tone === "green"
-      ? {
-          icon: "border-emerald-200/25 bg-emerald-950/35 text-emerald-100",
-          count: "border-emerald-200/20 bg-emerald-950/40 text-emerald-50",
-          dot: "bg-emerald-300 shadow-[0_0_8px_rgba(110,231,183,0.9)]",
-          glow: "from-emerald-300/45",
-        }
-      : {
-          icon: "border-rose-200/25 bg-rose-950/35 text-rose-100",
-          count: "border-rose-200/20 bg-rose-950/40 text-rose-50",
-          dot: "bg-rose-300 shadow-[0_0_8px_rgba(253,164,175,0.9)]",
-          glow: "from-rose-300/45",
-        };
-
-  const handleClick = async () => {
+  const [pending, setPending] = useState<"like" | "dislike" | null>(null);
+  const handleVote = async (type: "like" | "dislike") => {
     if (pending) return;
-    setPending(true);
+    setPending(type);
     try {
-      await onClick();
+      await (type === "like" ? onLike() : onDislike());
     } finally {
-      setPending(false);
+      setPending(null);
     }
   };
 
   return (
-    <PixelFireButton
-      tone={tone}
-      lit={active}
-      disabled={pending}
-      ariaLabel={`${label}, ${count}`}
-      ariaPressed={active}
-      className={cn(
-        "group h-[56px] rounded-2xl px-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_28px_-18px_rgba(0,0,0,0.9)] [&>span.relative]:w-full",
-        className,
-      )}
-      onClick={() => void handleClick()}
-      overlay={
-        <>
-          <span
-            aria-hidden="true"
-            className={cn(
-              "pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r via-white/25 to-transparent opacity-60",
-              activeTone.glow,
-            )}
-          />
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 translate-x-[-130%] skew-x-[-24deg] bg-gradient-to-r from-transparent via-white/[0.07] to-transparent transition-transform duration-700 group-hover:translate-x-[130%]"
-          />
-        </>
-      }
-    >
-      <span
-        className={cn(
-          "relative flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-black/25 text-white/70 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-white/20 group-hover:text-white",
-          active && activeTone.icon,
-        )}
+    <div role="group" aria-label="Rate loadout" className="inline-flex shrink-0 items-center rounded-xl border border-white/[0.12] bg-white/[0.035] p-1">
+      <button
+        type="button"
+        aria-label={`Like loadout, ${likes} likes`}
+        aria-pressed={liked}
+        disabled={pending !== null}
+        onClick={() => void handleVote("like")}
+        className={cn("flex h-9 min-w-[72px] items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium tabular-nums transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-wait", liked ? "bg-emerald-400/10 text-emerald-200" : "text-secondary")}
       >
-        {pending ? (
-          <LoaderCircle className="size-4 animate-spin" />
-        ) : (
-          <span
-            className={cn(
-              "flex transition-transform duration-200 group-active:scale-90",
-              active && "scale-110",
-            )}
-          >
-            {React.isValidElement(icon)
-              ? React.cloneElement(
-                  icon as React.ReactElement<{
-                    fill?: string;
-                    strokeWidth?: number;
-                  }>,
-                  {
-                    fill: active ? "currentColor" : "none",
-                    strokeWidth: active ? 2.4 : 2,
-                  },
-                )
-              : icon}
-          </span>
-        )}
-        {active && !pending && (
-          <span
-            aria-hidden="true"
-            className={cn(
-              "absolute -right-0.5 -top-0.5 size-2 rounded-full",
-              activeTone.dot,
-            )}
-          />
-        )}
-      </span>
-
-      <span className="flex min-w-0 flex-1 flex-col items-start leading-none">
-        <span className="text-[13px] font-semibold tracking-[-0.01em] text-white">
-          {pending ? "Updating" : label}
-        </span>
-        <span className="mt-1 text-[9px] font-medium uppercase tracking-[0.12em] text-white/40">
-          {active ? "Your vote" : "Cast vote"}
-        </span>
-      </span>
-
-      <span
-        className={cn(
-          "flex min-w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/25 px-2 py-1.5 text-xs tabular-nums text-white/60 transition-colors group-hover:text-white",
-          active && activeTone.count,
-        )}
+        {pending === "like" ? <LoaderCircle className="size-4 animate-spin" /> : <ThumbsUp className="size-4" fill={liked ? "currentColor" : "none"} />}
+        <span>{likes}</span>
+      </button>
+      <span aria-hidden="true" className="mx-1 h-5 w-px bg-white/10" />
+      <button
+        type="button"
+        aria-label={`Dislike loadout, ${dislikes} dislikes`}
+        aria-pressed={disliked}
+        disabled={pending !== null}
+        onClick={() => void handleVote("dislike")}
+        className={cn("flex h-9 min-w-[72px] items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium tabular-nums transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-wait", disliked ? "bg-rose-400/10 text-rose-200" : "text-secondary")}
       >
-        {count}
-      </span>
-    </PixelFireButton>
+        {pending === "dislike" ? <LoaderCircle className="size-4 animate-spin" /> : <ThumbsDown className="size-4" fill={disliked ? "currentColor" : "none"} />}
+        <span>{dislikes}</span>
+      </button>
+    </div>
   );
 }
 
@@ -458,7 +378,7 @@ export function LoadoutPreview() {
     }
   };
 
-  /** Performs the reaction toggle and resolves to whether `type` is now active, for ReactionButton's success animation. */
+  /** Performs the reaction toggle and resolves to whether `type` is now active. */
   const react = async (type: ReactionType): Promise<boolean> => {
     if (!accessToken) {
       setAuthModalOpen(true);
@@ -695,6 +615,16 @@ export function LoadoutPreview() {
     .filter((badge) => badge !== null);
   const isFullLoadout = loadout.contentType === "full_loadout";
   const shareUrl = window.location.href;
+  const voteCount = loadout.likes + loadout.dislikes;
+  const authorAvatar = (
+    <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] text-xs font-semibold">
+      {loadout.authorAvatarUrl ? (
+        <img src={loadout.authorAvatarUrl} alt="" className="size-full object-cover" />
+      ) : (
+        loadout.userName?.[0]?.toUpperCase() ?? "U"
+      )}
+    </div>
+  );
 
   return (
     <AppLayout
@@ -730,175 +660,101 @@ export function LoadoutPreview() {
         </>
       }
     >
-      {isFullLoadout && (
-        <header className="flex flex-row gap-4 ">
-          <div className="flex min-w-0  flex-1 items-center gap-4">
-            <RatingRing
-              percent={loadout.ratingPercent}
-              votes={loadout.likes + loadout.dislikes}
-              size={64}
-              innerClassName="border border-white/5"
-              fallbackLabel="New"
-            />
-            <div className="flex-1">
-              {titleTag && (
-                <p
-                  style={{ color: titleTag.color }}
-                  className="font-handwritten text-xl font-light"
-                >
-                  {titleTag.name}
-                </p>
-              )}
-              <h1 className="wrap-anywhere flxe-1 text-xl sm:text-2xl">
-                {loadout.name}
-              </h1>
-            </div>
-          </div>
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <FireReactionButton
-              icon={<ThumbsUp className="w-4 h-4" />}
-              label={loadout.liked ? "Liked" : "Like"}
-              count={loadout.likes}
-              active={loadout.liked}
-              tone="green"
-              onClick={() => react("like")}
-              className="flex-1 sm:min-w-36"
-            />
-            <FireReactionButton
-              icon={<ThumbsDown className="w-4 h-4" />}
-              label={loadout.disliked ? "Disliked" : "Dislike"}
-              count={loadout.dislikes}
-              active={loadout.disliked}
-              tone="red"
-              onClick={() => react("dislike")}
-              className="flex-1 sm:min-w-36"
-            />
-          </div>
-        </header>
-      )}
-
-      {!isFullLoadout && (
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-4">
-            <RatingRing
-              percent={loadout.ratingPercent}
-              votes={loadout.likes + loadout.dislikes}
-              size={56}
-              innerClassName="border border-white/5"
-              fallbackLabel="New"
-            />
-            <h1 className="min-w-0 text-sm antialiased sm:text-xl wrap-anywhere">
-              {titleTag && (
-                <span
-                  style={{ color: titleTag.color }}
-                  className="mr-2 font-handwritten text-2xl font-light"
-                >
-                  {titleTag.name}
-                </span>
-              )}
-              {primaryWeaponCatalog && (
-                <>
-                  <Tag
-                    className="mr-2 align-middle"
-                    link={explorePath(gameId, {
-                      category: primaryWeaponCatalog.type,
-                    })}
-                  >
-                    {primaryWeaponCatalog.typeShort || meta.short}
-                  </Tag>
-                  <Link
-                    to={weaponMetaPath(gameId, primaryWeaponCatalog.id)}
-                    className="font-sans text-teritary hover:text-[#efedf1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                  >
-                    {primaryWeaponCatalog.name}
-                  </Link>{" "}
-                </>
-              )}
-              {loadout.name}
-            </h1>
-          </div>
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <FireReactionButton
-              icon={<ThumbsUp className="w-4 h-4" />}
-              label={loadout.liked ? "Liked" : "Like"}
-              count={loadout.likes}
-              active={loadout.liked}
-              tone="green"
-              onClick={() => react("like")}
-              className="flex-1 sm:min-w-36"
-            />
-            <FireReactionButton
-              icon={<ThumbsDown className="w-4 h-4" />}
-              label={loadout.disliked ? "Disliked" : "Dislike"}
-              count={loadout.dislikes}
-              active={loadout.disliked}
-              tone="red"
-              onClick={() => react("dislike")}
-              className="flex-1 sm:min-w-36"
-            />
-          </div>
-        </header>
-      )}
-
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/[0.06] pb-4">
-        {(() => {
-          const avatar = (
-            <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] text-xs font-semibold">
-              {loadout.authorAvatarUrl ? (
-                <img
-                  src={loadout.authorAvatarUrl}
-                  alt=""
-                  className="size-full object-cover"
-                />
-              ) : (
-                loadout.userName?.[0]?.toUpperCase() ?? "U"
-              )}
-            </div>
-          );
-          return loadout.authorNickname ? (
-            <Link
-              to={`/u/${loadout.authorNickname}`}
-              aria-label={`View ${loadout.userName ?? loadout.authorNickname}'s profile`}
-              className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+      <header className="border-b border-white/[0.08] pb-5">
+        <div className="min-w-0">
+          {titleTag && (
+            <span
+              className="font-handwritten text-[clamp(1.5rem,2.5vw,2.25rem)] leading-none"
+              style={{ color: titleTag.color }}
             >
-              {avatar}
-            </Link>
-          ) : avatar;
-        })()}
-        <div className="flex min-w-0 items-baseline gap-1.5 text-sm">
-          <span className="text-teritary">by</span>
-          {loadout.authorNickname ? (
-            <Link to={`/u/${loadout.authorNickname}`} className="truncate font-medium hover:underline">
-              {loadout.userName} <span className="text-teritary">@{loadout.authorNickname}</span>
-            </Link>
-          ) : (
-            <span className="truncate font-medium">{loadout.userName}</span>
+              {titleTag.name}
+            </span>
+          )}
+          <h1 className={cn("wrap-anywhere text-[clamp(1.75rem,3.5vw,2.75rem)] font-semibold leading-[1.1] tracking-[-0.025em]", titleTag && "mt-1")}>
+            {loadout.name}
+          </h1>
+          {primaryWeaponCatalog && (
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+              <Tag link={explorePath(gameId, { category: primaryWeaponCatalog.type })}>
+                {primaryWeaponCatalog.typeShort || meta.short}
+              </Tag>
+              <Link
+                to={weaponMetaPath(gameId, primaryWeaponCatalog.id)}
+                className="font-medium text-secondary underline-offset-4 hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              >
+                {primaryWeaponCatalog.name}
+              </Link>
+            </div>
           )}
         </div>
-        {loadout.authorLinks &&
-          SOCIAL_LINK_FIELDS.some(({ key }) => loadout.authorLinks![key]) && (
-            <div className="ml-auto flex items-center gap-1">
-              {SOCIAL_LINK_FIELDS.filter(({ key }) => loadout.authorLinks![key]).map(
-                ({ key, label, icon: Icon, url }) => {
-                  const count = formatCount(loadout.authorSocialStats?.[key]);
-                  return (
-                    <Button key={key} asChild variant="ghost" size="sm" className="h-8 px-2">
-                      <a
-                        href={url(loadout.authorLinks![key]!)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={label}
-                      >
-                        <Icon className="size-3.5" />
-                        <span className="text-[10px] text-teritary font-mono">{count ?? "—"}</span>
-                      </a>
-                    </Button>
-                  );
-                },
+
+        <div className="mt-6 grid gap-5 border-t border-white/[0.06] pt-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            {loadout.authorNickname ? (
+              <Link
+                to={`/u/${loadout.authorNickname}`}
+                aria-label={`View ${loadout.userName ?? loadout.authorNickname}'s profile`}
+                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              >
+                {authorAvatar}
+              </Link>
+            ) : authorAvatar}
+            <div className="flex min-w-0 items-baseline gap-1.5 text-sm">
+              <span className="text-teritary">by</span>
+              {loadout.authorNickname ? (
+                <Link to={`/u/${loadout.authorNickname}`} className="truncate font-medium hover:underline">
+                  {loadout.userName} <span className="text-teritary">@{loadout.authorNickname}</span>
+                </Link>
+              ) : (
+                <span className="truncate font-medium">{loadout.userName}</span>
               )}
             </div>
-          )}
-      </div>
+            {loadout.authorLinks &&
+              SOCIAL_LINK_FIELDS.some(({ key }) => loadout.authorLinks![key]) && (
+                <div className="flex items-center gap-1">
+                  {SOCIAL_LINK_FIELDS.filter(({ key }) => loadout.authorLinks![key]).map(
+                    ({ key, label, icon: Icon, url }) => {
+                      const count = formatCount(loadout.authorSocialStats?.[key]);
+                      return (
+                        <Button key={key} asChild variant="ghost" size="sm" className="h-8 px-2">
+                          <a
+                            href={url(loadout.authorLinks![key]!)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={label}
+                          >
+                            <Icon className="size-3.5" />
+                            <span className="text-[10px] text-teritary font-mono">{count ?? "—"}</span>
+                          </a>
+                        </Button>
+                      );
+                    },
+                  )}
+                </div>
+              )}
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center xl:justify-end">
+            <div className="flex shrink-0 items-center gap-2.5">
+              <RatingRing
+                percent={loadout.ratingPercent}
+                votes={voteCount}
+                size={56}
+                innerClassName="border border-white/5"
+                fallbackLabel="New"
+              />
+              <span className="text-xs leading-tight text-secondary">Community rating</span>
+            </div>
+            <VoteControl
+              likes={loadout.likes}
+              dislikes={loadout.dislikes}
+              liked={loadout.liked}
+              disliked={loadout.disliked}
+              onLike={() => react("like")}
+              onDislike={() => react("dislike")}
+            />
+          </div>
+        </div>
+      </header>
 
       <div
         className={cn(
@@ -911,7 +767,7 @@ export function LoadoutPreview() {
           {isFullLoadout ? (
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-teritary">
+                <p className={CONTAINER_TITLE_CLASS}>
                   Primary weapon
                 </p>
                 <h2 className="mt-1 font-mono text-base uppercase">
@@ -945,21 +801,13 @@ export function LoadoutPreview() {
                   >
                     Back
                   </Button>
-                  <FireReactionButton
-                    icon={<ThumbsUp className="w-4 h-4" />}
-                    label={loadout.liked ? "Liked" : "Like"}
-                    count={loadout.likes}
-                    active={loadout.liked}
-                    tone="green"
-                    onClick={() => react("like")}
-                  />
-                  <FireReactionButton
-                    icon={<ThumbsDown className="w-4 h-4" />}
-                    label={loadout.disliked ? "Disliked" : "Dislike"}
-                    count={loadout.dislikes}
-                    active={loadout.disliked}
-                    tone="red"
-                    onClick={() => react("dislike")}
+                  <VoteControl
+                    likes={loadout.likes}
+                    dislikes={loadout.dislikes}
+                    liked={loadout.liked}
+                    disliked={loadout.disliked}
+                    onLike={() => react("like")}
+                    onDislike={() => react("dislike")}
                   />
                 </>
               }
@@ -1081,7 +929,7 @@ export function LoadoutPreview() {
           <Container>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-teritary">
+                <p className={CONTAINER_TITLE_CLASS}>
                   Secondary weapon
                 </p>
                 <h2 className="mt-1 font-mono text-base uppercase">
@@ -1203,7 +1051,7 @@ export function LoadoutPreview() {
           )}
         >
           <Container className="gap-3">
-            <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-teritary">
+            <h2 className={CONTAINER_TITLE_CLASS}>
               Build notes
             </h2>
             {loadout.description ? (
@@ -1302,9 +1150,9 @@ export function LoadoutPreview() {
               className="w-[104px] h-[104px]"
             />
             <div className="flex-1 min-w-[200px] flex flex-col gap-3">
-              <h3 className="text-[12px] tracking-[0.5px] uppercase  font-medium">
+              <h2 className={CONTAINER_TITLE_CLASS}>
                 Share loadout
-              </h3>
+              </h2>
               <p className="text-[12px] text-[#8d898a] break-all">{shareUrl}</p>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -1372,7 +1220,7 @@ export function LoadoutPreview() {
 
       {isFullLoadout && (
         <Container>
-          <h2 className="mt-1 text-xl">Perks, equipment & melee</h2>
+          <h2 className={CONTAINER_TITLE_CLASS}>Perks, equipment & melee</h2>
 
           <div className="grid gap-4">
             {(["melee"] as const).map((slot) => {

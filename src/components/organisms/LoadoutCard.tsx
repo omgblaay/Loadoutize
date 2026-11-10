@@ -183,6 +183,7 @@ export function LoadoutCard({
           }
           weaponId={primaryWeaponId}
           enableSpritePreview={loadout.gameId === "mw4"}
+          fitSpriteToBounds
           showSkeleton
           imageLoading={index < 3 ? "eager" : "lazy"}
           badges={attachmentIcons.map(
