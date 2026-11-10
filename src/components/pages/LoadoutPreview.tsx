@@ -229,7 +229,7 @@ function WeaponPreviewCaption({
   return (
     <div className="absolute left-0 top-0 z-[4] max-w-[min(85%,20rem)] rounded-lg bg-[#0a0909]/80 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-sm">
       {weapon ? (
-        <div className="font-mono text-sm font-semibold uppercase leading-tight">
+        <div className="font-mono text-sm font-semibold uppercase flex items-center gap-4 cursor-auto leading-tight">
           {weaponType && (
             <>
               <Link
@@ -238,18 +238,25 @@ function WeaponPreviewCaption({
               >
                 {weaponType}
               </Link>
-              <span className="text-teritary"> / </span>
+              <span className="text-teritary cursor-auto"> / </span>
             </>
           )}
           <Link
             to={weaponMetaPath(gameId, weapon.id)}
-            className="text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            className="inline-flex items-center gap-1.5 text-white hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           >
+            {weapon.imageUrl && (
+              <img
+                src={weapon.imageUrl}
+                alt=""
+                className="w-10 shrink-0 cursor-pointer object-contain"
+              />
+            )}
             {weapon.name}
           </Link>
         </div>
       ) : (
-        <span className="font-mono text-sm uppercase text-secondary">
+        <span className="font-mono text-sm uppercase cursor-pointer text-secondary">
           Not selected
         </span>
       )}
@@ -747,7 +754,15 @@ export function LoadoutPreview() {
               <BreadcrumbSpacer />
               <BreadcrumbLink
                 to={weaponMetaPath(gameId, primaryWeaponCatalog.id)}
+                className="inline-flex items-center gap-1.5"
               >
+                {primaryWeaponCatalog.imageUrl && (
+                  <img
+                    src={primaryWeaponCatalog.imageUrl}
+                    alt=""
+                    className="size-5 shrink-0 object-contain"
+                  />
+                )}
                 {primaryWeaponCatalog.name}
               </BreadcrumbLink>
             </>
