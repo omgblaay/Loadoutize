@@ -37,6 +37,7 @@ import { Tag } from "@/components/atoms/Tag";
 import { ROLE_TAG_META, type RoleTag } from "@/lib/roles";
 import { Container } from "@/components/atoms/Container";
 import { explorePath, loadoutPath } from "@/lib/routes";
+import { ResponsiveDialog } from "@/components/molecules/ResponsiveDialog";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -109,6 +110,7 @@ export function UserPage() {
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
   const [catalogs, setCatalogs] = useState<Record<string, GameCatalog>>({});
   const [loading, setLoading] = useState(true);
+  const [qrOpen, setQrOpen] = useState(false);
 
   useEffect(() => {
     if (nickname) fetchProfile();
@@ -214,7 +216,7 @@ export function UserPage() {
     const dataUrl = await generateBrandedQRPng(
       profileUrl,
       240,
-      "Scan the QR to see all my weapon configs",
+      "Scan to view this profile",
     );
     const a = document.createElement("a");
     a.href = dataUrl;
@@ -250,8 +252,17 @@ export function UserPage() {
       <div className="flex flex-col gap-6">
         {/* Profile hero */}
         <Container className="border-0">
-          <div className="flex gap-5">
-            <div className="w-32 h-32 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
+          <div className="flex flex-wrap items-start gap-4 sm:gap-5">
+            <button
+              type="button"
+              onClick={() => setQrOpen(true)}
+              aria-label={`Open QR code for @${profile.nickname}`}
+              className="group flex w-20 shrink-0 flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-2 text-[10px] font-medium uppercase tracking-wide text-secondary transition-colors hover:border-white/40 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            >
+              <QRCodeCanvas value={profileUrl} size={64} className="size-16" />
+              <span className="group-hover:text-white">QR code</span>
+            </button>
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
               {profile.avatarUrl ? (
                 <img
                   src={profile.avatarUrl}
@@ -264,7 +275,7 @@ export function UserPage() {
                 </span>
               )}
             </div>
-            <div className="flex flex-col space-between flex-1 justify-center h-full gap-2">
+            <div className="flex min-w-[160px] flex-1 flex-col justify-center gap-2">
               <h1 className="text-3xl">{profile.name}</h1>
               <div className="flex items-center gap-3">
                 <p className="text-md text-secondary">@{profile.nickname}</p>
@@ -319,31 +330,29 @@ export function UserPage() {
           </div>
         </Container>
 
-        {/* Share profile */}
-        <Container className="flex flex-row items-center gap-4">
-          <QRCodeCanvas
-            value={profileUrl}
-            size={104}
-            className="w-[104px] h-[104px]"
-          />
-          <div className="flex-1 min-w-[200px] flex flex-col gap-3">
-            <h3 className="text-[12px] tracking-[0.5px] uppercase  font-medium">
-              Scan the QR to see all my weapon configs
-            </h3>
-            <p className="text-[12px] text-[#8d898a] break-all">{profileUrl}</p>
-            {isOwnProfile && (
-              <Button
-                variant="outline"
-                className="w-fit"
-                onClick={downloadBrandedQr}
-              >
-                <Download className="w-4 h-4 " />
-                <span className="text-[14px] ">Download QR</span>
-                <span className="text-[14px] text-[#bebcbc]">as PNG</span>
-              </Button>
-            )}
+        <ResponsiveDialog
+          open={qrOpen}
+          onOpenChange={setQrOpen}
+          title={isOwnProfile ? "Your profile QR code" : `${profile.name}'s profile QR code`}
+        >
+          <div className="flex flex-col items-center gap-5 pt-2">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+              <QRCodeCanvas value={profileUrl} size={208} className="size-52" />
+            </div>
+            <div className="w-full text-center">
+              <p className="text-sm text-secondary">
+                {isOwnProfile
+                  ? "Share this code to open your profile."
+                  : `Scan this code to open @${profile.nickname}'s profile.`}
+              </p>
+              <p className="mt-2 break-all text-xs text-teritary">{profileUrl}</p>
+            </div>
+            <Button variant="outline" className="w-full" onClick={downloadBrandedQr}>
+              <Download className="size-4" />
+              {isOwnProfile ? "Download your QR code" : "Download QR code for this profile"}
+            </Button>
           </div>
-        </Container>
+        </ResponsiveDialog>
 
         {/* Loadouts */}
         <div className="flex flex-col gap-4">

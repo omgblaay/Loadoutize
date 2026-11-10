@@ -12,8 +12,14 @@ import {
   weaponMetaPath,
 } from "@/lib/routes";
 import { orderedAttachmentEntries } from "@/lib/attachmentOrder";
-import { builderAttachmentDisplayName, type BuilderRelationAsset } from "@/lib/weaponBuilderRelations";
-import { builderAttachmentImageUrl, loadBuilderAttachmentAssets } from "@/lib/builderAttachmentImages";
+import {
+  builderAttachmentDisplayName,
+  type BuilderRelationAsset,
+} from "@/lib/weaponBuilderRelations";
+import {
+  builderAttachmentImageUrl,
+  loadBuilderAttachmentAssets,
+} from "@/lib/builderAttachmentImages";
 import { visibleWeaponCatalog } from "@/lib/weaponCategories";
 import gameLogo from "figma:asset/mw4_logo.png";
 import { useAuth } from "@/providers/AuthProvider";
@@ -50,7 +56,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/molecules/AlertDialog";
 import type { CardWeapon, CardTag, CardAttachment } from "@/types/loadout";
-import { Tag } from "@/components/atoms/Tag";
 import {
   BreadcrumbLink,
   BreadcrumbSpacer,
@@ -134,7 +139,8 @@ interface Loadout {
 }
 
 type ReactionType = "like" | "dislike" | "favorite";
-const CONTAINER_TITLE_CLASS = "font-mono text-xs font-medium uppercase tracking-[0.12em] text-teritary";
+const CONTAINER_TITLE_CLASS =
+  "font-mono text-xs font-medium uppercase tracking-[0.12em] text-teritary";
 
 function VoteControl({
   likes,
@@ -163,16 +169,27 @@ function VoteControl({
   };
 
   return (
-    <div role="group" aria-label="Rate loadout" className="inline-flex shrink-0 items-center rounded-xl border border-white/[0.12] bg-white/[0.035] p-1">
+    <div
+      role="group"
+      aria-label="Rate loadout"
+      className="inline-flex shrink-0 items-center rounded-xl border border-white/[0.12] bg-white/[0.035] p-1"
+    >
       <button
         type="button"
         aria-label={`Like loadout, ${likes} likes`}
         aria-pressed={liked}
         disabled={pending !== null}
         onClick={() => void handleVote("like")}
-        className={cn("flex h-9 min-w-[72px] items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium tabular-nums transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-wait", liked ? "bg-emerald-400/10 text-emerald-200" : "text-secondary")}
+        className={cn(
+          "flex h-9 min-w-[72px] items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium tabular-nums transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-wait",
+          liked ? "bg-emerald-400/10 text-emerald-200" : "text-secondary",
+        )}
       >
-        {pending === "like" ? <LoaderCircle className="size-4 animate-spin" /> : <ThumbsUp className="size-4" fill={liked ? "currentColor" : "none"} />}
+        {pending === "like" ? (
+          <LoaderCircle className="size-4 animate-spin" />
+        ) : (
+          <ThumbsUp className="size-4" fill={liked ? "currentColor" : "none"} />
+        )}
         <span>{likes}</span>
       </button>
       <span aria-hidden="true" className="mx-1 h-5 w-px bg-white/10" />
@@ -182,11 +199,60 @@ function VoteControl({
         aria-pressed={disliked}
         disabled={pending !== null}
         onClick={() => void handleVote("dislike")}
-        className={cn("flex h-9 min-w-[72px] items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium tabular-nums transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-wait", disliked ? "bg-rose-400/10 text-rose-200" : "text-secondary")}
+        className={cn(
+          "flex h-9 min-w-[72px] items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium tabular-nums transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-wait",
+          disliked ? "bg-rose-400/10 text-rose-200" : "text-secondary",
+        )}
       >
-        {pending === "dislike" ? <LoaderCircle className="size-4 animate-spin" /> : <ThumbsDown className="size-4" fill={disliked ? "currentColor" : "none"} />}
+        {pending === "dislike" ? (
+          <LoaderCircle className="size-4 animate-spin" />
+        ) : (
+          <ThumbsDown
+            className="size-4"
+            fill={disliked ? "currentColor" : "none"}
+          />
+        )}
         <span>{dislikes}</span>
       </button>
+    </div>
+  );
+}
+
+function WeaponPreviewCaption({
+  weapon,
+  gameId,
+}: {
+  weapon?: CardWeapon;
+  gameId: string;
+}) {
+  const weaponType = weapon?.typeShort || weapon?.type;
+  return (
+    <div className="absolute left-0 top-0 z-[4] max-w-[min(85%,20rem)] rounded-lg bg-[#0a0909]/80 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+      {weapon ? (
+        <div className="font-mono text-sm font-semibold uppercase leading-tight">
+          {weaponType && (
+            <>
+              <Link
+                to={weaponMetaListPath(gameId, weapon.type)}
+                className="text-teritary hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              >
+                {weaponType}
+              </Link>
+              <span className="text-teritary"> / </span>
+            </>
+          )}
+          <Link
+            to={weaponMetaPath(gameId, weapon.id)}
+            className="text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          >
+            {weapon.name}
+          </Link>
+        </div>
+      ) : (
+        <span className="font-mono text-sm uppercase text-secondary">
+          Not selected
+        </span>
+      )}
     </div>
   );
 }
@@ -273,7 +339,9 @@ export function LoadoutPreview() {
   const [catalogAttachments, setCatalogAttachments] = useState<
     CardAttachment[]
   >([]);
-  const [relationAssets, setRelationAssets] = useState<BuilderRelationAsset[]>([]);
+  const [relationAssets, setRelationAssets] = useState<BuilderRelationAsset[]>(
+    [],
+  );
   const [catalogTags, setCatalogTags] = useState<CardTag[]>([]);
   const [catalogPerks, setCatalogPerks] = useState<PerkCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -299,7 +367,9 @@ export function LoadoutPreview() {
     if (gameId === "mw4") {
       loadBuilderAttachmentAssets()
         .then(setRelationAssets)
-        .catch((error) => console.error("Error fetching attachment assets:", error));
+        .catch((error) =>
+          console.error("Error fetching attachment assets:", error),
+        );
     } else {
       setRelationAssets([]);
     }
@@ -489,20 +559,38 @@ export function LoadoutPreview() {
     () => new Map(relationAssets.map((asset) => [asset.id, asset])),
     [relationAssets],
   );
-  const attachmentLabel = (attachment: CardAttachment | undefined, weaponId: string | undefined, fallback: string) =>
-    attachment?.displayName ?? (gameId === "mw4"
-      ? builderAttachmentDisplayName(attachment?.stats?.assetId, weaponId, relationAssetsById, attachment?.stats?.displayName ?? fallback)
-      : attachment?.stats?.displayName ?? fallback);
+  const attachmentLabel = (
+    attachment: CardAttachment | undefined,
+    weaponId: string | undefined,
+    fallback: string,
+  ) =>
+    attachment?.displayName ??
+    (gameId === "mw4"
+      ? builderAttachmentDisplayName(
+          attachment?.stats?.assetId,
+          weaponId,
+          relationAssetsById,
+          attachment?.stats?.displayName ?? fallback,
+        )
+      : (attachment?.stats?.displayName ?? fallback));
   const attachmentSubtypeLabel = (attachment: CardAttachment | undefined) =>
-    attachment?.subtypeLabel || attachment?.stats?.subtypeLabel ||
+    attachment?.subtypeLabel ||
+    attachment?.stats?.subtypeLabel ||
     (attachment?.stats?.assetId
       ? relationAssetsById.get(attachment.stats.assetId)?.subtype_label
-      : null) || null;
+      : null) ||
+    null;
   const attachmentIconUrl = (attachment: CardAttachment | undefined) =>
     attachment?.imageUrl ||
     (gameId === "mw4"
-      ? builderAttachmentImageUrl(attachment?.stats?.assetId, relationAssetsById, attachment?.name)
-      : null) || attachment?.stats?.imagePath || null;
+      ? builderAttachmentImageUrl(
+          attachment?.stats?.assetId,
+          relationAssetsById,
+          attachment?.name,
+        )
+      : null) ||
+    attachment?.stats?.imagePath ||
+    null;
 
   const primaryAttachments = React.useMemo(() => {
     if (!primaryWeapon?.attachments) return [];
@@ -606,7 +694,11 @@ export function LoadoutPreview() {
         key: slot,
         assetId: attachment.stats?.assetId,
         typeSlug: attachment.typeSlug || slot,
-        label: attachmentLabel(attachment, secondaryWeapon?.id, attachment.name),
+        label: attachmentLabel(
+          attachment,
+          secondaryWeapon?.id,
+          attachment.name,
+        ),
         subtypeLabel: attachmentSubtypeLabel(attachment),
         iconUrl: attachmentIconUrl(attachment),
         isApex: slot.toLowerCase() === "apex",
@@ -616,12 +708,17 @@ export function LoadoutPreview() {
   const isFullLoadout = loadout.contentType === "full_loadout";
   const shareUrl = window.location.href;
   const voteCount = loadout.likes + loadout.dislikes;
+  const authorName = loadout.authorNickname || loadout.userName || "Player";
   const authorAvatar = (
-    <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] text-xs font-semibold">
+    <div className="flex size-9 shrink-0 self-center items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] text-xs font-semibold">
       {loadout.authorAvatarUrl ? (
-        <img src={loadout.authorAvatarUrl} alt="" className="size-full object-cover" />
+        <img
+          src={loadout.authorAvatarUrl}
+          alt=""
+          className="size-full object-cover"
+        />
       ) : (
-        loadout.userName?.[0]?.toUpperCase() ?? "U"
+        (authorName[0]?.toUpperCase() ?? "U")
       )}
     </div>
   );
@@ -656,104 +753,84 @@ export function LoadoutPreview() {
             </>
           )}
           <BreadcrumbSpacer />
-          <span className="text-base">{loadout.name}</span>
+          {loadout.name}
         </>
       }
     >
       <header className="border-b border-white/[0.08] pb-5">
-        <div className="min-w-0">
-          {titleTag && (
-            <span
-              className="font-handwritten text-[clamp(1.5rem,2.5vw,2.25rem)] leading-none"
-              style={{ color: titleTag.color }}
+        <div className="flex min-w-0 items-center justify-between gap-4">
+          <div className="min-w-0">
+            {titleTag && (
+              <span
+                className="font-handwritten text-[clamp(1.5rem,2.5vw,2.25rem)] leading-none"
+                style={{ color: titleTag.color }}
+              >
+                {titleTag.name}
+              </span>
+            )}
+            <h1
+              className={cn(
+                "wrap-anywhere text-[clamp(1.75rem,3.5vw,2.75rem)] font-semibold leading-[1.1] tracking-[-0.025em]",
+                titleTag && "mt-1",
+              )}
             >
-              {titleTag.name}
-            </span>
-          )}
-          <h1 className={cn("wrap-anywhere text-[clamp(1.75rem,3.5vw,2.75rem)] font-semibold leading-[1.1] tracking-[-0.025em]", titleTag && "mt-1")}>
-            {loadout.name}
-          </h1>
-          {primaryWeaponCatalog && (
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-              <Tag link={explorePath(gameId, { category: primaryWeaponCatalog.type })}>
-                {primaryWeaponCatalog.typeShort || meta.short}
-              </Tag>
-              <Link
-                to={weaponMetaPath(gameId, primaryWeaponCatalog.id)}
-                className="font-medium text-secondary underline-offset-4 hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-              >
-                {primaryWeaponCatalog.name}
-              </Link>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-6 grid gap-5 border-t border-white/[0.06] pt-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            {loadout.authorNickname ? (
-              <Link
-                to={`/u/${loadout.authorNickname}`}
-                aria-label={`View ${loadout.userName ?? loadout.authorNickname}'s profile`}
-                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-              >
-                {authorAvatar}
-              </Link>
-            ) : authorAvatar}
-            <div className="flex min-w-0 items-baseline gap-1.5 text-sm">
-              <span className="text-teritary">by</span>
               {loadout.authorNickname ? (
-                <Link to={`/u/${loadout.authorNickname}`} className="truncate font-medium hover:underline">
-                  {loadout.userName} <span className="text-teritary">@{loadout.authorNickname}</span>
+                <Link
+                  to={`/u/${loadout.authorNickname}`}
+                  className="mr-2 inline-flex items-baseline gap-2 align-baseline font-normal leading-[1.1] text-secondary hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                >
+                  {authorAvatar}
+                  <span>{authorName}'s</span>
                 </Link>
               ) : (
-                <span className="truncate font-medium">{loadout.userName}</span>
+                <span className="mr-2 inline-flex items-baseline gap-2 align-baseline font-normal leading-[1.1] text-secondary">
+                  {authorAvatar}
+                  <span>{authorName}'s</span>
+                </span>
               )}
-            </div>
-            {loadout.authorLinks &&
-              SOCIAL_LINK_FIELDS.some(({ key }) => loadout.authorLinks![key]) && (
-                <div className="flex items-center gap-1">
-                  {SOCIAL_LINK_FIELDS.filter(({ key }) => loadout.authorLinks![key]).map(
-                    ({ key, label, icon: Icon, url }) => {
-                      const count = formatCount(loadout.authorSocialStats?.[key]);
-                      return (
-                        <Button key={key} asChild variant="ghost" size="sm" className="h-8 px-2">
-                          <a
-                            href={url(loadout.authorLinks![key]!)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={label}
-                          >
-                            <Icon className="size-3.5" />
-                            <span className="text-[10px] text-teritary font-mono">{count ?? "—"}</span>
-                          </a>
-                        </Button>
-                      );
-                    },
-                  )}
-                </div>
-              )}
+              <span>{loadout.name}</span>
+            </h1>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center xl:justify-end">
-            <div className="flex shrink-0 items-center gap-2.5">
-              <RatingRing
-                percent={loadout.ratingPercent}
-                votes={voteCount}
-                size={56}
-                innerClassName="border border-white/5"
-                fallbackLabel="New"
-              />
-              <span className="text-xs leading-tight text-secondary">Community rating</span>
-            </div>
-            <VoteControl
-              likes={loadout.likes}
-              dislikes={loadout.dislikes}
-              liked={loadout.liked}
-              disliked={loadout.disliked}
-              onLike={() => react("like")}
-              onDislike={() => react("dislike")}
-            />
-          </div>
+          <RatingRing
+            percent={loadout.ratingPercent}
+            votes={voteCount}
+            size={72}
+            innerClassName="border border-white/5"
+            fallbackLabel="New"
+          />
         </div>
+
+        {loadout.authorLinks &&
+          SOCIAL_LINK_FIELDS.some(({ key }) => loadout.authorLinks![key]) && (
+            <div className="mt-3 flex flex-wrap items-center gap-1">
+              {SOCIAL_LINK_FIELDS.filter(
+                ({ key }) => loadout.authorLinks![key],
+              ).map(({ key, label, icon: Icon, url }) => {
+                const count = formatCount(loadout.authorSocialStats?.[key]);
+                return (
+                  <Button
+                    key={key}
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2"
+                  >
+                    <a
+                      href={url(loadout.authorLinks![key]!)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
+                    >
+                      <Icon className="size-3.5" />
+                      <span className="text-[10px] text-teritary font-mono">
+                        {count ?? "—"}
+                      </span>
+                    </a>
+                  </Button>
+                );
+              })}
+            </div>
+          )}
       </header>
 
       <div
@@ -763,32 +840,11 @@ export function LoadoutPreview() {
         )}
       >
         {/* Weapon build */}
-        <Container className={!isFullLoadout ? "!border-0 !bg-transparent !p-0" : undefined}>
-          {isFullLoadout ? (
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className={CONTAINER_TITLE_CLASS}>
-                  Primary weapon
-                </p>
-                <h2 className="mt-1 font-mono text-base uppercase">
-                  {primaryWeaponCatalog ? (
-                    <Link
-                      to={weaponMetaPath(gameId, primaryWeaponCatalog.id)}
-                      className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                    >
-                      {primaryWeaponCatalog.name}
-                    </Link>
-                  ) : (
-                    "Not selected"
-                  )}
-                </h2>
-              </div>
-              {primaryWeaponCatalog?.typeShort && (
-                <Tag>{primaryWeaponCatalog.typeShort}</Tag>
-              )}
-            </div>
-          ) : null}
-
+        <Container
+          className={
+            !isFullLoadout ? "!border-0 !bg-transparent !p-0" : undefined
+          }
+        >
           {!isFullLoadout && (
             <CompactPageHeader
               title={loadout.name}
@@ -814,11 +870,36 @@ export function LoadoutPreview() {
             />
           )}
 
-          <div className={cn("relative isolate flex w-full flex-col items-center gap-2 py-4", !isFullLoadout && "min-h-[240px] justify-center py-8 md:min-h-[440px]")}>
-            {gameId === "mw4" && primaryWeapon?.id && getWeaponPreviewRef(primaryWeapon.id) && (
-              <WeaponPreviewSmoke />
+          <div
+            className={cn(
+              "relative isolate flex w-full flex-col items-center gap-2 py-4",
+              !isFullLoadout &&
+                "min-h-[240px] justify-center py-8 md:min-h-[440px]",
             )}
-            <div className={cn("relative z-[1] flex w-full justify-center", !isFullLoadout && "max-w-sm")}>
+          >
+            {gameId === "mw4" &&
+              primaryWeapon?.id &&
+              getWeaponPreviewRef(primaryWeapon.id) && <WeaponPreviewSmoke />}
+            <WeaponPreviewCaption
+              weapon={primaryWeaponCatalog}
+              gameId={gameId}
+            />
+            <div className="absolute right-0 top-0 z-[4]">
+              <VoteControl
+                likes={loadout.likes}
+                dislikes={loadout.dislikes}
+                liked={loadout.liked}
+                disliked={loadout.disliked}
+                onLike={() => react("like")}
+                onDislike={() => react("dislike")}
+              />
+            </div>
+            <div
+              className={cn(
+                "relative z-[1] flex w-full justify-center",
+                !isFullLoadout && "max-w-sm",
+              )}
+            >
               <WeaponImage
                 imageUrl={primaryWeaponImage}
                 loading={
@@ -837,43 +918,50 @@ export function LoadoutPreview() {
           </div>
           <div className="divide-y-1 divide-solid divide-white/5 w-full">
             <div className="lg:hidden">
-            {primaryAttachments.map((att) => {
-              return (
-                <div
-                  key={att.key}
-                  onPointerEnter={() => setActiveKey(att.key)}
-                  onPointerLeave={() => setActiveKey(null)}
-                  onFocus={() => setActiveKey(att.key)}
-                  onBlur={() => setActiveKey(null)}
-                  className="flex w-full items-center gap-4 py-3 text-left"
-                >
-                  <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.035] p-2">
-                    {att.iconUrl ? (
-                      <img
-                        src={att.iconUrl}
-                        alt=""
-                        className="size-full object-contain"
-                      />
-                    ) : <span className="text-xs font-semibold text-white/70">{att.label.slice(0, 2).toUpperCase()}</span>}
+              {primaryAttachments.map((att) => {
+                return (
+                  <div
+                    key={att.key}
+                    onPointerEnter={() => setActiveKey(att.key)}
+                    onPointerLeave={() => setActiveKey(null)}
+                    onFocus={() => setActiveKey(att.key)}
+                    onBlur={() => setActiveKey(null)}
+                    className="flex w-full items-center gap-4 py-3 text-left"
+                  >
+                    <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.035] p-2">
+                      {att.iconUrl ? (
+                        <img
+                          src={att.iconUrl}
+                          alt=""
+                          className="size-full object-contain"
+                        />
+                      ) : (
+                        <span className="text-xs font-semibold text-white/70">
+                          {att.label.slice(0, 2).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      {att.attachmentId ? (
+                        <Link
+                          to={attachmentMetaPath(
+                            gameId,
+                            String(att.attachmentId),
+                          )}
+                          className="font-medium hover:underline focus-visible:underline outline-offset-4"
+                        >
+                          {att.label}
+                        </Link>
+                      ) : (
+                        <span className="font-medium">{att.label}</span>
+                      )}
+                      <span className="text-[10px] uppercase tracking-[0.12em] text-teritary">
+                        {att.subtypeLabel || att.typeSlug}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    {att.attachmentId ? (
-                      <Link
-                        to={attachmentMetaPath(gameId, String(att.attachmentId))}
-                        className="font-medium hover:underline focus-visible:underline outline-offset-4"
-                      >
-                        {att.label}
-                      </Link>
-                    ) : (
-                      <span className="font-medium">{att.label}</span>
-                    )}
-                    <span className="text-[10px] uppercase tracking-[0.12em] text-teritary">
-                      {att.subtypeLabel || att.typeSlug}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
             </div>
 
             {/* {!primaryWeapon?.attachments &&
@@ -927,24 +1015,15 @@ export function LoadoutPreview() {
 
         {isFullLoadout && (
           <Container>
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className={CONTAINER_TITLE_CLASS}>
-                  Secondary weapon
-                </p>
-                <h2 className="mt-1 font-mono text-base uppercase">
-                  {secondaryWeaponCatalog?.name ?? "Not selected"}
-                </h2>
-              </div>
-              {secondaryWeaponCatalog?.typeShort && (
-                <Tag>{secondaryWeaponCatalog.typeShort}</Tag>
-              )}
-            </div>
-
             {secondaryWeapon && secondaryWeaponCatalog ? (
               <>
-                <div className="flex flex-col items-center gap-2 py-4">
+                <div className="relative flex flex-col items-center gap-2 py-4">
+                  <WeaponPreviewCaption
+                    weapon={secondaryWeaponCatalog}
+                    gameId={gameId}
+                  />
                   <div
+                    className="relative"
                     style={{
                       background: `radial-gradient(ellipse at center, ${titleTag?.color || null}14, transparent 70%)`,
                     }}
@@ -984,7 +1063,11 @@ export function LoadoutPreview() {
                               alt=""
                               className="size-full object-contain"
                             />
-                          ) : <span className="text-xs font-semibold text-white/70">{attachment.label.slice(0, 2).toUpperCase()}</span>}
+                          ) : (
+                            <span className="text-xs font-semibold text-white/70">
+                              {attachment.label.slice(0, 2).toUpperCase()}
+                            </span>
+                          )}
                         </div>
                         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                           {attachment.attachmentId ? (
@@ -1051,26 +1134,26 @@ export function LoadoutPreview() {
           )}
         >
           <Container className="gap-3">
-            <h2 className={CONTAINER_TITLE_CLASS}>
-              Build notes
-            </h2>
+            <h2 className={CONTAINER_TITLE_CLASS}>Build notes</h2>
             {loadout.description ? (
               <blockquote className="whitespace-pre-wrap break-words text-base leading-relaxed text-secondary">
-                {loadout.description.split(/(https:\/\/[^\s]+)/g).map((part, index) =>
-                  part.startsWith("https://") ? (
-                    <a
-                      key={index}
-                      href={part}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="break-all underline underline-offset-4 hover:text-white"
-                    >
-                      {part}
-                    </a>
-                  ) : (
-                    <React.Fragment key={index}>{part}</React.Fragment>
-                  ),
-                )}
+                {loadout.description
+                  .split(/(https:\/\/[^\s]+)/g)
+                  .map((part, index) =>
+                    part.startsWith("https://") ? (
+                      <a
+                        key={index}
+                        href={part}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="break-all underline underline-offset-4 hover:text-white"
+                      >
+                        {part}
+                      </a>
+                    ) : (
+                      <React.Fragment key={index}>{part}</React.Fragment>
+                    ),
+                  )}
               </blockquote>
             ) : (
               <p className="text-sm text-teritary">No description provided.</p>
@@ -1143,77 +1226,77 @@ export function LoadoutPreview() {
                   </>
                 );
               })()}
-          <Container className="flex flex-row items-center gap-4">
-            <QRCodeCanvas
-              value={shareUrl}
-              size={104}
-              className="w-[104px] h-[104px]"
-            />
-            <div className="flex-1 min-w-[200px] flex flex-col gap-3">
-              <h2 className={CONTAINER_TITLE_CLASS}>
-                Share loadout
-              </h2>
-              <p className="text-[12px] text-[#8d898a] break-all">{shareUrl}</p>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-fit">
-                    <Download className="w-4 h-4 " />
-                    <span className="text-[14px] ">Download QR</span>
-                    <span className="text-[14px] text-[#bebcbc]">as PNG</span>
-                    <ChevronDown className="w-4 h-4 text-[#bebcbc]" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuItem onClick={downloadBrandedQr}>
-                    White QR, with background
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={downloadPlainQr}>
-                    Black QR, no background
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </Container>
+            <Container className="flex flex-row items-center gap-4">
+              <QRCodeCanvas
+                value={shareUrl}
+                size={104}
+                className="w-[104px] h-[104px]"
+              />
+              <div className="flex-1 min-w-[200px] flex flex-col gap-3">
+                <h2 className={CONTAINER_TITLE_CLASS}>Share loadout</h2>
+                <p className="text-[12px] text-[#8d898a] break-all">
+                  {shareUrl}
+                </p>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-fit">
+                      <Download className="w-4 h-4 " />
+                      <span className="text-[14px] ">Download QR</span>
+                      <span className="text-[14px] text-[#bebcbc]">as PNG</span>
+                      <ChevronDown className="w-4 h-4 text-[#bebcbc]" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem onClick={downloadBrandedQr}>
+                      White QR, with background
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={downloadPlainQr}>
+                      Black QR, no background
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </Container>
 
-          {canEdit && (
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={() =>
-                  navigate(`${gamePath(gameId, "create")}?edit=${loadoutId}`)
-                }
-                variant="secondary"
-              >
-                <Edit className="w-4 h-4" />
-                Edit
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button>
-                    <Trash2 className="w-4 h-4" />
-                    Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent variant="destructive">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this loadout?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. The loadout and its shared
-                      link will be removed permanently.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Keep loadout</AlertDialogCancel>
-                    <AlertDialogAction
-                      variant="destructive"
-                      onClick={() => void deleteLoadout()}
-                    >
-                      Delete loadout
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          )}
+            {canEdit && (
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={() =>
+                    navigate(`${gamePath(gameId, "create")}?edit=${loadoutId}`)
+                  }
+                  variant="secondary"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button>
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent variant="destructive">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete this loadout?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. The loadout and its shared
+                        link will be removed permanently.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Keep loadout</AlertDialogCancel>
+                      <AlertDialogAction
+                        variant="destructive"
+                        onClick={() => void deleteLoadout()}
+                      >
+                        Delete loadout
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1269,7 +1352,9 @@ export function LoadoutPreview() {
                                 )}
                                 className={`${className} hover:underline focus-visible:underline`}
                               >
-                                {attachment.displayName ?? attachment.stats?.displayName ?? name}
+                                {attachment.displayName ??
+                                  attachment.stats?.displayName ??
+                                  name}
                               </Link>
                             ) : (
                               <span key={slot} className={className}>
