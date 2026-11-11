@@ -926,6 +926,7 @@ export function LoadoutPreview() {
                 badges={primaryWeaponBadges}
                 ovalBadgeLabels
                 enableSpritePreview={gameId === "mw4"}
+                fitSpriteToBounds
                 activeBadgeKey={activeKey}
                 onBadgeHover={setActiveKey}
               />
@@ -1048,6 +1049,7 @@ export function LoadoutPreview() {
                       weaponId={secondaryWeapon.id}
                       badges={secondaryWeaponBadges}
                       enableSpritePreview={gameId === "mw4"}
+                      fitSpriteToBounds
                       activeBadgeKey={
                         activeKey?.startsWith("secondary:")
                           ? activeKey.slice("secondary:".length)
@@ -1345,6 +1347,7 @@ export function LoadoutPreview() {
                           weaponId={weapon.id}
                           variant="small"
                           enableSpritePreview={gameId === "mw4"}
+                          fitSpriteToBounds
                         />
                       </div>
                       <p className="font-mono text-sm uppercase">
