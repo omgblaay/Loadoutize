@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { toast } from "sonner";
-import { projectId, publicAnonKey } from "/utils/supabase/info";
+import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { getGameColor } from "@/lib/gameColors";
 import { ArrowLeft, Heart, Eye, User, Share2, Edit } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
+import { LOCKED_GAME_ID } from "@/lib/games";
 import { explorePath, gamePath } from "@/lib/routes";
 
 interface WeaponConfig {
@@ -206,7 +207,7 @@ export function WeaponConfigPreview() {
               {canEdit && (
                 <button
                   onClick={() =>
-                    navigate(`${gamePath(gameId, "create")}?edit=${configId}`)
+                    navigate(`${gamePath(gameId ?? LOCKED_GAME_ID, "create")}?edit=${configId}`)
                   }
                   className="flex items-center gap-2 px-4 py-2 text-neutral-900 font-bold transition-opacity hover:opacity-90 bg-[#fafafa]"
                 >

@@ -4,8 +4,9 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "build": "vite build",
-    "dev": "vite",
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -56,6 +57,7 @@
     "input-otp": "1.4.2",
     "lucide-react": "0.487.0",
     "motion": "12.23.24",
+    "next": "^14.2.35",
     "next-themes": "0.4.6",
     "qrcode": "^1.5.4",
     "react-day-picker": "8.10.1",
@@ -76,14 +78,17 @@
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.1161.0",
-    "@tailwindcss/vite": "4.1.12",
+    "@tailwindcss/postcss": "^4.1.12",
+    "@types/node": "^26.6.6",
     "@types/pg": "^8.23.1",
     "@types/qrcode": "^1.5.6",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
     "@types/three": "^0.185.4",
-    "@vitejs/plugin-react": "4.7.0",
     "pg": "^8.23.1",
+    "postcss": "^8.5.32",
     "tailwindcss": "4.1.12",
-    "vite": "^6.4.3",
+    "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {

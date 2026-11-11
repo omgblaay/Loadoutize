@@ -1,9 +1,13 @@
-import { createRoot } from "react-dom/client";
-import App from "@/app/App.tsx";
-import "@/styles/index.css";
+"use client";
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
+import { useEffect } from "react";
+import dynamic from "next/dynamic";
+
+const App = dynamic(() => import("@/app/App"), { ssr: false });
+
+export function ClientApp() {
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
     navigator.serviceWorker
       .getRegistrations()
       .then((registrations) => {
@@ -14,7 +18,7 @@ if ("serviceWorker" in navigator) {
       .catch(() => {
         // Ignore cleanup failures; service workers are not used by this app.
       });
-  });
-}
+  }, []);
 
-createRoot(document.getElementById("root")!).render(<App />);
+  return <App />;
+}

@@ -21,8 +21,8 @@ import { Button } from "@/components/atoms/Button";
 import { SignInRequiredDialog } from "@/components/molecules/SignInRequiredDialog";
 import { NavIcon } from "@/components/atoms/NavIcon";
 import { useAuth } from "@/providers/AuthProvider";
-import gameLogo from "figma:asset/mw4_logo.png";
-import extensionIcon from "@/assets/youtube-loadouts-icon-192.png";
+import gameLogoImage from "@/assets/mw4_logo.png";
+import extensionIconImage from "@/assets/youtube-loadouts-icon-192.png";
 import chromeIcon from "@/assets/browser-icons/chrome.svg";
 import chromeWebStoreIcon from "@/assets/browser-icons/chrome-web-store.svg";
 import edgeIcon from "@/assets/browser-icons/edge.svg";
@@ -41,6 +41,10 @@ interface Game {
   slug: string;
   logoUrl: string | null;
 }
+
+// Next.js static imports resolve to { src } objects; these need the URL string.
+const gameLogo = gameLogoImage.src;
+const extensionIcon = extensionIconImage.src;
 
 const EXTENSION_BROWSERS = [
   { name: "Chrome", icon: chromeIcon },
