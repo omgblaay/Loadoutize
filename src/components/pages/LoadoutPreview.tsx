@@ -736,84 +736,117 @@ export function LoadoutPreview() {
       selectedGame={gameId}
       onGameSelect={(id) => navigate(explorePath(id))}
       breadcrumb={
-        <>
-          <img
-            src={gameLogo}
-            alt="Modern Warfare 4"
-            className="w-10 h-10 object-contain shrink-0"
-          />
-          {primaryWeaponCatalog && (
-            <>
-              <BreadcrumbSpacer />
-              {primaryWeaponCatalog.type ? (
+        <div className="hidden sm:contents">
+          <>
+            <img
+              src={gameLogo}
+              alt="Modern Warfare 4"
+              className="w-10 h-10 object-contain shrink-0"
+            />
+            {primaryWeaponCatalog && (
+              <>
+                <BreadcrumbSpacer />
+                {primaryWeaponCatalog.type ? (
+                  <BreadcrumbLink
+                    to={weaponMetaListPath(gameId, primaryWeaponCatalog.type)}
+                  >
+                    {primaryWeaponCatalog.type || meta.short}
+                  </BreadcrumbLink>
+                ) : null}
+                <BreadcrumbSpacer />
                 <BreadcrumbLink
-                  to={weaponMetaListPath(gameId, primaryWeaponCatalog.type)}
+                  to={weaponMetaPath(gameId, primaryWeaponCatalog.id)}
+                  className="inline-flex items-center gap-1.5"
                 >
-                  {primaryWeaponCatalog.type || meta.short}
+                  {primaryWeaponCatalog.imageUrl && (
+                    <img
+                      src={primaryWeaponCatalog.imageUrl}
+                      alt=""
+                      className="size-5 shrink-0 object-contain"
+                    />
+                  )}
+                  {primaryWeaponCatalog.name}
                 </BreadcrumbLink>
-              ) : null}
-              <BreadcrumbSpacer />
-              <BreadcrumbLink
-                to={weaponMetaPath(gameId, primaryWeaponCatalog.id)}
-                className="inline-flex items-center gap-1.5"
-              >
-                {primaryWeaponCatalog.imageUrl && (
-                  <img
-                    src={primaryWeaponCatalog.imageUrl}
-                    alt=""
-                    className="size-5 shrink-0 object-contain"
-                  />
-                )}
-                {primaryWeaponCatalog.name}
-              </BreadcrumbLink>
-            </>
-          )}
-          <BreadcrumbSpacer />
-          {loadout.name}
-        </>
+              </>
+            )}
+            <BreadcrumbSpacer />
+            {loadout.name}
+          </>
+        </div>
       }
     >
       <header className="border-b border-white/[0.08] pb-5">
         <div className="flex min-w-0 items-center justify-between gap-4">
-          <div className="min-w-0">
-            {titleTag && (
-              <span
-                className="font-handwritten text-[clamp(1.5rem,2.5vw,2.25rem)] leading-none"
-                style={{ color: titleTag.color }}
+          <div className="flex min-w-0 items-start gap-3 sm:block">
+            <div className="shrink-0 sm:hidden">
+              <RatingRing
+                percent={loadout.ratingPercent}
+                votes={voteCount}
+                size={44}
+                innerClassName="border border-white/5"
+                fallbackLabel="New"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-3 sm:block">
+                <p className="flex min-w-0 items-center gap-2 text-sm text-secondary sm:hidden">
+                  {loadout.authorNickname ? (
+                    <Link
+                      to={`/u/${loadout.authorNickname}`}
+                      className="inline-flex items-center gap-2 hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    >
+                      {authorAvatar}
+                      <span>{authorName}</span>
+                    </Link>
+                  ) : (
+                    <span className="inline-flex items-center gap-2">
+                      {authorAvatar}
+                      <span>{authorName}</span>
+                    </span>
+                  )}
+                </p>
+                {titleTag && (
+                  <span
+                    className="ml-auto font-handwritten text-lg leading-none sm:ml-0 sm:inline sm:text-[clamp(1.5rem,2.5vw,2.25rem)]"
+                    style={{ color: titleTag.color }}
+                  >
+                    {titleTag.name}
+                  </span>
+                )}
+              </div>
+              <h1
+                className={cn(
+                  "wrap-anywhere text-xl font-semibold leading-[1.1] tracking-[-0.025em] sm:text-[clamp(1.75rem,3.5vw,2.75rem)]",
+                  titleTag && "mt-1",
+                )}
               >
-                {titleTag.name}
-              </span>
-            )}
-            <h1
-              className={cn(
-                "wrap-anywhere text-[clamp(1.75rem,3.5vw,2.75rem)] font-semibold leading-[1.1] tracking-[-0.025em]",
-                titleTag && "mt-1",
-              )}
-            >
-              {loadout.authorNickname ? (
-                <Link
-                  to={`/u/${loadout.authorNickname}`}
-                  className="mr-2 inline-flex items-baseline gap-2 align-baseline font-normal leading-[1.1] text-secondary hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                >
-                  {authorAvatar}
-                  <span>{authorName}'s</span>
-                </Link>
-              ) : (
-                <span className="mr-2 inline-flex items-baseline gap-2 align-baseline font-normal leading-[1.1] text-secondary">
-                  {authorAvatar}
-                  <span>{authorName}'s</span>
-                </span>
-              )}
-              <span>{loadout.name}</span>
-            </h1>
+                {loadout.authorNickname ? (
+                  <Link
+                    to={`/u/${loadout.authorNickname}`}
+                    className="mr-2 hidden items-baseline gap-2 align-baseline font-normal leading-[1.1] text-secondary hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 sm:inline-flex"
+                  >
+                    {authorAvatar}
+                    <span>{authorName}'s</span>
+                  </Link>
+                ) : (
+                  <span className="mr-2 hidden items-baseline gap-2 align-baseline font-normal leading-[1.1] text-secondary sm:inline-flex">
+                    {authorAvatar}
+                    <span>{authorName}'s</span>
+                  </span>
+                )}
+                <span>{loadout.name}</span>
+              </h1>
+            </div>
           </div>
-          <RatingRing
-            percent={loadout.ratingPercent}
-            votes={voteCount}
-            size={72}
-            innerClassName="border border-white/5"
-            fallbackLabel="New"
-          />
+          <div className="hidden sm:block">
+            <RatingRing
+              percent={loadout.ratingPercent}
+              votes={voteCount}
+              size={72}
+              innerClassName="border border-white/5"
+              fallbackLabel="New"
+            />
+          </div>
         </div>
 
         {loadout.authorLinks &&
