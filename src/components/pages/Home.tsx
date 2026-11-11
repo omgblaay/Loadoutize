@@ -54,7 +54,7 @@ const EXTENSION_BROWSERS = [
 
 function ChromeExtensionPromo({
   screenshotUrl,
-  extensionUrl,
+  extensionUrl = "https://chromewebstore.google.com/detail/loadoutize-for-youtube/agcinigdpcgmpohidgbnigbjimfnidak?authuser=1&hl=en-GB",
 }: {
   screenshotUrl?: string;
   extensionUrl?: string;
@@ -67,10 +67,16 @@ function ChromeExtensionPromo({
           aria-label="Chrome Web Store compatible desktop browsers"
         >
           <li>
-            <Button aria-describedby="chrome-store-pending">
-              <img src={chromeWebStoreIcon} alt="" className="size-5" />
-              Get it on Chrome Web Store
-              <ArrowUpRight className="size-4" />
+            <Button asChild>
+              <a
+                href={extensionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src={chromeWebStoreIcon} alt="" className="size-5" />
+                Get the extension
+                <ArrowUpRight className="size-4" />
+              </a>
             </Button>
           </li>
           {EXTENSION_BROWSERS.map(({ name, icon }) => (

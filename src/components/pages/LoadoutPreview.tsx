@@ -21,7 +21,7 @@ import {
   loadBuilderAttachmentAssets,
 } from "@/lib/builderAttachmentImages";
 import { visibleWeaponCatalog } from "@/lib/weaponCategories";
-import gameLogo from "figma:asset/mw4_logo.png";
+import gameLogo from "figma:asset/mw4_logo_breadcrumb.png";
 import { useAuth } from "@/providers/AuthProvider";
 import { AppLayout } from "@/components/templates/AppLayout";
 import { Button } from "@/components/atoms/Button";

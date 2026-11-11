@@ -6,7 +6,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { Loading } from "@/components/molecules/Loading";
 import { Loader2, Check, X as XIcon, Upload, UserPlus } from "lucide-react";
 import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
-import { ROLE_TAG_META, ROLE_TAG_ORDER, type RoleTag } from "@/lib/roles";
+import { ROLE_TAG_META, selectableRoleTags, type RoleTag } from "@/lib/roles";
 
 const NICKNAME_PATTERN = /^[a-z0-9_-]{3,20}$/;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -321,7 +321,7 @@ export function AuthCallback() {
             value={roleTag}
             onValueChange={(v) => v && setRoleTag(v as RoleTag)}
           >
-            {ROLE_TAG_ORDER.map((tag) => (
+            {selectableRoleTags().map((tag) => (
               <FilterPill key={tag} value={tag} size="sm">
                 {ROLE_TAG_META[tag].label}
               </FilterPill>

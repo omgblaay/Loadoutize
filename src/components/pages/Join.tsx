@@ -6,7 +6,7 @@ import { LogIn, UserPlus } from "lucide-react";
 import { projectId } from "../../../utils/supabase/info";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
-import { ROLE_TAG_META, ROLE_TAG_ORDER, type RoleTag } from "@/lib/roles";
+import { ROLE_TAG_META, selectableRoleTags, type RoleTag } from "@/lib/roles";
 import { Button } from "@/components/atoms/Button";
 import { Input } from "@/components/atoms/Input";
 import { Label } from "@/components/atoms/Label";
@@ -186,7 +186,7 @@ export function Join() {
                     value={roleTag}
                     onValueChange={(v) => v && setRoleTag(v as RoleTag)}
                   >
-                    {ROLE_TAG_ORDER.map((tag) => (
+                    {selectableRoleTags().map((tag) => (
                       <FilterPill key={tag} value={tag} size="sm">
                         {ROLE_TAG_META[tag].label}
                       </FilterPill>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { useAuth } from "@/providers/AuthProvider";
@@ -22,7 +22,8 @@ import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
 import { visibleWeaponCatalog } from "@/lib/weaponCategories";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Settings as SettingsIcon, Download } from "lucide-react";
+import { Settings as SettingsIcon, Download, Search } from "lucide-react";
+import { Input } from "@/components/atoms/Input";
 import {
   QRCodeCanvas,
   generateBrandedQRPng,
@@ -38,6 +39,7 @@ import { ROLE_TAG_META, type RoleTag } from "@/lib/roles";
 import { Container } from "@/components/atoms/Container";
 import { explorePath, loadoutPath } from "@/lib/routes";
 import { ResponsiveDialog } from "@/components/molecules/ResponsiveDialog";
+import { WeaponPreviewSmoke } from "@/components/molecules/WeaponPreviewSmoke";
 
 interface Loadout extends CardLoadout {
   gameId: string;
@@ -91,8 +93,8 @@ function UserPageSkeleton() {
       {/* Loadouts */}
       <div className="flex flex-col gap-4">
         <Skeleton className={cn("h-5 w-28", block)} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className={cn("rounded-2xl h-[220px]", block)} />
           ))}
         </div>
@@ -111,6 +113,21 @@ export function UserPage() {
   const [catalogs, setCatalogs] = useState<Record<string, GameCatalog>>({});
   const [loading, setLoading] = useState(true);
   const [qrOpen, setQrOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredLoadouts = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return loadouts;
+    return loadouts.filter((l) => {
+      const catalog = catalogs[l.gameId];
+      const weaponName =
+        catalog?.weapons.find((w) => w.id === l.weapons[0]?.id)?.name ?? "";
+      const tagName = catalog?.tags.find((t) => t.id === l.tagId)?.name ?? "";
+      return [l.name, weaponName, tagName].some((value) =>
+        value.toLowerCase().includes(query),
+      );
+    });
+  }, [loadouts, catalogs, search]);
 
   useEffect(() => {
     if (nickname) fetchProfile();
@@ -254,33 +271,34 @@ export function UserPage() {
     >
       <div className="flex flex-col gap-6">
         {/* Profile hero */}
-        <Container className="border-0">
-          <div className="flex flex-wrap items-start gap-4 sm:gap-5">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center shrink-0 bg-white/[0.04]">
+        <Container className="relative isolate overflow-hidden border-0">
+          <WeaponPreviewSmoke />
+          <div className="relative z-[1] flex flex-col items-center gap-4 py-4 text-center">
+            <div className="flex size-28 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] sm:size-36">
               {profile.avatarUrl ? (
                 <img
                   src={profile.avatarUrl}
                   alt=""
-                  className="w-full h-full object-cover"
+                  className="size-full object-cover"
                 />
               ) : (
-                <span className="text-2xl">
+                <span className="text-3xl">
                   {profile.name?.[0]?.toUpperCase() ?? "U"}
                 </span>
               )}
             </div>
-            <div className="flex min-w-[160px] flex-1 flex-col justify-center gap-2">
+            <div className="flex flex-col items-center gap-2">
               <h1 className="text-3xl">{profile.name}</h1>
               <div className="flex items-center gap-3">
                 <p className="text-md text-secondary">@{profile.nickname}</p>
                 <Tag>{ROLE_TAG_META[profile.roleTag]?.label ?? "Player"}</Tag>
               </div>
+            </div>
 
-              {SOCIAL_LINK_FIELDS.some(({ key }) => profile.links[key]) && (
-                <div className="flex items-start sgap-2 flex-wrap">
-                  {SOCIAL_LINK_FIELDS.filter(
-                    ({ key }) => profile.links[key],
-                  ).map(({ key, label, icon: Icon, url }) => {
+            {SOCIAL_LINK_FIELDS.some(({ key }) => profile.links[key]) && (
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {SOCIAL_LINK_FIELDS.filter(({ key }) => profile.links[key]).map(
+                  ({ key, label, icon: Icon, url }) => {
                     const count = formatCount(profile.socialStats?.[key]);
                     return (
                       <Button
@@ -307,29 +325,36 @@ export function UserPage() {
                         </span>
                       </Button>
                     );
-                  })}
-                </div>
-              )}
-            </div>
-            {isOwnProfile && (
-              <Button
-                onClick={() => navigate("/settings")}
-                size="sm"
-                variant="outline"
-              >
-                <SettingsIcon className="w-4 h-4" />
-                Edit profile
-              </Button>
+                  },
+                )}
+              </div>
             )}
-            <button
-              type="button"
-              onClick={() => setQrOpen(true)}
-              aria-label={`Open QR code for @${profile.nickname}`}
-              className="group flex w-24 shrink-0 flex-col items-center gap-2 rounded-2xl  bg-white/[0.04] p-4 text-[10px] font-medium uppercase tracking-wide text-secondary transition-colors hover:border-white/40 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-            >
-              <QRCodeCanvas value={profileUrl} size={64} className="size-16" />
-              <span className="group-hover:text-white">QR code</span>
-            </button>
+
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {isOwnProfile && (
+                <Button
+                  onClick={() => navigate("/settings")}
+                  size="sm"
+                  variant="outline"
+                >
+                  <SettingsIcon className="w-4 h-4" />
+                  Edit profile
+                </Button>
+              )}
+              <button
+                type="button"
+                onClick={() => setQrOpen(true)}
+                aria-label={`Open QR code for @${profile.nickname}`}
+                className="group flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2 text-[10px] font-medium uppercase tracking-wide text-secondary transition-colors hover:border-white/40 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+              >
+                <QRCodeCanvas
+                  value={profileUrl}
+                  size={40}
+                  className="size-10"
+                />
+                <span className="group-hover:text-white">QR code</span>
+              </button>
+            </div>
           </div>
         </Container>
 
@@ -371,19 +396,40 @@ export function UserPage() {
 
         {/* Loadouts */}
         <div className="flex flex-col gap-4">
-          <h2 className="text-[16px]  font-semibold">
-            weapon config{loadouts.length !== 1 ? "s" : ""}
-            <span className="text-sm ml-2 inline-flex font-mono h-8 w-8 items-center rounded-full justify-center bg-[#171417] text-teritary ">
-              {loadouts.length}{" "}
-            </span>
-          </h2>
+          <div className="flex gap-4 sm:items-center sm:justify-between">
+            <h2 className="text-[16px] font-semibold">
+              weapon config{loadouts.length !== 1 ? "s" : ""}
+              <span className="text-sm ml-2 inline-flex font-mono h-8 w-8 items-center rounded-full justify-center bg-[#171417] text-teritary ">
+                {search.trim()
+                  ? `${filteredLoadouts.length}/${loadouts.length}`
+                  : loadouts.length}
+              </span>
+            </h2>
+            <div>
+              <Input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search by name, weapon or tag"
+                aria-label="Search weapon configs"
+                icon={<Search className="size-4 text-teritary" />}
+                className="h-11 !w-auto"
+              />
+            </div>
+          </div>
           {loadouts.length === 0 ? (
             <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
               <p className="text-[#8d898a]">No weapon configs published yet.</p>
             </div>
+          ) : filteredLoadouts.length === 0 ? (
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-16 text-center">
+              <p className="text-[#8d898a]">
+                No weapon configs match “{search.trim()}”.
+              </p>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {loadouts.map((l, i) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredLoadouts.map((l, i) => {
                 const catalog = catalogs[l.gameId];
                 const meta = gameMeta[l.gameId] ?? gameMeta.mw4;
                 const accent = getGameColor(l.gameId).primary;

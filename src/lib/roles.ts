@@ -13,3 +13,8 @@ export const ROLE_TAG_META: Record<RoleTag, { label: string }> = {
 };
 
 export const ROLE_TAG_ORDER: RoleTag[] = ["player", "pro_player", "streamer", "content_creator", "sweat"];
+
+/** Pro Player is granted by staff; it is offered only to accounts that already have it. */
+export function selectableRoleTags(current?: RoleTag | null): RoleTag[] {
+  return ROLE_TAG_ORDER.filter((tag) => tag !== "pro_player" || tag === current);
+}

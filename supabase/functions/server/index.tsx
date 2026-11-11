@@ -79,8 +79,14 @@ const NICKNAME_PATTERN = /^[a-z0-9_-]{3,20}$/;
 // no DB CHECK constraint -- same convention as REACTION_TYPES below.
 const ROLE_TAGS = ["player", "pro_player", "streamer", "content_creator", "sweat"] as const;
 type RoleTag = (typeof ROLE_TAGS)[number];
-function normalizeRoleTag(value: unknown): RoleTag {
-  return ROLE_TAGS.includes(value as RoleTag) ? (value as RoleTag) : "player";
+// Pro Player is granted by staff, never self-selected: a request for it keeps
+// the account's existing role instead.
+function normalizeRoleTag(value: unknown, currentRole: string | null = null): RoleTag {
+  if (!ROLE_TAGS.includes(value as RoleTag)) return "player";
+  if (value === "pro_player" && currentRole !== "pro_player") {
+    return (ROLE_TAGS.includes(currentRole as RoleTag) ? currentRole : "player") as RoleTag;
+  }
+  return value as RoleTag;
 }
 
 function avatarUrl(path: string | null): string | null {
@@ -494,7 +500,13 @@ app.put("/make-server-6db475c7/users/me", async (c) => {
     }
 
     if (body.roleTag != null) {
-      update.role_tag = normalizeRoleTag(body.roleTag);
+      const { data: current, error: currentError } = await supabase
+        .from('profiles')
+        .select('role_tag')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (currentError) throw currentError;
+      update.role_tag = normalizeRoleTag(body.roleTag, current?.role_tag ?? null);
     }
 
     for (const platform of ['tiktok', 'instagram', 'youtube', 'twitch', 'kick']) {
@@ -835,19 +847,15 @@ async function isTagAllowedForWeapons(gameId: string, tagId: number, weapons: an
   return weapons.every((w: any) => w.categoryId != null && allowedCategoryIds.includes(w.categoryId));
 }
 
-// loadouts.weapons used to be a JSONB blob embedding full weapon + attachment
-// name copies. It's now normalized into loadout_weapons (one row per weapon
-// slot) and loadout_weapon_attachments (many attachments -> one slot). Reads
-// go through this nested PostgREST embed and get flattened back into the
-// same `{ id, attachments }[]` shape the frontend already expects -- the
-// frontend resolves full weapon details (name/type/image/etc.) against the
-// catalog `/weapons` list it already fetches, by `id`.
+// Weapon configs use loadouts.weapon_id and the direct
+// loadouts.config_attachments relation. Full loadouts retain weapon slot
+// rows. Both are flattened into the frontend's `{ id, attachments }[]` shape.
 //
 // perks/equipment used to be plain TEXT[] of names; they're now
 // loadout_perks/loadout_equipment junction rows referencing the catalog by
 // id, but mapLoadout still flattens them back to `string[]` of names --
 // unlike weapons, nothing else about their frontend shape needed to change.
-const LOADOUT_SELECT = `*, loadout_weapons(id, weapon_id, slot_order, slot, loadout_weapon_attachments(attachments(name, attachment_types(name)))), loadout_perks(perks(name)), loadout_equipment(slot, is_any, equipment(name, slot)), loadout_reactions(type, user_id, created_at)`;
+const LOADOUT_SELECT = `*, loadout_config_attachments(attachments(name, attachment_types(name))), loadout_weapons(id, weapon_id, slot_order, slot, loadout_weapon_attachments(attachments(name, attachment_types(name)))), loadout_perks(perks(name)), loadout_equipment(slot, is_any, equipment(name, slot)), loadout_reactions(type, user_id, created_at)`;
 
 // Loadout share links use short IDs (loadoutize.com/mw4/l/ab12) rather than a
 // full UUID -- 4 lowercase hex characters (16^4 = 65,536 combos) is plenty
@@ -917,6 +925,27 @@ async function saveLoadoutWeapons(loadoutId: string, gameId: string, weaponsPayl
       .from('loadout_weapon_attachments')
       .insert(attachmentIds.map((attachment_id) => ({ loadout_weapon_id: lw.id, attachment_id })));
     if (insertAttError) throw insertAttError;
+  }
+}
+
+async function saveConfigAttachments(loadoutId: string, gameId: string, attachments: Record<string, string>) {
+  const { data: catalog, error: catalogError } = await supabase
+    .from('attachments_with_images')
+    .select('id, name, type_name')
+    .eq('game_id', gameId);
+  if (catalogError) throw catalogError;
+  const selected = Object.entries(attachments).filter(([, name]) => Boolean(name));
+  const attachmentIds = selected.map(([type, name]) =>
+    (catalog ?? []).find((item: any) => item.type_name === type && item.name === name)?.id
+  );
+  if (attachmentIds.some((id) => id == null)) throw new Error('One or more selected attachments are unavailable');
+
+  const { error: deleteError } = await supabase.from('loadout_config_attachments').delete().eq('loadout_id', loadoutId);
+  if (deleteError) throw deleteError;
+  if (attachmentIds.length) {
+    const { error: insertError } = await supabase.from('loadout_config_attachments')
+      .insert(attachmentIds.map((attachment_id) => ({ loadout_id: loadoutId, attachment_id })));
+    if (insertError) throw insertError;
   }
 }
 
@@ -1191,7 +1220,15 @@ async function fetchAuthorProfiles(loadouts: any[]): Promise<Map<string, AuthorP
 }
 
 function mapLoadout(l: any, viewerId?: string | null, authorProfiles?: Map<string, AuthorProfile>) {
-  const weapons = (l.loadout_weapons ?? [])
+  const configAttachments: Record<string, string> = {};
+  for (const relation of l.loadout_config_attachments ?? []) {
+    const typeName = relation.attachments?.attachment_types?.name;
+    const attachmentName = relation.attachments?.name;
+    if (typeName && attachmentName) configAttachments[typeName] = attachmentName;
+  }
+  const weapons = l.content_type === 'weapon_config' && l.weapon_id
+    ? [{ id: l.weapon_id, slot: 'primary', attachments: configAttachments }]
+    : (l.loadout_weapons ?? [])
     .slice()
     .sort((a: any, b: any) => (a.slot_order ?? 0) - (b.slot_order ?? 0))
     .map((lw: any) => {
@@ -1511,10 +1548,16 @@ app.post("/make-server-6db475c7/games/:gameId/loadouts", async (c) => {
       game_loadout_code: body.gameLoadoutCode || null,
       video,
       tag_id: tagId,
+      weapon_id: contentType === 'weapon_config' ? weapons[0].id : null,
     });
     const loadoutId = inserted.id;
 
-    await saveLoadoutWeapons(loadoutId, gameId, weapons);
+    if (contentType === 'weapon_config') {
+      await saveConfigAttachments(loadoutId, gameId, weapons[0].attachments ?? {});
+      await saveLoadoutWeapons(loadoutId, gameId, []);
+    } else {
+      await saveLoadoutWeapons(loadoutId, gameId, weapons);
+    }
     await saveLoadoutPerks(loadoutId, gameId, contentType === 'full_loadout' ? body.perks ?? [] : []);
     await saveLoadoutEquipment(loadoutId, gameId, contentType === 'full_loadout' ? body.equipment ?? [] : []);
 
@@ -1590,6 +1633,7 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
         game_loadout_code: body.gameLoadoutCode || null,
         video,
         tag_id: tagId,
+        weapon_id: contentType === 'weapon_config' ? weapons[0].id : null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', loadoutId)
@@ -1598,7 +1642,12 @@ app.put("/make-server-6db475c7/games/:gameId/loadouts/:loadoutId", async (c) => 
       .single();
     if (error) throw error;
 
-    await saveLoadoutWeapons(loadoutId, gameId, weapons);
+    if (contentType === 'weapon_config') {
+      await saveConfigAttachments(loadoutId, gameId, weapons[0].attachments ?? {});
+      await saveLoadoutWeapons(loadoutId, gameId, []);
+    } else {
+      await saveLoadoutWeapons(loadoutId, gameId, weapons);
+    }
     await saveLoadoutPerks(loadoutId, gameId, contentType === 'full_loadout' ? body.perks ?? [] : []);
     await saveLoadoutEquipment(loadoutId, gameId, contentType === 'full_loadout' ? body.equipment ?? [] : []);
 

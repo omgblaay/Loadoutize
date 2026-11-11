@@ -43,7 +43,7 @@ versions; the database columns remain authoritative.
    Collection → "Use Existing Table" for each of: `games`,
    `weapon_categories`, `weapons`, `attachment_types`, `attachments`,
    `perks`, `equipment`, `classes`, `specializations`, `tags`,
-   `tag_weapon_categories`, `loadouts`, `loadout_weapons`, `loadout_weapon_attachments`,
+   `tag_weapon_categories`, `loadouts`, `loadout_config_attachments`, `loadout_weapons`, `loadout_weapon_attachments`,
    `loadout_perks`, `loadout_equipment`, `loadout_reactions`.
    Every free-text column in this schema (`name`, `slug`, `description`,
    `user_id`, `user_name`, `type`, ...) is a Postgres `text` type, which
@@ -112,26 +112,30 @@ versions; the database columns remain authoritative.
    either way, since PostgREST doesn't care about this Directus-only
    bookkeeping). Leaving the list empty for a tag
    means the tag is unrestricted (selectable regardless of the loadout's
-   weapon category). Similarly, mark `loadout_weapons`,
+   weapon category). Similarly, mark `loadout_config_attachments`, `loadout_weapons`,
    `loadout_weapon_attachments`, `loadout_perks`, and `loadout_equipment`
    hidden — a loadout's weapon/perk/equipment selections are written by the
    app (`LoadoutBuilder.tsx` via the edge function), not edited directly in
    Directus; browse/moderate them from the `loadouts` form's
-   `weapon_slots`/`perk_slots`/`equipment_slots` fields instead of opening
+   `weapon_id`/`config_attachments` for weapon configs or
+   `weapon_slots`/`perk_slots`/`equipment_slots` for full loadouts instead of opening
    the junction collections directly.
 
-   These four fields split into two different shapes, and it matters which
+   These relation fields split into two different shapes, and it matters which
    one you pick:
-   - **`loadouts.perk_slots`, `loadouts.equipment_slots`, and
+   - **`loadouts.config_attachments`, `loadouts.perk_slots`, `loadouts.equipment_slots`, and
      `loadout_weapons.attachments`** should be genuine **M2M** (List M2M
      interface, `{{perk_id.name}}`/`{{equipment_id.name}}`/
      `{{attachment_id.name}}` templates, `junction_field` set reciprocally
      on both `directus_relations` rows per the recipe above). Their
      junction tables (`loadout_perks`, `loadout_equipment`,
-     `loadout_weapon_attachments`) carry nothing but the two FKs, so
+     `loadout_weapon_attachments`, `loadout_config_attachments`) carry nothing but the two FKs, so
      there's no per-row data to lose — as real M2M, "Add Existing" browses
      the actual perks/equipment/attachments catalog (what you want), and
      clicking an item opens that catalog row.
+   - **`loadouts.weapon_id`** directly selects the catalog weapon for a
+     `weapon_config`. Its attachments are edited on the same loadout item
+     through `config_attachments`; new configs have no `loadout_weapons` row.
    - **`loadouts.weapon_slots`** must stay a plain **O2M** into
      `loadout_weapons` (List O2M interface, `junction_field` left `NULL`
      on both relations) — *don't* convert this one to M2M. Unlike the

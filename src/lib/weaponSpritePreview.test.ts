@@ -1,13 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import {
   choosePreviewAsset,
   createPreviewBuild,
   getWeaponPreviewRef,
   normalizePreviewSlot,
+  resolveCatalogAssetUrls,
   type SpriteAsset,
   type SpriteWeapon,
 } from "./weaponSpritePreview";
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 const weapon: SpriteWeapon = {
   id: "rex_ar_mike4",
@@ -99,6 +104,25 @@ describe("weapon sprite preview mapping", () => {
     expect(normalizePreviewSlot("reargrip")).toBe("rear_grip");
     expect(normalizePreviewSlot("mag")).toBe("magazine");
     expect(normalizePreviewSlot("Underbarrel")).toBe("underbarrel");
+  });
+
+  it("keeps icon-only asset sources null instead of resolving a /null URL", () => {
+    vi.stubGlobal("window", { location: { origin: "http://localhost" } });
+    const resolved = resolveCatalogAssetUrls(
+      {
+        assets: [
+          { id: "rex_apex_menu_hotel45_1497", slot: "apex", src: null, families: ["hotel45"] },
+          { id: "rex_bar_lgt_hotel45", slot: "barrel", src: "../mw4-attachments/images/barrel.png", families: ["hotel45"] },
+        ],
+        weapons: [],
+        slots: [],
+      },
+      "/weapon-preview/weapon-builder/catalog.json",
+    );
+    expect(resolved.assets[0].src).toBeNull();
+    expect(resolved.assets[1].src).toBe(
+      "http://localhost/weapon-preview/mw4-attachments/images/barrel.png",
+    );
   });
 
   it("prefers a non-factory family sprite and stays deterministic", () => {

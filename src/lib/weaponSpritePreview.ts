@@ -7,7 +7,7 @@ export interface SpritePreviewAttachment {
 export interface SpriteAsset {
   id: string;
   slot: string;
-  src: string;
+  src: string | null;
   families: string[];
   composable?: boolean;
   controller_only?: boolean;
@@ -282,7 +282,9 @@ export function resolveCatalogAssetUrls(
     ...library,
     assets: library.assets.map((asset) => ({
       ...asset,
-      src: new URL(asset.src, baseUrl).toString(),
+      // APEX menu records can be icon-only with a null sprite source. Keep the
+      // null so the compositor skips them instead of requesting ".../null".
+      src: asset.src ? new URL(asset.src, baseUrl).toString() : null,
     })),
     weapons: library.weapons.map((weapon) => ({
       ...weapon,

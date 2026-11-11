@@ -100,3 +100,32 @@ describe("Kastov 762 composed preview framing", () => {
     }
   });
 });
+
+describe("KASTOV ARC barrel conversion", () => {
+  it("draws the ARC in the barrel slot and keeps the muzzle mounted to it", () => {
+    const catalog = {
+      ...library.weapons.find((item) => item.id === "rex_ar_akilo"),
+      weapon: "rex_ar_akilo",
+      assets: library.assets,
+      placement_overrides: {},
+      slot_mounts: {},
+      barrel_muzzle_offsets: {},
+    };
+    const arc = library.assets.find((item) => item.id === "rex_bar_akilo_emp");
+    const renderer = new WeaponSpriteCompositor(catalog);
+    const state = factoryBuild(catalog);
+    state.parts = { apex: arc.id, muzzle: "rex_comp_vert_b", receiver: "rex_rec_akilo_emp" };
+    state.autoParts = { barrel: `apex:${arc.id}`, receiver: "linked_attachment" };
+
+    const barrel = renderer.placement(state, "barrel");
+    expect(barrel?.asset.id).toBe(arc.id);
+    expect(renderer.placement(state, "apex")).toBeNull();
+    expect(renderer.placement(state, "muzzle")).not.toBeNull();
+    state.transforms.apex = { dx: 10, dy: -5, scale: 1, rotation: 0 };
+    const moved = renderer.placement(state, "barrel");
+    expect(moved.x - barrel.x).toBeCloseTo(10);
+    expect(moved.y - barrel.y).toBeCloseTo(-5);
+    expect(renderer.adjustSlot(state, "barrel")).toBe("apex");
+    expect(renderer.adjustSlot(state, "muzzle")).toBe("muzzle");
+  });
+});

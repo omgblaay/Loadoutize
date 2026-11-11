@@ -126,7 +126,13 @@ export class WeaponSpriteCompositor{
     if(!this.catalog.component_base){this.base=await loadImage(this.catalog.base_src);this.baseLayer=canvas(512,256);}
     await this.ensure(state);return this;
   }
-  part(state,slot){const locked=String(state.autoParts?.[slot]||'').startsWith('apex:'),id=state.parts[slot]||(!locked&&this.catalog.factory_parts?.[slot]);const asset=this.assets.get(id);return asset?.controller_only?null:asset;}
+  part(state,slot){
+    const locked=String(state.autoParts?.[slot]||'').startsWith('apex:');
+    // An APEX conversion can replace a physical slot (KASTOV ARC is a barrel
+    // with slot "apex" and render_slot "barrel"). Draw it in that slot.
+    if(locked){const conversion=this.assets.get(state.parts.apex);if(conversion?.render_slot===slot)return conversion;}
+    const id=state.parts[slot]||(!locked&&this.catalog.factory_parts?.[slot]);const asset=this.assets.get(id);return asset?.controller_only?null:asset;
+  }
   barrelMount(state,barrel){
     // The source probe gives the left muzzle socket for left-facing barrels.
     // Right-facing profiles need a separate right-edge cut calibration.
@@ -158,14 +164,22 @@ export class WeaponSpriteCompositor{
     if(slot==='receiver'&&this.catalog.family==='moscar')return null;
     // This stock also includes the barrel; keep its selection for restoration.
     if(slot==='barrel'&&this.catalog.family==='moscar'&&this.part(state,'stock')?.id==='rex_stockno_lgt_moscar')return null;
-    const asset=this.part(state,slot),registered=this.catalog.profile.asset_placements?.[asset?.id],preset=registered||this.catalog.profile.placements[slot];if(!asset||!asset.composable||!preset)return null;
+    const asset=this.part(state,slot);
+    // The APEX slot only selects the conversion; it is drawn in its render slot.
+    if(asset&&asset.slot===slot&&asset.render_slot&&asset.render_slot!==slot)return null;
+    // A conversion that replaces a factory part mounts exactly where that part
+    // sits, so it inherits the factory part's registration.
+    const replacedId=asset&&asset.render_slot&&asset.render_slot!==asset.slot?this.catalog.factory_parts?.[asset.render_slot]:null;
+    const registered=this.catalog.profile.asset_placements?.[asset?.id]||(replacedId?this.catalog.profile.asset_placements?.[replacedId]:undefined),preset=registered||this.catalog.profile.placements[slot];if(!asset||!asset.composable||!preset)return null;
     const conversion=this.assets.get(state.parts.apex),variantMount=conversion?.slot_mounts?.[slot];
     const b=asset.bbox,baseSaved=this.catalog.placement_overrides?.[asset.id]||{};
     const variantSaved=variantMount?this.catalog.placement_overrides?.[`${asset.id}@${conversion.id}`]||{}:{};
     // Ordinary positional edits belong to the factory assembly. A conversion
     // may keep an attachment's size/rotation, but receives its own x/y edits.
     const saved=variantMount?{...baseSaved,dx:0,dy:0,...variantSaved}:baseSaved;
-    const t=state.transforms[slot]||saved;
+    // A conversion that replaces a factory part is adjusted from its APEX slot.
+    const editSlot=asset&&asset.slot!==slot?asset.slot:slot;
+    const t=state.transforms[editSlot]||saved;
     // DECHO's factory structural sprites register correctly, but its small
     // accessories are authored at a different source scale/offset than the
     // other pistols. Apply family corrections before user overrides.
@@ -372,5 +386,8 @@ export class WeaponSpriteCompositor{
     if(guides){for(const slot of this.order()){const p=this.placement(state,slot);if(!p)continue;const active=slot===selectedSlot;ctx.strokeStyle=active?'#74dfd1':'#93aabd';ctx.lineWidth=1/scale;ctx.setLineDash([3/scale,3/scale]);ctx.strokeRect(p.bounds[0],p.bounds[1],p.bounds[2]-p.bounds[0],p.bounds[3]-p.bounds[1]);ctx.setLineDash([]);ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(p.x,p.y,2/scale,0,Math.PI*2);ctx.fill();}}
     ctx.restore();return {view,scale};
   }
+  // The slot whose transform controls a placed part. APEX conversions drawn in
+  // a factory slot are adjusted through their APEX slot.
+  adjustSlot(state,slot){const p=this.placement(state,slot);return p&&p.asset.slot!==slot?p.asset.slot:slot;}
   hitTest(state,x,y){return [...this.order()].reverse().find(slot=>{const p=this.placement(state,slot);return p&&x>=p.bounds[0]&&x<=p.bounds[2]&&y>=p.bounds[1]&&y<=p.bounds[3];})||null;}
 }

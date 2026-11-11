@@ -133,21 +133,17 @@ try {
     const description = `Recreated from CODMunity's MW4 Multiplayer ${build.style.toLowerCase()} build (checked 7 Nov 2026). Source: ${build.source}`;
     if (existing) {
       await db.query(
-        "update public.loadouts set name=$1,description=$2,game_loadout_code=$3,tag_id=$4,content_type='weapon_config',is_public=true,updated_at=now() where id=$5",
-        [`${build.weapon} · CODMunity ${build.style}`, description, build.code, tagId, loadoutId],
+        "update public.loadouts set name=$1,description=$2,game_loadout_code=$3,tag_id=$4,weapon_id=$5,content_type='weapon_config',is_public=true,updated_at=now() where id=$6",
+        [`${build.weapon} · CODMunity ${build.style}`, description, build.code, tagId, build.weaponId, loadoutId],
       );
+      await db.query("delete from public.loadout_config_attachments where loadout_id=$1", [loadoutId]);
       await db.query("delete from public.loadout_weapons where loadout_id=$1", [loadoutId]);
     } else {
       await db.query(
-        "insert into public.loadouts (id,game_id,user_id,user_name,name,description,game_loadout_code,tag_id,content_type,is_public) values ($1,'mw4',$2,$3,$4,$5,$6,$7,'weapon_config',true)",
-        [loadoutId, owner.id, owner.name, `${build.weapon} · CODMunity ${build.style}`, description, build.code, tagId],
+        "insert into public.loadouts (id,game_id,user_id,user_name,name,description,game_loadout_code,tag_id,weapon_id,content_type,is_public) values ($1,'mw4',$2,$3,$4,$5,$6,$7,$8,'weapon_config',true)",
+        [loadoutId, owner.id, owner.name, `${build.weapon} · CODMunity ${build.style}`, description, build.code, tagId, build.weaponId],
       );
     }
-
-    const loadoutWeaponId = (await db.query(
-      "insert into public.loadout_weapons (loadout_id,weapon_id,slot_order,slot) values ($1,$2,0,'primary') returning id",
-      [loadoutId, build.weaponId],
-    )).rows[0].id;
     const resolved = [];
     for (const [slot, label] of build.parts) {
       const typeId = types.get(slot);
@@ -175,8 +171,8 @@ try {
         }
       }
       await db.query(
-        "insert into public.loadout_weapon_attachments (loadout_weapon_id,attachment_id) values ($1,$2)",
-        [loadoutWeaponId, attachmentId],
+        "insert into public.loadout_config_attachments (loadout_id,attachment_id) values ($1,$2)",
+        [loadoutId, attachmentId],
       );
       resolved.push({ slot, label, attachmentId, sourceOnly: !match });
     }
