@@ -21,7 +21,7 @@ import {
   loadBuilderAttachmentAssets,
 } from "@/lib/builderAttachmentImages";
 import { visibleWeaponCatalog } from "@/lib/weaponCategories";
-import gameLogo from "figma:asset/mw4_logo_breadcrumb.png";
+import gameLogoImage from "@/assets/mw4_logo_breadcrumb.png";
 import { useAuth } from "@/providers/AuthProvider";
 import { AppLayout } from "@/components/templates/AppLayout";
 import { Button } from "@/components/atoms/Button";
@@ -139,6 +139,8 @@ interface Loadout {
 }
 
 type ReactionType = "like" | "dislike" | "favorite";
+const gameLogo = gameLogoImage.src;
+
 const CONTAINER_TITLE_CLASS =
   "font-mono text-xs font-medium uppercase tracking-[0.12em] text-teritary";
 
@@ -233,7 +235,7 @@ function WeaponPreviewCaption({
           {weaponType && (
             <>
               <Link
-                to={weaponMetaListPath(gameId, weapon.type)}
+                to={weaponMetaListPath(gameId, weapon.type ?? undefined)}
                 className="text-teritary hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               >
                 {weaponType}

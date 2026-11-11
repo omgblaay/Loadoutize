@@ -218,7 +218,8 @@ export function RatingRing({
       style={{
         width: size,
         height: size,
-        background: tier
+        background:
+          tier && percent != null
           ? `conic-gradient(${TIER_COLORS[tier]} ${percent * 3.6}deg, rgba(255,255,255,0.1) 0deg)`
           : "rgba(255,255,255,0.1)",
       }}

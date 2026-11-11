@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import QRCodeLib from "qrcode";
-import logoMark from "figma:asset/ldtize-logo-mark.svg";
-import logoWordmark from "figma:asset/logo.svg";
+import logoMark from "@/assets/ldtize-logo-mark.svg";
+import logoWordmark from "@/assets/logo.svg";
 import { cn } from "@/lib/utils";
 
 interface QRCodeCanvasProps {

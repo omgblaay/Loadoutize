@@ -2,7 +2,6 @@ import {
   lazy,
   Suspense,
   useEffect,
-  type ComponentType,
   type ReactNode,
 } from "react";
 import {
@@ -22,19 +21,6 @@ import { GAME_SELECTOR_ENABLED, LOCKED_GAME_ID } from "@/lib/games";
 import { explorePath, loadoutPath, weaponMetaListPath } from "@/lib/routes";
 import { FULL_LOADOUTS_ENABLED } from "@/lib/contentVisibility";
 
-// ComponentTest.tsx is gitignored (a local-only scratch/preview page) -- a
-// normal static import of it breaks the build anywhere the file doesn't
-// exist on disk, e.g. Vercel, which builds from the git checkout and never
-// has it. import.meta.glob resolves it when present (local dev) and simply
-// returns no match when absent, so the build never fails either way.
-const componentTestModules = import.meta.glob<{ ComponentTest: ComponentType }>(
-  "../components/pages/ComponentTest.tsx",
-);
-const loadComponentTest =
-  componentTestModules["../components/pages/ComponentTest.tsx"];
-const ComponentTest = loadComponentTest
-  ? lazy(() => loadComponentTest().then((m) => ({ default: m.ComponentTest })))
-  : null;
 const Home = lazy(() =>
   import("@/components/pages/Home").then((module) => ({
     default: module.Home,
@@ -271,10 +257,7 @@ export default function App() {
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
-            {ComponentTest && (
-              <Route path="/component-test" element={<ComponentTest />} />
-            )}
-            {import.meta.env.DEV && (
+            {process.env.NODE_ENV !== "production" && (
               <Route
                 path="/oval-placement-test"
                 element={<OvalPlacementTest />}

@@ -32,3 +32,7 @@ Desktop.ini
 *.log
 docs/MW4_EXTRACTION.md
 extension/Loadoutize Helper.zip
+
+# Next.js
+.next/
+next-env.d.ts

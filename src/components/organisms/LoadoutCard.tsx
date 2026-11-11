@@ -184,7 +184,7 @@ export function LoadoutCard({
               typeSlug: a.typeSlug || a.type || "",
               label: a.displayName ?? a.stats?.displayName ?? a.name,
               iconUrl: a.imageUrl ?? a.stats?.imagePath,
-              isApex: a.type.toLowerCase() === "apex",
+              isApex: a.type?.toLowerCase() === "apex",
             }),
           )}
         />

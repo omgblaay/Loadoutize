@@ -1,4 +1,4 @@
-import logoUrl from "figma:asset/logo.svg";
+import logoUrl from "@/assets/logo.svg";
 
 export function Logo({ className }: { className?: string }) {
   return (

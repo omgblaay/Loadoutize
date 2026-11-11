@@ -33,7 +33,7 @@ export const gameColors = {
 
 export type GameId = keyof typeof gameColors;
 
-export function getGameColor(gameId: string | undefined): typeof gameColors.mw4 {
+export function getGameColor(gameId: string | undefined): (typeof gameColors)[GameId] {
   if (!gameId) return gameColors.mw4;
   const normalizedId = gameId.toLowerCase();
   return gameColors[normalizedId as GameId] || gameColors.mw4;
