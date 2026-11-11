@@ -900,7 +900,7 @@ export function LoadoutPreview() {
               weapon={primaryWeaponCatalog}
               gameId={gameId}
             />
-            <div className="absolute right-0 top-0 z-[4]">
+            <div className="absolute right-0 top-0 z-[4] hidden sm:block">
               <VoteControl
                 likes={loadout.likes}
                 dislikes={loadout.dislikes}
@@ -913,7 +913,9 @@ export function LoadoutPreview() {
             <div
               className={cn(
                 "relative z-[1] flex w-full justify-center",
-                !isFullLoadout && "max-w-sm",
+                isFullLoadout
+                  ? "max-w-[300px] sm:max-w-none"
+                  : "max-w-[260px] sm:max-w-sm",
               )}
             >
               <WeaponImage
@@ -933,6 +935,16 @@ export function LoadoutPreview() {
               />
             </div>
           </div>
+          <div className="flex justify-center sm:hidden">
+            <VoteControl
+              likes={loadout.likes}
+              dislikes={loadout.dislikes}
+              liked={loadout.liked}
+              disliked={loadout.disliked}
+              onLike={() => react("like")}
+              onDislike={() => react("dislike")}
+            />
+          </div>
           <div className="divide-y-1 divide-solid divide-white/5 w-full">
             <div className="lg:hidden">
               {primaryAttachments.map((att) => {
@@ -945,7 +957,7 @@ export function LoadoutPreview() {
                     onBlur={() => setActiveKey(null)}
                     className="flex w-full items-center gap-4 py-3 text-left"
                   >
-                    <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] p-1">
+                    <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/[0.035] p-1">
                       {att.iconUrl ? (
                         <img
                           src={att.iconUrl}
@@ -1040,7 +1052,7 @@ export function LoadoutPreview() {
                     gameId={gameId}
                   />
                   <div
-                    className="relative"
+                    className="relative mx-auto max-w-[300px] sm:max-w-none"
                     style={{
                       background: `radial-gradient(ellipse at center, ${titleTag?.color || null}14, transparent 70%)`,
                     }}
