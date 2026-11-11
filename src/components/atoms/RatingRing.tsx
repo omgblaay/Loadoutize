@@ -40,9 +40,21 @@ const TIER_COLORS: Record<RatingTier, string> = {
 interface FireRatingProps {
   idPrefix: string;
   size: number;
+  /** Negative delay so each flame starts at a different point in its cycle. */
+  flickerDelayMs: number;
 }
 
-function FireRating({ idPrefix, size }: FireRatingProps) {
+const FLICKER_CYCLE_MS = 1400;
+
+function flickerDelayFor(id: string) {
+  let hash = 0;
+  for (let index = 0; index < id.length; index += 1) {
+    hash = (hash * 31 + id.charCodeAt(index)) | 0;
+  }
+  return -(Math.abs(hash) % FLICKER_CYCLE_MS);
+}
+
+function FireRating({ idPrefix, size, flickerDelayMs }: FireRatingProps) {
   const outlineGradient = `${idPrefix}-outline`;
   const flameGradient = `${idPrefix}-flame`;
   const highlightGradient = `${idPrefix}-highlight`;
@@ -71,18 +83,20 @@ function FireRating({ idPrefix, size }: FireRatingProps) {
         style={{ mixBlendMode: "overlay" }}
         strokeWidth="1.16667"
       />
-      <use href={`#${flamePath}`} fill={`url(#${flameGradient})`} />
       <mask id={flameMask} fill="white">
         <use href={`#${flamePath}`} />
       </mask>
-      <path
-        d="M32.514 56.7989C41.7388 54.9516 53.6667 48.3148 53.6667 31.1549C53.6667 15.5412 42.2375 5.14198 34.019 0.36434C32.1924 -0.698013 30.0588 0.697801 30.0588 2.80775V8.20215C30.0588 12.4575 28.2705 20.2244 23.3011 23.4558C20.7632 25.1054 18.0188 22.6354 17.7119 19.6254L17.4581 17.1525C17.163 14.2782 14.2357 12.5342 11.9398 14.2871C7.81138 17.4299 3.5 22.9482 3.5 31.1519C3.5 52.1363 19.1077 57.3861 26.9101 57.3861C27.3665 57.3861 27.8426 57.3714 28.3384 57.3419C29.6545 57.1766 28.3384 57.634 32.514 56.7959"
-        strokeWidth="5.90196"
-        stroke={`url(#${highlightGradient})`}
-        strokeOpacity="0.6"
-        style={{ mixBlendMode: "overlay" }}
-        mask={`url(#${flameMask})`}
-      />
+      <g className="rating-fire-flicker" style={{ animationDelay: `${flickerDelayMs}ms` }}>
+        <use href={`#${flamePath}`} fill={`url(#${flameGradient})`} />
+        <path
+          d="M32.514 56.7989C41.7388 54.9516 53.6667 48.3148 53.6667 31.1549C53.6667 15.5412 42.2375 5.14198 34.019 0.36434C32.1924 -0.698013 30.0588 0.697801 30.0588 2.80775V8.20215C30.0588 12.4575 28.2705 20.2244 23.3011 23.4558C20.7632 25.1054 18.0188 22.6354 17.7119 19.6254L17.4581 17.1525C17.163 14.2782 14.2357 12.5342 11.9398 14.2871C7.81138 17.4299 3.5 22.9482 3.5 31.1519C3.5 52.1363 19.1077 57.3861 26.9101 57.3861C27.3665 57.3861 27.8426 57.3714 28.3384 57.3419C29.6545 57.1766 28.3384 57.634 32.514 56.7959"
+          strokeWidth="5.90196"
+          stroke={`url(#${highlightGradient})`}
+          strokeOpacity="0.6"
+          style={{ mixBlendMode: "overlay" }}
+          mask={`url(#${flameMask})`}
+        />
+      </g>
       <rect
         x="11.3335"
         y="17.1667"
@@ -182,7 +196,11 @@ export function RatingRing({
         title={title}
         style={{ width: size, height: size }}
       >
-        <FireRating idPrefix={`rating-fire-${fireId}`} size={size} />
+        <FireRating
+          idPrefix={`rating-fire-${fireId}`}
+          size={size}
+          flickerDelayMs={flickerDelayFor(fireId)}
+        />
         <span className={cn("relative", RATING_LABEL_CLASS)}>{tier}</span>
       </div>
     );

@@ -270,6 +270,43 @@
   }
 }
 
+/* S-rated rating flame: a slow flicker anchored at the base of the flame. */
+@keyframes rating-fire-flicker {
+  0%,
+  100% {
+    transform: scale(1, 1);
+    opacity: 1;
+  }
+
+  30% {
+    transform: scale(1.02, 1.05);
+    opacity: 0.94;
+  }
+
+  60% {
+    transform: scale(0.99, 1.02);
+    opacity: 1;
+  }
+
+  80% {
+    transform: scale(1.03, 1.07);
+    opacity: 0.9;
+  }
+}
+
+.rating-fire-flicker {
+  transform-box: view-box;
+  transform-origin: 50% 100%;
+  animation: rating-fire-flicker 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rating-fire-flicker {
+    animation: none;
+  }
+}
+
+
 @media (prefers-reduced-motion: reduce) {
 
   [style*="marquee-up"],

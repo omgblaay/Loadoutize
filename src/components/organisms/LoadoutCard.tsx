@@ -13,7 +13,6 @@ import {
 import { Tag } from "@/components/atoms/Tag";
 import { RatingRing } from "@/components/atoms/RatingRing";
 import { FireCardEffect } from "@/components/atoms/FireCardEffect";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { VIDEO_PLATFORM_META } from "@/lib/video";
 import { explorePath } from "@/lib/routes";
 import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
@@ -89,10 +88,6 @@ export function LoadoutCard({
       : undefined;
   const glowColor = tag?.color;
   const voteCount = loadout.likes + loadout.dislikes;
-  const isTopLoadout =
-    voteCount >= 5 &&
-    loadout.ratingPercent != null &&
-    loadout.ratingPercent >= 90;
   const authorLabel = [
     loadout.userName,
     loadout.authorNickname ? `@${loadout.authorNickname}` : null,
@@ -230,20 +225,7 @@ export function LoadoutCard({
   return (
     <div className="relative h-full w-full transition-[transform,filter] duration-200 ease-out hover:-translate-y-1 hover:drop-shadow-[0_16px_18px_rgba(0,0,0,0.45)]">
       {fire && <FireCardEffect radius={12} />}
-      {isTopLoadout ? (
-        <BorderBeam
-          size="md"
-          colorVariant="colorful"
-          borderRadius={16}
-          strength={0.55}
-          duration={3.2}
-          className="h-full"
-        >
-          {card}
-        </BorderBeam>
-      ) : (
-        card
-      )}
+      {card}
     </div>
   );
 }
