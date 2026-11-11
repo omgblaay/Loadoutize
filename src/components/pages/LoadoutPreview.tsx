@@ -571,15 +571,16 @@ export function LoadoutPreview() {
     weaponId: string | undefined,
     fallback: string,
   ) =>
-    attachment?.displayName ??
+    attachment?.displayName ||
+    attachment?.stats?.displayName ||
     (gameId === "mw4"
       ? builderAttachmentDisplayName(
           attachment?.stats?.assetId,
           weaponId,
           relationAssetsById,
-          attachment?.stats?.displayName ?? fallback,
+          fallback,
         )
-      : (attachment?.stats?.displayName ?? fallback));
+      : fallback);
   const attachmentSubtypeLabel = (attachment: CardAttachment | undefined) =>
     attachment?.subtypeLabel ||
     attachment?.stats?.subtypeLabel ||
