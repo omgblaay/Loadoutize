@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Logo } from "@/components/atoms/Logo";
 
-const EFFECTIVE_DATE = "September 30, 2026";
+const EFFECTIVE_DATE = "November 10, 2026";
 const CONTACT_EMAIL = "loadoutize@gmail.com";
 
 function Section({
@@ -40,8 +40,8 @@ export function PrivacyPolicy() {
           <p className="text-secondary">
             Loadoutize ("Loadoutize", "we", "us") lets players build and share
             game loadouts. This policy explains what information we collect when
-            you use loadoutize.com (the "Service"), why we collect it, and the
-            choices you have.
+            you use loadoutize.com (the "Service") or the Loadoutize for YouTube
+            browser extension, why we collect it, and the choices you have.
           </p>
 
           <Section title="Information we collect">
@@ -79,6 +79,31 @@ export function PrivacyPolicy() {
               <code className="text-white">localStorage</code> so you stay
               signed in. This stays on your device and is not shared with third
               parties.
+            </p>
+          </Section>
+
+          <Section title="Loadoutize for YouTube browser extension">
+            <p>
+              The extension runs on YouTube watch pages. It reads the current
+              video ID from the page URL and sends that ID over HTTPS to our
+              Loadoutize API, hosted by Supabase, to find public loadouts linked
+              to the video. It displays matching builds next to the video or a
+              link to create one when there is no match.
+            </p>
+            <p>
+              The extension does not send the video title, page contents, or
+              your YouTube account details to Loadoutize. It does not store a
+              history of videos you watch or use the video ID for advertising.
+              Our API provider may log the request and standard technical data
+              described above for security and reliability. If you open a
+              Loadoutize link, your use of the website is covered by the rest
+              of this policy.
+            </p>
+            <p>
+              We use information handled by the extension only to provide its
+              video lookup and related security and reliability functions, in
+              accordance with the Chrome Web Store User Data Policy, including
+              its Limited Use requirements.
             </p>
           </Section>
 
