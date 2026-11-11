@@ -195,6 +195,11 @@ export function choosePreviewAsset(
   return candidates[stableHash(attachment.label) % candidates.length];
 }
 
+/** APEX defaults the player may replace, unlike the recipe's locked defaults. */
+const APEX_REPLACEABLE_DEFAULTS: Record<string, Record<string, string>> = {
+  rex_apex_menu_akilo_1601: { magazine: "rex_mag_akilo_545" },
+};
+
 const RECEIVER_LINK_TOKENS = new Set([
   "545", "emp", "pdw", "gl", "airburst", "auto", "semi", "adversefire",
   "topload", "noads", "alt", "hyperburst", "fanfire", "hotload", "pump",
@@ -223,6 +228,10 @@ export function createPreviewBuild(
   if (conversion) {
     for (const [slot, id] of Object.entries(conversion.default_parts ?? {})) {
       if (byId.has(id)) parts[slot] = id;
+    }
+    // Replaceable APEX defaults: used only when the player has not picked the slot.
+    for (const [slot, id] of Object.entries(APEX_REPLACEABLE_DEFAULTS[conversion.id] ?? {})) {
+      if (byId.has(id) && !parts[slot]) parts[slot] = id;
     }
     for (const slot of conversion.locked_slots ?? []) {
       delete parts[slot];

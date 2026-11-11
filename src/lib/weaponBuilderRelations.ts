@@ -166,6 +166,43 @@ export function getBuilderApexRelation(
   return { apexName: recipe.display_name || recipe.title || apexEntry[1], lockedSlots };
 }
 
+/** Magazines that only an APEX conversion supplies; never picked directly. */
+const APEX_ONLY_ATTACHMENT_ASSET_IDS = new Set(["rex_mag_akilo_545"]);
+
+/** Attachments that can be picked only while the named APEX is equipped. */
+const KASTOV_545_APEX_ASSET_ID = "rex_apex_menu_akilo_1601";
+const APEX_REQUIRED_ATTACHMENT_ASSET_IDS: Record<string, string> = {
+  rex_drum_akilo_545: KASTOV_545_APEX_ASSET_ID,
+  rex_xmag_akilo_545: KASTOV_545_APEX_ASSET_ID,
+};
+
+function equippedApexAssetId(
+  selected: Record<string, string>,
+  attachments: BuilderAttachment[],
+): string | null {
+  const apexName = Object.entries(selected).find(
+    ([slot, value]) => normalizePreviewSlot(slot) === "apex" && Boolean(value),
+  )?.[1];
+  return attachments.find(
+    (attachment) =>
+      normalizePreviewSlot(attachment.typeSlug || attachment.type) === "apex" &&
+      attachment.name === apexName,
+  )?.stats?.assetId ?? null;
+}
+
+/** Whether an attachment may be picked given the APEX currently equipped. */
+export function attachmentAllowedByApex(
+  assetId: string | undefined,
+  selected: Record<string, string>,
+  attachments: BuilderAttachment[],
+): boolean {
+  if (!assetId) return true;
+  if (APEX_ONLY_ATTACHMENT_ASSET_IDS.has(assetId)) return false;
+  const required = APEX_REQUIRED_ATTACHMENT_ASSET_IDS[assetId];
+  if (!required) return true;
+  return equippedApexAssetId(selected, attachments) === required;
+}
+
 export function applyBuilderRelations(
   selected: Record<string, string>,
   attachments: BuilderAttachment[],
@@ -180,9 +217,22 @@ export function applyBuilderRelations(
   const striga = weaponId === "rex_sm_pmike63";
   const strigaUnderbarrelBlocked = striga &&
     !strigaDreadlineSelected(selected, attachments, weaponId);
+  const apexGated = new Set(
+    Object.entries(selected)
+      .filter(([slot, name]) => {
+        const attachment = attachments.find(
+          (item) =>
+            item.name === name &&
+            normalizePreviewSlot(item.typeSlug || item.type) === normalizePreviewSlot(slot),
+        );
+        return Boolean(attachment) &&
+          !attachmentAllowedByApex(attachment?.stats?.assetId, selected, attachments);
+      })
+      .map(([slot]) => normalizePreviewSlot(slot)),
+  );
   if (!relation && !blockedComb && !Object.keys(selected).some(
     (slot) => hiddenMw4Slots?.has(normalizePreviewSlot(slot)),
-  ) && !striga) return selected;
+  ) && !striga && apexGated.size === 0) return selected;
   return Object.fromEntries(
     Object.entries(selected).filter(
       ([slot]) =>
@@ -190,6 +240,7 @@ export function applyBuilderRelations(
         !(striga && normalizePreviewSlot(slot) === "guard") &&
         !(strigaUnderbarrelBlocked && normalizePreviewSlot(slot) === "underbarrel") &&
         !relation?.lockedSlots.has(normalizePreviewSlot(slot)) &&
+        !apexGated.has(normalizePreviewSlot(slot)) &&
         !(normalizePreviewSlot(slot) === "comb" && blockedComb),
     ),
   );

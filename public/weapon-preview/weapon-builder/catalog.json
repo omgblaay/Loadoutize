@@ -23254,6 +23254,7 @@
         "rex_comb_svictor98",
         "rex_comb_tac_svictor98",
         "rex_hotload_he_svictor98",
+        "rex_irons_svictor98",
         "rex_mag_svictor98",
         "rex_rec_svictor98",
         "rex_rec_svictor98_hotload",
@@ -37327,7 +37328,7 @@
     {
       "id": "rex_irons_svictor98",
       "title": "irons svictor98",
-      "slot": "iron_sights",
+      "slot": "optic",
       "src": "../mw4-attachments/images/rex_irons_svictor98-2db99c74c7dca353.png",
       "bbox": [
         8,

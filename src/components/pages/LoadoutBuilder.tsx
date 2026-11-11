@@ -48,6 +48,7 @@ import {
 } from "@/lib/weaponCategories";
 import {
   applyBuilderRelations,
+  attachmentAllowedByApex,
   builderAttachmentDisplayName,
   getBuilderApexRelation,
   mw4MuzzleAllowed,
@@ -1173,6 +1174,15 @@ export function LoadoutBuilder() {
     }))
     .filter((attachment) => {
       if (!selectedWeapon) return true;
+      if (
+        gameId === "mw4" &&
+        !attachmentAllowedByApex(
+          attachment.stats?.assetId,
+          selectedWeapon.attachments,
+          attachments,
+        )
+      )
+        return false;
       if (
         gameId === "mw4" &&
         normalizePreviewSlot(attachment.typeSlug || attachment.type) ===

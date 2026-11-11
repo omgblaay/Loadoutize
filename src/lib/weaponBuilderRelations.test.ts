@@ -15,6 +15,7 @@ import {
   VEL_AMMUNITION_IDS,
   velAllowsAmmunition,
   strigaDreadlineSelected,
+  attachmentAllowedByApex,
   type BuilderRelationAsset,
 } from "./weaponBuilderRelations";
 
@@ -181,5 +182,29 @@ describe("weapon builder relations", () => {
     const selected = { APEX: "Han X20 Skybreaker", Optic: "Scope", Stock: "Light", Barrel: "Short", Magazine: "Extended" };
     expect(applyBuilderRelations(selected, skybreaker, catalog.assets, "rex_ar_kilo2"))
       .toEqual({ APEX: "Han X20 Skybreaker", Magazine: "Extended" });
+  });
+
+  it("offers the 5.45 drum and 45 round mag only with KASTOV 545 equipped", () => {
+    const kastov545 = { name: "Kastov 545", type: "APEX", stats: { assetId: "rex_apex_menu_akilo_1601" } };
+    const drum = { name: "drum akilo 545", type: "Magazine", stats: { assetId: "rex_drum_akilo_545" } };
+    const xmag = { name: "xmag akilo 545", type: "Magazine", stats: { assetId: "rex_xmag_akilo_545" } };
+    const mag = { name: "mag akilo 545", type: "Magazine", stats: { assetId: "rex_mag_akilo_545" } };
+    const list = [kastov545, drum, xmag, mag];
+    expect(attachmentAllowedByApex("rex_drum_akilo_545", {}, list)).toBe(false);
+    expect(attachmentAllowedByApex("rex_xmag_akilo_545", { APEX: "EMP" }, list)).toBe(false);
+    expect(attachmentAllowedByApex("rex_drum_akilo_545", { APEX: "Kastov 545" }, list)).toBe(true);
+    expect(attachmentAllowedByApex("rex_xmag_akilo_545", { APEX: "Kastov 545" }, list)).toBe(true);
+    expect(attachmentAllowedByApex("rex_mag_akilo_545", { APEX: "Kastov 545" }, list)).toBe(false);
+  });
+
+  it("drops a 5.45 magazine when KASTOV 545 is removed", () => {
+    const list = [
+      { name: "Kastov 545", type: "APEX", stats: { assetId: "rex_apex_menu_akilo_1601" } },
+      { name: "drum akilo 545", type: "Magazine", stats: { assetId: "rex_drum_akilo_545" } },
+    ];
+    expect(applyBuilderRelations({ APEX: "Kastov 545", Magazine: "drum akilo 545" }, list, catalog.assets, "rex_ar_akilo"))
+      .toEqual({ APEX: "Kastov 545", Magazine: "drum akilo 545" });
+    expect(applyBuilderRelations({ Magazine: "drum akilo 545" }, list, catalog.assets, "rex_ar_akilo"))
+      .toEqual({});
   });
 });

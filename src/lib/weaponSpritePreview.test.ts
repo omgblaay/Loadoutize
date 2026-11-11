@@ -184,4 +184,12 @@ describe("weapon sprite preview mapping", () => {
     expect(build.autoParts.optic).toBe(`apex:${skybreaker.id}`);
     expect(build.autoParts.stock).toBe(`apex:${skybreaker.id}`);
   });
+  it("replaces the Kastov 545 default magazine but keeps a picked 5.45 magazine", () => {
+    const catalog = JSON.parse(readFileSync("public/weapon-preview/weapon-builder/catalog.json", "utf8"));
+    const akilo = catalog.weapons.find((item: SpriteWeapon) => item.id === "rex_ar_akilo") as SpriteWeapon;
+    const apex = { typeSlug: "apex", label: "Kastov 545", assetId: "rex_apex_menu_akilo_1601" };
+    expect(createPreviewBuild(akilo, catalog.assets, [apex]).parts.magazine).toBe("rex_mag_akilo_545");
+    const drum = { typeSlug: "magazine", label: "95 ROUND DRUM MAG 5.45", assetId: "rex_drum_akilo_545" };
+    expect(createPreviewBuild(akilo, catalog.assets, [apex, drum]).parts.magazine).toBe("rex_drum_akilo_545");
+  });
 });
