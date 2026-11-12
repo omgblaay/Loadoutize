@@ -122,3 +122,12 @@ The original brief says "use Next.js". Options:
   - Build passes, type check is clean, 81 unit tests pass, and smoke tests on 7 routes show no page or console errors.
   - Known gaps carried into Phase 1: canonical is still `/` on every route, unknown paths still return 200, and `sitemap.xml` still lists `/mw4/*`.
 - **Step 2, server-rendered SEO routes:** not started.
+- **Steps 2–3, search-intent pages and linking (branch `nextjs-migration`): built, not yet indexable.**
+  - Server-rendered pages: `/meta/weapons/[weapon]`, `/meta/weapons/[weapon]/best-loadout`, `/meta/categories/[category]`, `/best-loadouts`. ISR at 1 hour.
+  - Weapon URLs use slugs from display names. Old `/meta/weapons/<id>` URLs 308 to the slug.
+  - Real 404s for unknown weapons and for weapons with no build. `noindex` below the publish gate.
+  - Breadcrumbs and `BreadcrumbList` on every page. `VideoObject` only for YouTube builds. No `Review` or `AggregateRating` anywhere.
+  - Home links to the hub with a real `<a>`.
+  - Backend: additive `authorIsOrganic` and `organic*` fields in `supabase/functions/server/index.tsx`. **Not deployed.** Pages fail closed until it is.
+  - Keyword map: `Plans/SEO_KEYWORDS.md`. Search volume still needs Keyword Planner and Search Console exports.
+  - Data reality: 0 of 30 weapons pass the gate today. Only 3 of 109 public builds are from non-seeded authors, and none has organic votes.

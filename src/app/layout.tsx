@@ -55,7 +55,7 @@ const structuredData = {
       "@type": "VideoGame",
       name: "Call of Duty: Modern Warfare 4",
       releaseDate: "2026-10-23T04:00:00Z",
-      url: `${SITE_URL}/mw4/explore`,
+      url: `${SITE_URL}/explore`,
     },
   ],
 };

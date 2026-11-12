@@ -21,6 +21,14 @@ export interface CardLoadout {
   views: number;
   tagId?: number | null;
   video?: LoadoutVideo | null;
+  gameLoadoutCode?: string | null;
+  createdAt?: string;
+  // Organic = authored and voted on by real, non-seeded profiles.
+  authorIsOrganic?: boolean;
+  organicLikes?: number;
+  organicDislikes?: number;
+  organicFavorites?: number;
+  organicRatingPercent?: number | null;
 }
 
 export type LoadoutWeaponSlot = "primary" | "secondary" | "melee";
