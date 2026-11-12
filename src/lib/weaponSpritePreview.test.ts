@@ -48,6 +48,35 @@ const assets: SpriteAsset[] = [
 ];
 
 describe("weapon sprite preview mapping", () => {
+  it("uses Oden's APEX parts and default MARKSMAP without changing a Mini Reflex receiver", () => {
+    const catalog = JSON.parse(readFileSync("public/weapon-preview/weapon-builder/catalog.json", "utf8"));
+    const oden = catalog.weapons.find((item: SpriteWeapon) => item.id === "rex_br_asierra12") as SpriteWeapon;
+    const apex = { typeSlug: "apex", label: "ODEN SENTINEL", assetId: "rex_apex_asierra12" };
+    const marksmap = { typeSlug: "optic", label: "MARKSMAP", assetId: "rex_scope_asierra12" };
+    for (const selected of [[apex], [apex, marksmap]]) {
+      const build = createPreviewBuild(oden, catalog.assets, selected);
+      expect(build.parts.receiver).toBe("rex_rec_asierra12_apex");
+      expect(build.parts.barrel).toBe("rex_barbip_asierra12");
+      expect(build.parts.muzzle).toBe("rex_sil_vks_asierra12");
+      expect(build.parts.optic).toBe("rex_scope_asierra12");
+      expect(build.autoParts.muzzle).toBe("apex:rex_apex_asierra12");
+      expect(build.autoParts.barrel).toBe("apex:rex_apex_asierra12");
+      expect(build.autoParts.optic).toBeUndefined();
+    }
+    const miniReflex = { typeSlug: "optic", label: "SLIMLINE ELITE", assetId: "rex_minireddot01_asierra12" };
+    const mini = createPreviewBuild(oden, catalog.assets, [apex, miniReflex]);
+    expect(mini.parts.receiver).toBe("rex_rec_asierra12");
+    expect(mini.parts.optic).toBe("rex_minireddot01_asierra12");
+    expect(mini.parts.muzzle).toBe("rex_sil_vks_asierra12");
+    const opticOnly = createPreviewBuild(oden, catalog.assets, [marksmap]);
+    expect(opticOnly.parts.receiver).toBe("rex_rec_asierra12");
+    expect(opticOnly.parts.muzzle).toBeUndefined();
+    const ordinary = createPreviewBuild(oden, catalog.assets, []);
+    expect(ordinary.parts.receiver).toBe("rex_rec_asierra12");
+    expect(ordinary.parts.muzzle).toBeUndefined();
+    const variant = catalog.assets.find((asset: SpriteAsset) => asset.id === "rex_rec_asierra12_apex");
+    expect(variant.src).toContain("rex_rec_asierra12_no_top_guard.png");
+  });
   it("keeps Striga underbarrels only on its Dreadline 80 barrel", () => {
     const catalog = JSON.parse(readFileSync("public/weapon-preview/weapon-builder/catalog.json", "utf8"));
     const striga = catalog.weapons.find((item: SpriteWeapon) => item.id === "rex_sm_pmike63") as SpriteWeapon;

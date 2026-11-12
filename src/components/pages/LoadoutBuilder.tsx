@@ -922,6 +922,9 @@ export function LoadoutBuilder() {
       attachmentName &&
       !isApexAttachmentType(slot) &&
       !currentWeapon?.attachments[slot] &&
+      !(weaponId === "rex_br_asierra12" && normalizePreviewSlot(slot) === "optic" &&
+        attachments.some((attachment) => attachment.name === attachmentName && attachment.stats?.assetId === "rex_scope_asierra12") &&
+        Boolean(relation?.defaultSlots.get("optic"))) &&
       selectedAttachmentCount >= MAX_STANDARD_ATTACHMENTS
     ) {
       toast.info(
@@ -1862,6 +1865,8 @@ export function LoadoutBuilder() {
                     const selectedImageUrl =
                       selectedAttachment?.imageUrl ??
                       selectedAttachment?.stats?.imagePath;
+                    const defaultSlot =
+                      selectedApexRelation?.defaultSlots.get(normalizePreviewSlot(type));
                     const lockedSlot =
                       selectedApexRelation?.lockedSlots.get(
                         normalizePreviewSlot(type),
@@ -1957,6 +1962,12 @@ export function LoadoutBuilder() {
                                 className="size-6 shrink-0 text-rose-300/80"
                                 aria-hidden="true"
                               />
+                            ) : defaultSlot?.includedAssetId ? (
+                              <img
+                                src={builderAttachmentImageUrl(defaultSlot.includedAssetId, assetsById, defaultSlot.includedPart) ?? ""}
+                                alt=""
+                                className="size-10 shrink-0 object-contain"
+                              />
                             ) : isAnySelected ? (
                               <span className="flex size-5 items-center justify-center font-mono text-3xl text-teritary">
                                 ∞
@@ -2012,6 +2023,13 @@ export function LoadoutBuilder() {
                                     {lockSource}
                                   </span>
                                 )}
+                              </span>
+                            ) : defaultSlot ? (
+                              <span className="min-w-0 flex flex-col items-start">
+                                <span className="max-w-full truncate">{defaultSlot.includedPart}</span>
+                                <span className="max-w-full truncate text-xs text-teritary font-normal">
+                                  Default {type} with {selectedApexRelation?.apexName} · changeable
+                                </span>
                               </span>
                             ) : !hasOptions ? (
                               <span className="text-teritary">

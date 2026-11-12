@@ -14,6 +14,7 @@ export interface SpriteAsset {
   render_slot?: string;
   factory_component?: boolean;
   dependency_only?: boolean;
+  subtype_label?: string;
   receiver_variant?: string;
   default_parts?: Record<string, string>;
   dependencies?: Record<string, string>;
@@ -227,7 +228,8 @@ export function createPreviewBuild(
   const conversion = byId.get(parts.apex);
   if (conversion) {
     for (const [slot, id] of Object.entries(conversion.default_parts ?? {})) {
-      if (byId.has(id)) parts[slot] = id;
+      if (byId.has(id) && (conversion.id !== "rex_apex_asierra12" || slot !== "optic" || !parts[slot]))
+        parts[slot] = id;
     }
     // Replaceable APEX defaults: used only when the player has not picked the slot.
     for (const [slot, id] of Object.entries(APEX_REPLACEABLE_DEFAULTS[conversion.id] ?? {})) {
@@ -248,7 +250,10 @@ export function createPreviewBuild(
   const receivers = assets.filter(
     (asset) => asset.slot === "receiver" && weapon.assets.includes(asset.id),
   );
-  let receiver = receivers.find((asset) => asset.id === conversion?.receiver_variant);
+  const odenMiniReflex = weapon.id === "rex_br_asierra12" &&
+    byId.get(parts.optic)?.subtype_label === "MINI REFLEX";
+  let receiver = receivers.find((asset) =>
+    asset.id === (odenMiniReflex ? weapon.factory_parts?.receiver : conversion?.receiver_variant));
   if (!receiver) {
     const selectedTokens = new Set(
       Object.entries(parts)

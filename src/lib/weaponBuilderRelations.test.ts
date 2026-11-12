@@ -64,6 +64,25 @@ describe("weapon builder relations", () => {
     expect(applyBuilderRelations({ APEX: "Snap", Stock: "Heavy Stock" }, apex, catalog.assets, "rex_sm_mpapa7"))
       .toEqual({ APEX: "Snap" });
   });
+  it("locks Oden's Sentinel barrel and VKS muzzle while showing MARKSMAP as a changeable default", () => {
+    const odenAttachments = [
+      { name: "Oden Sentinel", type: "APEX", stats: { assetId: "rex_apex_asierra12" } },
+      { name: "scope asierra12", type: "Optic", stats: { assetId: "rex_scope_asierra12" } },
+      { name: "other muzzle", type: "Muzzle", stats: { assetId: "rex_comp_vert_d" } },
+    ];
+    const selected = { APEX: "Oden Sentinel", Muzzle: "other muzzle", Barrel: "other barrel" };
+    const relation = getBuilderApexRelation(selected, odenAttachments, catalog.assets);
+    expect(relation?.lockedSlots.get("muzzle")?.includedAssetId).toBe("rex_sil_vks_asierra12");
+    expect(relation?.lockedSlots.get("barrel")?.includedAssetId).toBe("rex_barbip_asierra12");
+    expect(relation?.lockedSlots.has("optic")).toBe(false);
+    expect(relation?.defaultSlots.get("optic")?.includedAssetId).toBe("rex_scope_asierra12");
+    expect(applyBuilderRelations(selected, odenAttachments, catalog.assets, "rex_br_asierra12"))
+      .toEqual({ APEX: "Oden Sentinel" });
+    expect(applyBuilderRelations({ APEX: "Oden Sentinel", Optic: "scope asierra12" },
+      odenAttachments, catalog.assets, "rex_br_asierra12"))
+      .toEqual({ APEX: "Oden Sentinel" });
+    expect(getBuilderApexRelation({ Optic: "scope asierra12" }, odenAttachments, catalog.assets)).toBeNull();
+  });
   it("matches VEL 46's five 4.6x30mm ammunition choices", () => {
     const names = [
       "4.6x30mm Armor Piercing", "4.6x30mm Frangible",

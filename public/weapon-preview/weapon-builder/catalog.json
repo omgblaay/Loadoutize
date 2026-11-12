@@ -4405,7 +4405,8 @@
         "rex_grip_bipod01",
         "rex_bipod_ngsierra",
         "rex_ub_gl_akilo",
-        "rex_ub_sh_akilo"
+        "rex_ub_sh_akilo",
+        "rex_sil_vks_asierra12"
       ],
       "shared_assets": [
         "rex_ammo_12x55_ap",
@@ -32288,7 +32289,7 @@
     },
     {
       "id": "rex_barbip_asierra12",
-      "title": "Oden Sentinel \u2014 bipod barrel",
+      "title": "Oden Sentinel — bipod barrel",
       "slot": "barrel",
       "src": "../mw4-attachments/images/rex_barbip_asierra12-75cbd9cbecb18dd9.png",
       "bbox": [
@@ -32309,7 +32310,7 @@
         "method": "sprite_review"
       },
       "internal_title": "barbip asierra12",
-      "display_name": "ODEN SENTINEL \u2014 BIPOD BARREL",
+      "display_name": "ODEN SENTINEL — BIPOD BARREL",
       "name_status": "derived_component",
       "name_evidence": "descriptive_component_label_from_official_Oden_Sentinel_bundle_not_separate_localized_name",
       "name_source_url": "https://www.callofduty.com/blog/2026/10/call-of-duty-modern-warfare-4-launch-multiplayer-operators-weapons-equipment-create-a-class"
@@ -41968,22 +41969,21 @@
       "id": "rex_rec_asierra12_apex",
       "title": "rec asierra12 apex",
       "slot": "receiver",
-      "src": "../mw4-attachments/images/rex_rec_asierra12-77fccb7c5b09c600.png",
+      "src": "../mw4-attachments/images/rex_rec_asierra12_no_top_guard.png",
       "bbox": [
         12,
         84,
         243,
         169
       ],
-      "source_image_hash": "77fccb7c5b09c600",
       "families": [
         "asierra12"
       ],
-      "evidence": "weapon_token_reference",
+      "evidence": "user_supplied_receiver_image",
       "composable": true,
       "internal_title": "rec asierra12 apex",
-      "display_name": "REC ASIERRA12 APEX",
-      "name_status": "unresolved"
+      "display_name": "ODEN RECEIVER — NO TOP GUARD",
+      "name_status": "user_supplied"
     },
     {
       "id": "rex_rec_balisong",
@@ -43681,7 +43681,7 @@
     },
     {
       "id": "rex_scope_asierra12",
-      "title": "scope asierra12",
+      "title": "Marksmap",
       "slot": "optic",
       "src": "../mw4-attachments/images/rex_scope_asierra12-71286a736670d90e.png",
       "bbox": [
@@ -43697,8 +43697,9 @@
       "evidence": "weapon_token_reference",
       "composable": true,
       "internal_title": "scope asierra12",
-      "display_name": "SCOPE ASIERRA12",
-      "name_status": "unresolved"
+      "display_name": "MARKSMAP",
+      "name_status": "user_supplied",
+      "name_evidence": "user_named_marksmap_optic"
     },
     {
       "id": "rex_selectknives_findia",
@@ -51032,12 +51033,18 @@
       "controller_only": true,
       "source_attachment_ref": "rex_rec_asierra12_apex",
       "receiver_variant": "rex_rec_asierra12_apex",
-      "dependencies": {},
+      "dependencies": {
+        "barrel": "rex_barbip_asierra12",
+        "muzzle": "rex_sil_vks_asierra12"
+      },
       "locked_slots": [],
       "internal_title": "APEX conversion",
       "display_name": "ODEN SENTINEL",
       "name_status": "canonicalized",
-      "name_evidence": "single_label_in_previous_menu_mapping"
+      "name_evidence": "single_label_in_previous_menu_mapping",
+      "default_parts": {
+        "optic": "rex_scope_asierra12"
+      }
     },
     {
       "id": "rex_apex_ngsierra",
@@ -52497,6 +52504,30 @@
       ],
       "underbarrel_order": 21,
       "underbarrel_table": true
+    },
+    {
+      "id": "rex_sil_vks_asierra12",
+      "title": "VKS Silencer",
+      "display_name": "VKS SILENCER",
+      "slot": "muzzle",
+      "src": "../mw4-attachments/images/rex_sil_vks_asierra12-5c54135336a6130f.png",
+      "bbox": [
+        13,
+        109,
+        243,
+        144
+      ],
+      "source_image_hash": "5c54135336a6130f",
+      "families": [
+        "asierra12"
+      ],
+      "evidence": "user_required_oden_dependency",
+      "composable": true,
+      "connector_y": 0.4857142857142857,
+      "dependency_only": true,
+      "weapon_ids": [
+        "rex_br_asierra12"
+      ]
     }
   ],
   "slots": [

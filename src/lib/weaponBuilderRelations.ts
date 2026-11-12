@@ -125,6 +125,7 @@ export interface LockedBuilderSlot {
 export interface BuilderApexRelation {
   apexName: string;
   lockedSlots: Map<string, LockedBuilderSlot>;
+  defaultSlots: Map<string, LockedBuilderSlot>;
 }
 
 /** The catalog's APEX recipe is the source of truth for controlled slots. */
@@ -136,24 +137,29 @@ export function getBuilderApexRelation(
   const apexEntry = Object.entries(selected).find(
     ([slot, value]) => normalizePreviewSlot(slot) === "apex" && Boolean(value),
   );
-  if (!apexEntry) return null;
-
-  const apex = attachments.find(
-    (attachment) =>
-      normalizePreviewSlot(attachment.typeSlug || attachment.type) === "apex" &&
-      attachment.name === apexEntry[1],
-  );
-  const recipe = assets.find((asset) => asset.id === apex?.stats?.assetId);
+  const controller = apexEntry && attachments.find((attachment) =>
+    normalizePreviewSlot(attachment.typeSlug || attachment.type) === "apex" &&
+    attachment.name === apexEntry[1]);
+  const recipe = assets.find((asset) => asset.id === controller?.stats?.assetId);
   if (!recipe) return null;
 
   const lockedSlots = new Map<string, LockedBuilderSlot>();
+  const defaultSlots = new Map<string, LockedBuilderSlot>();
   for (const slot of recipe.locked_slots ?? []) {
     lockedSlots.set(normalizePreviewSlot(slot), { slot });
   }
-  for (const [slot, id] of Object.entries({
-    ...recipe.default_parts,
-    ...recipe.dependencies,
-  })) {
+  for (const [slot, id] of Object.entries(recipe.default_parts ?? {})) {
+    const part = assets.find((asset) => asset.id === id);
+    if (!part) continue;
+    const isOdenDefaultOptic = recipe.id === "rex_apex_asierra12" && slot === "optic";
+    if (isOdenDefaultOptic && Object.entries(selected).some(([selectedSlot, name]) =>
+      normalizePreviewSlot(selectedSlot) === "optic" && Boolean(name))) continue;
+    (isOdenDefaultOptic ? defaultSlots : lockedSlots).set(normalizePreviewSlot(slot), {
+      slot, included: true, includedPart: part.display_name || part.title,
+      includedAssetId: part.id, includedSubtypeLabel: part.subtype_label,
+    });
+  }
+  for (const [slot, id] of Object.entries(recipe.dependencies ?? {})) {
     const part = assets.find((asset) => asset.id === id);
     lockedSlots.set(normalizePreviewSlot(slot), {
       slot,
@@ -163,7 +169,7 @@ export function getBuilderApexRelation(
       includedSubtypeLabel: part?.subtype_label,
     });
   }
-  return { apexName: recipe.display_name || recipe.title || apexEntry[1], lockedSlots };
+  return { apexName: recipe.display_name || recipe.title || controller?.name || "APEX", lockedSlots, defaultSlots };
 }
 
 /** Magazines that only an APEX conversion supplies; never picked directly. */
@@ -210,6 +216,11 @@ export function applyBuilderRelations(
   weaponId?: string,
 ) {
   const relation = getBuilderApexRelation(selected, attachments, assets);
+  const odenDefaultOptic = weaponId === "rex_br_asierra12" &&
+    Object.entries(selected).some(([slot, name]) => normalizePreviewSlot(slot) === "apex" &&
+      attachments.some((attachment) => attachment.name === name && attachment.stats?.assetId === "rex_apex_asierra12")) &&
+    Object.entries(selected).some(([slot, name]) => normalizePreviewSlot(slot) === "optic" &&
+      attachments.some((attachment) => attachment.name === name && attachment.stats?.assetId === "rex_scope_asierra12"));
   const blockedComb = rezi12NoStockBlocksComb(selected, attachments, weaponId);
   const hiddenMw4Slots = weaponId?.startsWith("rex_")
     ? new Set(["iron_sights", "other"])
@@ -230,7 +241,7 @@ export function applyBuilderRelations(
       })
       .map(([slot]) => normalizePreviewSlot(slot)),
   );
-  if (!relation && !blockedComb && !Object.keys(selected).some(
+  if (!relation && !odenDefaultOptic && !blockedComb && !Object.keys(selected).some(
     (slot) => hiddenMw4Slots?.has(normalizePreviewSlot(slot)),
   ) && !striga && apexGated.size === 0) return selected;
   return Object.fromEntries(
@@ -240,6 +251,7 @@ export function applyBuilderRelations(
         !(striga && normalizePreviewSlot(slot) === "guard") &&
         !(strigaUnderbarrelBlocked && normalizePreviewSlot(slot) === "underbarrel") &&
         !relation?.lockedSlots.has(normalizePreviewSlot(slot)) &&
+        !(odenDefaultOptic && normalizePreviewSlot(slot) === "optic") &&
         !apexGated.has(normalizePreviewSlot(slot)) &&
         !(normalizePreviewSlot(slot) === "comb" && blockedComb),
     ),
