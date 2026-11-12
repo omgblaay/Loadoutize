@@ -153,19 +153,22 @@ async function fetchTikTokFollowers(handle: string): Promise<number | null> {
 }
 
 function parseCompactCount(text: string): number | null {
-  const match = text.replace(/,/g, "").match(/^([\d.]+)([KM])?$/);
+  const normalized = text.replace(/,/g, "").trim().toLowerCase();
+  const match = normalized.match(/^([\d.]+)\s*(k|m|b|thousand|million|billion)?$/);
   if (!match) return null;
   const n = parseFloat(match[1]);
-  if (match[2] === "M") return Math.round(n * 1_000_000);
-  if (match[2] === "K") return Math.round(n * 1_000);
+  const unit = match[2];
+  if (unit === "b" || unit === "billion") return Math.round(n * 1_000_000_000);
+  if (unit === "m" || unit === "million") return Math.round(n * 1_000_000);
+  if (unit === "k" || unit === "thousand") return Math.round(n * 1_000);
   return Math.round(n);
 }
 
 // YouTube channel pages also echo other creators' subscriber counts in
-// "recommended channel" shelves elsewhere on the same page, so a single
-// regex match can grab the wrong number -- the real channel's own count is
-// the one that recurs most often (it's duplicated across several metadata
-// blocks for the page's own channel), so take the mode rather than the first match.
+// recommended-channel shelves, so a generic match can grab the wrong number.
+// The channel's own count is exposed in specific fields (subscriberCountText,
+// header metadata rows, and meta tags), so prefer those before falling back
+// to the most common "X subscribers" text on the page.
 async function fetchYouTubeSubscribers(handle: string): Promise<number | null> {
   try {
     const response = await fetch(`https://www.youtube.com/@${encodeURIComponent(handle)}`, {
@@ -173,9 +176,25 @@ async function fetchYouTubeSubscribers(handle: string): Promise<number | null> {
     });
     if (!response.ok) return null;
     const html = await response.text();
-    const matches = [...html.matchAll(/"simpleText":"([\d.,]+[KM]?) subscribers?"/g)].map((m) => m[1]);
-    if (!matches.length) return null;
 
+    const patterns = [
+      // Channel header field, present in both classic and newer layouts.
+      /"subscriberCountText"\s*:\s*\{[^{}]*?"simpleText"\s*:\s*"([\d.,]+[KM]?\s*(?:thousand|million|billion)?)\s*subscribers?"/gi,
+      /"subscriberCountText"\s*:\s*\{[^{}]*?"label"\s*:\s*"([\d.,]+[KM]?\s*(?:thousand|million|billion)?)\s*subscribers?"/gi,
+      // Newer page header metadata rows.
+      /"content"\s*:\s*"([\d.,]+[KM]?\s*(?:thousand|million|billion)?)\s*subscribers?"/gi,
+      // Meta/interaction fallbacks sometimes carry the channel count.
+      /"subscriberCount"\s*:\s*"([\d.,]+[KM]?\s*(?:thousand|million|billion)?)"/gi,
+    ];
+
+    for (const pattern of patterns) {
+      const first = [...html.matchAll(pattern)].map((m) => m[1])[0];
+      const parsed = first ? parseCompactCount(first) : null;
+      if (parsed != null) return parsed;
+    }
+
+    const matches = [...html.matchAll(/"simpleText"\s*:\s*"([\d.,]+[KM]?\s*(?:thousand|million|billion)?)\s*subscribers?"/gi)].map((m) => m[1]);
+    if (!matches.length) return null;
     const counts = new Map<string, number>();
     for (const m of matches) counts.set(m, (counts.get(m) ?? 0) + 1);
     const [mode] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];

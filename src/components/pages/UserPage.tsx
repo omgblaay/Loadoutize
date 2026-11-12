@@ -317,7 +317,7 @@ export function UserPage() {
                             </span>
                           </>
                         }
-                        className="gap-2 px-1 !max-w-20"
+                        className="gap-2 px-1 h-8 !max-w-20"
                       >
                         <Icon className="size-6" />
                         <span className="text-xs text-teritary font-mono">
