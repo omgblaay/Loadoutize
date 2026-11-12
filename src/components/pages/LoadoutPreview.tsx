@@ -272,63 +272,103 @@ function WeaponPreviewCaption({
 }
 
 function LoadoutPreviewSkeleton() {
-  const block = "bg-white/[0.02] animate-pulse";
+  const block = "bg-white/[0.07] motion-reduce:animate-none";
+  const attachmentCard = (position: string, index: number) => (
+    <div
+      key={index}
+      className={cn(
+        "absolute hidden h-[72px] w-[220px] items-center gap-3 rounded-xl border border-white/[0.06] bg-[#121011] px-3 lg:flex",
+        position,
+      )}
+    >
+      <Skeleton className={cn("size-11 shrink-0 rounded-md", block)} />
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <Skeleton className={cn("h-4 w-full", block)} />
+        <Skeleton className={cn("h-2.5 w-2/3", block)} />
+      </div>
+    </div>
+  );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-      {/* Weapon build */}
-      <Container>
-        <div className="flex items-center gap-4">
-          <Skeleton className={cn("w-16 h-16 rounded-full shrink-0", block)} />
-          <Skeleton className={cn("h-6 w-3/4", block)} />
+    <div role="status" aria-label="Loading loadout preview" aria-busy="true" className="flex flex-col gap-6" >
+      <div aria-hidden="true" className="flex flex-col gap-4 border-b border-white/[0.08] pb-5">
+        <Skeleton className={cn("h-8 w-36 -rotate-2 rounded-sm", block)} />
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1 space-y-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className={cn("size-10 shrink-0 rounded-full", block)} />
+              <Skeleton className={cn("h-8 w-36 max-w-[35%] sm:h-12", block)} />
+              <Skeleton className={cn("h-8 w-48 max-w-[38%] sm:h-12", block)} />
+            </div>
+            <Skeleton className={cn("h-8 w-[88%] sm:h-12", block)} />
+            <Skeleton className={cn("h-8 w-[66%] sm:h-12", block)} />
+          </div>
+          <Skeleton className={cn("size-12 shrink-0 rounded-full sm:size-[72px]", block)} />
         </div>
-        <div className="flex flex-col items-center gap-2 py-4">
-          <Skeleton className={cn("w-full h-[220px] rounded-xl", block)} />
+      </div>
+
+      <div aria-hidden="true" className="flex flex-col gap-6">
+        <div className="relative isolate min-h-[270px] w-full sm:min-h-[410px] lg:min-h-[540px]">
+          <div className="absolute left-0 top-0 flex h-11 items-center gap-3 rounded-lg bg-[#0a0909]/80 px-3">
+            <Skeleton className={cn("h-4 w-10", block)} />
+            <Skeleton className={cn("h-4 w-3", block)} />
+            <Skeleton className={cn("h-4 w-36", block)} />
+          </div>
+          <Skeleton className={cn("absolute right-0 top-0 hidden h-11 w-40 rounded-xl sm:block", block)} />
+          <div className="absolute inset-x-[12%] top-[37%] flex flex-col items-center gap-2 sm:inset-x-[19%]">
+            <Skeleton className={cn("h-16 w-full rounded-xl sm:h-24", block)} />
+            <Skeleton className={cn("h-12 w-10 rounded-md sm:h-20 sm:w-14", block)} />
+          </div>
+          {attachmentCard("left-[7%] top-[31%]", 0)}
+          {attachmentCard("right-[12%] top-[11%]", 1)}
+          {attachmentCard("right-[7%] top-[45%]", 2)}
+          {attachmentCard("left-[16%] bottom-[12%]", 3)}
+          {attachmentCard("left-[38%] bottom-[2%]", 4)}
+          {attachmentCard("right-[23%] bottom-[7%]", 5)}
         </div>
-        <div className="flex flex-col w-full gap-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-4 py-3 border-b border-white/5 w-full"
-            >
-              <Skeleton className={cn("w-6 h-6 rounded-md shrink-0", block)} />
-              <Skeleton className={cn("h-4 flex-1", block)} />
+
+        <div className="divide-y divide-white/[0.05] lg:hidden">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="flex items-center gap-4 py-3">
+              <Skeleton className={cn("size-10 shrink-0 rounded-lg", block)} />
+              <div className="flex flex-1 flex-col gap-2">
+                <Skeleton className={cn("h-4 w-40 max-w-[80%]", block)} />
+                <Skeleton className={cn("h-2.5 w-24", block)} />
+              </div>
             </div>
           ))}
         </div>
-      </Container>
 
-      <div className="flex flex-col gap-4">
-        {/* Description, reactions, author -- one merged info panel now */}
-        <Container className="">
-          <div className="flex flex-col gap-3 pb-5">
+        <div className="flex min-h-12 items-center justify-center gap-4 rounded-xl bg-white/[0.03] px-4">
+          <Skeleton className={cn("h-3 w-24", block)} />
+          <Skeleton className={cn("h-4 w-40 max-w-[40%]", block)} />
+          <Skeleton className={cn("size-4", block)} />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <Container className="min-h-40 gap-4">
             <Skeleton className={cn("h-3 w-24", block)} />
             <Skeleton className={cn("h-4 w-full", block)} />
-            <Skeleton className={cn("h-4 w-2/3", block)} />
-            <div className="flex items-center w-full gap-2 pt-2">
-              <Skeleton className={cn("h-11 flex-1 rounded-xl", block)} />
-              <Skeleton className={cn("h-11 flex-1 rounded-xl", block)} />
+            <Skeleton className={cn("h-4 w-[85%]", block)} />
+            <Skeleton className={cn("h-4 w-[55%]", block)} />
+            <div className="grid grid-cols-2 gap-4 border-t border-white/[0.08] pt-4">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="space-y-2">
+                  <Skeleton className={cn("h-3 w-24 max-w-full", block)} />
+                  <Skeleton className={cn("h-4 w-16", block)} />
+                </div>
+              ))}
             </div>
-          </div>
-
-          <div className="flex flex-wrap items-center text-sm gap-4 py-5">
-            <Skeleton className={cn("w-20 h-20 rounded-lg shrink-0", block)} />
-            <div className="flex flex-col gap-2">
-              <Skeleton className={cn("h-4 w-32", block)} />
-              <Skeleton className={cn("h-8 w-40", block)} />
+          </Container>
+          <Container className="min-h-40 flex-row items-center gap-4">
+            <Skeleton className={cn("size-[104px] shrink-0 rounded-sm", block)} />
+            <div className="flex min-w-0 flex-1 flex-col gap-3">
+              <Skeleton className={cn("h-3 w-32", block)} />
+              <Skeleton className={cn("h-3 w-full", block)} />
+              <Skeleton className={cn("h-9 w-40 max-w-full rounded-lg", block)} />
             </div>
-          </div>
-        </Container>
-
-        {/* Share */}
-        <Container className="flex flex-row items-center gap-4">
-          <Skeleton className={cn("w-[104px] h-[104px] shrink-0", block)} />
-          <div className="flex-1 min-w-[200px] flex flex-col gap-3">
-            <Skeleton className={cn("h-3 w-28", block)} />
-            <Skeleton className={cn("h-3 w-full", block)} />
-            <Skeleton className={cn("h-9 w-32 rounded-xl", block)} />
-          </div>
-        </Container>
+          </Container>
+        </div>
       </div>
     </div>
   );
@@ -666,6 +706,15 @@ export function LoadoutPreview() {
       <AppLayout
         selectedGame={gameId}
         onGameSelect={(id) => navigate(explorePath(id))}
+        breadcrumb={
+          <div aria-hidden="true" className="flex items-center gap-3">
+            <Skeleton className="size-10 rounded-md bg-white/[0.07] motion-reduce:animate-none" />
+            <Skeleton className="h-4 w-3 rounded-sm bg-white/[0.07] motion-reduce:animate-none" />
+            <Skeleton className="h-4 w-14 bg-white/[0.07] motion-reduce:animate-none" />
+            <Skeleton className="h-4 w-3 rounded-sm bg-white/[0.07] motion-reduce:animate-none" />
+            <Skeleton className="h-4 w-36 bg-white/[0.07] motion-reduce:animate-none" />
+          </div>
+        }
       >
         <LoadoutPreviewSkeleton />
       </AppLayout>
@@ -744,6 +793,14 @@ export function LoadoutPreview() {
   const shareUrl = window.location.href;
   const voteCount = loadout.likes + loadout.dislikes;
   const authorName = loadout.authorNickname || loadout.userName || "Player";
+  const publishedAt = new Date(loadout.createdAt);
+  const publishedDate = Number.isNaN(publishedAt.getTime())
+    ? null
+    : new Intl.DateTimeFormat(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }).format(publishedAt);
   const authorAvatar = (
     <div className="flex size-6 top-[-5px] relative md:size-10 shrink-0 self-center items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] text-xs font-semibold">
       {loadout.authorAvatarUrl ? (
@@ -1191,7 +1248,7 @@ export function LoadoutPreview() {
           )}
         >
           <Container className="gap-3">
-            <h2 className={CONTAINER_TITLE_CLASS}>Build notes</h2>
+            <h2 className={CONTAINER_TITLE_CLASS}>Details</h2>
             {loadout.description ? (
               <blockquote className="whitespace-pre-wrap break-words text-base leading-relaxed text-secondary">
                 {loadout.description
@@ -1215,6 +1272,45 @@ export function LoadoutPreview() {
             ) : (
               <p className="text-sm text-teritary">No description provided.</p>
             )}
+            <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-white/[0.08] pt-4 text-sm">
+              <div className="min-w-0">
+                <dt className="text-teritary">Total ratings</dt>
+                <dd className="mt-1 font-medium tabular-nums">{voteCount.toLocaleString()}</dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-teritary">Total likes</dt>
+                <dd className="mt-1 font-medium tabular-nums">{loadout.likes.toLocaleString()}</dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-teritary">Total dislikes</dt>
+                <dd className="mt-1 font-medium tabular-nums">{loadout.dislikes.toLocaleString()}</dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-teritary">Published</dt>
+                <dd className="mt-1 font-medium">
+                  {publishedDate ? (
+                    <time dateTime={publishedAt.toISOString()}>{publishedDate}</time>
+                  ) : (
+                    "Unknown"
+                  )}
+                </dd>
+              </div>
+              <div className="col-span-2 min-w-0">
+                <dt className="text-teritary">Author</dt>
+                <dd className="mt-1 font-medium break-words">
+                  {loadout.authorNickname ? (
+                    <Link
+                      to={`/u/${loadout.authorNickname}`}
+                      className="hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    >
+                      {authorName}
+                    </Link>
+                  ) : (
+                    authorName
+                  )}
+                </dd>
+              </div>
+            </dl>
           </Container>
 
           <div className="flex flex-col gap-4">
