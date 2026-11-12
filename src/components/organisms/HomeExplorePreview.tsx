@@ -265,14 +265,14 @@ export function HomeExplorePreview({
         )}
       </div>
 
-      <section className="relative mt-4  isolate overflow-hidden rounded-3xl border border-white/[0.1] bg-[#121011] p-5 sm:p-7 lg:p-8">
+      <section className="relative mt-4 isolate overflow-hidden rounded-xl bg-[#121011] p-5 sm:p-5 lg:p-5">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -left-20 -top-28 size-80 rounded-full opacity-20 blur-[110px]"
         />
 
-        <div className="relative grid items-center gap-7 lg:grid-cols-[minmax(0,0.82fr)_minmax(420px,1.18fr)] lg:gap-10">
-          <div className="flex flex-col items-start">
+        <div className="relative flex items-center gap-5 lg:grid-cols-[minmax(0,0.82fr)_minmax(420px,1.18fr)] lg:gap-10">
+          <div className="flex flex-col flex-1 items-start">
             <h2 className="mt-4 max-w-lg text-2xl leading-tight sm:text-xl">
               See what your favourite creators actually run.
             </h2>
@@ -302,7 +302,7 @@ export function HomeExplorePreview({
                       `${gamePath(selectedGame, "community")}?social=${key}`,
                     )
                   }
-                  className="group relative flex min-h-24 items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.035] p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.065]"
+                  className="group relative flex min-h-16 items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.065]"
                 >
                   <span
                     aria-hidden="true"
