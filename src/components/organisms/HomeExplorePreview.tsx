@@ -18,38 +18,32 @@ import {
   weaponMetaListPath,
   weaponMetaPath,
 } from "@/lib/routes";
-import {
-  InstagramIcon,
-  TiktokIcon,
-  TwitchIcon,
-  YoutubeIcon,
-} from "@/assets/icons/socials";
+import youtubePlatformIcon from "@/assets/platforms/youtube.webp";
+import twitchPlatformIcon from "@/assets/platforms/twitch.webp";
+import tiktokPlatformIcon from "@/assets/platforms/tiktok.webp";
+import instagramPlatformIcon from "@/assets/platforms/instagram.webp";
 import { Tag } from "../atoms/Tag";
 
 const CREATOR_PLATFORMS = [
   {
     key: "youtube",
     label: "YouTube",
-    description: "Video builds",
-    icon: YoutubeIcon,
+    icon: youtubePlatformIcon,
   },
   {
     key: "twitch",
     label: "Twitch",
-    description: "Live setups",
-    icon: TwitchIcon,
+    icon: twitchPlatformIcon,
   },
   {
     key: "tiktok",
     label: "TikTok",
-    description: "Quick weapon configs",
-    icon: TiktokIcon,
+    icon: tiktokPlatformIcon,
   },
   {
     key: "instagram",
     label: "Instagram",
-    description: "Creator picks",
-    icon: InstagramIcon,
+    icon: instagramPlatformIcon,
   },
 ] as const;
 const TOP_WEAPON_CATEGORIES = [
@@ -274,11 +268,11 @@ export function HomeExplorePreview({
         <div className="relative flex items-center gap-5 lg:grid-cols-[minmax(0,0.82fr)_minmax(420px,1.18fr)] lg:gap-10">
           <div className="flex flex-col flex-1 items-start">
             <h2 className="mt-4 max-w-lg text-2xl leading-tight sm:text-xl">
-              See what your favourite creators actually run.
+              See what your favourite creators actually run
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-6 text-secondary sm:text-base">
               Go from the video or stream straight to the complete build—every
-              attachment, rating, and shareable code in one place.
+              attachment, rating, and shareable code in one place
             </p>
             <Button
               variant="outline"
@@ -292,32 +286,34 @@ export function HomeExplorePreview({
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {CREATOR_PLATFORMS.map(
-              ({ key, label, description, icon: Icon }) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() =>
-                    navigate(
-                      `${gamePath(selectedGame, "community")}?social=${key}`,
-                    )
-                  }
-                  className="group relative flex min-h-16 items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.065]"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-x-6 bottom-0 h-px origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100 bg-gray-600"
-                  />
-                  <Icon size={24} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-medium text-white">
-                      {label}
-                    </span>
+            {CREATOR_PLATFORMS.map(({ key, label, icon }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `${gamePath(selectedGame, "community")}?social=${key}`,
+                  )
+                }
+                className="group relative flex min-h-16 items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.065]"
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-6 bottom-0 h-px origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100 bg-gray-600"
+                />
+                <img
+                  src={icon.src}
+                  alt=""
+                  className="size-6 shrink-0 object-contain"
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-medium text-white">
+                    {label}
                   </span>
-                  <ChevronRight className="size-4 shrink-0 text-white/25 transition-all group-hover:translate-x-1 group-hover:text-white/75" />
-                </button>
-              ),
-            )}
+                </span>
+                <ChevronRight className="size-4 shrink-0 text-white/25 transition-all group-hover:translate-x-1 group-hover:text-white/75" />
+              </button>
+            ))}
           </div>
         </div>
       </section>
