@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { WeaponSpriteCompositor, factoryBuild } from "@/lib/weaponSpriteCompositor.js";
 import {
   createPreviewBuild,
@@ -21,10 +21,49 @@ let libraryPromise: Promise<{
   library: SpriteLibrary;
   calibration: CalibrationOverrides;
 }> | null = null;
+const revisionListeners = new Set<() => void>();
+let revisionTimer: ReturnType<typeof setInterval> | null = null;
+let currentRevision: string | null = null;
+let revisionCheckRunning = false;
+
+async function checkBuilderRevision() {
+  if (revisionCheckRunning) return;
+  revisionCheckRunning = true;
+  try {
+    const response = await fetch("/api/weapon-builder/revision", { cache: "no-store" });
+    if (!response.ok) return;
+    const { revision } = await response.json() as { revision: string };
+    if (currentRevision && currentRevision !== revision) {
+      libraryPromise = null;
+      revisionListeners.forEach((listener) => listener());
+    }
+    currentRevision = revision;
+  } catch {
+    // A stopped development server should not disrupt the current preview.
+  } finally {
+    revisionCheckRunning = false;
+  }
+}
+
+function subscribeBuilderRevision(listener: () => void) {
+  revisionListeners.add(listener);
+  if (!revisionTimer) {
+    void checkBuilderRevision();
+    revisionTimer = setInterval(() => void checkBuilderRevision(), 3000);
+  }
+  return () => {
+    revisionListeners.delete(listener);
+    if (!revisionListeners.size && revisionTimer) {
+      clearInterval(revisionTimer);
+      revisionTimer = null;
+    }
+  };
+}
 
 function loadLibrary() {
   libraryPromise ??= Promise.all([
-    fetch(CATALOG_URL), fetch(CALIBRATION_URL),
+    fetch(CATALOG_URL, { cache: "no-store" }),
+    fetch(CALIBRATION_URL, { cache: "no-store" }),
   ]).then(async ([catalogResponse, calibrationResponse]) => {
       if (!catalogResponse.ok || !calibrationResponse.ok) {
         throw new Error("Weapon preview calibration is unavailable.");
@@ -34,6 +73,9 @@ function loadLibrary() {
         calibrationResponse.json() as Promise<CalibrationOverrides>,
       ]);
       return { library: resolveCatalogAssetUrls(catalog, CATALOG_URL), calibration };
+    }).catch((error) => {
+      libraryPromise = null;
+      throw error;
     });
   return libraryPromise;
 }
@@ -55,6 +97,11 @@ export function WeaponSpriteCanvas({
   onError: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [builderRevision, setBuilderRevision] = useState(0);
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    return subscribeBuilderRevision(() => setBuilderRevision((value) => value + 1));
+  }, []);
   const attachmentKey = useMemo(
     () => attachments.map((item) => `${item.typeSlug}:${item.assetId ?? item.label}`).join("|"),
     [attachments],
@@ -165,7 +212,7 @@ export function WeaponSpriteCanvas({
     return () => {
       cancelled = true;
     };
-  }, [attachmentKey, fitToBounds, onError, onReady, weaponId]);
+  }, [attachmentKey, builderRevision, fitToBounds, onError, onReady, weaponId]);
 
   return (
     <canvas

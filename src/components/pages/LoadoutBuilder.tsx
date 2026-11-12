@@ -66,6 +66,7 @@ import {
   type BuilderRelationAsset,
 } from "@/lib/weaponBuilderRelations";
 import { normalizePreviewSlot } from "@/lib/weaponSpritePreview";
+import { findAttachmentForWeapon } from "@/lib/attachmentLookup";
 import { detectVideoPlatform, VIDEO_PLATFORM_META } from "@/lib/video";
 import { Container } from "@/components/atoms/Container";
 import { Button } from "@/components/atoms/Button";
@@ -538,6 +539,36 @@ export function LoadoutBuilder() {
     }
   }, [gameId, editId]);
 
+  useEffect(() => {
+    if (gameId !== "mw4" || process.env.NODE_ENV === "production") return;
+    let cancelled = false;
+    let revision: string | null = null;
+    let checking = false;
+    const check = async () => {
+      if (checking) return;
+      checking = true;
+      try {
+        const response = await fetch("/api/weapon-builder/revision", { cache: "no-store" });
+        if (!response.ok) return;
+        const next = (await response.json() as { revision: string }).revision;
+        if (revision && revision !== next) {
+          const catalogResponse = await fetch("/weapon-preview/weapon-builder/catalog.json", { cache: "no-store" });
+          if (!catalogResponse.ok) throw new Error("Could not refresh weapon builder rules");
+          const catalog = await catalogResponse.json() as { assets: BuilderRelationAsset[] };
+          if (!cancelled) setRelationAssets(catalog.assets);
+        }
+        revision = next;
+      } catch (error) {
+        console.warn("Weapon builder rules refresh failed:", error);
+      } finally {
+        checking = false;
+      }
+    };
+    void check();
+    const timer = setInterval(() => void check(), 3000);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [gameId]);
+
   const fetchWeapons = async () => {
     try {
       const response = await fetch(
@@ -899,6 +930,7 @@ export function LoadoutBuilder() {
       currentWeapon?.attachments ?? {},
       attachments,
       relationAssets,
+      weaponId,
     );
     if (
       attachmentName &&
@@ -1066,9 +1098,7 @@ export function LoadoutBuilder() {
           for (const [type, name] of Object.entries(normalized)) {
             const slot = normalizePreviewSlot(type);
             if (slot !== "muzzle" && slot !== "underbarrel") continue;
-            const attachment = attachments.find(
-              (item) => item.type === type && item.name === name,
-            );
+            const attachment = findAttachmentForWeapon(attachments, type, name, weapon.id);
             const allowed =
               slot === "muzzle"
                 ? mw4MuzzleAllowed(
@@ -1127,6 +1157,7 @@ export function LoadoutBuilder() {
         selectedWeapon.attachments,
         attachments,
         relationAssets,
+        selectedWeapon.id,
       )
     : null;
   const reziCombBlocked = selectedWeapon
@@ -1183,6 +1214,7 @@ export function LoadoutBuilder() {
           attachment.stats?.assetId,
           selectedWeapon.attachments,
           attachments,
+          selectedWeapon.id,
         )
       )
         return false;

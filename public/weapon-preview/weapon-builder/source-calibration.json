@@ -3028,8 +3028,8 @@
         "rotation": 0
       },
       "rex_bar_sht_asierra12": {
-        "dx": -15.342122487143513,
-        "dy": -0.4274894810659049,
+        "dx": -16.012307183713418,
+        "dy": 8.284911574343084,
         "scale": 0.67,
         "rotation": 0
       },
@@ -3074,8 +3074,10 @@
         "rotation": 0
       },
       "rex_sil_vks_asierra12": {
-        "scale": 2.85,
-        "rotation": 0
+        "scale": 3.13,
+        "rotation": 0,
+        "dx": 38.740174163420875,
+        "dy": 4.799862976576193
       },
       "rex_bipod_asierra12": {
         "scale": 1,
@@ -3090,7 +3092,7 @@
         "rotation": 0
       },
       "rex_comp_asierra12": {
-        "scale": 1,
+        "scale": 1.49,
         "rotation": 0
       },
       "rex_sil_stb_asierra12": {
@@ -3115,7 +3117,9 @@
       },
       "rex_grip_ang": {
         "scale": 1,
-        "rotation": 0
+        "rotation": 0,
+        "dx": 12.259577149801487,
+        "dy": -0.7662235718626107
       },
       "rex_grip_ang_short": {
         "scale": 1,
@@ -3134,8 +3138,118 @@
         "rotation": 0
       },
       "rex_bar_asierra12": {
-        "dx": 31.293634496919907,
-        "dy": 2.0862422997946624,
+        "dx": -41.0863127326315,
+        "dy": 1.4160576032247576,
+        "scale": 0.67,
+        "rotation": 0
+      },
+      "rex_sil_tac_d": {
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_sil_tac_e": {
+        "scale": 1.49,
+        "rotation": 0
+      },
+      "rex_scope_asierra12": {
+        "scale": 1.2,
+        "rotation": 0
+      },
+      "rex_comp_vert_d": {
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_comp_vert_swhiskey": {
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_breach_d": {
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_flash_d": {
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_barbip_asierra12": {
+        "dx": -26.453783736834822,
+        "dy": -2.3783289700651835,
+        "scale": 0.82,
+        "rotation": 0
+      },
+      "rex_fourx01": {
+        "scale": 0.67,
+        "rotation": 0
+      },
+      "rex_minireddot03": {
+        "dx": -5.354212426557638,
+        "dy": -20.651962216722517,
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_minireddot01_asierra12": {
+        "dx": -3.0595499580329033,
+        "dy": -20.65196221672253,
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_minireddot02_asierra12": {
+        "dx": -2.010554089709757,
+        "dy": -22.116094986807383,
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_minireddot03_asierra12": {
+        "dx": 2.010554089709757,
+        "dy": -20.105540897097626,
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_minireddot04_asierra12": {
+        "dx": 0.6701846965698905,
+        "dy": -20.105540897097626,
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_arscope_hybrid01": {
+        "dx": 0.670184696569919,
+        "dy": 5.361477572559373,
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_minireddot04": {
+        "dx": -0.670184696569919,
+        "dy": -19.435356200527714,
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_minireddot02": {
+        "dx": -0.670184696569919,
+        "dy": -18.76517150395778,
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_reflex01": {
+        "dx": 0,
+        "dy": -15.414248021108172,
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_reflex02": {
+        "dx": -8.712401055408947,
+        "dy": -21.44591029023747,
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_reflex03": {
+        "dx": -6.701846965699218,
+        "dy": -18.094986807387855,
+        "scale": 1,
+        "rotation": 0
+      },
+      "rex_reflex04": {
+        "dx": 2.6807387862796475,
+        "dy": -19.435356200527707,
         "scale": 1,
         "rotation": 0
       }
@@ -5139,18 +5253,18 @@
     "rex_br_asierra12": {
       "optic": {
         "source": "receiver",
-        "dx": -16.401244578143746,
-        "dy": -19.253634939560072
+        "dx": -10.850361419707724,
+        "dy": -2.1637972295688215
       },
       "muzzle": {
         "source": "barrel",
-        "dx": 33.53606025415416,
-        "dy": 1.447557521353815
+        "dx": 11.66299138935976,
+        "dy": -2.1360202197595015
       },
       "underbarrel": {
         "source": "barrel",
-        "dx": -42.29070788928195,
-        "dy": -3.434110648208403
+        "dx": -36.55282853487219,
+        "dy": -1.929627430211383
       }
     },
     "rex_sm_psierra41": {
@@ -5435,16 +5549,24 @@
     },
     "rex_br_asierra12": {
       "rex_bar_hvylng_asierra12": {
-        "dx": 3.36614414483185,
-        "dy": 10.098432434495592
+        "dx": 44.03739867371801,
+        "dy": 9.325218425712052
       },
       "rex_bar_sht_asierra12": {
-        "dx": -80.24927536231885,
-        "dy": 2.2086956521739154
+        "dx": -25.67872042786894,
+        "dy": 0.5556408926059788
       },
       "rex_bar_asierra12": {
-        "dx": -65.52463768115942,
-        "dy": -5.153623188405788
+        "dx": -34.931583574862685,
+        "dy": 0.2078543841535634
+      },
+      "rex_bar_lng_asierra12": {
+        "dx": 23.980264550416873,
+        "dy": 15.027464044818899
+      },
+      "rex_barbip_asierra12": {
+        "dx": -6.226427659867859,
+        "dy": 2.4691306086078413
       }
     },
     "rex_ar_cromeo": {

@@ -12,6 +12,7 @@ import {
   weaponMetaPath,
 } from "@/lib/routes";
 import { orderedAttachmentEntries } from "@/lib/attachmentOrder";
+import { findAttachmentForWeapon, preferWeaponAttachment } from "@/lib/attachmentLookup";
 import {
   builderAttachmentDisplayName,
   type BuilderRelationAsset,
@@ -561,9 +562,20 @@ export function LoadoutPreview() {
   );
 
   const attachmentIndex = React.useMemo(
-    () => new Map(catalogAttachments.map((a) => [`${a.type}:${a.name}`, a])),
+    () => {
+      const index = new Map<string, CardAttachment[]>();
+      for (const attachment of catalogAttachments) {
+        const key = `${attachment.type}:${attachment.name}`;
+        const matches = index.get(key) ?? [];
+        matches.push(attachment);
+        index.set(key, matches);
+      }
+      return index;
+    },
     [catalogAttachments],
   );
+  const indexedAttachment = (slot: string, name: string, weaponId: string) =>
+    preferWeaponAttachment(attachmentIndex.get(`${slot}:${name}`) ?? [], weaponId);
   const relationAssetsById = React.useMemo(
     () => new Map(relationAssets.map((asset) => [asset.id, asset])),
     [relationAssets],
@@ -607,7 +619,7 @@ export function LoadoutPreview() {
 
     return orderedAttachmentEntries(primaryWeapon.attachments).map(
       ([slot, value]) => {
-        const attachment = attachmentIndex.get(`${slot}:${value}`);
+        const attachment = indexedAttachment(slot, value, primaryWeapon.id);
         return {
           key: slot,
           attachmentId: attachment?.id,
@@ -627,7 +639,7 @@ export function LoadoutPreview() {
 
     return orderedAttachmentEntries(secondaryWeapon.attachments).map(
       ([slot, value]) => {
-        const attachment = attachmentIndex.get(`${slot}:${value}`);
+        const attachment = indexedAttachment(slot, value, secondaryWeapon.id);
         return {
           key: slot,
           attachmentId: attachment?.id,
@@ -673,9 +685,7 @@ export function LoadoutPreview() {
     primaryWeapon?.attachments,
   )
     .map(([slot, value]) => {
-      const attachment = catalogAttachments.find(
-        (a) => a.type === slot && a.name === value,
-      );
+      const attachment = findAttachmentForWeapon(catalogAttachments, slot, value, primaryWeapon?.id);
       if (!attachment) return null;
       return {
         key: slot,
@@ -696,9 +706,7 @@ export function LoadoutPreview() {
     secondaryWeapon?.attachments,
   )
     .map(([slot, value]) => {
-      const attachment = catalogAttachments.find(
-        (a) => a.type === slot && a.name === value,
-      );
+      const attachment = findAttachmentForWeapon(catalogAttachments, slot, value, secondaryWeapon?.id);
       if (!attachment) return null;
       return {
         key: slot,
@@ -1369,9 +1377,7 @@ export function LoadoutPreview() {
                       <div className="flex flex-wrap gap-1.5">
                         {orderedAttachmentEntries(weapon.attachments).map(
                           ([slot, name]) => {
-                            const attachment = attachmentIndex.get(
-                              `${slot}:${name}`,
-                            );
+                            const attachment = indexedAttachment(slot, name, weapon.id);
                             const className =
                               "rounded-md border border-white/[0.08] bg-black/20 px-2 py-1 text-[10px] text-secondary";
                             return attachment ? (

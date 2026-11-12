@@ -83,6 +83,17 @@ describe("weapon builder relations", () => {
       .toEqual({ APEX: "Oden Sentinel" });
     expect(getBuilderApexRelation({ Optic: "scope asierra12" }, odenAttachments, catalog.assets)).toBeNull();
   });
+  it("uses the selected weapon to resolve a shared APEX internal name", () => {
+    const duplicated = [
+      { name: "APEX conversion", type: "APEX", stats: { assetId: "rex_apex_asierra12", weaponIds: ["rex_br_asierra12"] } },
+      { name: "APEX conversion", type: "APEX", stats: { assetId: "rex_apex_ngsierra", weaponIds: ["rex_br_ngsierra"] } },
+    ];
+    const selected = { APEX: "APEX conversion" };
+    expect(getBuilderApexRelation(selected, duplicated, catalog.assets, "rex_br_ngsierra")?.apexName)
+      .toBe("CRONEN MAELSTROM");
+    expect(getBuilderApexRelation(selected, duplicated, catalog.assets, "rex_br_asierra12")?.apexName)
+      .toBe("ODEN SENTINEL");
+  });
   it("matches VEL 46's five 4.6x30mm ammunition choices", () => {
     const names = [
       "4.6x30mm Armor Piercing", "4.6x30mm Frangible",

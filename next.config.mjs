@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  experimental: {
+    instrumentationHook: true,
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [

@@ -1,4 +1,5 @@
 import { normalizePreviewSlot } from "./weaponSpritePreview";
+import { preferWeaponAttachment } from "./attachmentLookup";
 
 export const AR_OPTIC_IDS = [
   "rex_minireddot01", "rex_minireddot02", "rex_minireddot03",
@@ -98,7 +99,8 @@ export interface BuilderAttachment {
   name: string;
   type: string;
   typeSlug?: string | null;
-  stats?: { assetId?: string } | null;
+  weaponIds?: string[] | null;
+  stats?: { assetId?: string; weaponIds?: string[] | null } | null;
 }
 
 export function strigaDreadlineSelected(
@@ -133,13 +135,14 @@ export function getBuilderApexRelation(
   selected: Record<string, string>,
   attachments: BuilderAttachment[],
   assets: BuilderRelationAsset[],
+  weaponId?: string,
 ): BuilderApexRelation | null {
   const apexEntry = Object.entries(selected).find(
     ([slot, value]) => normalizePreviewSlot(slot) === "apex" && Boolean(value),
   );
-  const controller = apexEntry && attachments.find((attachment) =>
+  const controller = apexEntry && preferWeaponAttachment(attachments.filter((attachment) =>
     normalizePreviewSlot(attachment.typeSlug || attachment.type) === "apex" &&
-    attachment.name === apexEntry[1]);
+    attachment.name === apexEntry[1]), weaponId);
   const recipe = assets.find((asset) => asset.id === controller?.stats?.assetId);
   if (!recipe) return null;
 
@@ -185,15 +188,16 @@ const APEX_REQUIRED_ATTACHMENT_ASSET_IDS: Record<string, string> = {
 function equippedApexAssetId(
   selected: Record<string, string>,
   attachments: BuilderAttachment[],
+  weaponId?: string,
 ): string | null {
   const apexName = Object.entries(selected).find(
     ([slot, value]) => normalizePreviewSlot(slot) === "apex" && Boolean(value),
   )?.[1];
-  return attachments.find(
+  return preferWeaponAttachment(attachments.filter(
     (attachment) =>
       normalizePreviewSlot(attachment.typeSlug || attachment.type) === "apex" &&
       attachment.name === apexName,
-  )?.stats?.assetId ?? null;
+  ), weaponId)?.stats?.assetId ?? null;
 }
 
 /** Whether an attachment may be picked given the APEX currently equipped. */
@@ -201,12 +205,13 @@ export function attachmentAllowedByApex(
   assetId: string | undefined,
   selected: Record<string, string>,
   attachments: BuilderAttachment[],
+  weaponId?: string,
 ): boolean {
   if (!assetId) return true;
   if (APEX_ONLY_ATTACHMENT_ASSET_IDS.has(assetId)) return false;
   const required = APEX_REQUIRED_ATTACHMENT_ASSET_IDS[assetId];
   if (!required) return true;
-  return equippedApexAssetId(selected, attachments) === required;
+  return equippedApexAssetId(selected, attachments, weaponId) === required;
 }
 
 export function applyBuilderRelations(
@@ -215,7 +220,7 @@ export function applyBuilderRelations(
   assets: BuilderRelationAsset[],
   weaponId?: string,
 ) {
-  const relation = getBuilderApexRelation(selected, attachments, assets);
+  const relation = getBuilderApexRelation(selected, attachments, assets, weaponId);
   const odenDefaultOptic = weaponId === "rex_br_asierra12" &&
     Object.entries(selected).some(([slot, name]) => normalizePreviewSlot(slot) === "apex" &&
       attachments.some((attachment) => attachment.name === name && attachment.stats?.assetId === "rex_apex_asierra12")) &&
@@ -231,13 +236,13 @@ export function applyBuilderRelations(
   const apexGated = new Set(
     Object.entries(selected)
       .filter(([slot, name]) => {
-        const attachment = attachments.find(
+        const attachment = preferWeaponAttachment(attachments.filter(
           (item) =>
             item.name === name &&
             normalizePreviewSlot(item.typeSlug || item.type) === normalizePreviewSlot(slot),
-        );
+        ), weaponId);
         return Boolean(attachment) &&
-          !attachmentAllowedByApex(attachment?.stats?.assetId, selected, attachments);
+          !attachmentAllowedByApex(attachment?.stats?.assetId, selected, attachments, weaponId);
       })
       .map(([slot]) => normalizePreviewSlot(slot)),
   );
@@ -273,3 +278,4 @@ export function rezi12NoStockBlocksComb(
       attachment.stats?.assetId === "rex_stockno_bmike3",
   );
 }
+

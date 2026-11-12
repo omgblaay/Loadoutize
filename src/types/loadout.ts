@@ -64,9 +64,10 @@ export interface CardAttachment {
   subtypeLabel?: string | null;
   type: string | null;
   typeSlug?: string | null;
+  weaponIds?: string[] | null;
   imageUrl?: string | null;
   typeImageUrl?: string | null;
-  stats?: { assetId?: string; displayName?: string; subtypeLabel?: string | null; imagePath?: string } | null;
+  stats?: { assetId?: string; weaponIds?: string[] | null; displayName?: string; subtypeLabel?: string | null; imagePath?: string } | null;
 }
 
 export interface CardTag {

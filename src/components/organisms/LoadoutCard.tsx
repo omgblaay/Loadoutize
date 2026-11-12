@@ -19,6 +19,7 @@ import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
 import { builderAttachmentImageUrl, loadBuilderAttachmentAssets } from "@/lib/builderAttachmentImages";
 import { apexAttachmentIconUrl } from "@/lib/apexAttachmentIcon";
 import { isApexAttachment } from "@/lib/attachmentPresentation";
+import { findAttachmentForWeapon } from "@/lib/attachmentLookup";
 import type { BuilderRelationAsset } from "@/lib/weaponBuilderRelations";
 import { AppTooltip } from "@/components/atoms/Tooltip";
 
@@ -66,7 +67,7 @@ export function LoadoutCard({
     loadout.weapons?.[0]?.attachments || {};
   const attachmentIcons = Object.entries(primaryAttachments)
     .map(([type, name]) =>
-      attachments.find((a) => a.type === type && a.name === name),
+      findAttachmentForWeapon(attachments, type, name, primaryWeaponId),
     )
     .filter((a): a is CardAttachment => Boolean(a))
     .map((attachment) => {
