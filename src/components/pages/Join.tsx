@@ -110,7 +110,7 @@ export function Join() {
           <div className="w-full max-w-md">
             <div className="mb-8">
               <h1 className="text-2xl font-bold text-[#fafafa] mb-2">
-                {mode === "login" ? "Welcome Back" : "Create Account"}
+                {mode === "login" ? "Welcome" : "Create Account"}
               </h1>
               <p className="text-neutral-400 font-medium text-sm">
                 {mode === "login"
@@ -137,7 +137,10 @@ export function Join() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {mode === "signup" && (
                 <div>
-                  <Label htmlFor="join-name" className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                  <Label
+                    htmlFor="join-name"
+                    className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2"
+                  >
                     Name
                   </Label>
                   <Input
@@ -154,7 +157,10 @@ export function Join() {
 
               {mode === "signup" && (
                 <div>
-                  <label htmlFor="join-nickname" className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                  <label
+                    htmlFor="join-nickname"
+                    className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2"
+                  >
                     Nickname
                   </label>
                   <Input
@@ -177,7 +183,10 @@ export function Join() {
 
               {mode === "signup" && (
                 <div>
-                  <span id="join-role-label" className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                  <span
+                    id="join-role-label"
+                    className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2"
+                  >
                     You are a...
                   </span>
                   <FilterPillGroup
@@ -196,7 +205,10 @@ export function Join() {
               )}
 
               <div>
-                <label htmlFor="join-email" className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                <label
+                  htmlFor="join-email"
+                  className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2"
+                >
                   Email
                 </label>
                 <Input
@@ -211,13 +223,18 @@ export function Join() {
               </div>
 
               <div>
-                <label htmlFor="join-password" className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                <label
+                  htmlFor="join-password"
+                  className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2"
+                >
                   Password
                 </label>
                 <Input
                   id="join-password"
                   type="password"
-                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                  autoComplete={
+                    mode === "signup" ? "new-password" : "current-password"
+                  }
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -237,15 +254,24 @@ export function Join() {
 
               {mode === "signup" && (
                 <div>
-                  <label htmlFor="join-confirm-password" className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                  <label
+                    htmlFor="join-confirm-password"
+                    className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2"
+                  >
                     Confirm password
                   </label>
                   <Input
                     id="join-confirm-password"
                     type="password"
                     autoComplete="new-password"
-                    aria-invalid={Boolean(confirmPassword && confirmPassword !== password)}
-                    aria-describedby={confirmPassword && confirmPassword !== password ? "join-confirm-password-error" : undefined}
+                    aria-invalid={Boolean(
+                      confirmPassword && confirmPassword !== password,
+                    )}
+                    aria-describedby={
+                      confirmPassword && confirmPassword !== password
+                        ? "join-confirm-password-error"
+                        : undefined
+                    }
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -253,7 +279,11 @@ export function Join() {
                     placeholder="Re-enter your password"
                   />
                   {confirmPassword && confirmPassword !== password && (
-                    <p id="join-confirm-password-error" className="mt-1.5 text-xs text-[#ef9696]" role="alert">
+                    <p
+                      id="join-confirm-password-error"
+                      className="mt-1.5 text-xs text-[#ef9696]"
+                      role="alert"
+                    >
                       Passwords do not match
                     </p>
                   )}
@@ -261,12 +291,20 @@ export function Join() {
               )}
 
               {error && (
-                <div className="bg-red-950/20 border border-red-600/20 p-3 text-red-400 font-medium rounded-md text-sm" role="alert">
+                <div
+                  className="bg-red-950/20 border border-red-600/20 p-3 text-red-400 font-medium rounded-md text-sm"
+                  role="alert"
+                >
                   {error}
                 </div>
               )}
 
-              <Button type="submit" disabled={loading} aria-busy={loading} className="w-full">
+              <Button
+                type="submit"
+                disabled={loading}
+                aria-busy={loading}
+                className="w-full"
+              >
                 {loading ? (
                   "Please wait..."
                 ) : mode === "login" ? (
