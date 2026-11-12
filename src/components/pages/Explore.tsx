@@ -34,7 +34,10 @@ import { FilterPill, FilterPillGroup } from "@/components/molecules/FilterPill";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { cn } from "@/lib/utils";
-import { sortWeaponCategories, visibleWeaponCatalog } from "@/lib/weaponCategories";
+import {
+  sortWeaponCategories,
+  visibleWeaponCatalog,
+} from "@/lib/weaponCategories";
 import { CompactPageHeader } from "@/components/molecules/CompactPageHeader";
 import { Button } from "@/components/atoms/Button";
 import { ResponsiveDialog } from "@/components/molecules/ResponsiveDialog";
@@ -71,7 +74,12 @@ function ExploreSkeleton() {
       {/* Filter / search / sort row */}
       <div className="flex items-center gap-3 w-full flex-wrap">
         <Skeleton className={cn("h-10 w-24 rounded-xl", block)} />
-        <Skeleton className={cn("order-3 h-10 w-full rounded-xl sm:order-none sm:w-auto sm:min-w-[160px] sm:flex-1", block)} />
+        <Skeleton
+          className={cn(
+            "order-3 h-10 w-full rounded-xl sm:order-none sm:w-auto sm:min-w-[160px] sm:flex-1",
+            block,
+          )}
+        />
         <Skeleton className={cn("h-10 w-28 rounded-xl ml-auto", block)} />
       </div>
 
@@ -83,7 +91,7 @@ function ExploreSkeleton() {
       </div>
 
       {/* Loadout grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
           <Skeleton key={i} className={cn("rounded-2xl h-[220px]", block)} />
         ))}
@@ -149,7 +157,9 @@ export function Explore() {
       },
     )
       .then((r) => r.json())
-      .then((data) => setLoadouts((data.loadouts ?? []).filter(isVisibleConfig)))
+      .then((data) =>
+        setLoadouts((data.loadouts ?? []).filter(isVisibleConfig)),
+      )
       .catch((error) => console.error("Error fetching loadouts:", error))
       .finally(() => setLoading(false));
 
@@ -160,7 +170,9 @@ export function Explore() {
       },
     )
       .then((r) => r.json())
-      .then((data) => setWeapons(visibleWeaponCatalog<CardWeapon>(data.weapons ?? [])))
+      .then((data) =>
+        setWeapons(visibleWeaponCatalog<CardWeapon>(data.weapons ?? [])),
+      )
       .catch((error) => console.error("Error fetching weapons:", error));
 
     fetch(
@@ -257,10 +269,8 @@ export function Explore() {
 
     const aVotes = a.likes + a.dislikes;
     const bVotes = b.likes + b.dislikes;
-    const aIsRated =
-      a.ratingPercent != null && aVotes >= MIN_RATING_VOTES;
-    const bIsRated =
-      b.ratingPercent != null && bVotes >= MIN_RATING_VOTES;
+    const aIsRated = a.ratingPercent != null && aVotes >= MIN_RATING_VOTES;
+    const bIsRated = b.ratingPercent != null && bVotes >= MIN_RATING_VOTES;
 
     if (aIsRated !== bIsRated) return Number(bIsRated) - Number(aIsRated);
 
@@ -280,7 +290,10 @@ export function Explore() {
     Number(Boolean(activeWeaponId || activeCategory)) +
     Number(activeTagId != null);
   const hasActiveFilters = Boolean(activeFilterCount || searchQuery.trim());
-  const syncWeaponFilterUrl = (weaponId: string | null, category: string | null) => {
+  const syncWeaponFilterUrl = (
+    weaponId: string | null,
+    category: string | null,
+  ) => {
     const next = new URLSearchParams(searchParams);
     next.delete("weapon");
     next.delete("category");

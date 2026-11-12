@@ -145,7 +145,7 @@ function CommunityViewSkeleton() {
 
       <Skeleton className={cn("h-9 w-96 max-w-full rounded-xl", block)} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
@@ -203,7 +203,9 @@ export function CommunityView() {
         return response.json();
       })
       .then(async (data) => {
-        const nextLoadouts = ((data.loadouts ?? []) as LoadoutSummary[]).filter(isVisibleConfig);
+        const nextLoadouts = ((data.loadouts ?? []) as LoadoutSummary[]).filter(
+          isVisibleConfig,
+        );
         try {
           return await hydrateLoadoutAuthors(nextLoadouts);
         } catch (error) {
@@ -349,7 +351,7 @@ export function CommunityView() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {sorted.map((member) => (
             <Link
               key={member.userId}
