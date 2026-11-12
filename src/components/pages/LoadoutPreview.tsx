@@ -12,7 +12,10 @@ import {
   weaponMetaPath,
 } from "@/lib/routes";
 import { orderedAttachmentEntries } from "@/lib/attachmentOrder";
-import { findAttachmentForWeapon, preferWeaponAttachment } from "@/lib/attachmentLookup";
+import {
+  findAttachmentForWeapon,
+  preferWeaponAttachment,
+} from "@/lib/attachmentLookup";
 import {
   builderAttachmentDisplayName,
   type BuilderRelationAsset,
@@ -561,21 +564,21 @@ export function LoadoutPreview() {
       : undefined,
   );
 
-  const attachmentIndex = React.useMemo(
-    () => {
-      const index = new Map<string, CardAttachment[]>();
-      for (const attachment of catalogAttachments) {
-        const key = `${attachment.type}:${attachment.name}`;
-        const matches = index.get(key) ?? [];
-        matches.push(attachment);
-        index.set(key, matches);
-      }
-      return index;
-    },
-    [catalogAttachments],
-  );
+  const attachmentIndex = React.useMemo(() => {
+    const index = new Map<string, CardAttachment[]>();
+    for (const attachment of catalogAttachments) {
+      const key = `${attachment.type}:${attachment.name}`;
+      const matches = index.get(key) ?? [];
+      matches.push(attachment);
+      index.set(key, matches);
+    }
+    return index;
+  }, [catalogAttachments]);
   const indexedAttachment = (slot: string, name: string, weaponId: string) =>
-    preferWeaponAttachment(attachmentIndex.get(`${slot}:${name}`) ?? [], weaponId);
+    preferWeaponAttachment(
+      attachmentIndex.get(`${slot}:${name}`) ?? [],
+      weaponId,
+    );
   const relationAssetsById = React.useMemo(
     () => new Map(relationAssets.map((asset) => [asset.id, asset])),
     [relationAssets],
@@ -685,7 +688,12 @@ export function LoadoutPreview() {
     primaryWeapon?.attachments,
   )
     .map(([slot, value]) => {
-      const attachment = findAttachmentForWeapon(catalogAttachments, slot, value, primaryWeapon?.id);
+      const attachment = findAttachmentForWeapon(
+        catalogAttachments,
+        slot,
+        value,
+        primaryWeapon?.id,
+      );
       if (!attachment) return null;
       return {
         key: slot,
@@ -706,7 +714,12 @@ export function LoadoutPreview() {
     secondaryWeapon?.attachments,
   )
     .map(([slot, value]) => {
-      const attachment = findAttachmentForWeapon(catalogAttachments, slot, value, secondaryWeapon?.id);
+      const attachment = findAttachmentForWeapon(
+        catalogAttachments,
+        slot,
+        value,
+        secondaryWeapon?.id,
+      );
       if (!attachment) return null;
       return {
         key: slot,
@@ -728,7 +741,7 @@ export function LoadoutPreview() {
   const voteCount = loadout.likes + loadout.dislikes;
   const authorName = loadout.authorNickname || loadout.userName || "Player";
   const authorAvatar = (
-    <div className="flex size-6 md:size-10 shrink-0 self-center items-baseline justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] text-xs font-semibold">
+    <div className="flex size-6 top-[-5px] relative md:size-10 shrink-0 self-center items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] text-xs font-semibold">
       {loadout.authorAvatarUrl ? (
         <img
           src={loadout.authorAvatarUrl}
@@ -799,13 +812,15 @@ export function LoadoutPreview() {
               )}
             >
               {loadout.authorNickname ? (
-                <Link
-                  to={`/u/${loadout.authorNickname}`}
-                  className="mr-2 inline-flex items-baseline gap-2 align-baseline font-normal leading-[1.1] text-secondary hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                >
+                <div className="mr-2 inline-flex items-baseline gap-2 align-baseline font-normal leading-[1.1] text-secondary">
                   {authorAvatar}
-                  <span>{authorName}'s</span>
-                </Link>
+                  <Link
+                    to={`/u/${loadout.authorNickname}`}
+                    className="mr-2 inline-flexgap-2 align-baseline font-normal leading-[1.1] text-secondary hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  >
+                    <span>{authorName}'s</span>
+                  </Link>
+                </div>
               ) : (
                 <span className="mr-2 inline-flex items-baseline gap-2 align-baseline font-normal leading-[1.1] text-secondary">
                   {authorAvatar}
@@ -1377,7 +1392,11 @@ export function LoadoutPreview() {
                       <div className="flex flex-wrap gap-1.5">
                         {orderedAttachmentEntries(weapon.attachments).map(
                           ([slot, name]) => {
-                            const attachment = indexedAttachment(slot, name, weapon.id);
+                            const attachment = indexedAttachment(
+                              slot,
+                              name,
+                              weapon.id,
+                            );
                             const className =
                               "rounded-md border border-white/[0.08] bg-black/20 px-2 py-1 text-[10px] text-secondary";
                             return attachment ? (
