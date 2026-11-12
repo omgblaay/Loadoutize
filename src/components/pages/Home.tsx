@@ -72,11 +72,7 @@ function ChromeExtensionPromo({
         >
           <li>
             <Button asChild>
-              <a
-                href={extensionUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={extensionUrl} target="_blank" rel="noopener noreferrer">
                 <img src={chromeWebStoreIcon} alt="" className="size-5" />
                 Get the extension
                 <ArrowUpRight className="size-4" />
@@ -425,6 +421,14 @@ export function Home() {
           <p className="font-semibold text-white">Explore meta</p>
           <ChevronRight className="size-5 text-teritary transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white" />
         </button>
+
+        {/* <a
+          href="/best-loadouts"
+          className="flex gap-2 relative overflow-hidden rounded-xl border border-white/[0.1] p-4 items-center text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-[#1a1719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+        >
+          <p className="font-semibold text-white">Best MW4 loadouts by weapon</p>
+          <ChevronRight className="size-5 text-teritary transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white" />
+        </a> */}
 
         <button
           type="button"

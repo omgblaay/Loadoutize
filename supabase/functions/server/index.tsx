@@ -1174,6 +1174,8 @@ function youtubeVideoId(value: unknown): string | null {
 }
 
 interface AuthorProfile {
+  is_bot: boolean;
+  is_seed: boolean;
   nickname: string;
   name: string;
   avatar_path: string | null;
@@ -1186,17 +1188,21 @@ interface AuthorProfile {
   social_stats: any;
 }
 
-// Batch-fetches profiles for a set of loadouts' user_ids, keyed by id --
-// same batching shape as resolveImageUrls, avoiding an N+1 lookup per
-// loadout. Loadouts predate profiles, so an author may not have one yet.
+// Batch-fetches profiles for a set of loadouts' user_ids and their reactors,
+// keyed by id -- same batching shape as resolveImageUrls, avoiding an N+1
+// lookup per loadout. Loadouts predate profiles, so an author may not have one yet.
 async function fetchAuthorProfiles(loadouts: any[]): Promise<Map<string, AuthorProfile>> {
-  const userIds = [...new Set(loadouts.map((l) => l.user_id).filter(Boolean))];
+  const userIds = [
+    ...new Set(
+      loadouts.flatMap((l) => [l.user_id, ...(l.loadout_reactions ?? []).map((r: any) => r.user_id)]).filter(Boolean),
+    ),
+  ];
   const byId = new Map<string, AuthorProfile>();
   if (userIds.length === 0) return byId;
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, nickname, name, avatar_path, role_tag, tiktok, instagram, youtube, twitch, kick, social_stats')
+    .select('id, nickname, name, avatar_path, role_tag, tiktok, instagram, youtube, twitch, kick, social_stats, is_bot, is_seed')
     .in('id', userIds);
   if (error) {
     console.log(`Could not resolve author profiles: ${error.message}`);
@@ -1204,6 +1210,8 @@ async function fetchAuthorProfiles(loadouts: any[]): Promise<Map<string, AuthorP
   }
   for (const p of data ?? []) {
     byId.set(p.id, {
+      is_bot: Boolean(p.is_bot),
+      is_seed: Boolean(p.is_seed),
       nickname: p.nickname,
       name: p.name,
       avatar_path: p.avatar_path,
@@ -1270,6 +1278,22 @@ function mapLoadout(l: any, viewerId?: string | null, authorProfiles?: Map<strin
   const likedAt = viewerReactions.find((r: any) => r.type === 'like')?.created_at ?? null;
   const author = authorProfiles?.get(l.user_id);
 
+  // "Organic" means a reaction or authorship from a real, non-seeded profile.
+  // Unknown profiles count as non-organic so demo data never reaches SEO output.
+  const isOrganic = (userId: string | null | undefined) => {
+    const profile = userId ? authorProfiles?.get(userId) : undefined;
+    return Boolean(profile) && !profile!.is_bot && !profile!.is_seed;
+  };
+  const organicReactions = reactions.filter((r: any) => isOrganic(r.user_id));
+  const organicLikes = organicReactions.filter((r: any) => r.type === 'like').length;
+  const organicDislikes = organicReactions.filter((r: any) => r.type === 'dislike').length;
+  const organicFavorites = organicReactions.filter((r: any) => r.type === 'favorite').length;
+  const organicVotes = organicLikes + organicDislikes;
+  const organicRatingPercent =
+    organicVotes >= MIN_VOTES_FOR_RATING
+      ? Math.round((organicLikes / organicVotes) * 100)
+      : null;
+
   return {
     id: l.id,
     gameId: l.game_id,
@@ -1306,6 +1330,11 @@ function mapLoadout(l: any, viewerId?: string | null, authorProfiles?: Map<strin
     favorites,
     score,
     ratingPercent,
+    authorIsOrganic: isOrganic(l.user_id),
+    organicLikes,
+    organicDislikes,
+    organicFavorites,
+    organicRatingPercent,
     liked: mine.includes('like'),
     likedAt,
     disliked: mine.includes('dislike'),
