@@ -101,7 +101,7 @@ function ChromeExtensionPromo({
     <section
       aria-labelledby="chrome-extension-title"
       className={cn(
-        "mt-4 flex-col items-center gap-5 overflow-hidden rounded-2xl border border-white/[0.1] bg-[#151314] p-6 sm:p-8",
+        "mt-4 flex-col items-center gap-5 overflow-hidden rounded-2xl  bg-[#151314] p-6 sm:p-8",
         screenshotUrl
           ? "lg:grid-cols-2 lg:gap-8"
           : "sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:gap-8",

@@ -12,6 +12,7 @@ import {
   weaponMetaPath,
 } from "@/lib/routes";
 import { orderedAttachmentEntries } from "@/lib/attachmentOrder";
+import { apexAttachmentIconUrl } from "@/lib/apexAttachmentIcon";
 import {
   findAttachmentForWeapon,
   preferWeaponAttachment,
@@ -605,7 +606,10 @@ export function LoadoutPreview() {
       ? relationAssetsById.get(attachment.stats.assetId)?.subtype_label
       : null) ||
     null;
-  const attachmentIconUrl = (attachment: CardAttachment | undefined) =>
+  const attachmentIconUrl = (attachment: CardAttachment | undefined, slot: string) =>
+    (slot.toLowerCase() === "apex"
+      ? apexAttachmentIconUrl(attachment?.typeImageUrl, gameId)
+      : null) ||
     attachment?.imageUrl ||
     (gameId === "mw4"
       ? builderAttachmentImageUrl(
@@ -630,7 +634,7 @@ export function LoadoutPreview() {
           typeSlug: attachment?.typeSlug || slot,
           label: attachmentLabel(attachment, primaryWeapon.id, value),
           subtypeLabel: attachmentSubtypeLabel(attachment),
-          iconUrl: attachmentIconUrl(attachment),
+          iconUrl: attachmentIconUrl(attachment, slot),
           isApex: slot.toLowerCase() === "apex",
         };
       },
@@ -650,7 +654,7 @@ export function LoadoutPreview() {
           typeSlug: attachment?.typeSlug || slot,
           label: attachmentLabel(attachment, secondaryWeapon.id, value),
           subtypeLabel: attachmentSubtypeLabel(attachment),
-          iconUrl: attachmentIconUrl(attachment),
+          iconUrl: attachmentIconUrl(attachment, slot),
           isApex: slot.toLowerCase() === "apex",
         };
       },
@@ -701,7 +705,7 @@ export function LoadoutPreview() {
         typeSlug: attachment.typeSlug || slot,
         label: attachmentLabel(attachment, primaryWeapon?.id, attachment.name),
         subtypeLabel: attachmentSubtypeLabel(attachment),
-        iconUrl: attachmentIconUrl(attachment),
+        iconUrl: attachmentIconUrl(attachment, slot),
         isApex: slot.toLowerCase() === "apex",
         to: attachmentMetaPath(gameId, String(attachment.id)),
       } satisfies WeaponImageBadge;
@@ -731,7 +735,7 @@ export function LoadoutPreview() {
           attachment.name,
         ),
         subtypeLabel: attachmentSubtypeLabel(attachment),
-        iconUrl: attachmentIconUrl(attachment),
+        iconUrl: attachmentIconUrl(attachment, slot),
         isApex: slot.toLowerCase() === "apex",
       } satisfies WeaponImageBadge;
     })

@@ -237,15 +237,18 @@ export function LoadoutCard({
       </div>
 
       {attachmentIcons.length > 0 && (
-        <div className="relative flex items-center w-full">
+        <div
+          className="relative grid w-full"
+          style={{ gridTemplateColumns: `repeat(${attachmentIcons.length}, minmax(0, 1fr))` }}
+        >
           {attachmentIcons.map((a) => (
             <div
               key={a.id}
-              className="bg-gradient-to-b from-white/0 from-[60%] to-white/[0.08] opacity-80 p-2 border w-full border-white/12 h-14 flex items-center justify-center"
+              className="bg-gradient-to-b from-white/0 from-[60%] to-white/[0.08] opacity-80 p-1.5 border min-w-0 h-14 flex items-center justify-center border-white/12"
             >
               <AttachmentIcon
                 attachment={a}
-                className="size-9"
+                className="size-full max-w-9 max-h-9 min-w-0 min-h-0 shrink object-contain"
                 tintApex={isApexAttachment(a)}
               />
             </div>
