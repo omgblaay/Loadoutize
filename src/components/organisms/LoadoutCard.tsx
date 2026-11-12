@@ -16,7 +16,10 @@ import { FireCardEffect } from "@/components/atoms/FireCardEffect";
 import { VIDEO_PLATFORM_META } from "@/lib/video";
 import { explorePath } from "@/lib/routes";
 import { AttachmentIcon } from "@/components/atoms/AttachmentIcon";
-import { builderAttachmentImageUrl, loadBuilderAttachmentAssets } from "@/lib/builderAttachmentImages";
+import {
+  builderAttachmentImageUrl,
+  loadBuilderAttachmentAssets,
+} from "@/lib/builderAttachmentImages";
 import { apexAttachmentIconUrl } from "@/lib/apexAttachmentIcon";
 import { isApexAttachment } from "@/lib/attachmentPresentation";
 import { findAttachmentForWeapon } from "@/lib/attachmentLookup";
@@ -47,14 +50,22 @@ export function LoadoutCard({
   /** Layers a shader flame effect over the card's edge -- reserve for a single standout card (e.g. the #1 ranked loadout), not whole grids: each instance is its own WebGL context. */
   fire?: boolean;
 }) {
-  const [builderAssets, setBuilderAssets] = React.useState<BuilderRelationAsset[]>([]);
+  const [builderAssets, setBuilderAssets] = React.useState<
+    BuilderRelationAsset[]
+  >([]);
   React.useEffect(() => {
     if (loadout.gameId !== "mw4") return;
     let active = true;
     loadBuilderAttachmentAssets()
-      .then((assets) => { if (active) setBuilderAssets(assets); })
-      .catch((error) => console.error("Could not load attachment images:", error));
-    return () => { active = false; };
+      .then((assets) => {
+        if (active) setBuilderAssets(assets);
+      })
+      .catch((error) =>
+        console.error("Could not load attachment images:", error),
+      );
+    return () => {
+      active = false;
+    };
   }, [loadout.gameId]);
   const builderAssetsById = React.useMemo(
     () => new Map(builderAssets.map((asset) => [asset.id, asset])),
@@ -71,15 +82,22 @@ export function LoadoutCard({
     )
     .filter((a): a is CardAttachment => Boolean(a))
     .map((attachment) => {
-      const isApex = (attachment.typeSlug || attachment.type || "").toLowerCase() === "apex";
+      const isApex =
+        (attachment.typeSlug || attachment.type || "").toLowerCase() === "apex";
       return {
         ...attachment,
         imageUrl: isApex
           ? apexAttachmentIconUrl(attachment.typeImageUrl, loadout.gameId)
           : attachment.imageUrl ||
             (loadout.gameId === "mw4"
-              ? builderAttachmentImageUrl(attachment.stats?.assetId, builderAssetsById, attachment.name)
-              : null) || attachment.stats?.imagePath || null,
+              ? builderAttachmentImageUrl(
+                  attachment.stats?.assetId,
+                  builderAssetsById,
+                  attachment.name,
+                )
+              : null) ||
+            attachment.stats?.imagePath ||
+            null,
       };
     })
     .slice(0, MAX_ATTACHMENT_ICONS);
@@ -89,10 +107,13 @@ export function LoadoutCard({
       : undefined;
   const glowColor = tag?.color;
   const voteCount = loadout.likes + loadout.dislikes;
-  const authorLabel = [
-    loadout.userName,
-    loadout.authorNickname ? `@${loadout.authorNickname}` : null,
-  ].filter(Boolean).join(" ") || "Community member";
+  const authorLabel =
+    [
+      loadout.userName,
+      loadout.authorNickname ? `@${loadout.authorNickname}` : null,
+    ]
+      .filter(Boolean)
+      .join(" ") || "Community member";
 
   const card = (
     <Link
@@ -107,7 +128,7 @@ export function LoadoutCard({
         style={{ background: glowColor }}
       />
 
-      <div className="relative flex p-4 items-start gap-4 w-full">
+      <div className="relative flex p-4 items-start gap-2 w-full">
         <RatingRing
           percent={loadout.ratingPercent}
           votes={voteCount}
@@ -138,8 +159,8 @@ export function LoadoutCard({
         </h3> */}
         <div className="flex-1 min-w-0 flex flex-col gap-0 justify-center">
           <h3 className="text-base font-sans font-semibold">{loadout.name}</h3>
-          <p className="text-sm text-teritary truncate">
-            {/* {loadout.video && (
+          {/* <p className="text-sm text-teritary truncate">
+            {loadout.video && (
               <div
                 className="absolute right-4 top-4"
                 title={`Video: ${VIDEO_PLATFORM_META[loadout.video.platform].label}`}
@@ -151,16 +172,25 @@ export function LoadoutCard({
                   },
                 )}
               </div>
-            )} */}
+            )} 
             {loadout.description}
-          </p>
+          </p> */}
         </div>
         <AppTooltip content={authorLabel} side="top">
-          <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/[0.08] text-xs font-semibold text-white" role="img" aria-label={authorLabel}>
+          <span
+            className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/[0.08] text-xs font-semibold text-white"
+            role="img"
+            aria-label={authorLabel}
+          >
             {loadout.authorAvatarUrl ? (
-              <img src={loadout.authorAvatarUrl} alt="" className="size-full object-cover" loading="lazy" />
+              <img
+                src={loadout.authorAvatarUrl}
+                alt=""
+                className="size-full object-cover"
+                loading="lazy"
+              />
             ) : (
-              loadout.userName?.[0]?.toUpperCase() ?? "U"
+              (loadout.userName?.[0]?.toUpperCase() ?? "U")
             )}
           </span>
         </AppTooltip>
@@ -213,7 +243,11 @@ export function LoadoutCard({
               key={a.id}
               className="bg-gradient-to-b from-white/0 from-[60%] to-white/[0.08] opacity-80 p-2 border w-full border-white/12 h-14 flex items-center justify-center"
             >
-              <AttachmentIcon attachment={a} className="size-9" tintApex={isApexAttachment(a)} />
+              <AttachmentIcon
+                attachment={a}
+                className="size-9"
+                tintApex={isApexAttachment(a)}
+              />
             </div>
           ))}
         </div>
