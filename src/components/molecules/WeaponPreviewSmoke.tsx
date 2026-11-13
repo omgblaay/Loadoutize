@@ -36,7 +36,10 @@ export function WeaponPreviewSmoke() {
   }, []);
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+    <div
+      className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+      aria-hidden="true"
+    >
       <video
         ref={videoRef}
         src={VIDEO}
@@ -46,19 +49,15 @@ export function WeaponPreviewSmoke() {
         loop
         playsInline
         preload="metadata"
-        className="absolute inset-0 size-full object-fill opacity-[0.09] motion-reduce:hidden"
+        className="absolute inset-0 size-full object-cover opacity-[0.12] motion-reduce:hidden"
       />
       <img
         src={POSTER}
         alt=""
-        className="absolute inset-0 hidden size-full object-fill opacity-[0.09] motion-reduce:block"
+        className="absolute inset-0 hidden size-full object-cover opacity-[0.09] motion-reduce:block"
       />
       {edgeGradients.map((background, index) => (
-        <div
-          key={index}
-          className="absolute inset-0"
-          style={{ background }}
-        />
+        <div key={index} className="absolute inset-0" style={{ background }} />
       ))}
     </div>
   );
