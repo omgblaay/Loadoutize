@@ -48023,7 +48023,7 @@
     },
     {
       "id": "rex_stockno_akilo",
-      "title": "stockno akilo",
+      "title": "No Stock",
       "slot": "stock",
       "src": "../mw4-attachments/images/rex_stockno_akilo-4db3145741558e17.png",
       "bbox": [
@@ -48040,8 +48040,9 @@
       "composable": true,
       "connector_y": 0.7975014554165354,
       "internal_title": "stockno akilo",
-      "display_name": "STOCKNO AKILO",
-      "name_status": "unresolved"
+      "display_name": "NO STOCK",
+      "name_status": "user_supplied",
+      "name_evidence": "user_request"
     },
     {
       "id": "rex_stockno_bmike3",

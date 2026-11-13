@@ -101,13 +101,15 @@ export function Footer({
               TikTok
             </Link>
             <span aria-hidden="true">·</span>
-            <Link
-              to="/"
+            <a
+              href="https://www.youtube.com/@loadoutize"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 hover:text-[#efedf1]"
             >
               <YoutubeIcon size={16} color="currentColor" aria-hidden="true" />
               YouTube
-            </Link>
+            </a>
           </nav>
           <nav aria-label="Legal" className="flex items-center gap-x-6 gap-y-2">
             <Link to="/privacy" className="hover:text-[#efedf1]">

@@ -274,46 +274,50 @@ export function HomeExplorePreview({
               Go from the video or stream straight to the complete build—every
               attachment, rating, and shareable code in one place
             </p>
-            <Button
-              variant="outline"
-              onClick={() => navigate(gamePath(selectedGame, "community"))}
-              className="group mt-6"
-            >
-              <Users className="size-4" />
-              Browse all creators
-              <ChevronRight className="size-4 transition-transform group-hover:translate-x-1" />
-            </Button>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {CREATOR_PLATFORMS.map(({ key, label, icon }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() =>
-                  navigate(
-                    `${gamePath(selectedGame, "community")}?social=${key}`,
-                  )
-                }
-                className="group relative flex min-h-16 items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.065]"
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {CREATOR_PLATFORMS.map(({ key, label, icon }) => (
+                <Link
+                  key={key}
+                  to={`${gamePath(selectedGame, "community")}?social=${key}`}
+                  className="group relative flex min-h-16 items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.065] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-6 bottom-0 h-px origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100 bg-gray-600"
+                  />
+                  <img
+                    src={icon.src}
+                    alt=""
+                    className="size-6 shrink-0 object-contain"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium text-white">
+                      {label} creators
+                    </span>
+                  </span>
+                  <ChevronRight className="size-4 shrink-0 text-white/25 transition-all group-hover:translate-x-1 group-hover:text-white/75" />
+                </Link>
+              ))}
+              <Link
+                to={gamePath(selectedGame, "community")}
+                className="group relative flex min-h-16 items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.09] p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.065] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:col-span-2"
               >
                 <span
                   aria-hidden="true"
                   className="absolute inset-x-6 bottom-0 h-px origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100 bg-gray-600"
                 />
-                <img
-                  src={icon.src}
-                  alt=""
-                  className="size-6 shrink-0 object-contain"
-                />
+                <Users className="size-6 shrink-0 text-white" aria-hidden="true" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-medium text-white">
-                    {label}
+                    Browse all creators
                   </span>
                 </span>
                 <ChevronRight className="size-4 shrink-0 text-white/25 transition-all group-hover:translate-x-1 group-hover:text-white/75" />
-              </button>
-            ))}
+              </Link>
+            </div>
           </div>
         </div>
       </section>

@@ -2008,9 +2008,9 @@
         "rotation": 0
       },
       "rex_bar_akilo": {
-        "dx": 8.254938613327141,
-        "dy": 0.7347300015416209,
-        "scale": 0.88,
+        "dx": 5.765912072740008,
+        "dy": 1.3569866366884185,
+        "scale": 0.75,
         "rotation": 0
       },
       "rex_stock_hvy_akilo": {
@@ -2055,9 +2055,7 @@
       },
       "rex_grip_vert_short": {
         "scale": 0.4,
-        "rotation": 0,
-        "dx": -4.923577357643751,
-        "dy": -0.7227293800841608
+        "rotation": 0
       },
       "rex_minireddot01_akilo_chemist": {
         "dx": -33.87096774193543,
@@ -2180,7 +2178,7 @@
       "rex_reflex02": {
         "dx": 0,
         "dy": 0,
-        "scale": 0.67,
+        "scale": 0.86,
         "rotation": 0
       },
       "rex_minireddot03": {
@@ -2266,20 +2264,14 @@
         "rotation": 0
       },
       "rex_grip_ang": {
-        "dx": -37.400000000000006,
-        "dy": 0,
         "scale": 1,
         "rotation": 0
       },
       "rex_ub_gl_akilo": {
-        "dx": -23.153510379877872,
-        "dy": 0,
         "scale": 0.5,
         "rotation": 0
       },
       "rex_grip_vert": {
-        "dx": -17,
-        "dy": 0,
         "scale": 0.5,
         "rotation": 0
       }
@@ -5323,13 +5315,13 @@
       },
       "muzzle": {
         "source": "barrel",
-        "dx": 12.121814122638668,
-        "dy": -0.6734341179243586
+        "dx": 12.121848304112191,
+        "dy": -0.05117748277757528
       },
       "underbarrel": {
         "source": "barrel",
-        "dx": 3.5341457830665775,
-        "dy": 3.3298459416596415
+        "dx": -42.7118306151487,
+        "dy": 3.952119667543201
       }
     },
     "rex_sn_sierra100": {
@@ -5539,6 +5531,14 @@
       "rex_bar_akilo_emp": {
         "dx": -71.4,
         "dy": 1.3599999999999994
+      },
+      "rex_bar_lng_akilo": {
+        "dx": -9.47470051673194,
+        "dy": -2.0302929678711195
+      },
+      "rex_bar_sht_akilo": {
+        "dx": -60.71012976413331,
+        "dy": -0.24451327029358083
       }
     },
     "rex_ar_kilo2": {
