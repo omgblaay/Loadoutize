@@ -8,6 +8,7 @@ import {
   attachmentMetaPath,
   explorePath,
   gamePath,
+  loadoutPath,
   weaponMetaListPath,
   weaponMetaPath,
 } from "@/lib/routes";
@@ -290,20 +291,35 @@ function LoadoutPreviewSkeleton() {
   );
 
   return (
-    <div role="status" aria-label="Loading loadout preview" aria-busy="true" className="flex flex-col gap-6" >
-      <div aria-hidden="true" className="flex flex-col gap-4 border-b border-white/[0.08] pb-5">
+    <div
+      role="status"
+      aria-label="Loading loadout preview"
+      aria-busy="true"
+      className="flex flex-col gap-6"
+    >
+      <div
+        aria-hidden="true"
+        className="flex flex-col gap-4 border-b border-white/[0.08] pb-5"
+      >
         <Skeleton className={cn("h-8 w-36 -rotate-2 rounded-sm", block)} />
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1 space-y-3">
             <div className="flex items-center gap-3">
-              <Skeleton className={cn("size-10 shrink-0 rounded-full", block)} />
+              <Skeleton
+                className={cn("size-10 shrink-0 rounded-full", block)}
+              />
               <Skeleton className={cn("h-8 w-36 max-w-[35%] sm:h-12", block)} />
               <Skeleton className={cn("h-8 w-48 max-w-[38%] sm:h-12", block)} />
             </div>
             <Skeleton className={cn("h-8 w-[88%] sm:h-12", block)} />
             <Skeleton className={cn("h-8 w-[66%] sm:h-12", block)} />
           </div>
-          <Skeleton className={cn("size-12 shrink-0 rounded-full sm:size-[72px]", block)} />
+          <Skeleton
+            className={cn(
+              "size-12 shrink-0 rounded-full sm:size-[72px]",
+              block,
+            )}
+          />
         </div>
       </div>
 
@@ -314,10 +330,17 @@ function LoadoutPreviewSkeleton() {
             <Skeleton className={cn("h-4 w-3", block)} />
             <Skeleton className={cn("h-4 w-36", block)} />
           </div>
-          <Skeleton className={cn("absolute right-0 top-0 hidden h-11 w-40 rounded-xl sm:block", block)} />
+          <Skeleton
+            className={cn(
+              "absolute right-0 top-0 hidden h-11 w-40 rounded-xl sm:block",
+              block,
+            )}
+          />
           <div className="absolute inset-x-[12%] top-[37%] flex flex-col items-center gap-2 sm:inset-x-[19%]">
             <Skeleton className={cn("h-16 w-full rounded-xl sm:h-24", block)} />
-            <Skeleton className={cn("h-12 w-10 rounded-md sm:h-20 sm:w-14", block)} />
+            <Skeleton
+              className={cn("h-12 w-10 rounded-md sm:h-20 sm:w-14", block)}
+            />
           </div>
           {attachmentCard("left-[7%] top-[31%]", 0)}
           {attachmentCard("right-[12%] top-[11%]", 1)}
@@ -361,11 +384,15 @@ function LoadoutPreviewSkeleton() {
             </div>
           </Container>
           <Container className="min-h-40 flex-row items-center gap-4">
-            <Skeleton className={cn("size-[104px] shrink-0 rounded-sm", block)} />
+            <Skeleton
+              className={cn("size-[104px] shrink-0 rounded-sm", block)}
+            />
             <div className="flex min-w-0 flex-1 flex-col gap-3">
               <Skeleton className={cn("h-3 w-32", block)} />
               <Skeleton className={cn("h-3 w-full", block)} />
-              <Skeleton className={cn("h-9 w-40 max-w-full rounded-lg", block)} />
+              <Skeleton
+                className={cn("h-9 w-40 max-w-full rounded-lg", block)}
+              />
             </div>
           </Container>
         </div>
@@ -646,7 +673,10 @@ export function LoadoutPreview() {
       ? relationAssetsById.get(attachment.stats.assetId)?.subtype_label
       : null) ||
     null;
-  const attachmentIconUrl = (attachment: CardAttachment | undefined, slot: string) =>
+  const attachmentIconUrl = (
+    attachment: CardAttachment | undefined,
+    slot: string,
+  ) =>
     (slot.toLowerCase() === "apex"
       ? apexAttachmentIconUrl(attachment?.typeImageUrl, gameId)
       : null) ||
@@ -790,7 +820,14 @@ export function LoadoutPreview() {
     })
     .filter((badge) => badge !== null);
   const isFullLoadout = loadout.contentType === "full_loadout";
-  const shareUrl = window.location.href;
+  // Build the canonical app URL instead of copying window.location.href, so tracking
+  // parameters from incoming links (utm_*, igshid, fbclid, ...) never end up in the
+  // shared link or QR code. The origin keeps whichever domain the visitor is on.
+  const shareUrl = `${window.location.origin}${loadoutPath(
+    loadout.gameId,
+    loadout.id,
+    isFullLoadout ? "full_loadout" : "weapon_config",
+  )}`;
   const voteCount = loadout.likes + loadout.dislikes;
   const authorName = loadout.authorNickname || loadout.userName || "Player";
   const publishedAt = new Date(loadout.createdAt);
@@ -1275,21 +1312,29 @@ export function LoadoutPreview() {
             <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-white/[0.08] pt-4 text-sm">
               <div className="min-w-0">
                 <dt className="text-teritary">Total ratings</dt>
-                <dd className="mt-1 font-medium tabular-nums">{voteCount.toLocaleString()}</dd>
+                <dd className="mt-1 font-medium tabular-nums">
+                  {voteCount.toLocaleString()}
+                </dd>
               </div>
               <div className="min-w-0">
                 <dt className="text-teritary">Total likes</dt>
-                <dd className="mt-1 font-medium tabular-nums">{loadout.likes.toLocaleString()}</dd>
+                <dd className="mt-1 font-medium tabular-nums">
+                  {loadout.likes.toLocaleString()}
+                </dd>
               </div>
               <div className="min-w-0">
                 <dt className="text-teritary">Total dislikes</dt>
-                <dd className="mt-1 font-medium tabular-nums">{loadout.dislikes.toLocaleString()}</dd>
+                <dd className="mt-1 font-medium tabular-nums">
+                  {loadout.dislikes.toLocaleString()}
+                </dd>
               </div>
               <div className="min-w-0">
                 <dt className="text-teritary">Published</dt>
                 <dd className="mt-1 font-medium">
                   {publishedDate ? (
-                    <time dateTime={publishedAt.toISOString()}>{publishedDate}</time>
+                    <time dateTime={publishedAt.toISOString()}>
+                      {publishedDate}
+                    </time>
                   ) : (
                     "Unknown"
                   )}
@@ -1330,9 +1375,9 @@ export function LoadoutPreview() {
                     <Container>
                       <div className="flex items-center gap-2 text-teritary mb-2">
                         <PlatformIcon className="size-5" />
-                        <span className="text-xs tracking-[0.5px] uppercase font-medium">
+                        <h2 className={CONTAINER_TITLE_CLASS}>
                           {platformMeta.label} video attached
-                        </span>
+                        </h2>
                       </div>
                       <div className="flex flex-row gap-2 min-w-0 flex-1">
                         {loadout.video.thumbnailUrl ? (
@@ -1387,9 +1432,7 @@ export function LoadoutPreview() {
               />
               <div className="flex-1 min-w-[200px] flex flex-col gap-3">
                 <h2 className={CONTAINER_TITLE_CLASS}>Share loadout</h2>
-                <p className="text-[12px] text-[#8d898a] break-all">
-                  {shareUrl}
-                </p>
+                <p className="break-all">{shareUrl}</p>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="w-fit">
